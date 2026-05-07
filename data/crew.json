@@ -1,0 +1,122 @@
+[
+  {
+    "id": "CRW-001",
+    "name": "Commander Elara Voss",
+    "role": "captain",
+    "department": "command",
+    "clearanceLevel": 5,
+    "specializations": ["tactical", "diplomacy", "crisis-management"],
+    "activeMission": "MSN-001",
+    "yearsOfService": 18
+  },
+  {
+    "id": "CRW-002",
+    "name": "Lt. Cmdr. Kael Orin",
+    "role": "science-officer",
+    "department": "science",
+    "clearanceLevel": 4,
+    "specializations": ["astrophysics", "xenobiology", "spectral-analysis"],
+    "activeMission": "MSN-006",
+    "yearsOfService": 12
+  },
+  {
+    "id": "CRW-003",
+    "name": "Chief Engineer Mira Chen",
+    "role": "engineer",
+    "department": "engineering",
+    "clearanceLevel": 4,
+    "specializations": ["propulsion", "shields", "power-systems"],
+    "activeMission": "MSN-001",
+    "yearsOfService": 15
+  },
+  {
+    "id": "CRW-004",
+    "name": "Lt. Zara Petrov",
+    "role": "navigator",
+    "department": "operations",
+    "clearanceLevel": 3,
+    "specializations": ["stellar-cartography", "warp-navigation", "anomaly-detection"],
+    "activeMission": "MSN-003",
+    "yearsOfService": 7
+  },
+  {
+    "id": "CRW-005",
+    "name": "Ensign Dax Morel",
+    "role": "ops",
+    "department": "operations",
+    "clearanceLevel": 2,
+    "specializations": ["comms", "sensor-calibration", "data-relay"],
+    "activeMission": "MSN-001",
+    "yearsOfService": 2
+  },
+  {
+    "id": "CRW-006",
+    "name": "Dr. Sable Achebe",
+    "role": "medical-officer",
+    "department": "medical",
+    "clearanceLevel": 4,
+    "specializations": ["trauma", "radiation-medicine", "biocontainment"],
+    "activeMission": null,
+    "yearsOfService": 10
+  },
+  {
+    "id": "CRW-007",
+    "name": "Lt. Reiko Tanaka",
+    "role": "security-chief",
+    "department": "security",
+    "clearanceLevel": 4,
+    "specializations": ["threat-assessment", "EVA-security", "weapons-systems"],
+    "activeMission": "MSN-003",
+    "yearsOfService": 9
+  },
+  {
+    "id": "CRW-008",
+    "name": "Specialist Juno Park",
+    "role": "science-officer",
+    "department": "science",
+    "clearanceLevel": 3,
+    "specializations": ["geology", "atmospheric-chemistry", "sample-analysis"],
+    "activeMission": "MSN-006",
+    "yearsOfService": 4
+  },
+  {
+    "id": "CRW-009",
+    "name": "Ensign Tomás Herrera",
+    "role": "engineer",
+    "department": "engineering",
+    "clearanceLevel": 2,
+    "specializations": ["hull-repair", "environmental-systems", "fabrication"],
+    "activeMission": "MSN-004",
+    "yearsOfService": 1
+  },
+  {
+    "id": "CRW-010",
+    "name": "Lt. Cmdr. Aisha Okonkwo",
+    "role": "navigator",
+    "department": "operations",
+    "clearanceLevel": 4,
+    "specializations": ["deep-space-navigation", "gravitational-mapping", "FTL-calculations"],
+    "activeMission": "MSN-005",
+    "yearsOfService": 14
+  },
+  {
+    "id": "CRW-011",
+    "name": "Specialist Bodhi Kwan",
+    "role": "ops",
+    "department": "operations",
+    "clearanceLevel": 2,
+    "specializations": ["cargo-logistics", "shuttle-ops", "EVA-support"],
+    "activeMission": "MSN-001",
+    "yearsOfService": 3
+  },
+  {
+    "id": "CRW-012",
+    "name": "Dr. Felix Strand",
+    "role": "science-officer",
+    "department": "science",
+    "clearanceLevel": 3,
+    "specializations": ["quantum-mechanics", "sensor-theory", "AI-calibration"],
+    "activeMission": null,
+    "yearsOfService": 6
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "SYS-001",
+    "name": "Sol",
+    "coordinates": { "x": 0.0, "y": 0.0, "z": 0.0 },
+    "distanceLy": 0.0,
+    "planets": 8,
+    "resources": ["hydrogen", "helium-3", "water-ice", "iron"],
+    "hazardLevel": 1,
+    "explored": true,
+    "notes": "Home system. All inner planets charted."
+  },
+  {
+    "id": "SYS-002",
+    "name": "Proxima Centauri",
+    "coordinates": { "x": -1.62, "y": -1.04, "z": -3.77 },
+    "distanceLy": 4.24,
+    "planets": 3,
+    "resources": ["iron", "silicates"],
+    "hazardLevel": 2,
+    "explored": true,
+    "notes": "Relay station operational in orbit around Proxima b."
+  },
+  {
+    "id": "SYS-003",
+    "name": "TRAPPIST-1",
+    "coordinates": { "x": 29.7, "y": -16.2, "z": 12.1 },
+    "distanceLy": 39.6,
+    "planets": 7,
+    "resources": ["water-ice", "silicates", "unknown-mineral-T7"],
+    "hazardLevel": 3,
+    "explored": false,
+    "notes": "Three planets in habitable zone. Active survey underway."
+  },
+  {
+    "id": "SYS-004",
+    "name": "Kepler-442",
+    "coordinates": { "x": 742.0, "y": -389.0, "z": 201.0 },
+    "distanceLy": 1206.0,
+    "planets": 2,
+    "resources": ["titanium", "rare-earths", "helium-3"],
+    "hazardLevel": 3,
+    "explored": false,
+    "notes": "Kepler-442b is a super-Earth. Asteroid belt rich in rare earths."
+  },
+  {
+    "id": "SYS-005",
+    "name": "Cygnus X-1",
+    "coordinates": { "x": 1860.0, "y": 450.0, "z": -310.0 },
+    "distanceLy": 6070.0,
+    "planets": 0,
+    "resources": [],
+    "hazardLevel": 5,
+    "explored": false,
+    "notes": "Black hole binary system. Extreme radiation. Salvage ops only."
+  },
+  {
+    "id": "SYS-006",
+    "name": "Barnard's Star",
+    "coordinates": { "x": 4.01, "y": 0.94, "z": -3.94 },
+    "distanceLy": 5.96,
+    "planets": 1,
+    "resources": ["hydrogen", "deuterium"],
+    "hazardLevel": 1,
+    "explored": true,
+    "notes": "Fuel depot established. Common waypoint for deep-space missions."
+  },
+  {
+    "id": "SYS-007",
+    "name": "Tau Ceti",
+    "coordinates": { "x": -6.9, "y": -8.6, "z": 2.5 },
+    "distanceLy": 11.9,
+    "planets": 5,
+    "resources": ["water-ice", "iron", "copper", "silicates"],
+    "hazardLevel": 2,
+    "explored": true,
+    "notes": "Debris disk complicates orbital insertion. Mining outpost on Tau Ceti f."
+  },
+  {
+    "id": "SYS-008",
+    "name": "Luyten's Star",
+    "coordinates": { "x": -3.0, "y": -11.2, "z": 3.4 },
+    "distanceLy": 12.4,
+    "planets": 2,
+    "resources": ["silicates", "ice"],
+    "hazardLevel": 2,
+    "explored": false,
+    "notes": "Luyten b is rocky, temperate. Flagged for habitability assessment."
+  }
+]

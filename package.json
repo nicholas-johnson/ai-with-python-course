@@ -1,0 +1,36 @@
+{
+  "name": "deep-space-ops-ai-engineering",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deep Space Ops: AI Engineering with Python — 3-day course materials",
+  "author": "Nicholas Johnson",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.8.0",
+  "scripts": {
+    "slides:01": "pnpm --filter @deep-space-ops/module-01-slides dev",
+    "slides:02": "pnpm --filter @deep-space-ops/module-02-slides dev",
+    "slides:03": "pnpm --filter @deep-space-ops/module-03-slides dev",
+    "slides:04": "pnpm --filter @deep-space-ops/module-04-slides dev",
+    "slides:05": "pnpm --filter @deep-space-ops/module-05-slides dev",
+    "slides:06": "pnpm --filter @deep-space-ops/module-06-slides dev",
+    "slides:07": "pnpm --filter @deep-space-ops/module-07-slides dev",
+    "slides:08": "pnpm --filter @deep-space-ops/module-08-slides dev",
+    "slides:09": "pnpm --filter @deep-space-ops/module-09-slides dev",
+    "slides:10": "pnpm --filter @deep-space-ops/module-10-slides dev",
+    "slides:11": "pnpm --filter @deep-space-ops/module-11-slides dev",
+    "slides:12": "pnpm --filter @deep-space-ops/module-12-slides dev",
+    "slides:13": "pnpm --filter @deep-space-ops/module-13-slides dev",
+    "lint:slides": "eslint slide-deck/",
+    "format:slides": "prettier --write slide-deck/ **/slides/src/**"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "prettier": "^3.4.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

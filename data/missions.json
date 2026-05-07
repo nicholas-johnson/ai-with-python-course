@@ -1,0 +1,90 @@
+[
+  {
+    "id": "MSN-001",
+    "name": "Kepler Sweep",
+    "sector": "Kepler-442",
+    "status": "active",
+    "crewSize": 12,
+    "riskLevel": 3,
+    "startDate": "2347-03-15",
+    "objectives": ["Map asteroid field", "Collect mineral samples", "Deploy sensor buoys"],
+    "notes": "Moderate radiation in outer belt. EVA teams rotate every 4 hours."
+  },
+  {
+    "id": "MSN-002",
+    "name": "Proxima Contact",
+    "sector": "Proxima Centauri",
+    "status": "completed",
+    "crewSize": 8,
+    "riskLevel": 2,
+    "startDate": "2347-01-08",
+    "objectives": ["Establish relay station", "Atmospheric analysis of Proxima b"],
+    "notes": "Relay station operational. Atmospheric data archived."
+  },
+  {
+    "id": "MSN-003",
+    "name": "Void Cartography",
+    "sector": "Boötes Void",
+    "status": "active",
+    "crewSize": 6,
+    "riskLevel": 5,
+    "startDate": "2347-04-01",
+    "objectives": ["Chart uncharted void boundary", "Gravitational anomaly survey", "Emergency beacon placement"],
+    "notes": "Long-range comms unreliable past boundary marker V-17. Caution advised."
+  },
+  {
+    "id": "MSN-004",
+    "name": "Titan Harvest",
+    "sector": "Sol-Saturn",
+    "status": "completed",
+    "crewSize": 15,
+    "riskLevel": 1,
+    "startDate": "2346-11-20",
+    "objectives": ["Methane extraction", "Ice core sampling", "Habitat maintenance"],
+    "notes": "Routine resupply. All objectives met ahead of schedule."
+  },
+  {
+    "id": "MSN-005",
+    "name": "Sagittarius Listening Post",
+    "sector": "Sagittarius A*",
+    "status": "planning",
+    "crewSize": 4,
+    "riskLevel": 5,
+    "startDate": "2347-06-01",
+    "objectives": ["Deploy deep-space antenna array", "Calibrate gravitational wave detector"],
+    "notes": "Awaiting risk assessment from Science Division. Crew selection pending."
+  },
+  {
+    "id": "MSN-006",
+    "name": "Trappist Survey",
+    "sector": "TRAPPIST-1",
+    "status": "active",
+    "crewSize": 10,
+    "riskLevel": 4,
+    "startDate": "2347-02-14",
+    "objectives": ["Orbital survey of planets d, e, f", "Water ice confirmation", "Biosignature scan"],
+    "notes": "Planet e shows promising spectral lines. Extended mission approved."
+  },
+  {
+    "id": "MSN-007",
+    "name": "Cygnus Salvage",
+    "sector": "Cygnus X-1",
+    "status": "completed",
+    "crewSize": 7,
+    "riskLevel": 4,
+    "startDate": "2346-09-03",
+    "objectives": ["Recover derelict probe", "Analyze radiation damage", "Retrieve data cores"],
+    "notes": "Probe recovered intact. Data cores partially corrupted — decryption ongoing."
+  },
+  {
+    "id": "MSN-008",
+    "name": "Andromeda Relay",
+    "sector": "Andromeda Approach",
+    "status": "planning",
+    "crewSize": 20,
+    "riskLevel": 5,
+    "startDate": "2348-01-01",
+    "objectives": ["Intergalactic relay prototype deployment", "Signal latency benchmarking"],
+    "notes": "Flagship mission. Requires full crew complement and extended provisions."
+  }
+]

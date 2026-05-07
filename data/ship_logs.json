@@ -1,0 +1,130 @@
+[
+  {
+    "id": "LOG-001",
+    "timestamp": "2347-03-15T08:00:00Z",
+    "author": "Commander Elara Voss",
+    "category": "command",
+    "content": "Mission Kepler Sweep officially underway. All stations report ready. Warp drive engaged at 0800 hours. Estimated arrival at Kepler-442 asteroid belt in 72 hours.",
+    "tags": ["mission-start", "navigation", "kepler-442"]
+  },
+  {
+    "id": "LOG-002",
+    "timestamp": "2347-03-15T09:30:00Z",
+    "author": "Chief Engineer Mira Chen",
+    "category": "engineering",
+    "content": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance for next downtime window.",
+    "tags": ["warp-core", "maintenance", "routine"]
+  },
+  {
+    "id": "LOG-003",
+    "timestamp": "2347-03-15T14:15:00Z",
+    "author": "Lt. Cmdr. Kael Orin",
+    "category": "science",
+    "content": "Long-range sensors detecting unusual spectral signature at bearing 047 mark 3. Consistent with heavy element concentration — possibly a metallic asteroid cluster not in current charts. Recommending a 2-degree course correction for closer scan.",
+    "tags": ["sensors", "anomaly", "spectral-analysis"]
+  },
+  {
+    "id": "LOG-004",
+    "timestamp": "2347-03-16T03:00:00Z",
+    "author": "Ensign Dax Morel",
+    "category": "operations",
+    "content": "Night watch report: all systems nominal. Received automated ping from Barnard's Star fuel depot confirming our transit registration. Next scheduled comm window with HQ at 0600.",
+    "tags": ["night-watch", "comms", "routine"]
+  },
+  {
+    "id": "LOG-005",
+    "timestamp": "2347-03-16T11:45:00Z",
+    "author": "Dr. Sable Achebe",
+    "category": "medical",
+    "content": "Crew health check complete. All 12 mission crew within normal parameters. Radiation exposure badges show baseline levels. Reminded EVA teams about dosimeter protocols for the asteroid belt phase.",
+    "tags": ["health-check", "radiation", "EVA"]
+  },
+  {
+    "id": "LOG-006",
+    "timestamp": "2347-03-17T07:20:00Z",
+    "author": "Lt. Zara Petrov",
+    "category": "navigation",
+    "content": "Exiting warp in 4 hours. Plotting approach vector for Kepler-442 outer belt. Three candidate survey zones identified. Zone A has the highest mineral probability but overlaps with a debris field from the 2340 mining collapse.",
+    "tags": ["navigation", "kepler-442", "approach"]
+  },
+  {
+    "id": "LOG-007",
+    "timestamp": "2347-03-17T11:00:00Z",
+    "author": "Commander Elara Voss",
+    "category": "command",
+    "content": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution — asteroid density higher than projected. Deploying first sensor buoy at coordinates K442-A1.",
+    "tags": ["arrival", "kepler-442", "shields", "sensor-buoy"]
+  },
+  {
+    "id": "LOG-008",
+    "timestamp": "2347-03-17T15:30:00Z",
+    "author": "Lt. Reiko Tanaka",
+    "category": "security",
+    "content": "Security sweep of EVA staging area complete. All suits inspected, tether integrity verified. Cleared EVA Team Alpha for first excursion at 0600 tomorrow. Posted watch rotation for cargo bay during sample intake.",
+    "tags": ["security", "EVA", "inspection"]
+  },
+  {
+    "id": "LOG-009",
+    "timestamp": "2347-03-18T06:30:00Z",
+    "author": "Specialist Bodhi Kwan",
+    "category": "operations",
+    "content": "EVA Team Alpha deployed successfully. Shuttle 2 in standby. Cargo bay prepped for mineral samples — containment protocols active. Estimated first sample return at 1100.",
+    "tags": ["EVA", "cargo", "mineral-samples"]
+  },
+  {
+    "id": "LOG-010",
+    "timestamp": "2347-03-18T11:45:00Z",
+    "author": "Lt. Cmdr. Kael Orin",
+    "category": "science",
+    "content": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium. This is consistent with a differentiated planetesimal core fragment. Requesting extended survey time in Zone A.",
+    "tags": ["samples", "minerals", "analysis", "kepler-442"]
+  },
+  {
+    "id": "LOG-011",
+    "timestamp": "2347-03-18T16:00:00Z",
+    "author": "Chief Engineer Mira Chen",
+    "category": "engineering",
+    "content": "Sensor buoy K442-B1 deployed and transmitting. Telemetry link stable at 99.7% uptime. Plasma conduit 7-B repair completed during EVA downtime — efficiency back to 97%.",
+    "tags": ["sensor-buoy", "maintenance", "repair"]
+  },
+  {
+    "id": "LOG-012",
+    "timestamp": "2347-03-19T09:00:00Z",
+    "author": "Commander Elara Voss",
+    "category": "command",
+    "content": "Day 4 at Kepler-442. Two of three survey zones complete. Mineral yields exceeding projections by 40%. Science division requesting a mission extension of 48 hours — approved pending HQ confirmation.",
+    "tags": ["status-report", "kepler-442", "mission-extension"]
+  },
+  {
+    "id": "LOG-013",
+    "timestamp": "2347-02-14T08:00:00Z",
+    "author": "Lt. Cmdr. Kael Orin",
+    "category": "science",
+    "content": "TRAPPIST-1 survey commencing. Initial orbital insertion around planet d successful. Spectrometer array calibrated and running continuous atmospheric scans. Water vapour signature detected in upper atmosphere — promising.",
+    "tags": ["trappist-1", "mission-start", "atmospheric-scan", "water"]
+  },
+  {
+    "id": "LOG-014",
+    "timestamp": "2347-02-16T13:20:00Z",
+    "author": "Specialist Juno Park",
+    "category": "science",
+    "content": "Surface scan of TRAPPIST-1e reveals potential subsurface liquid water. Thermal imaging shows hotspots near the terminator line. Deploying ground-penetrating radar probe for confirmation.",
+    "tags": ["trappist-1", "water", "surface-scan", "probe"]
+  },
+  {
+    "id": "LOG-015",
+    "timestamp": "2347-04-01T07:00:00Z",
+    "author": "Lt. Zara Petrov",
+    "category": "navigation",
+    "content": "Void Cartography mission underway. Entering Boötes Void perimeter. Star density dropping rapidly — navigation relies on inertial reference and pre-plotted waypoints. Comms relay chain established but signal degradation expected past marker V-10.",
+    "tags": ["void-cartography", "navigation", "bootes-void", "comms"]
+  },
+  {
+    "id": "LOG-016",
+    "timestamp": "2347-04-03T22:15:00Z",
+    "author": "Lt. Reiko Tanaka",
+    "category": "security",
+    "content": "Anomalous sensor contact at long range — bearing 180 mark 12. Unable to classify. Could be sensor echo from void boundary or unknown object. Raised alert status to yellow. Monitoring.",
+    "tags": ["void-cartography", "anomaly", "alert", "security"]
+  }
+]

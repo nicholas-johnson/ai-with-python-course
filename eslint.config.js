@@ -1,0 +1,27 @@
+import js from '@eslint/js';
+import globals from 'globals';
+
+export default [
+  js.configs.recommended,
+  {
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    ignores: [
+      '**/solution.js',
+      '**/exercises/**/solution/**',
+      '**/slides/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+    ],
+  },
+];

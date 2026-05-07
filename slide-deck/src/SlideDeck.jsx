@@ -1,0 +1,129 @@
+import { useEffect } from "react";
+import { Home } from "lucide-react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useParams,
+  useNavigate,
+  Navigate,
+} from "react-router-dom";
+import {
+  TitleSlide,
+  StandardSlide,
+  ComparisonSlide,
+  CodeSlide,
+  RulesSlide,
+  WelcomeSlide,
+  ModulesSlide,
+  ThreeWayComparison,
+} from "./components";
+
+function SlideViewer({ slides }) {
+  const { slideNumber } = useParams();
+  const navigate = useNavigate();
+
+  // Convert to 0-based index, default to slide 1
+  const currentSlide = Math.max(
+    0,
+    Math.min(parseInt(slideNumber || "1", 10) - 1, slides.length - 1),
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        if (currentSlide < slides.length - 1) {
+          navigate(`/${currentSlide + 2}`);
+        }
+      } else if (e.key === "ArrowLeft" || e.key === "Backspace") {
+        e.preventDefault();
+        if (currentSlide > 0) {
+          navigate(`/${currentSlide}`);
+        }
+      } else if (e.key === "Home") {
+        navigate("/1");
+      } else if (e.key === "End") {
+        navigate(`/${slides.length}`);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentSlide, navigate, slides.length]);
+
+  const slide = slides[currentSlide];
+
+  const renderSlide = () => {
+    if (slide.type === "custom" && slide.component) {
+      const Component = slide.component;
+      return <Component />;
+    }
+
+    switch (slide.type) {
+      case "title":
+        return <TitleSlide content={slide.content} />;
+      case "comparison":
+        return <ComparisonSlide content={slide.content} />;
+      case "three-way":
+        return <ThreeWayComparison content={slide.content} />;
+      case "code":
+        return <CodeSlide content={slide.content} />;
+      case "rules":
+        return <RulesSlide content={slide.content} />;
+      case "welcome":
+        return <WelcomeSlide content={slide.content} />;
+      case "modules":
+        return <ModulesSlide content={slide.content} />;
+      default:
+        return <StandardSlide content={slide.content} />;
+    }
+  };
+
+  return (
+    <div className="w-screen h-screen flex flex-col bg-slate-900 text-white overflow-hidden">
+      {renderSlide()}
+
+      <div className="flex justify-between items-center gap-8 p-4 bg-slate-950 border-t border-slate-800">
+        <button
+          onClick={() => navigate("/1")}
+          className="p-2 text-slate-400 hover:text-slate-200 transition-colors rounded-lg"
+          aria-label="Go to first slide"
+        >
+          <Home className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-8">
+          <button
+            onClick={() => navigate(`/${currentSlide}`)}
+            disabled={currentSlide === 0}
+            className="px-6 py-2 font-semibold rounded-lg bg-primary text-white transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            ← Prev
+          </button>
+          <span className="text-lg text-gray-400 font-semibold min-w-[80px] text-center">
+            {currentSlide + 1} / {slides.length}
+          </span>
+          <button
+            onClick={() => navigate(`/${currentSlide + 2}`)}
+            disabled={currentSlide === slides.length - 1}
+            className="px-6 py-2 font-semibold rounded-lg bg-primary text-white transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            Next →
+          </button>
+        </div>
+        <div className="w-10" aria-hidden="true" />
+      </div>
+    </div>
+  );
+}
+
+export function SlideDeck({ slides }) {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/:slideNumber" element={<SlideViewer slides={slides} />} />
+        <Route path="/" element={<Navigate to="/1" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
