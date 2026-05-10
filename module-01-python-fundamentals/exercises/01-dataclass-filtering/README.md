@@ -1,6 +1,6 @@
-# Exercise 01 — Crew Manifest
+# Exercise 01 — Dataclass Filtering
 
-**Mission briefing:** The DSS Pathfinder's crew manifest is stored as raw JSON. Command needs a tool that can load crew records into proper data structures, filter by department and clearance, and produce formatted reports. Your job: build it.
+Parse JSON records into typed dataclasses, filter by field values, and produce formatted output.
 
 ## Objectives
 
@@ -12,7 +12,7 @@
 ## Run the tests
 
 ```bash
-pytest module-01-python-fundamentals/exercises/01-crew-manifest/test_start.py -v
+pytest module-01-python-fundamentals/exercises/01-dataclass-filtering/test_start.py -v
 ```
 
 ## Hints

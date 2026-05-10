@@ -1,6 +1,6 @@
-# Exercise 03 — Mission API
+# Exercise 03 — FastAPI CRUD
 
-**Mission briefing:** HQ wants a REST API so bridge officers can query, create, and update mission records from any terminal on the ship. Build a FastAPI app that serves mission data, and prove it works with httpx tests.
+Build a FastAPI application with full CRUD endpoints (list, get, create, update) and test it with httpx.
 
 ## Objectives
 
@@ -13,7 +13,7 @@
 ## Run the tests
 
 ```bash
-pytest module-01-python-fundamentals/exercises/03-mission-api/test_start.py -v
+pytest module-01-python-fundamentals/exercises/03-fastapi-crud/test_start.py -v
 ```
 
 ## Hints

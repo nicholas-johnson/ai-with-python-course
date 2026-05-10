@@ -1,6 +1,6 @@
-# Exercise 02 — Ship Tools
+# Exercise 02 — MCP Tools
 
-**Mission briefing:** The Pathfinder AI needs access to ship systems. Build an MCP server with three tools: sensor readings, crew lookup, and log search. Each tool reads from the shared data files and returns structured JSON.
+Build an MCP server with three practical tools: sensor read, crew lookup, and log search. Each tool reads from shared JSON data files and returns structured output.
 
 ## Objectives
 
@@ -11,5 +11,5 @@
 ## Run the tests
 
 ```bash
-pytest module-05-mcp-server/exercises/02-ship-tools/test_start.py -v
+pytest module-05-mcp-server/exercises/02-mcp-tools/test_start.py -v
 ```

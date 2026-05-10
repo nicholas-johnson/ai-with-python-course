@@ -1,6 +1,6 @@
-# Exercise 02 — Async Sensor Relay
+# Exercise 02 — Async Queue Processing
 
-**Mission briefing:** The Pathfinder's sensor array produces readings faster than any single processor can handle. Engineering needs an async relay system: sensors feed readings into a queue, a consumer processes them, and the whole pipeline respects timeouts so a stuck sensor never blocks the ship.
+Build an async producer/consumer pipeline with `asyncio.Queue`, backpressure, sentinel-based shutdown, and timeout handling.
 
 ## Objectives
 
@@ -12,7 +12,7 @@
 ## Run the tests
 
 ```bash
-pytest module-01-python-fundamentals/exercises/02-async-sensor-relay/test_start.py -v
+pytest module-01-python-fundamentals/exercises/02-async-queue-processing/test_start.py -v
 ```
 
 ## Hints

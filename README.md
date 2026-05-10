@@ -40,7 +40,7 @@ pytest
 pytest module-01-python-fundamentals/
 
 # Run a single exercise's tests
-pytest module-01-python-fundamentals/exercises/01-crew-manifest/test_start.py
+pytest module-01-python-fundamentals/exercises/01-dataclass-filtering/test_start.py
 ```
 
 ## Project structure
@@ -101,9 +101,9 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Crew manifest | [`exercises/01-crew-manifest`](module-01-python-fundamentals/exercises/01-crew-manifest/) | Parse/filter/transform crew JSON with dataclasses, CLI args |
-| Async sensor relay | [`exercises/02-async-sensor-relay`](module-01-python-fundamentals/exercises/02-async-sensor-relay/) | Async queue processing ship sensor data with timeouts |
-| Mission API | [`exercises/03-mission-api`](module-01-python-fundamentals/exercises/03-mission-api/) | FastAPI CRUD for missions with httpx test client |
+| Dataclass filtering | [`exercises/01-dataclass-filtering`](module-01-python-fundamentals/exercises/01-dataclass-filtering/) | Parse/filter/transform crew JSON with dataclasses, CLI args |
+| Async queue processing | [`exercises/02-async-queue-processing`](module-01-python-fundamentals/exercises/02-async-queue-processing/) | Async queue processing ship sensor data with timeouts |
+| FastAPI CRUD | [`exercises/03-fastapi-crud`](module-01-python-fundamentals/exercises/03-fastapi-crud/) | FastAPI CRUD for missions with httpx test client |
 
 ### Module 2 — [Agent Core](module-02-agent-core/)
 
@@ -143,7 +143,7 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
 | Hello MCP | [`exercises/01-hello-mcp`](module-05-mcp-server/exercises/01-hello-mcp/) | Minimal MCP server exposing one tool |
-| Ship tools | [`exercises/02-ship-tools`](module-05-mcp-server/exercises/02-ship-tools/) | Three ship-system tools: sensor read, crew lookup, log query |
+| MCP tools | [`exercises/02-mcp-tools`](module-05-mcp-server/exercises/02-mcp-tools/) | Three ship-system tools: sensor read, crew lookup, log query |
 | Auth + observability | [`exercises/03-auth-observability`](module-05-mcp-server/exercises/03-auth-observability/) | Per-tool auth scopes and structured logging |
 | MCP client | [`exercises/04-mcp-client`](module-05-mcp-server/exercises/04-mcp-client/) | Build an MCP client: discover tools, validate args, handle errors |
 
@@ -164,7 +164,7 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
 | Router agent | [`exercises/01-router-agent`](module-07-multi-agent/exercises/01-router-agent/) | Route queries to navigation, engineering, or science specialists |
-| Research team | [`exercises/02-research-team`](module-07-multi-agent/exercises/02-research-team/) | Supervisor coordinates researcher + critic for mission briefings |
+| Supervisor-critic | [`exercises/02-supervisor-critic`](module-07-multi-agent/exercises/02-supervisor-critic/) | Supervisor coordinates researcher + critic for mission briefings |
 | Consensus | [`exercises/03-consensus`](module-07-multi-agent/exercises/03-consensus/) | Multiple agents propose answers; vote on the best response |
 
 ### Module 8 — [Agent Memory + Workflows](module-08-agent-memory/)
@@ -237,7 +237,7 @@ pytest
 pytest module-01-python-fundamentals/
 
 # One exercise
-pytest module-01-python-fundamentals/exercises/01-crew-manifest/test_start.py
+pytest module-01-python-fundamentals/exercises/01-dataclass-filtering/test_start.py
 
 # With verbose output
 pytest -v module-02-agent-core/

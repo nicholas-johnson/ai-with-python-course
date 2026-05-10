@@ -243,9 +243,9 @@ python module-01-python-fundamentals/demo/05_http_basics.py
 
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-crew-manifest`](exercises/01-crew-manifest/) | Parse, filter, and transform crew JSON with dataclasses and CLI args. |
-| [`exercises/02-async-sensor-relay`](exercises/02-async-sensor-relay/) | Async queue processing of ship sensor data with timeouts. |
-| [`exercises/03-mission-api`](exercises/03-mission-api/) | FastAPI CRUD for missions with httpx test client. |
+| [`exercises/01-dataclass-filtering`](exercises/01-dataclass-filtering/) | Parse, filter, and transform crew JSON with dataclasses and CLI args. |
+| [`exercises/02-async-queue-processing`](exercises/02-async-queue-processing/) | Async queue processing of ship sensor data with timeouts. |
+| [`exercises/03-fastapi-crud`](exercises/03-fastapi-crud/) | FastAPI CRUD for missions with httpx test client. |
 
 Run tests for this module:
 
