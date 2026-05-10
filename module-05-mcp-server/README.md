@@ -30,6 +30,7 @@ python module-05-mcp-server/demo/03_practical_tools.py
 | [`exercises/01-hello-mcp`](exercises/01-hello-mcp/) | Build a minimal MCP server that exposes one tool. |
 | [`exercises/02-ship-tools`](exercises/02-ship-tools/) | Implement 3 ship-system tools: sensor read, crew lookup, log query. |
 | [`exercises/03-auth-observability`](exercises/03-auth-observability/) | Add per-tool auth scopes and structured logging. |
+| [`exercises/04-mcp-client`](exercises/04-mcp-client/) | Build an MCP **client**: discover tools, validate args, handle errors. |
 
 Run tests for this module:
 

@@ -11,6 +11,8 @@ dependencies = [
     "mcp>=1.0",
     "pydantic>=2.9",
     "sse-starlette>=2.0",
+    "tiktoken>=0.7",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]
@@ -23,11 +25,16 @@ dev = [
 rag = [
     "chromadb>=0.5",
     "sentence-transformers>=3.0",
+    "networkx>=3.2",
 ]
 langchain = [
     "langchain-core>=0.3",
     "langchain-openai>=0.3",
     "langchain>=0.3",
+    "langgraph>=0.2",
+]
+structured = [
+    "instructor>=1.4",
 ]
 
 [tool.pytest.ini_options]

@@ -1,4 +1,4 @@
-# Module 9 — Production & Deployment
+# Module 11 — Production & Deployment
 
 **Launch is not the finish line.** Agentic systems on the Pathfinder must be observable, resilient, and affordable to run — and they need to ship reliably across environments. This module covers the full journey from code to production: structured tracing, reliability patterns, cost controls, environment config, secrets, containerisation, and CI/CD basics.
 
@@ -18,9 +18,9 @@
 ## Demos
 
 ```bash
-python module-09-production/demo/01_structured_tracing.py
-python module-09-production/demo/02_circuit_breaker.py
-python module-09-production/demo/03_deployment_pipeline.py
+python module-11-production/demo/01_structured_tracing.py
+python module-11-production/demo/02_circuit_breaker.py
+python module-11-production/demo/03_deployment_pipeline.py
 ```
 
 ## Exercises
@@ -30,16 +30,17 @@ python module-09-production/demo/03_deployment_pipeline.py
 | [`exercises/01-trace-middleware`](exercises/01-trace-middleware/) | Add trace IDs and timing to every tool call in a small agent loop. |
 | [`exercises/02-batch-pipeline`](exercises/02-batch-pipeline/) | **Batch** LLM requests with **retry** and **fallback** model. |
 | [`exercises/03-cost-tracker`](exercises/03-cost-tracker/) | Track and enforce per-session token or cost budgets. |
+| [`exercises/04-deploy-container`](exercises/04-deploy-container/) | Build a **health-check** app, load **env config**, and validate a **Dockerfile**. |
 
 Run tests for this module:
 
 ```bash
-pytest module-09-production/
+pytest module-11-production/
 ```
 
 ## Slides
 
-From repo root: `pnpm slides:09`, or `cd module-09-production/slides && pnpm dev`.
+From repo root: `pnpm slides:11`, or `cd module-11-production/slides && pnpm dev`.
 
 ## Reference
 
