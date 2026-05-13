@@ -4,106 +4,139 @@ import json
 
 import pytest
 
-from start import ToolRegistry, validate_required
+from start import ToolRegistry, registry
 
 
-@pytest.fixture()
-def registry():
-    reg = ToolRegistry()
+# ---------------------------------------------------------------------------
+# ToolRegistry class tests
+# ---------------------------------------------------------------------------
 
-    @reg.register(
-        name="get_crew_count",
-        description="Get crew count for a department",
-        parameters={
-            "type": "object",
-            "properties": {
-                "department": {"type": "string"},
-            },
-            "required": ["department"],
-        },
-    )
-    def get_crew_count(department: str) -> dict:
-        counts = {"science": 3, "engineering": 2}
-        return {"department": department, "count": counts.get(department, 0)}
-
-    @reg.register(
-        name="ping",
-        description="Simple ping",
-        parameters={"type": "object", "properties": {}},
-    )
-    def ping() -> dict:
-        return {"status": "pong"}
-
-    return reg
-
-
-class TestRegister:
+class TestRegisterDecorator:
     def test_decorator_returns_original_function(self):
         reg = ToolRegistry()
-        @reg.register(name="f", description="d", parameters={})
+
+        @reg.register("test_fn", "A test", {"type": "object", "properties": {}})
         def my_func():
             return 42
+
         assert my_func() == 42
 
-    def test_tool_stored_in_registry(self, registry):
-        tools = registry.list_tools()
-        names = [t["function"]["name"] for t in tools]
-        assert "get_crew_count" in names
-        assert "ping" in names
+    def test_tool_appears_in_list(self):
+        reg = ToolRegistry()
+
+        @reg.register("greet", "Say hello", {
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+            "required": ["name"],
+        })
+        def greet(name: str) -> str:
+            return f"Hello, {name}!"
+
+        tools = reg.list_tools()
+        assert len(tools) == 1
+        assert tools[0]["function"]["name"] == "greet"
 
 
 class TestListTools:
-    def test_format(self, registry):
-        tools = registry.list_tools()
-        assert len(tools) == 2
-        for tool in tools:
-            assert tool["type"] == "function"
-            assert "name" in tool["function"]
-            assert "description" in tool["function"]
-            assert "parameters" in tool["function"]
+    def test_format_matches_openai(self):
+        reg = ToolRegistry()
+
+        @reg.register("ping", "Ping test", {"type": "object", "properties": {}})
+        def ping() -> str:
+            return "pong"
+
+        tools = reg.list_tools()
+        assert len(tools) == 1
+        tool = tools[0]
+        assert tool["type"] == "function"
+        assert "name" in tool["function"]
+        assert "description" in tool["function"]
+        assert "parameters" in tool["function"]
+
+    def test_multiple_tools(self):
+        reg = ToolRegistry()
+
+        @reg.register("a", "Tool A", {"type": "object", "properties": {}})
+        def tool_a() -> str:
+            return "a"
+
+        @reg.register("b", "Tool B", {"type": "object", "properties": {}})
+        def tool_b() -> str:
+            return "b"
+
+        tools = reg.list_tools()
+        names = {t["function"]["name"] for t in tools}
+        assert names == {"a", "b"}
 
 
-class TestCall:
-    def test_successful_call(self, registry):
-        result = json.loads(registry.call("get_crew_count", {"department": "science"}))
-        assert result == {"department": "science", "count": 3}
+class TestExecute:
+    def test_successful_call(self):
+        reg = ToolRegistry()
 
-    def test_unknown_tool(self, registry):
-        result = json.loads(registry.call("nonexistent", {}))
+        @reg.register("add", "Add numbers", {
+            "type": "object",
+            "properties": {"a": {"type": "integer"}, "b": {"type": "integer"}},
+            "required": ["a", "b"],
+        })
+        def add(a: int, b: int) -> str:
+            return json.dumps({"sum": a + b})
+
+        result = json.loads(reg.execute("add", {"a": 3, "b": 4}))
+        assert result == {"sum": 7}
+
+    def test_unknown_tool_returns_error(self):
+        reg = ToolRegistry()
+        result = json.loads(reg.execute("nonexistent", {}))
         assert "error" in result
         assert "Unknown tool" in result["error"]
 
-    def test_missing_required_field(self, registry):
-        result = json.loads(registry.call("get_crew_count", {}))
-        assert "error" in result
-        assert "Missing required" in result["error"] or "department" in result["error"]
-
-    def test_tool_that_raises(self):
+    def test_handler_exception_caught(self):
         reg = ToolRegistry()
 
-        @reg.register(name="broken", description="breaks", parameters={"type": "object", "properties": {}})
-        def broken():
+        @reg.register("boom", "Explodes", {"type": "object", "properties": {}})
+        def boom() -> str:
             raise ValueError("warp core breach")
 
-        result = json.loads(reg.call("broken", {}))
+        result = json.loads(reg.execute("boom", {}))
         assert "error" in result
         assert "warp core breach" in result["error"]
 
-    def test_no_args_tool(self, registry):
-        result = json.loads(registry.call("ping", {}))
-        assert result == {"status": "pong"}
+    def test_non_string_result_serialized(self):
+        reg = ToolRegistry()
+
+        @reg.register("data", "Returns dict", {"type": "object", "properties": {}})
+        def data() -> dict:
+            return {"status": "ok"}
+
+        result = json.loads(reg.execute("data", {}))
+        assert result == {"status": "ok"}
 
 
-class TestValidateRequired:
-    def test_all_present(self):
-        schema = {"required": ["a", "b"]}
-        assert validate_required(schema, {"a": 1, "b": 2}) == []
+# ---------------------------------------------------------------------------
+# Module-level registry (registered tools)
+# ---------------------------------------------------------------------------
 
-    def test_missing_fields(self):
-        schema = {"required": ["a", "b", "c"]}
-        missing = validate_required(schema, {"a": 1})
-        assert set(missing) == {"b", "c"}
+class TestShipToolsRegistered:
+    def test_three_tools_registered(self):
+        tools = registry.list_tools()
+        assert len(tools) == 3
 
-    def test_no_required(self):
-        schema = {"type": "object", "properties": {}}
-        assert validate_required(schema, {}) == []
+    def test_tool_names(self):
+        names = {t["function"]["name"] for t in registry.list_tools()}
+        assert names == {"get_crew_count", "get_ship_status", "search_crew"}
+
+    def test_get_crew_count_via_execute(self):
+        result = json.loads(registry.execute("get_crew_count", {"department": "science"}))
+        assert result["department"] == "science"
+        assert isinstance(result["count"], int)
+        assert result["count"] > 0
+
+    def test_get_ship_status_via_execute(self):
+        result = json.loads(registry.execute("get_ship_status", {"system": "warp"}))
+        assert result["system"] == "warp"
+        assert "status" in result
+
+    def test_search_crew_via_execute(self):
+        results = json.loads(registry.execute("search_crew", {"query": "Voss"}))
+        assert len(results) >= 1
+        assert any("Voss" in r["name"] for r in results)

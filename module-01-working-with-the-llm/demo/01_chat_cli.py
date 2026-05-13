@@ -1,46 +1,38 @@
 """
-Demo: CLI chat loop — conversation history, simulated streaming.
+Demo: CLI chat loop — streaming conversation with real OpenAI API.
 Run:  python module-01-working-with-the-llm/demo/01_chat_cli.py
 
-Uses a mock LLM to simulate a streaming chat interface.
+Requires: OPENAI_API_KEY environment variable.
 """
 
 import sys
-import time
+
+from openai import OpenAI
+
+SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful, concise, and professional."
+MODEL = "gpt-4o-mini"
 
 
-class MockStreamingLLM:
-    """Simulates token-by-token streaming responses."""
-
-    RESPONSES = {
-        "hello": "Welcome aboard the DSS Pathfinder, Engineer. How can I assist you today?",
-        "status": "All primary systems nominal. Warp core at 97% efficiency. Shields online. Long-range sensors show clear space ahead.",
-        "crew": "Current bridge crew: Commander Voss (captain), Lt. Cmdr. Orin (science), Chief Engineer Chen, Lt. Petrov (navigation), Ensign Morel (ops).",
-    }
-    DEFAULT = "I'm the Pathfinder AI. I can help with ship status, crew queries, mission data, and system diagnostics. What do you need?"
-
-    def stream(self, messages: list[dict]):
-        last_user = ""
-        for msg in reversed(messages):
-            if msg["role"] == "user":
-                last_user = msg["content"].lower()
-                break
-
-        response = self.DEFAULT
-        for keyword, text in self.RESPONSES.items():
-            if keyword in last_user:
-                response = text
-                break
-
-        for char in response:
-            yield char
-            time.sleep(0.015)
+def stream_response(client: OpenAI, messages: list[dict]) -> str:
+    """Stream the LLM response, printing tokens as they arrive."""
+    response = client.chat.completions.create(
+        model=MODEL, messages=messages, stream=True,
+    )
+    tokens = []
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        if content:
+            sys.stdout.write(content)
+            sys.stdout.flush()
+            tokens.append(content)
+    print()
+    return "".join(tokens)
 
 
 def run_chat():
-    llm = MockStreamingLLM()
-    history: list[dict] = [
-        {"role": "system", "content": "You are the DSS Pathfinder ship AI. Be helpful, concise, and professional."},
+    client = OpenAI()
+    messages: list[dict] = [
+        {"role": "system", "content": SYSTEM_PROMPT},
     ]
 
     print("\n=== DSS Pathfinder AI Console ===")
@@ -56,19 +48,13 @@ def run_chat():
             print("\nPathfinder AI signing off.")
             break
 
-        history.append({"role": "user", "content": user_input})
+        messages.append({"role": "user", "content": user_input})
 
         sys.stdout.write("AI> ")
         sys.stdout.flush()
+        response = stream_response(client, messages)
 
-        full_response = []
-        for token in llm.stream(history):
-            sys.stdout.write(token)
-            sys.stdout.flush()
-            full_response.append(token)
-
-        print()
-        history.append({"role": "assistant", "content": "".join(full_response)})
+        messages.append({"role": "assistant", "content": response})
 
 
 if __name__ == "__main__":

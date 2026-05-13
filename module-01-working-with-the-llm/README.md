@@ -1,58 +1,77 @@
 # Module 1 — Working with the LLM
 
-> Time to talk to the model. After building a solid Python foundation, the Pathfinder AI needs a voice. This module is your "hello world" with LLMs — making real API calls, building a CLI chat interface where crew members type questions and see answers stream back token by token, an HTTP API so the bridge console can connect, and session storage so conversations survive between watches. By the end of this module you have a working chatbot.
+> Time to talk to the model. After building a solid Python foundation, the Pathfinder AI needs a voice. This module is your "hello world" with LLMs — making real API calls, building a CLI chat interface where crew members type questions and see answers stream back token by token, and adding persistence so conversations survive between watches. By the end of this module you have a working chatbot you can run from the terminal.
 
 ## Learning goals
 
-- Call the **LLM chat-completion API** directly (message roles, parameters, streaming).
+- Call the **LLM chat-completion API** directly (message roles, parameters, responses).
 - Build a **CLI chat loop** with conversation history.
-- Create a **FastAPI streaming endpoint** using Server-Sent Events (SSE).
-- Implement **session storage**: in-memory first, then file-based.
-- Apply **prompting patterns** that hold up in production (structured outputs, grounding).
+- **Stream responses** token by token for real-time output.
+- Add **persistence** so conversations survive restarts.
+- Apply **prompting patterns** that hold up in production (system prompts, structured outputs).
 
 ---
 
 ## The chat loop
 
-A chatbot is a while-loop that maintains a growing list of messages. Each turn appends the user's input, sends the full history to the model, and appends the response.
+The core pattern is a function that calls the OpenAI API:
 
 ```python
-class ChatBot:
-    def __init__(self, llm, system_prompt):
-        self.messages = [{"role": "system", "content": system_prompt}]
+from openai import OpenAI
 
-    def chat(self, user_input: str) -> str:
-        self.messages.append({"role": "user", "content": user_input})
-        response = self.llm.chat(self.messages)
-        self.messages.append({"role": "assistant", "content": response})
-        return response
+client = OpenAI()
+
+def chat(client, messages):
+    response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    return response.choices[0].message.content
 ```
 
 The model sees the full context every time — that is how it "remembers" the conversation. The catch is that the history grows with every turn. When it exceeds the model's context window you need to truncate or summarise (covered in Module 7).
 
-For a CLI interface, wrap this in an input loop with `readline`:
+Wrap this in an input loop:
 
 ```python
+messages = [{"role": "system", "content": "You are the DSS Pathfinder ship AI."}]
+
 while True:
-    user_input = input("You> ").strip()
+    user_input = input("You: ").strip()
     if user_input.lower() in ("quit", "exit"):
         break
-    print("AI>", bot.chat(user_input))
+    messages.append({"role": "user", "content": user_input})
+    response = chat(client, messages)
+    messages.append({"role": "assistant", "content": response})
+    print(f"AI: {response}")
 ```
 
 ---
 
-## Why streaming matters
+## Streaming responses
 
-Without streaming, the user types a question and stares at a blank screen for 2-5 seconds while the model generates the full response. With streaming, the first token appears in ~200ms and words flow in as they are generated. The total time is the same, but perceived latency drops dramatically.
+With streaming, the first token appears in ~200ms and words flow in as they are generated. The total time is the same, but perceived latency drops dramatically.
 
-Streaming also lets you show **tool calls in progress** — the user sees "Querying crew database..." before the final answer appears. Transparency builds trust.
+```python
+def stream_response(client, messages):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini", messages=messages, stream=True,
+    )
+    tokens = []
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        if content:
+            sys.stdout.write(content)
+            sys.stdout.flush()
+            tokens.append(content)
+    print()
+    return "".join(tokens)
+```
+
+Each chunk contains a `delta` with a fragment of the response. Print it immediately and the user sees words appear as they are generated. Streaming also lets you show **tool calls in progress** in later modules — the user sees "Querying crew database..." before the final answer.
 
 ---
 
 ## SSE streaming with FastAPI
 
-Server-Sent Events (SSE) are the simplest way to stream from a server to a browser. They use plain HTTP (no WebSocket upgrade), work through proxies and CDNs, and are natively supported by `EventSource` in JavaScript.
+For web applications, Server-Sent Events (SSE) are the simplest way to stream from a server to a browser. They use plain HTTP (no WebSocket upgrade), work through proxies and CDNs, and are natively supported by `EventSource` in JavaScript.
 
 ```python
 from sse_starlette.sse import EventSourceResponse
@@ -72,37 +91,39 @@ Each `yield` sends an SSE event to the client immediately. The event structure i
 
 ---
 
-## Session storage — in-memory, then persistent
+## Conversation persistence
 
-A chat application needs to store conversation history between HTTP requests. The simplest backend is an in-memory dict — fast, but lost on server restart. A file backend survives restarts but does not scale to multiple server instances. In production you would use Redis or Postgres.
-
-The key insight is to **code to an interface**, not to a specific backend. Define a `SessionBackend` Protocol, then swap implementations without changing any other code:
+A chat application needs to store conversation history so it survives restarts. The simplest approach is writing the messages list to a JSON file:
 
 ```python
-class SessionBackend(Protocol):
-    def load(self, session_id: str) -> list[dict]: ...
-    def save(self, session_id: str, messages: list[dict]) -> None: ...
-    def exists(self, session_id: str) -> bool: ...
+import json
+from pathlib import Path
 
-class SessionManager:
-    def __init__(self, backend: SessionBackend):
-        self.backend = backend
+def save_session(filepath: Path, messages: list[dict]) -> None:
+    filepath.write_text(json.dumps(messages, indent=2))
+
+def load_session(filepath: Path) -> list[dict]:
+    if not filepath.exists():
+        return [{"role": "system", "content": system_prompt}]
+    return json.loads(filepath.read_text())
 ```
 
-| In-memory | File / DB |
-| --------- | --------- |
-| Fast: plain dict lookup | Survives restarts |
-| Lost on server restart | Shareable across instances |
-| Fine for development | Slightly slower (disk/network I/O) |
-| No shared state between instances | Production-ready with Redis/Postgres |
+For production systems you would use Redis or Postgres, but file-based persistence is a solid start. The key insight is to **code to an interface** — define a `SessionBackend` Protocol and swap implementations without changing other code.
 
-The `InMemoryBackend` stores sessions in a dict. The `FileBackend` writes each session as a JSON file in a directory. Both implement the same three methods, so `SessionManager` works identically with either one.
+---
+
+## Slash commands
+
+A well-designed CLI chat supports commands alongside conversation. Prefix commands with `/` so they are easy to distinguish from chat messages:
 
 ```python
-# Swap backends without touching the rest of the codebase
-mgr = SessionManager(InMemoryBackend())
-mgr = SessionManager(FileBackend(Path("./sessions")))
+if user_input.startswith("/"):
+    handle_command(user_input, messages, filepath)
+else:
+    # send to LLM
 ```
+
+Common commands: `/clear` (reset history), `/history` (show conversation), `/save` and `/load` (persistence), `/help` (list commands).
 
 ---
 
@@ -117,7 +138,7 @@ Citations work the same way: when the answer references data from a tool call, l
 ## Field rules
 
 - **Stream by default.** Waiting 5 seconds for a response feels broken.
-- **Sessions are backend-agnostic.** Code to Protocol, not to dict or file.
+- **Persist conversations.** Users expect to pick up where they left off.
 - **Show your work.** Tool calls in the stream let users see what the AI is doing.
 
 ---
@@ -132,11 +153,13 @@ python module-01-working-with-the-llm/demo/03_session_storage.py
 
 ## Exercises
 
+The exercises chain — each one builds on the previous. Run them with `python start.py` for an interactive chat, or use `pytest` to validate.
+
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-chat-loop`](exercises/01-chat-loop/) | Build a CLI chatbot with conversation history. |
-| [`exercises/02-streaming-api`](exercises/02-streaming-api/) | FastAPI streaming endpoint with SSE. |
-| [`exercises/03-session-manager`](exercises/03-session-manager/) | Pluggable session backend: in-memory then file-based. |
+| [`exercises/01-first-chat`](exercises/01-first-chat/) | Make your first LLM API call and build an input loop. |
+| [`exercises/02-streaming`](exercises/02-streaming/) | Upgrade the chat to stream responses token by token. |
+| [`exercises/03-chat-app`](exercises/03-chat-app/) | Add slash commands and file persistence. |
 
 Run tests for this module:
 

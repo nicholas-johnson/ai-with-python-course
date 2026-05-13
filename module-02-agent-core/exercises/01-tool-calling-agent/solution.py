@@ -1,17 +1,61 @@
 """
-Exercise 02 — Tool Registry
-Build a ToolRegistry class and wire it into the agent loop from Exercise 01.
-
-The agent loop and ship data are provided (from Exercise 01's solution).
-You only need to implement the ToolRegistry class and register the tools.
+Exercise 01 — Tool-Calling Agent (solution)
 """
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Callable
 
 # ---------------------------------------------------------------------------
-# Ship data (same as exercise 01)
+# Tool schemas
+# ---------------------------------------------------------------------------
+
+TOOLS: list[dict] = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_crew_count",
+            "description": "Get the number of crew members in a department.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "department": {"type": "string", "description": "Department name (command, science, engineering, medical)"},
+                },
+                "required": ["department"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_ship_status",
+            "description": "Get the current status of a ship system.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "system": {"type": "string", "description": "System name (warp, shields, sensors, life_support)"},
+                },
+                "required": ["system"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_crew",
+            "description": "Search crew members by name or role.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search term to match against crew names and roles"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+]
+
+# ---------------------------------------------------------------------------
+# Tool handlers
 # ---------------------------------------------------------------------------
 
 CREW_DATA = {
@@ -36,75 +80,36 @@ SHIP_SYSTEMS = {
 }
 
 
-# ---------------------------------------------------------------------------
-# ToolRegistry — YOUR CODE HERE
-# ---------------------------------------------------------------------------
+def get_crew_count(department: str) -> str:
+    crew = CREW_DATA.get(department, [])
+    return json.dumps({"department": department, "count": len(crew)})
 
-class ToolRegistry:
-    def __init__(self):
-        self._tools: dict[str, dict] = {}
 
-    def register(self, name: str, description: str, parameters: dict):
-        """
-        Decorator that registers a function as a tool.
+def get_ship_status(system: str) -> str:
+    status = SHIP_SYSTEMS.get(system, {"system": system, "status": "unknown"})
+    return json.dumps(status)
 
-        Store the handler function alongside its schema so that:
-        - list_tools() can build the OpenAI format
-        - execute() can route calls to the right function
 
-        Usage:
-            @registry.register("tool_name", "description", {"type": "object", ...})
-            def tool_name(arg: str) -> str:
-                ...
-        """
-        # TODO: return a decorator that stores the tool and returns the function unchanged
-        pass
+def search_crew(query: str) -> str:
+    matches = []
+    q = query.lower()
+    for dept, members in CREW_DATA.items():
+        for member in members:
+            if q in member["name"].lower() or q in member["role"].lower():
+                matches.append({**member, "department": dept})
+    return json.dumps(matches)
 
-    def list_tools(self) -> list[dict]:
-        """
-        Return tools in OpenAI-compatible format:
-        [{"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}]
-        """
-        # TODO: build and return the tool list from self._tools
-        pass
 
-    def execute(self, name: str, arguments: dict) -> str:
-        """
-        Look up the tool by name and call its handler with the arguments.
-        Return the result as a string.
-
-        Error handling:
-        - Unknown tool: return JSON {"error": "Unknown tool: <name>"}
-        - Handler raises: return JSON {"error": "Tool error: <message>"}
-        """
-        # TODO: implement routing with error handling
-        pass
-
+TOOL_HANDLERS: dict[str, callable] = {
+    "get_crew_count": get_crew_count,
+    "get_ship_status": get_ship_status,
+    "search_crew": search_crew,
+}
 
 # ---------------------------------------------------------------------------
-# Create registry and register tools — YOUR CODE HERE
+# Agent result
 # ---------------------------------------------------------------------------
 
-registry = ToolRegistry()
-
-# TODO: use @registry.register(...) to register these three tools:
-#   get_crew_count  — takes department, returns JSON with count
-#   get_ship_status — takes system, returns JSON with status
-#   search_crew     — takes query, returns JSON array of matches
-#
-# Example:
-#   @registry.register("get_crew_count", "Get crew count for a department", {
-#       "type": "object",
-#       "properties": {"department": {"type": "string"}},
-#       "required": ["department"],
-#   })
-#   def get_crew_count(department: str) -> str:
-#       ...
-
-
-# ---------------------------------------------------------------------------
-# Agent result + loop (from Exercise 01 — already implemented)
-# ---------------------------------------------------------------------------
 
 @dataclass
 class AgentResult:
@@ -113,11 +118,14 @@ class AgentResult:
     steps: int = 0
 
 
+# ---------------------------------------------------------------------------
+# The agent loop
+# ---------------------------------------------------------------------------
+
 SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Use your tools to answer crew and ship queries. Be concise."
 
 
 def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
-    """Agent loop that uses the ToolRegistry instead of raw dicts."""
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question},
@@ -130,7 +138,7 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            tools=registry.list_tools(),
+            tools=TOOLS,
         )
         message = response.choices[0].message
 
@@ -139,7 +147,7 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
             for tc in message.tool_calls:
                 name = tc.function.name
                 args = json.loads(tc.function.arguments)
-                result = registry.execute(name, args)
+                result = TOOL_HANDLERS[name](**args)
                 tool_calls_made.append(name)
                 messages.append({
                     "role": "tool",
@@ -170,13 +178,7 @@ if __name__ == "__main__":
     from openai import OpenAI
 
     client = OpenAI()
-    print("DSS Pathfinder Agent (with registry) ready. Type a question (or 'quit').\n")
-
-    registered = registry.list_tools()
-    if not registered:
-        print("WARNING: No tools registered! Implement the ToolRegistry first.\n")
-    else:
-        print(f"Registered tools: {', '.join(t['function']['name'] for t in registered)}\n")
+    print("DSS Pathfinder Agent ready. Type a question (or 'quit').\n")
 
     while True:
         q = input("You: ").strip()

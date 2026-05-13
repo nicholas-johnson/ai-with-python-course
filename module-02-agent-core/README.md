@@ -1,14 +1,13 @@
 # Module 2 — Agent Core
 
-> The Pathfinder's AI is not magic — it is a loop. Now that you can talk to the LLM, it is time to give it hands. A crew member asks a question, the model decides whether to think or act, and if it acts it calls a tool, reads the result, and loops until it has an answer. This module builds that loop from scratch, hardens it with a tool registry that validates every call, adds safety rails so the agent cannot run amok, and finishes with an evaluation harness that catches regressions before they reach the bridge.
+> The Pathfinder's AI is not magic — it is a loop. Now that you can talk to the LLM, it is time to give it hands. A crew member asks a question, the model decides whether to think or act, and if it acts it calls a tool, reads the result, and loops until it has an answer. This module builds that loop from scratch using real OpenAI API calls, hardens it with a tool registry that validates every call, and adds safety rails so the agent cannot run amok.
 
 ## Learning goals
 
 - Understand the **message format** that drives an agent (system, user, assistant, tool messages).
-- Build a **tool-calling loop**: schema in, action out, result back, repeat.
-- Implement a **tool registry** with schema validation, routing, and error handling.
-- Add **safety rails**: allowlists, rate limits, redaction, audit logs.
-- Write an **evaluation harness**: golden tests, replay, deterministic mocks.
+- Build a **tool-calling loop** with real OpenAI API calls: schema in, action out, result back, repeat.
+- Implement a **tool registry** with decorator registration, routing, and error handling.
+- Add **safety rails**: allowlists, rate limits, audit logs.
 
 ---
 
@@ -44,18 +43,22 @@ The model decides whether to call a tool or answer directly. Tool results come b
 The core loop is deceptively simple. Ask the model. If it wants to call a tool, execute the tool, append the result, and ask again. If it replies with text, return it.
 
 ```python
-def run_tool_loop(llm, tools, user_input, max_steps=10):
-    messages = [system_msg, {"role": "user", "content": user_input}]
+def run_agent(client, question, max_steps=5):
+    messages = [system_msg, {"role": "user", "content": question}]
 
     for _ in range(max_steps):
-        response = llm.chat(messages)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, tools=TOOLS,
+        )
+        message = response.choices[0].message
 
-        if response.tool_calls:
-            for tc in response.tool_calls:
-                result = tools[tc.name](**tc.arguments)
-                messages.append(...)  # assistant + tool messages
-        elif response.content:
-            return response.content  # final answer
+        if message.tool_calls:
+            messages.append(message)
+            for tc in message.tool_calls:
+                result = execute_tool(tc.function.name, tc.function.arguments)
+                messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+        elif message.content:
+            return message.content  # final answer
 
     return None  # exhausted steps
 ```
@@ -134,23 +137,7 @@ class RateLimiter:
 
 ## Evaluation — golden-file testing
 
-You cannot test an agent with live LLM calls — they are slow, expensive, and non-deterministic. Instead, **mock the LLM** with scripted responses and check that the agent makes the right tool calls and produces the expected answer.
-
-A **golden case** is a fixed input paired with expected tool calls and answer:
-
-```python
-case = GoldenCase(
-    name="crew count query",
-    user_input="How many in science?",
-    expected_tool_names=["get_crew_count"],
-    expected_answer_contains="3",
-)
-
-result = run_golden_test(case, agent_fn)
-assert result.passed
-```
-
-Golden tests are fast (no API calls), free (no tokens), and deterministic (same result every run). They catch regressions when you change prompts or tool schemas. Add a new case every time you discover an edge case — the suite only gets stronger.
+For regression testing, **mock the LLM** with scripted responses and check that the agent makes the right tool calls and produces the expected answer. Golden tests are fast (no API calls), free (no tokens), and deterministic (same result every run). See `demo/04_eval_harness.py` for the pattern.
 
 ---
 
@@ -158,7 +145,7 @@ Golden tests are fast (no API calls), free (no tokens), and deterministic (same 
 
 - **Always cap loop iterations.** `max_steps` prevents runaway agents and surprise bills.
 - **Validate before you execute.** Check the allowlist and schema before calling any tool handler.
-- **Test with mocks, not live LLMs.** Golden tests are fast, deterministic, and free.
+- **Use golden tests for regression.** Real API calls for development, mocks for CI.
 
 ---
 
@@ -173,11 +160,13 @@ python module-02-agent-core/demo/04_eval_harness.py
 
 ## Exercises
 
+The exercises chain — each one builds on the previous. Run them with `python start.py` for an interactive CLI chat, or use `pytest` to validate.
+
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-tool-loop`](exercises/01-tool-loop/) | Build a minimal tool-calling loop: schema in, action out, result back. |
-| [`exercises/02-tool-registry`](exercises/02-tool-registry/) | Implement a tool registry with validation and routing. |
-| [`exercises/03-safety-eval`](exercises/03-safety-eval/) | Add rate limiting + write golden-file tests for a tool agent. |
+| [`exercises/01-tool-calling-agent`](exercises/01-tool-calling-agent/) | Build a tool-calling agent with real OpenAI API calls. |
+| [`exercises/02-tool-registry`](exercises/02-tool-registry/) | Refactor with a decorator-based tool registry. |
+| [`exercises/03-guarded-agent`](exercises/03-guarded-agent/) | Add allowlist, rate limiter, and audit log. |
 
 Run tests for this module:
 

@@ -1,13 +1,18 @@
 """
-Exercise 02 — Tool Registry (solution)
+Exercise 03 — Guarded Agent
+Add safety rails (allowlist, rate limiter, audit log) to the tool-calling agent.
+
+The ToolRegistry, tool registrations, and data are provided (from Exercise 02's solution).
+You only need to implement AllowList, RateLimiter, and GuardedAgent.
 """
 
 import json
+import time
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Callable
 
 # ---------------------------------------------------------------------------
-# Ship data
+# Ship data (same as exercises 01/02)
 # ---------------------------------------------------------------------------
 
 CREW_DATA = {
@@ -33,7 +38,7 @@ SHIP_SYSTEMS = {
 
 
 # ---------------------------------------------------------------------------
-# ToolRegistry
+# ToolRegistry (from Exercise 02 — already implemented)
 # ---------------------------------------------------------------------------
 
 class ToolRegistry:
@@ -75,7 +80,7 @@ class ToolRegistry:
 
 
 # ---------------------------------------------------------------------------
-# Register tools
+# Register tools (from Exercise 02)
 # ---------------------------------------------------------------------------
 
 registry = ToolRegistry()
@@ -84,7 +89,7 @@ registry = ToolRegistry()
 @registry.register("get_crew_count", "Get the number of crew members in a department.", {
     "type": "object",
     "properties": {
-        "department": {"type": "string", "description": "Department name (command, science, engineering, medical)"},
+        "department": {"type": "string", "description": "Department name"},
     },
     "required": ["department"],
 })
@@ -96,7 +101,7 @@ def get_crew_count(department: str) -> str:
 @registry.register("get_ship_status", "Get the current status of a ship system.", {
     "type": "object",
     "properties": {
-        "system": {"type": "string", "description": "System name (warp, shields, sensors, life_support)"},
+        "system": {"type": "string", "description": "System name"},
     },
     "required": ["system"],
 })
@@ -108,7 +113,7 @@ def get_ship_status(system: str) -> str:
 @registry.register("search_crew", "Search crew members by name or role.", {
     "type": "object",
     "properties": {
-        "query": {"type": "string", "description": "Search term to match against crew names and roles"},
+        "query": {"type": "string", "description": "Search term"},
     },
     "required": ["query"],
 })
@@ -123,7 +128,50 @@ def search_crew(query: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Agent result + loop
+# Safety classes — YOUR CODE HERE
+# ---------------------------------------------------------------------------
+
+@dataclass
+class AuditEntry:
+    timestamp: float
+    tool_name: str
+    arguments: dict
+    allowed: bool
+    result: str | None = None
+
+
+class AllowList:
+    """Check whether a tool name is in the permitted set."""
+
+    def __init__(self, permitted: set[str]):
+        self._permitted = permitted
+
+    def check(self, name: str) -> bool:
+        """Return True if the tool is allowed, False otherwise."""
+        # TODO: implement
+        pass
+
+
+@dataclass
+class RateLimiter:
+    """Sliding-window rate limiter."""
+
+    max_calls: int
+    window_seconds: float
+    _timestamps: list[float] = field(default_factory=list)
+
+    def allow(self) -> bool:
+        """
+        Return True if a new call is within the rate limit.
+        Prune timestamps outside the window, then check count.
+        If allowed, record the current timestamp.
+        """
+        # TODO: implement sliding-window rate limiting
+        pass
+
+
+# ---------------------------------------------------------------------------
+# Guarded agent result
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -131,54 +179,61 @@ class AgentResult:
     final_answer: str | None
     tool_calls_made: list[str] = field(default_factory=list)
     steps: int = 0
+    audit_log: list[AuditEntry] = field(default_factory=list)
 
+
+# ---------------------------------------------------------------------------
+# GuardedAgent — YOUR CODE HERE
+# ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Use your tools to answer crew and ship queries. Be concise."
 
 
-def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": question},
-    ]
-    tool_calls_made: list[str] = []
-    steps = 0
+class GuardedAgent:
+    """
+    A tool-calling agent with safety rails.
 
-    for _ in range(max_steps):
-        steps += 1
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            tools=registry.list_tools(),
-        )
-        message = response.choices[0].message
+    Before executing each tool call:
+    1. Check the AllowList — if blocked, send back an error message as the tool result
+       (so the model knows the tool was denied and can try something else).
+    2. Check the RateLimiter — if exceeded, send back a rate-limit error message.
+    3. Log every call (allowed or blocked) to the audit log.
+    """
 
-        if message.tool_calls:
-            messages.append(message)
-            for tc in message.tool_calls:
-                name = tc.function.name
-                args = json.loads(tc.function.arguments)
-                result = registry.execute(name, args)
-                tool_calls_made.append(name)
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.id,
-                    "content": result,
-                })
-        elif message.content:
-            return AgentResult(
-                final_answer=message.content,
-                tool_calls_made=tool_calls_made,
-                steps=steps,
-            )
-        else:
-            break
+    def __init__(
+        self,
+        client,
+        tool_registry: ToolRegistry,
+        allow_list: AllowList,
+        rate_limiter: RateLimiter,
+        system_prompt: str = SYSTEM_PROMPT,
+    ):
+        self.client = client
+        self.registry = tool_registry
+        self.allow_list = allow_list
+        self.rate_limiter = rate_limiter
+        self.system_prompt = system_prompt
+        self.audit_log: list[AuditEntry] = []
 
-    return AgentResult(
-        final_answer=None,
-        tool_calls_made=tool_calls_made,
-        steps=steps,
-    )
+    def run(self, question: str, max_steps: int = 5) -> AgentResult:
+        """
+        Run the guarded agent loop.
+
+        Same structure as the agent loop from exercises 01/02, but wrap
+        each tool execution with allowlist + rate limit checks.
+
+        For blocked or rate-limited tools:
+        - Append a tool result message with a JSON error explanation
+          (e.g., {"error": "Tool not permitted: search_crew"})
+        - Log an AuditEntry with allowed=False
+        - Continue the loop so the model can see the error and recover
+
+        For allowed tools:
+        - Execute via self.registry.execute()
+        - Log an AuditEntry with allowed=True and the result
+        """
+        # TODO: implement the guarded agent loop
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -189,15 +244,25 @@ if __name__ == "__main__":
     from openai import OpenAI
 
     client = OpenAI()
-    print("DSS Pathfinder Agent (with registry) ready. Type a question (or 'quit').\n")
-    print(f"Registered tools: {', '.join(t['function']['name'] for t in registry.list_tools())}\n")
+    allow_list = AllowList(permitted={"get_crew_count", "get_ship_status"})
+    rate_limiter = RateLimiter(max_calls=10, window_seconds=60.0)
+    agent = GuardedAgent(client, registry, allow_list, rate_limiter)
+
+    print("DSS Pathfinder Guarded Agent ready. Type a question (or 'quit').")
+    print("Allowed tools: get_crew_count, get_ship_status")
+    print("Blocked tool:  search_crew (try asking to find someone!)\n")
 
     while True:
         q = input("You: ").strip()
         if not q or q.lower() in ("quit", "exit"):
             break
-        result = run_agent(client, q)
+        result = agent.run(q)
         print(f"\nAgent: {result.final_answer}")
         if result.tool_calls_made:
             print(f"  (tools used: {', '.join(result.tool_calls_made)})")
+        if result.audit_log:
+            print("  Audit log:")
+            for entry in result.audit_log:
+                status = "ALLOWED" if entry.allowed else "BLOCKED"
+                print(f"    [{status}] {entry.tool_name}({json.dumps(entry.arguments)})")
         print()

@@ -1,13 +1,23 @@
 # Exercise 02 — Tool Registry
 
-**Mission briefing:** The Pathfinder AI needs a registry where tools declare their schema (name, description, parameter spec) and the system can validate arguments, route calls to the right handler, and return structured errors when things go wrong.
+**Mission briefing:** Your tool-calling agent works, but those hand-written JSON schemas are tedious and error-prone. Build a `ToolRegistry` class that lets you register tools with a decorator, auto-generates the OpenAI tool list, and routes calls to the right handler with error handling.
+
+This exercise builds on Exercise 01. The agent loop and data are already provided — you only need to implement the registry.
 
 ## Objectives
 
 1. Implement `ToolRegistry` with a `register(name, description, parameters)` decorator.
-2. Implement `list_tools()` — returns the OpenAI-compatible tool list format.
-3. Implement `call(name, arguments)` — validates the tool exists, calls the handler, catches errors.
-4. Implement `validate_required(parameters_schema, arguments)` — check that all required fields are present.
+2. Implement `list_tools()` — returns the OpenAI-compatible tool list.
+3. Implement `execute(name, arguments)` — validates the tool exists, calls the handler, catches errors, returns a string result.
+4. Register the ship tools using the decorator and wire the registry into the agent loop.
+
+## Try it
+
+```bash
+python start.py
+```
+
+Same agent, cleaner code. Ask the same questions as Exercise 01 — the behaviour should be identical.
 
 ## Run the tests
 

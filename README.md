@@ -63,29 +63,29 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 
 ## Schedule
 
-### Day 1 — Build a working chatbot
+### Day 1 — Build a working agent
 
 | Block | Module | Topic |
 | ----- | ------ | ----- |
 | 0 | [module-00-python-fundamentals](module-00-python-fundamentals/) | Data structures, modules, CLI, logging, async, HTTP |
 | 1 | [module-01-working-with-the-llm](module-01-working-with-the-llm/) | LLM APIs, chat integration, streaming, prompting patterns |
 | 2 | [module-02-agent-core](module-02-agent-core/) | Message format, tool registry, safety rails, eval harness |
-| 3 | [module-03-genai-strategies](module-03-genai-strategies/) | GenAI strategies, prompt engineering, multimodal, guardrails |
+| 3 | [module-03-mcp-server](module-03-mcp-server/) | MCP concepts, build a server, practical tools, auth |
+| 4 | [module-04-genai-strategies](module-04-genai-strategies/) | Structured outputs, vision, multimodal API — the Day 1 closer |
 
-### Day 2 — MCP + knowledge
+### Day 2 — Knowledge + retrieval
 
 | Block | Module | Topic |
 | ----- | ------ | ----- |
-| 4 | [module-04-mcp-server](module-04-mcp-server/) | MCP concepts, build a server, practical tools, auth |
 | 5 | [module-05-rag-fundamentals](module-05-rag-fundamentals/) | Chunking, embeddings, vector stores, retrieval, evaluation |
 | 6 | [module-06-multi-agent](module-06-multi-agent/) | Roles, coordination patterns, shared context |
 | 7 | [module-07-agent-memory](module-07-agent-memory/) | Short/long-term memory, summarisation, ReAct, plan-and-execute |
+| 8 | [module-08-structured-facts](module-08-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA |
 
-### Day 3 — Structured knowledge + ship it
+### Day 3 — Ship it
 
 | Block | Module | Topic |
 | ----- | ------ | ----- |
-| 8 | [module-08-structured-facts](module-08-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA |
 | 9 | [module-09-adaptive-retrieval](module-09-adaptive-retrieval/) | Retrieval routing, self-critique, query decomposition, multi-source QA |
 | 10 | [module-10-production](module-10-production/) | Tracing, reliability, cost controls, deployment |
 | 11 | [module-11-langchain](module-11-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
@@ -111,9 +111,9 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Chat loop | [`exercises/01-chat-loop`](module-01-working-with-the-llm/exercises/01-chat-loop/) | CLI chatbot with conversation history |
-| Streaming API | [`exercises/02-streaming-api`](module-01-working-with-the-llm/exercises/02-streaming-api/) | FastAPI streaming endpoint with SSE |
-| Session manager | [`exercises/03-session-manager`](module-01-working-with-the-llm/exercises/03-session-manager/) | Pluggable session backend: in-memory then file-based |
+| First chat | [`exercises/01-first-chat`](module-01-working-with-the-llm/exercises/01-first-chat/) | First LLM API call + interactive console chat |
+| Streaming | [`exercises/02-streaming`](module-01-working-with-the-llm/exercises/02-streaming/) | Stream responses token by token |
+| Chat app | [`exercises/03-chat-app`](module-01-working-with-the-llm/exercises/03-chat-app/) | Slash commands + file persistence |
 
 ### Module 2 — [Agent Core](module-02-agent-core/)
 
@@ -121,31 +121,30 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Tool loop | [`exercises/01-tool-loop`](module-02-agent-core/exercises/01-tool-loop/) | Minimal tool-calling loop: schema in, action out, result back |
-| Tool registry | [`exercises/02-tool-registry`](module-02-agent-core/exercises/02-tool-registry/) | Registry with validation and routing |
-| Safety + eval | [`exercises/03-safety-eval`](module-02-agent-core/exercises/03-safety-eval/) | Rate limiting + golden-file tests for a tool agent |
+| Tool-calling agent | [`exercises/01-tool-calling-agent`](module-02-agent-core/exercises/01-tool-calling-agent/) | Build a tool-calling agent with real OpenAI API calls |
+| Tool registry | [`exercises/02-tool-registry`](module-02-agent-core/exercises/02-tool-registry/) | Decorator-based registry plugged into the agent loop |
+| Guarded agent | [`exercises/03-guarded-agent`](module-02-agent-core/exercises/03-guarded-agent/) | AllowList + RateLimiter + audit log wrapping the agent |
 
-### Module 3 — [GenAI Strategies](module-03-genai-strategies/)
+### Module 3 — [MCP Server](module-03-mcp-server/)
 
-**Topics:** Prompting patterns that hold up in production (structured outputs, tool calling, grounding), model selection trade-offs (quality/cost/latency), token budgeting, caching, reliability + guardrails (evals, red-teaming, failure modes).
-
-| Exercise | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Structured prompts | [`exercises/01-structured-prompts`](module-03-genai-strategies/exercises/01-structured-prompts/) | Build prompts that produce JSON-parseable outputs |
-| Token budget | [`exercises/02-token-budget`](module-03-genai-strategies/exercises/02-token-budget/) | Token counting and budget enforcement |
-| Guardrail chain | [`exercises/03-guardrail-chain`](module-03-genai-strategies/exercises/03-guardrail-chain/) | Schema validation, content filter, confidence threshold |
-| Multimodal analysis | [`exercises/04-multimodal-analysis`](module-03-genai-strategies/exercises/04-multimodal-analysis/) | Vision and audio payloads, structured damage report parsing |
-
-### Module 4 — [MCP Server](module-04-mcp-server/)
-
-**Topics:** MCP concepts (tool discovery, schemas, calling conventions), building a minimal MCP server, practical tools (filesystem, HTTP fetch, DB query, calculators), auth + permissions, observability, versioning.
+**Topics:** MCP concepts (tool discovery, schemas, calling conventions), building a minimal MCP server, practical tools (sensor reads, crew lookup, log search), auth + permissions, observability, building an MCP client.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Hello MCP | [`exercises/01-hello-mcp`](module-04-mcp-server/exercises/01-hello-mcp/) | Minimal MCP server exposing one tool |
-| MCP tools | [`exercises/02-mcp-tools`](module-04-mcp-server/exercises/02-mcp-tools/) | Three ship-system tools: sensor read, crew lookup, log query |
-| Auth + observability | [`exercises/03-auth-observability`](module-04-mcp-server/exercises/03-auth-observability/) | Per-tool auth scopes and structured logging |
-| MCP client | [`exercises/04-mcp-client`](module-04-mcp-server/exercises/04-mcp-client/) | Build an MCP client: discover tools, validate args, handle errors |
+| Hello MCP | [`exercises/01-hello-mcp`](module-03-mcp-server/exercises/01-hello-mcp/) | Minimal MCP server exposing one tool |
+| MCP tools | [`exercises/02-mcp-tools`](module-03-mcp-server/exercises/02-mcp-tools/) | Three ship-system tools: sensor read, crew lookup, log query |
+| Auth + observability | [`exercises/03-auth-observability`](module-03-mcp-server/exercises/03-auth-observability/) | Per-tool auth scopes and structured logging |
+| MCP client | [`exercises/04-mcp-client`](module-03-mcp-server/exercises/04-mcp-client/) | Build an MCP client: discover tools, validate args, handle errors |
+
+### Module 4 — [GenAI Strategies](module-04-genai-strategies/)
+
+**Topics:** Structured outputs (Pydantic, `response_format`), prompt engineering, model selection trade-offs, multimodal (vision via GPT-4o, audio via Whisper), building a FastAPI multimodal API.
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Structured outputs | [`exercises/01-structured-outputs`](module-04-genai-strategies/exercises/01-structured-outputs/) | Pydantic model + `response_format` for reliable JSON |
+| Vision | [`exercises/02-vision`](module-04-genai-strategies/exercises/02-vision/) | Send images to GPT-4o, get structured analysis |
+| Multimodal API | [`exercises/03-multimodal-api`](module-04-genai-strategies/exercises/03-multimodal-api/) | FastAPI app with /chat, /vision, /transcribe endpoints |
 
 ### Module 5 — [RAG Fundamentals](module-05-rag-fundamentals/)
 
