@@ -127,14 +127,13 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 3 — [MCP Server](module-03-mcp-server/)
 
-**Topics:** MCP concepts (tool discovery, schemas, calling conventions), building a minimal MCP server, practical tools (sensor reads, crew lookup, log search), auth + permissions, observability, building an MCP client.
+**Topics:** MCP concepts (tool discovery, schemas, calling conventions), building FastMCP servers, connecting to an agent via MCP stdio, dynamic tool discovery, real-world tools (web fetch, file I/O).
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Hello MCP | [`exercises/01-hello-mcp`](module-03-mcp-server/exercises/01-hello-mcp/) | Minimal MCP server exposing one tool |
-| MCP tools | [`exercises/02-mcp-tools`](module-03-mcp-server/exercises/02-mcp-tools/) | Three ship-system tools: sensor read, crew lookup, log query |
-| Auth + observability | [`exercises/03-auth-observability`](module-03-mcp-server/exercises/03-auth-observability/) | Per-tool auth scopes and structured logging |
-| MCP client | [`exercises/04-mcp-client`](module-03-mcp-server/exercises/04-mcp-client/) | Build an MCP client: discover tools, validate args, handle errors |
+| MCP agent | [`exercises/01-mcp-agent`](module-03-mcp-server/exercises/01-mcp-agent/) | FastMCP server + console agent connected via MCP stdio |
+| Data tools | [`exercises/02-data-tools`](module-03-mcp-server/exercises/02-data-tools/) | Server reading crew, logs, sensors, missions from JSON data |
+| Live tools | [`exercises/03-live-tools`](module-03-mcp-server/exercises/03-live-tools/) | Server with web fetch and note file management |
 
 ### Module 4 — [GenAI Strategies](module-04-genai-strategies/)
 

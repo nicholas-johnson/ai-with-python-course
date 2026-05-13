@@ -79,14 +79,13 @@
 | `module-03-mcp-server/demo/02_minimal_server.py` | Working FastMCP server. Start it, show tools/list response. |
 | `module-03-mcp-server/demo/03_practical_tools.py` | Sensor read, crew lookup, log search reading from JSON data files. |
 
-**Exercises:**
+**Exercises (chained — each builds on the previous):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-hello-mcp` | Minimal MCP server exposing one tool |
-| `exercises/02-mcp-tools` | Three ship-system tools: sensor, crew, logs |
-| `exercises/03-auth-observability` | Per-tool auth scopes + structured logging |
-| `exercises/04-mcp-client` | Client that discovers tools, validates args, handles errors |
+| `exercises/01-mcp-agent` | FastMCP server + console agent connected via MCP stdio. `python start.py` for interactive chat. |
+| `exercises/02-data-tools` | Richer server reading crew, logs, sensors, missions from JSON files. Ships with ex01 agent. |
+| `exercises/03-live-tools` | Server with web fetch (httpx) + note save/list/read. Ships with ex01 agent. The "it actually does stuff" moment. |
 
 ---
 

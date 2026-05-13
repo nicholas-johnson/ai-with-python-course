@@ -1,13 +1,13 @@
 # Module 3 — MCP Server
 
-> The Pathfinder AI can answer questions about the ship, but only if the data is already in its context window. Real ship systems — sensor arrays, crew databases, maintenance logs — live behind APIs. The Model Context Protocol (MCP) gives LLMs a standard way to discover and call those APIs. In this module you build an MCP server that exposes Pathfinder tools, wire it up with authentication and structured logging, and then write a client that discovers and invokes tools dynamically.
+> The Pathfinder AI can answer questions about the ship, but only if the data is already in its context window. Real ship systems — sensor arrays, crew databases, maintenance logs — live behind APIs. The Model Context Protocol (MCP) gives LLMs a standard way to discover and call those APIs. In this module you build MCP servers of increasing power and wire each one to a console agent that discovers tools dynamically.
 
 ## Learning goals
 
 - Understand the **Model Context Protocol**: tool discovery, schemas, calling conventions.
-- Build a **FastMCP server** with practical tools: sensor reads, crew lookup, log search.
-- Add **authentication** (scopes) and **structured logging** for audit trails.
-- Build an **MCP client** that discovers tools and validates arguments.
+- Build **FastMCP servers** with practical tools: data queries, web fetch, file I/O.
+- Connect an MCP server to a **real agent** via `mcp.client.stdio`.
+- Convert MCP tool schemas to **OpenAI tool-calling format** for dynamic discovery.
 
 ---
 
@@ -181,12 +181,13 @@ python module-03-mcp-server/demo/03_practical_tools.py
 
 ## Exercises
 
+Each exercise builds an MCP server (`server.py`) and runs it via a console agent (`start.py`). `python start.py` is interactive. Exercises chain: Exercise 2 ships with Exercise 1's agent, Exercise 3 ships with Exercise 1+2's solutions.
+
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-hello-mcp`](exercises/01-hello-mcp/) | Create a FastMCP server with `greet` and `ship_time` tools. |
-| [`exercises/02-mcp-tools`](exercises/02-mcp-tools/) | Build tools that read sensors, query crew, and search logs from JSON data. |
-| [`exercises/03-auth-observability`](exercises/03-auth-observability/) | Add auth scopes and structured logging to a tool runner. |
-| [`exercises/04-mcp-client`](exercises/04-mcp-client/) | Build an MCP client: discover tools, validate arguments, handle errors. |
+| [`exercises/01-mcp-agent`](exercises/01-mcp-agent/) | Build a FastMCP server + console agent that connects via MCP stdio. |
+| [`exercises/02-data-tools`](exercises/02-data-tools/) | Build a server that queries crew, logs, sensors, and missions from JSON data. |
+| [`exercises/03-live-tools`](exercises/03-live-tools/) | Build a server that fetches web pages and manages notes on disk. |
 
 Run tests for this module:
 
