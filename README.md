@@ -71,7 +71,7 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | 1 | [module-01-working-with-the-llm](module-01-working-with-the-llm/) | LLM APIs, chat integration, streaming, prompting patterns |
 | 2 | [module-02-agent-core](module-02-agent-core/) | Message format, tool registry, safety rails, eval harness |
 | 3 | [module-03-mcp-server](module-03-mcp-server/) | MCP concepts, build a server, practical tools, auth |
-| 4 | [module-04-genai-strategies](module-04-genai-strategies/) | Structured outputs, vision, multimodal API — the Day 1 closer |
+| 4 | [module-04-genai-strategies](module-04-genai-strategies/) | Research Assistant app: streaming chat, MCP tools, multimodal — the Day 1 closer |
 
 ### Day 2 — Knowledge + retrieval
 
@@ -137,13 +137,13 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 4 — [GenAI Strategies](module-04-genai-strategies/)
 
-**Topics:** Structured outputs (Pydantic, `response_format`), prompt engineering, model selection trade-offs, multimodal (vision via GPT-4o, audio via Whisper), building a FastAPI multimodal API.
+**Topics:** Prompt engineering, structured outputs, model selection trade-offs, multimodal (vision via GPT-4o, audio via Whisper), FastAPI with SSE streaming, MCP tool integration in a web API. Delegates build a **Research Assistant** web app -- the Day 1 closer.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Structured outputs | [`exercises/01-structured-outputs`](module-04-genai-strategies/exercises/01-structured-outputs/) | Pydantic model + `response_format` for reliable JSON |
-| Vision | [`exercises/02-vision`](module-04-genai-strategies/exercises/02-vision/) | Send images to GPT-4o, get structured analysis |
-| Multimodal API | [`exercises/03-multimodal-api`](module-04-genai-strategies/exercises/03-multimodal-api/) | FastAPI app with /chat, /vision, /transcribe endpoints |
+| Chat API | [`exercises/01-chat-api`](module-04-genai-strategies/exercises/01-chat-api/) | FastAPI backend with SSE streaming chat |
+| Tool chat | [`exercises/02-tool-chat`](module-04-genai-strategies/exercises/02-tool-chat/) | MCP server with web fetch + notes, tool-calling loop in the API |
+| Multimodal | [`exercises/03-multimodal`](module-04-genai-strategies/exercises/03-multimodal/) | Add /vision (GPT-4o) and /transcribe (Whisper) endpoints |
 
 ### Module 5 — [RAG Fundamentals](module-05-rag-fundamentals/)
 

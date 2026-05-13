@@ -1,15 +1,30 @@
 # Module 4 — GenAI Strategies
 
-> The agent can talk, call tools, and expose them via MCP. Now it is time to make it smart — and give it eyes and ears. This module closes Day 1 by layering on prompt engineering that produces reliable structured outputs, multimodal capabilities so the Pathfinder can analyse hull damage photos and transcribe bridge audio, and a FastAPI app that wraps it all into a real API with a web frontend.
+> Build a real AI application. This module closes Day 1 by combining everything from Modules 1–3 into a **Research Assistant** -- a web app where you chat with an AI that fetches web pages, saves notes, analyses images, and transcribes audio. A Svelte frontend is provided; features light up as you implement each backend endpoint.
 
 ## Learning goals
 
-- Apply **prompt engineering**: system prompts, few-shot examples, structured outputs, and grounding.
+- Build a **FastAPI app** with SSE streaming chat, tool integration, and multimodal endpoints.
+- Apply **prompt engineering**: system prompts, structured outputs, and grounding.
 - Work with **multimodal** inputs: vision/image analysis via GPT-4o, speech-to-text via Whisper.
-- Build a **FastAPI app** that exposes chat, vision, and transcription as API endpoints.
+- Connect an **MCP server** to a web API for real-time tool use.
 - Reason about **model selection** trade-offs: quality, cost, latency.
 - Count tokens and enforce **budgets** before calling the model.
 - Apply **guardrails**: schema validation, content filters, and confidence thresholds.
+
+---
+
+## The project
+
+Delegates build the backend for an **AI Research Assistant** across three chained exercises. A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Each exercise adds a new capability -- the frontend progressively lights up as endpoints come online.
+
+```
+frontend/          <- Provided. pnpm dev to start.
+exercises/
+  01-chat-api/     <- Streaming chat API
+  02-tool-chat/    <- MCP server + tool-calling loop
+  03-multimodal/   <- Vision + audio endpoints
+```
 
 ---
 
@@ -17,7 +32,7 @@
 
 The difference between a flaky demo and a production AI is prompt engineering. A well-crafted prompt constrains the model's output so your code can reliably parse and act on it.
 
-**Be specific.** Vague prompts produce vague answers. "Tell me about the crew" could return anything. "Return a JSON object with fields `name`, `role`, and `status` for each crew member in the science department" gives the model a target.
+**Be specific.** Vague prompts produce vague answers. "Tell me about the topic" could return anything. "Return a JSON object with fields `title`, `summary`, and `key_points`" gives the model a target.
 
 **System prompt** — the first message in the conversation. It sets persona, constraints, available tools, and output format. Think of it as the agent's standing orders.
 
@@ -27,19 +42,18 @@ The difference between a flaky demo and a production AI is prompt engineering. A
 messages = [
     {"role": "system", "content": SYSTEM_PROMPT},
     # Few-shot example
-    {"role": "user", "content": "Kepler Sweep lost contact at 14:30."},
+    {"role": "user", "content": "Summarise the Wikipedia article on transformers."},
     {"role": "assistant", "content": json.dumps({
-        "mission_id": "KS-7",
-        "status": "aborted",
-        "risk_level": "critical",
-        "summary": "Contact lost during Kepler Sweep."
+        "title": "Transformer (deep learning)",
+        "summary": "A neural network architecture based on self-attention.",
+        "key_points": ["Introduced in 2017", "Replaced RNNs", "Powers GPT, BERT, etc."]
     })},
     # Real query
-    {"role": "user", "content": actual_report},
+    {"role": "user", "content": actual_query},
 ]
 ```
 
-The assistant message IS the example output. The model mirrors the format with no extra instructions needed. Diminishing returns kick in after about 5 examples — keep them tight.
+Diminishing returns kick in after about 5 examples — keep them tight.
 
 **Grounding** anchors answers to retrieved data, not the model's imagination. You will build full grounding pipelines in Modules 6 and 10.
 
@@ -50,13 +64,12 @@ The assistant message IS the example output. The model mirrors the format with n
 Free-text responses are hard to parse. A structured output prompt constrains the model to return valid JSON matching a specific schema:
 
 ```python
-SYSTEM = """You are a mission analyst for the DSS Pathfinder.
+SYSTEM = """You are a research assistant.
 Return ONLY valid JSON matching this schema:
 {
-  "mission_id": "string",
-  "status": "active | completed | aborted",
-  "risk_level": "low | medium | high | critical",
-  "summary": "one sentence"
+  "title": "string",
+  "summary": "one paragraph",
+  "key_points": ["string", ...]
 }
 Do not include any text outside the JSON object."""
 ```
@@ -105,7 +118,7 @@ Always preserve the system prompt — it sets the agent's behaviour. Trim from t
 
 ## Multimodal inputs
 
-The Pathfinder's hull cameras capture images and the bridge records audio. Modern models can process both alongside text.
+Modern models can process images and audio alongside text.
 
 **Vision** — send images as base64 data URIs or public URLs in the message content:
 
@@ -115,7 +128,7 @@ response = client.chat.completions.create(
     messages=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe any damage visible."},
+            {"type": "text", "text": "Describe what you see."},
             {"type": "image_url", "image_url": {
                 "url": f"data:image/png;base64,{img_b64}"
             }},
@@ -126,7 +139,7 @@ response = client.chat.completions.create(
 
 Content is a list of parts — text and images mixed freely. This works with base64 data URIs or public HTTPS URLs.
 
-**Audio** — the Whisper API transcribes speech to text. Send raw audio bytes to the transcription endpoint and get back a transcript you can feed into the chat pipeline. Text-to-speech goes the other direction — convert the agent's response to spoken audio for hands-free bridge ops.
+**Audio** — the Whisper API transcribes speech to text. Send raw audio bytes to the transcription endpoint and get back a transcript you can feed into the chat pipeline.
 
 ---
 
@@ -142,25 +155,20 @@ A single check is not enough. Chain multiple guardrails, fail early, and log eve
 
 ```python
 def run_guardrails(response, schema, blocked_terms, min_confidence):
-    # Step 1: Schema check
     try:
         data = schema.model_validate_json(response)
     except ValidationError as e:
         return GuardrailResult(passed=False, reason=f"Schema: {e}")
 
-    # Step 2: Content filter
     for term in blocked_terms:
         if term.lower() in response.lower():
             return GuardrailResult(passed=False, reason=f"Blocked: {term}")
 
-    # Step 3: Confidence gate
     if data.confidence < min_confidence:
         return GuardrailResult(passed=False, reason="Low confidence")
 
     return GuardrailResult(passed=True, data=data)
 ```
-
-Each guardrail returns early on failure — no wasted work. The structured result lets the caller decide what to do next (retry, fall back, or escalate).
 
 ---
 
@@ -182,13 +190,25 @@ python module-04-genai-strategies/demo/03_guardrails.py
 
 ## Exercises
 
-| Folder | Mission |
-| ------ | ------- |
-| [`exercises/01-structured-outputs`](exercises/01-structured-outputs/) | Get GPT to return reliable **JSON** — Pydantic validation, `response_format`. |
-| [`exercises/02-vision`](exercises/02-vision/) | Send **images** to GPT-4o, get structured analysis back. |
-| [`exercises/03-multimodal-api`](exercises/03-multimodal-api/) | **FastAPI app** with `/chat`, `/vision`, `/transcribe` endpoints — the Day 1 closer. |
+| # | Folder | What you build |
+|---|--------|---------------|
+| 1 | [`exercises/01-chat-api`](exercises/01-chat-api/) | **Streaming Chat** — FastAPI with SSE streaming `/chat` and `/health` endpoints. |
+| 2 | [`exercises/02-tool-chat`](exercises/02-tool-chat/) | **MCP Research Tools** — Build an MCP server with web fetch + notes, extend chat with a tool-calling loop. |
+| 3 | [`exercises/03-multimodal`](exercises/03-multimodal/) | **Vision & Audio** — Add `/vision` (GPT-4o image analysis) and `/transcribe` (Whisper) endpoints. |
 
-Run tests for this module:
+### Frontend
+
+The Svelte frontend lives in `frontend/`. Start it with:
+
+```bash
+cd module-04-genai-strategies/frontend
+pnpm install
+pnpm dev
+```
+
+It connects to `http://localhost:8000` (via Vite proxy). Features light up as you implement each backend endpoint.
+
+### Run tests
 
 ```bash
 pytest module-04-genai-strategies/
@@ -201,6 +221,9 @@ From repo root: `pnpm slides:04`, or `cd module-04-genai-strategies/slides && pn
 ## Reference
 
 - [OpenAI — Prompt engineering](https://platform.openai.com/docs/guides/prompt-engineering)
-- [Anthropic — Prompting long context](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering)
+- [OpenAI — Vision](https://platform.openai.com/docs/guides/vision)
+- [OpenAI — Speech to text](https://platform.openai.com/docs/guides/speech-to-text)
+- [FastAPI — Server-Sent Events](https://fastapi.tiangolo.com/)
+- [sse-starlette](https://github.com/sysid/sse-starlette)
 - [tiktoken (OpenAI tokenizer)](https://github.com/openai/tiktoken)
 - [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/)

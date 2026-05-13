@@ -10,16 +10,13 @@
 - The chat loop pattern: while-loop, append user input, call API, append response
 - Why streaming matters: perceived latency, first token in 200ms vs 3s blank screen
 - Streaming with the OpenAI SDK: `stream=True`, iterating over chunks, `delta.content`
-- Conversation persistence: JSON file save/load, slash commands for a CLI app
-- SSE with FastAPI (lecture/demo only): EventSourceResponse for web frontends
+- Prompt engineering: personas, format constraints, guardrails, few-shot examples
 
 **Demo:**
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-01-working-with-the-llm/demo/01_chat_cli.py` | Live streaming CLI chat with real OpenAI API. Point out the message list growing. |
-| `module-01-working-with-the-llm/demo/02_api_backend.py` | FastAPI server with SSE. Start it, curl POST to /chat, show event stream. |
-| `module-01-working-with-the-llm/demo/03_session_storage.py` | Protocol-based pluggable storage. In-memory vs file. Same interface, different backends. |
+| `module-01-working-with-the-llm/demo/demo.py` | All-in-one walkthrough. Part 1: basic chat call, message list growing. Part 2: streaming tokens live. Part 3: same question through different system prompts (persona, bullets, JSON, guardrails, few-shot). |
 
 **Exercises (chained — each builds on the previous):**
 
@@ -27,7 +24,7 @@
 | ------ | --------------- |
 | `exercises/01-first-chat` | First API call + console input loop. `python start.py` for interactive chat. |
 | `exercises/02-streaming` | Streaming upgrade — tokens print as they arrive. Ships with ex01 solution. |
-| `exercises/03-chat-app` | Slash commands (/clear, /history, /save, /load) + file persistence. Ships with ex02 solution. |
+| `exercises/03-prompting` | Write system prompts for 6 challenges (persona, format, JSON, haiku, guardrails, few-shot). Ships with run_prompt() helper. |
 
 ---
 
@@ -99,6 +96,7 @@
 - Token counting and budgets (lecture): tiktoken, truncate or summarise if over budget
 - Multimodal: Vision API (base64 image in message, content parts), Whisper for audio transcription
 - Guardrails (lecture): schema validation, content filter, confidence threshold — already practised in Module 2
+- FastAPI + SSE streaming for real-time chat backends
 
 **Demo:**
 
@@ -108,13 +106,15 @@
 | `module-04-genai-strategies/demo/02_model_selection.py` | Model comparison, cost calculation |
 | `module-04-genai-strategies/demo/03_guardrails.py` | Validation chain: valid output passes, malformed JSON fails schema, toxic content fails filter |
 
-**Exercises (chained — each builds on the previous):**
+**Exercises (chained — delegates build a Research Assistant web app):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-structured-outputs` | Pydantic model + `response_format` + system prompt. Console app: type a description, get structured JSON. |
-| `exercises/02-vision` | Base64 image encoding + GPT-4o vision. Console app: `python start.py image.png`. Ships with ex01 solution. |
-| `exercises/03-multimodal-api` | FastAPI app with `/chat`, `/vision`, `/transcribe` endpoints. Day 1 closer — instructor provides web frontend. Ships with ex01+ex02 solution. |
+| `exercises/01-chat-api` | FastAPI backend with SSE streaming `/chat` and `/health`. Frontend chat panel lights up. |
+| `exercises/02-tool-chat` | MCP server with web fetch + notes tools. Extend chat with tool-calling loop. Frontend shows tool activity. |
+| `exercises/03-multimodal` | Add `/vision` (GPT-4o image analysis) and `/transcribe` (Whisper). Frontend image/audio uploads work. |
+
+A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focus on the FastAPI backend.
 
 ---
 
