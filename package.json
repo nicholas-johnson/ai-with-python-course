@@ -8,6 +8,7 @@
   "license": "UNLICENSED",
   "packageManager": "pnpm@10.8.0",
   "scripts": {
+    "slides:00": "pnpm --filter @deep-space-ops/module-00-slides dev",
     "slides:01": "pnpm --filter @deep-space-ops/module-01-slides dev",
     "slides:02": "pnpm --filter @deep-space-ops/module-02-slides dev",
     "slides:03": "pnpm --filter @deep-space-ops/module-03-slides dev",
@@ -20,7 +21,6 @@
     "slides:10": "pnpm --filter @deep-space-ops/module-10-slides dev",
     "slides:11": "pnpm --filter @deep-space-ops/module-11-slides dev",
     "slides:12": "pnpm --filter @deep-space-ops/module-12-slides dev",
-    "slides:13": "pnpm --filter @deep-space-ops/module-13-slides dev",
     "lint:slides": "eslint slide-deck/",
     "format:slides": "prettier --write slide-deck/ **/slides/src/**"
   },

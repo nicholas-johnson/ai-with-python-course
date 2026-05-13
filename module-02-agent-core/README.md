@@ -1,6 +1,6 @@
 # Module 2 — Agent Core
 
-> The Pathfinder's AI is not magic — it is a loop. A crew member asks a question, the model decides whether to think or act, and if it acts it calls a tool, reads the result, and loops until it has an answer. This module builds that loop from scratch, hardens it with a tool registry that validates every call, adds safety rails so the agent cannot run amok, and finishes with an evaluation harness that catches regressions before they reach the bridge.
+> The Pathfinder's AI is not magic — it is a loop. Now that you can talk to the LLM, it is time to give it hands. A crew member asks a question, the model decides whether to think or act, and if it acts it calls a tool, reads the result, and loops until it has an answer. This module builds that loop from scratch, hardens it with a tool registry that validates every call, adds safety rails so the agent cannot run amok, and finishes with an evaluation harness that catches regressions before they reach the bridge.
 
 ## Learning goals
 
