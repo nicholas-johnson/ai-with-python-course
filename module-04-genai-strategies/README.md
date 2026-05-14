@@ -183,10 +183,13 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 ## Demos
 
 ```bash
-python module-04-genai-strategies/demo/01_prompting_patterns.py
-python module-04-genai-strategies/demo/02_model_selection.py
-python module-04-genai-strategies/demo/03_guardrails.py
+python module-04-genai-strategies/demo/demo.py
 ```
+
+Walks through all three topics interactively — press Enter between sections:
+1. **Prompt engineering** — vague vs specific prompts, `response_format=json_object`, few-shot classification
+2. **Model selection** — same task on GPT-4o vs GPT-4o-mini, comparing latency, tokens, and quality
+3. **Guardrails** — Pydantic schema validation, content filtering, confidence gating — 4 test cases then a live LLM response
 
 ## Exercises
 

@@ -56,7 +56,7 @@ Shared mission data lives in [`data/`](data/).
 Each module includes a Vite app under `slides/` that renders teaching decks with the workspace package [`slide-deck`](slide-deck/).
 
 ```bash
-pnpm slides:01          # same pattern :00 … :12
+pnpm slides:01          # same pattern :00 … :13
 # or
 cd module-01-working-with-the-llm/slides && pnpm dev
 ```
@@ -78,18 +78,19 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | Block | Module | Topic |
 | ----- | ------ | ----- |
 | 5 | [module-05-rag-fundamentals](module-05-rag-fundamentals/) | Chunking, embeddings, vector stores, retrieval, evaluation |
-| 6 | [module-06-multi-agent](module-06-multi-agent/) | Roles, coordination patterns, shared context |
-| 7 | [module-07-agent-memory](module-07-agent-memory/) | Short/long-term memory, summarisation, ReAct, plan-and-execute |
-| 8 | [module-08-structured-facts](module-08-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA |
+| 6 | [module-06-structured-facts](module-06-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA |
+| 7 | [module-07-agent-memory](module-07-agent-memory/) | Short/long-term memory, summarisation, decay controls |
+| 8 | [module-08-structured-workflows](module-08-structured-workflows/) | ReAct, plan-and-execute, tool routing — the Day 2 closer |
 
 ### Day 3 — Ship it
 
 | Block | Module | Topic |
 | ----- | ------ | ----- |
-| 9 | [module-09-adaptive-retrieval](module-09-adaptive-retrieval/) | Retrieval routing, self-critique, query decomposition, multi-source QA |
-| 10 | [module-10-production](module-10-production/) | Tracing, reliability, cost controls, deployment |
-| 11 | [module-11-langchain](module-11-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
-| 12 | [module-12-capstone](module-12-capstone/) | Full agentic app: chatbot + RAG + MCP + multi-agent |
+| 9 | [module-09-multi-agent](module-09-multi-agent/) | Roles, coordination patterns, shared context |
+| 10 | [module-10-adaptive-retrieval](module-10-adaptive-retrieval/) | Retrieval routing, self-critique, query decomposition, multi-source QA |
+| 11 | [module-11-production](module-11-production/) | Tracing, reliability, cost controls, deployment |
+| 12 | [module-12-langchain](module-12-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
+| 13 | [module-13-capstone](module-13-capstone/) | Full agentic app: chatbot + RAG + MCP + multi-agent |
 
 ## Course outline
 
@@ -151,79 +152,89 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Document chunker | [`exercises/01-document-chunker`](module-05-rag-fundamentals/exercises/01-document-chunker/) | Chunk ship logs into overlapping windows for indexing |
-| Vector search | [`exercises/02-vector-search`](module-05-rag-fundamentals/exercises/02-vector-search/) | Embed and search the mission archives |
-| RAG pipeline | [`exercises/03-rag-pipeline`](module-05-rag-fundamentals/exercises/03-rag-pipeline/) | End-to-end RAG with citation linking back to sources |
+| Build the index | [`exercises/01-build-index`](module-05-rag-fundamentals/exercises/01-build-index/) | Chunk ship logs, embed with OpenAI, store in ChromaDB, interactive search |
+| RAG chat | [`exercises/02-rag-chat`](module-05-rag-fundamentals/exercises/02-rag-chat/) | Grounded chat agent with source citations and /norag comparison |
+| RAG MCP server | [`exercises/03-rag-mcp-server`](module-05-rag-fundamentals/exercises/03-rag-mcp-server/) | Wrap RAG as MCP server, connect to a tool-calling agent |
 
-### Module 6 — [Multi-Agent Systems](module-06-multi-agent/)
-
-**Topics:** When multi-agent helps vs hurts, agent roles (router, researcher, coder, critic), coordination patterns (supervisor, swarm, debate, blackboard), shared context and tools, consensus and conflict resolution.
-
-| Exercise | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Router agent | [`exercises/01-router-agent`](module-06-multi-agent/exercises/01-router-agent/) | Route queries to navigation, engineering, or science specialists |
-| Supervisor-critic | [`exercises/02-supervisor-critic`](module-06-multi-agent/exercises/02-supervisor-critic/) | Supervisor coordinates researcher + critic for mission briefings |
-| Consensus | [`exercises/03-consensus`](module-06-multi-agent/exercises/03-consensus/) | Multiple agents propose answers; vote on the best response |
-
-### Module 7 — [Agent Memory + Workflows](module-07-agent-memory/)
-
-**Topics:** Short-term session memory vs long-term profile, summarisation for context limits, decay and "do not remember" controls, workflow patterns (ReAct, plan-and-execute, tool routing).
-
-| Exercise | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Memory store | [`exercises/01-memory-store`](module-07-agent-memory/exercises/01-memory-store/) | Short-term buffer and long-term memory with decay |
-| Conversation summary | [`exercises/02-conversation-summary`](module-07-agent-memory/exercises/02-conversation-summary/) | Summarise long conversations to fit a token budget |
-| ReAct loop | [`exercises/03-react-loop`](module-07-agent-memory/exercises/03-react-loop/) | Implement ReAct: Reason, Act, Observe |
-
-### Module 8 — [Structured Facts](module-08-structured-facts/)
+### Module 6 — [Structured Facts](module-06-structured-facts/)
 
 **Topics:** Structured outputs (Pydantic, JSON Schema), fact extraction pipelines with provenance and confidence, knowledge graph construction (entities, relationships), grounded QA with citations.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Fact extractor | [`exercises/01-fact-extractor`](module-08-structured-facts/exercises/01-fact-extractor/) | Extract structured facts from ship logs using Pydantic schemas |
-| Knowledge graph | [`exercises/02-knowledge-graph`](module-08-structured-facts/exercises/02-knowledge-graph/) | Build a graph from entities and query for relationships |
-| Grounded QA | [`exercises/03-grounded-qa`](module-08-structured-facts/exercises/03-grounded-qa/) | Answer questions with source citations and confidence scores |
+| Fact extractor | [`exercises/01-fact-extractor`](module-06-structured-facts/exercises/01-fact-extractor/) | Extract structured facts with OpenAI + Pydantic, interactive REPL |
+| Knowledge graph | [`exercises/02-knowledge-graph`](module-06-structured-facts/exercises/02-knowledge-graph/) | Build a networkx graph from facts, query entities, find paths |
+| Grounded QA | [`exercises/03-grounded-qa`](module-06-structured-facts/exercises/03-grounded-qa/) | Answer questions grounded in graph evidence with [Fact N] citations |
 
-### Module 9 — [Adaptive Retrieval](module-09-adaptive-retrieval/)
+### Module 7 — [Agent Memory](module-07-agent-memory/)
+
+**Topics:** Short-term session memory vs long-term profile, summarisation for context limits, decay and "do not remember" controls.
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Memory store | [`exercises/01-memory-store`](module-07-agent-memory/exercises/01-memory-store/) | Short-term buffer and long-term memory with decay |
+| Conversation summary | [`exercises/02-conversation-summary`](module-07-agent-memory/exercises/02-conversation-summary/) | Summarise long conversations to fit a token budget |
+| Memory MCP server | [`exercises/03-memory-server`](module-07-agent-memory/exercises/03-memory-server/) | Expose memory as an MCP server for agent integration |
+
+### Module 8 — [Structured Workflows](module-08-structured-workflows/)
+
+**Topics:** Workflow patterns (ReAct, plan-and-execute, tool routing), chaining reasoning steps, dynamic replanning, structured execution traces.
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| ReAct agent | [`exercises/01-react-agent`](module-08-structured-workflows/exercises/01-react-agent/) | Implement ReAct: Reason, Act, Observe |
+| Plan-and-execute | [`exercises/02-plan-and-execute`](module-08-structured-workflows/exercises/02-plan-and-execute/) | Decompose a goal into steps, execute, and replan |
+| Holiday planner | [`exercises/03-holiday-planner`](module-08-structured-workflows/exercises/03-holiday-planner/) | Multi-step workflow combining tools to plan a trip |
+
+### Module 9 — [Multi-Agent Systems](module-09-multi-agent/)
+
+**Topics:** When multi-agent helps vs hurts, agent roles (router, researcher, coder, critic), coordination patterns (supervisor, swarm, debate, blackboard), shared context and tools, consensus and conflict resolution.
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Router agent | [`exercises/01-router-agent`](module-09-multi-agent/exercises/01-router-agent/) | Route queries to navigation, engineering, or science specialists |
+| Supervisor-critic | [`exercises/02-supervisor-critic`](module-09-multi-agent/exercises/02-supervisor-critic/) | Supervisor coordinates researcher + critic for mission briefings |
+| Consensus | [`exercises/03-consensus`](module-09-multi-agent/exercises/03-consensus/) | Multiple agents propose answers; vote on the best response |
+
+### Module 10 — [Adaptive Retrieval](module-10-adaptive-retrieval/)
 
 **Topics:** Retrieval routing (vector, graph, keyword), query decomposition, self-critique loops (corrective RAG), multi-source orchestration with merge and ranking.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Retrieval router | [`exercises/01-retrieval-router`](module-09-adaptive-retrieval/exercises/01-retrieval-router/) | Route queries to vector, graph, or keyword search |
-| Self-critique | [`exercises/02-self-critique`](module-09-adaptive-retrieval/exercises/02-self-critique/) | Evaluate retrieval quality and refine queries |
-| Multi-source QA | [`exercises/03-multi-source-qa`](module-09-adaptive-retrieval/exercises/03-multi-source-qa/) | Fan out to multiple backends, merge, rank, answer with citations |
+| Retrieval router | [`exercises/01-retrieval-router`](module-10-adaptive-retrieval/exercises/01-retrieval-router/) | Route queries to vector, graph, or keyword search |
+| Self-critique | [`exercises/02-self-critique`](module-10-adaptive-retrieval/exercises/02-self-critique/) | Evaluate retrieval quality and refine queries |
+| Multi-source QA | [`exercises/03-multi-source-qa`](module-10-adaptive-retrieval/exercises/03-multi-source-qa/) | Fan out to multiple backends, merge, rank, answer with citations |
 
-### Module 10 — [Production & Deployment](module-10-production/)
+### Module 11 — [Production & Deployment](module-11-production/)
 
 **Topics:** Structured tracing and logging, reliability (retries, circuit breakers, fallbacks), cost controls (budgets, batching, model tiering), environment config, secrets, containers, CI/CD.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Trace middleware | [`exercises/01-trace-middleware`](module-10-production/exercises/01-trace-middleware/) | Add trace IDs and timing to every tool call |
-| Batch pipeline | [`exercises/02-batch-pipeline`](module-10-production/exercises/02-batch-pipeline/) | Batch LLM requests with retry and fallback model |
-| Cost tracker | [`exercises/03-cost-tracker`](module-10-production/exercises/03-cost-tracker/) | Per-session token and cost budget enforcement |
-| Deploy container | [`exercises/04-deploy-container`](module-10-production/exercises/04-deploy-container/) | Health-check app, env config, Dockerfile validation |
+| Trace middleware | [`exercises/01-trace-middleware`](module-11-production/exercises/01-trace-middleware/) | Add trace IDs and timing to every tool call |
+| Batch pipeline | [`exercises/02-batch-pipeline`](module-11-production/exercises/02-batch-pipeline/) | Batch LLM requests with retry and fallback model |
+| Cost tracker | [`exercises/03-cost-tracker`](module-11-production/exercises/03-cost-tracker/) | Per-session token and cost budget enforcement |
+| Deploy container | [`exercises/04-deploy-container`](module-11-production/exercises/04-deploy-container/) | Health-check app, env config, Dockerfile validation |
 
-### Module 11 — [LangChain with Python](module-11-langchain/)
+### Module 12 — [LangChain with Python](module-12-langchain/)
 
 **Topics:** LangChain vs hand-rolled (chains, agents, tools, memory, output parsers), prompt templates and LCEL, rewriting agent loops with LangChain, connecting to MCP and RAG pipelines.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Chain basics | [`exercises/01-chain-basics`](module-11-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
-| Tool agent | [`exercises/02-tool-agent`](module-11-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via AgentExecutor |
-| RAG chain | [`exercises/03-rag-chain`](module-11-langchain/exercises/03-rag-chain/) | RetrievalQA chain over the Pathfinder knowledge base |
+| Chain basics | [`exercises/01-chain-basics`](module-12-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
+| Tool agent | [`exercises/02-tool-agent`](module-12-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via AgentExecutor |
+| RAG chain | [`exercises/03-rag-chain`](module-12-langchain/exercises/03-rag-chain/) | RetrievalQA chain over the Pathfinder knowledge base |
 
-### Module 12 — [Capstone Project](module-12-capstone/)
+### Module 13 — [Capstone Project](module-13-capstone/)
 
 **Topics:** Full agentic application integrating chat, RAG, MCP tools, and multi-agent coordination. Demo scenarios, integration tests, extension documentation.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Capstone app | [`exercises/01-capstone-app`](module-12-capstone/exercises/01-capstone-app/) | Integrated chat + RAG + MCP + multi-agent app |
-| Test and extend | [`exercises/02-test-and-extend`](module-12-capstone/exercises/02-test-and-extend/) | Integration tests and extension documentation |
+| Capstone app | [`exercises/01-capstone-app`](module-13-capstone/exercises/01-capstone-app/) | Integrated chat + RAG + MCP + multi-agent app |
+| Test and extend | [`exercises/02-test-and-extend`](module-13-capstone/exercises/02-test-and-extend/) | Integration tests and extension documentation |
 
 ## Running tests
 

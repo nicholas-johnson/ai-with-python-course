@@ -174,10 +174,13 @@ The client validates arguments locally before sending them over the wire — thi
 ## Demos
 
 ```bash
-python module-03-mcp-server/demo/01_mcp_concepts.py
-python module-03-mcp-server/demo/02_minimal_server.py
-python module-03-mcp-server/demo/03_practical_tools.py
+python module-03-mcp-server/demo/demo.py
 ```
+
+Walks through all three topics interactively — press Enter between sections:
+1. **MCP concepts** — tool discovery, schemas, calling conventions (data walkthrough, no server)
+2. **FastMCP server** — decorator pattern, type hints to JSON Schema, auto-generated tool definitions
+3. **Connecting a client** — spawns a real MCP server, discovers tools, converts to OpenAI format, runs a live tool-calling agent loop
 
 ## Exercises
 

@@ -42,10 +42,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-02-agent-core/demo/01_message_format.py` | Live API call that triggers a tool call. Walk through the 4 message roles in real time. |
-| `module-02-agent-core/demo/02_tool_registry.py` | Decorator registration, list_tools(), call() with error handling. Unknown tool and bad args both handled. |
-| `module-02-agent-core/demo/03_safety_rails.py` | Allowlist blocks delete_all_data, rate limiter kicks in on 4th call, clearance levels redacted, audit trail. |
-| `module-02-agent-core/demo/04_eval_harness.py` | Mock LLM, golden case definition, run agent loop, pass/fail checks. |
+| `module-02-agent-core/demo/demo.py` | All four topics in one interactive walkthrough — press Enter between sections. Part 1: live tool call tracing 4 message roles. Part 2: decorator registry, list/call/error handling. Part 3: allowlist, rate limiter, redaction, audit log. Part 4: mock LLM golden tests. |
 
 **Exercises (chained — each builds on the previous):**
 
@@ -72,9 +69,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-03-mcp-server/demo/01_mcp_concepts.py` | Tool schemas as data structures. Walk through JSON: name, description, inputSchema. |
-| `module-03-mcp-server/demo/02_minimal_server.py` | Working FastMCP server. Start it, show tools/list response. |
-| `module-03-mcp-server/demo/03_practical_tools.py` | Sensor read, crew lookup, log search reading from JSON data files. |
+| `module-03-mcp-server/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: MCP protocol as data — discovery, call, result. Part 2: FastMCP decorator pattern and auto-generated schemas. Part 3: live agent connecting to an MCP server, discovering tools, calling them via OpenAI. |
 
 **Exercises (chained — each builds on the previous):**
 
@@ -102,9 +97,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-04-genai-strategies/demo/01_prompting_patterns.py` | Structured output prompts, few-shot examples (skeleton for live walkthrough) |
-| `module-04-genai-strategies/demo/02_model_selection.py` | Model comparison, cost calculation |
-| `module-04-genai-strategies/demo/03_guardrails.py` | Validation chain: valid output passes, malformed JSON fails schema, toxic content fails filter |
+| `module-04-genai-strategies/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: vague vs specific prompts, response_format, few-shot classification. Part 2: same task on GPT-4o vs GPT-4o-mini — latency, tokens, quality. Part 3: Pydantic guardrails chain — schema validation, content filter, confidence gate with 4 test cases + live LLM. |
 
 **Exercises (chained — delegates build a Research Assistant web app):**
 
@@ -133,23 +126,112 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 **Demo:**
 
-| Script | What it shows |
-| ------ | ------------- |
-| `module-05-rag-fundamentals/demo/01_chunking.py` | Different chunking strategies on ship logs |
-| `module-05-rag-fundamentals/demo/02_embeddings_vectors.py` | Embedding text, storing in vector index, similarity search |
-| `module-05-rag-fundamentals/demo/03_retrieval_strategies.py` | Dense vs hybrid retrieval, reranking |
+Multi-step walkthrough using persistent ChromaDB (Docker). Run from `module-05-rag-fundamentals/demo/`:
+
+| Step | Command | What it shows |
+| ---- | ------- | ------------- |
+| 1 | `docker compose up -d` | Start ChromaDB server (port 8100) |
+| 2 | `python ingest.py` | Load ship logs, chunk, embed, store in ChromaDB |
+| 3 | `python -m mcp dev server.py` | (Optional) MCP Inspector — call RAG tools in browser |
+| 4 | `python agent.py` | Chat with RAG agent — tool calls print inline |
+| 5 | `docker compose down` | Clean up |
 
 **Exercises:**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-document-chunker` | Chunk ship logs into overlapping windows |
-| `exercises/02-vector-search` | Embed and search the mission archives |
-| `exercises/03-rag-pipeline` | End-to-end RAG with citation linking |
+| `exercises/01-build-index` | Chunk ship logs, embed with OpenAI, store in ChromaDB, interactive search |
+| `exercises/02-rag-chat` | Grounded chat agent with source citations, /norag comparison |
+| `exercises/03-rag-mcp-server` | Wrap RAG pipeline as MCP server, connect to tool-calling agent |
 
 ---
 
-### Module 6 — Multi-Agent Systems
+### Module 6 — Structured Facts
+
+**Talk about:**
+
+- Structured outputs with Pydantic models
+- Fact extraction pipelines: claims, provenance, confidence
+- Knowledge graphs: entities, relationships, traversal with networkx
+- Grounded QA from graphs with citations
+
+**Demo:**
+
+Each demo is a separate interactive script with real OpenAI calls:
+
+| Script | What it shows |
+| ------ | ------------- |
+| `module-06-structured-facts/demo/01_extraction.py` | Pydantic schema, structured extraction from logs, validation filtering |
+| `module-06-structured-facts/demo/02_graph.py` | Build networkx graph from facts, query entities and paths |
+| `module-06-structured-facts/demo/03_grounded_qa.py` | Graph-grounded QA with citations, comparison without graph |
+
+**Exercises:**
+
+| Folder | Delegates build |
+| ------ | --------------- |
+| `exercises/01-fact-extractor` | Extract structured facts with OpenAI + Pydantic, interactive REPL with /validate, /json, /schema |
+| `exercises/02-knowledge-graph` | Build networkx graph from facts, query entities, find paths, explore connections |
+| `exercises/03-grounded-qa` | Graph-grounded QA with [Fact N] citations, /evidence, /nograph comparison |
+
+---
+
+### Module 7 — Agent Memory
+
+**Talk about:**
+
+- Short-term (session) vs long-term (profile) memory
+- Summarisation to fit context windows
+- Memory decay and explicit "do not remember" controls
+
+**Demo:**
+
+| Script | What it shows |
+| ------ | ------------- |
+| `module-07-agent-memory/demo/demo.py` | All-in-one walkthrough: session memory, long-term memory with decay, summarisation, memory-enhanced agent |
+
+**Exercises:**
+
+| Folder | Delegates build |
+| ------ | --------------- |
+| `exercises/01-memory-store` | Session + long-term memory with decay/forget, interactive agent with /memories, /decay, /forget |
+| `exercises/02-conversation-summary` | Auto-summarise long conversations, /summary, /turns, /force-summarise |
+| `exercises/03-memory-server` | Memory as FastMCP server, console agent via stdio, /tools |
+
+---
+
+### Module 8 — Structured Workflows
+
+Day 2 closer.
+
+**Talk about:**
+
+- ReAct pattern: Reason → Act → Observe loop
+- Plan-and-execute workflows: generate plan, execute steps, re-plan on failure
+- Comparison: when to use ReAct vs plan-and-execute
+- Integration into web apps with SSE streaming
+
+**Demo:**
+
+| Script | What it shows |
+| ------ | ------------- |
+| `module-08-structured-workflows/demo/01_react.py` | ReAct loop with real tools — trace printed live |
+| `module-08-structured-workflows/demo/02_plan_and_execute.py` | Plan generation, step execution, re-planning on failure |
+
+**Exercises (chained — delegates build a Holiday Planner web app):**
+
+| Folder | Delegates build |
+| ------ | --------------- |
+| `exercises/01-react-agent` | ReAct loop with web search, calculator, notes. /trace, /tools, /steps N |
+| `exercises/02-plan-and-execute` | Planner + executor with re-planning. /plan, /react, /replan comparison |
+| `exercises/03-holiday-planner` | FastAPI backend + Svelte frontend. SSE streaming, MCP tools, plan visualisation |
+
+A Svelte frontend is provided. Delegates focus on the backend logic.
+
+---
+
+## Day 3 — Ship it
+
+### Module 9 — Multi-Agent Systems
 
 **Talk about:**
 
@@ -163,9 +245,9 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-06-multi-agent/demo/01_agent_roles.py` | Define and run agents with different roles |
-| `module-06-multi-agent/demo/02_supervisor_pattern.py` | Supervisor delegates to specialists, synthesises results |
-| `module-06-multi-agent/demo/03_debate_pattern.py` | Two agents argue, third votes |
+| `module-09-multi-agent/demo/01_agent_roles.py` | Define and run agents with different roles |
+| `module-09-multi-agent/demo/02_supervisor_pattern.py` | Supervisor delegates to specialists, synthesises results |
+| `module-09-multi-agent/demo/03_debate_pattern.py` | Two agents argue, third votes |
 
 **Exercises:**
 
@@ -177,63 +259,7 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 ---
 
-### Module 7 — Agent Memory + Workflows
-
-**Talk about:**
-
-- Short-term (session) vs long-term (profile) memory
-- Summarisation to fit context windows
-- Memory decay and explicit "do not remember" controls
-- Workflow patterns: ReAct (Reason → Act → Observe), plan-and-execute
-
-**Demo:**
-
-| Script | What it shows |
-| ------ | ------------- |
-| `module-07-agent-memory/demo/01_memory_types.py` | Short-term buffer vs long-term store with decay |
-| `module-07-agent-memory/demo/02_summarisation.py` | Compress long conversation to fit token budget |
-| `module-07-agent-memory/demo/03_workflow_patterns.py` | ReAct loop and plan-and-execute side by side |
-
-**Exercises:**
-
-| Folder | Delegates build |
-| ------ | --------------- |
-| `exercises/01-memory-store` | Short-term buffer and long-term memory with decay |
-| `exercises/02-conversation-summary` | Summarise long conversations to fit a token budget |
-| `exercises/03-react-loop` | Implement ReAct: Reason, Act, Observe |
-
----
-
-### Module 8 — Structured Facts
-
-**Talk about:**
-
-- Structured outputs with Pydantic models
-- Fact extraction pipelines: claims, provenance, confidence
-- Knowledge graphs: entities, relationships, traversal with networkx
-- Grounded QA from graphs with citations
-
-**Demo:**
-
-| Script | What it shows |
-| ------ | ------------- |
-| `module-08-structured-facts/demo/01_structured_extraction.py` | Extract typed facts from unstructured text |
-| `module-08-structured-facts/demo/02_knowledge_graph.py` | Build graph from entities, query relationships |
-| `module-08-structured-facts/demo/03_grounded_qa.py` | Answer questions from graph with source citations |
-
-**Exercises:**
-
-| Folder | Delegates build |
-| ------ | --------------- |
-| `exercises/01-fact-extractor` | Extract structured facts from ship logs using Pydantic |
-| `exercises/02-knowledge-graph` | Build a graph from entities, query relationships |
-| `exercises/03-grounded-qa` | Answer questions with source citations and confidence |
-
----
-
-## Day 3 — Ship it
-
-### Module 9 — Adaptive Retrieval
+### Module 10 — Adaptive Retrieval
 
 **Talk about:**
 
@@ -246,9 +272,9 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-09-adaptive-retrieval/demo/01_retrieval_routing.py` | Route queries to different backends |
-| `module-09-adaptive-retrieval/demo/02_self_critique.py` | Evaluate retrieval quality, refine query |
-| `module-09-adaptive-retrieval/demo/03_multi_source.py` | Fan out to multiple sources, merge and rank |
+| `module-10-adaptive-retrieval/demo/01_retrieval_routing.py` | Route queries to different backends |
+| `module-10-adaptive-retrieval/demo/02_self_critique.py` | Evaluate retrieval quality, refine query |
+| `module-10-adaptive-retrieval/demo/03_multi_source.py` | Fan out to multiple sources, merge and rank |
 
 **Exercises:**
 
@@ -260,7 +286,7 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 ---
 
-### Module 10 — Production & Deployment
+### Module 11 — Production & Deployment
 
 **Talk about:**
 
@@ -273,9 +299,9 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-10-production/demo/01_structured_tracing.py` | Trace IDs propagated through tool calls |
-| `module-10-production/demo/02_circuit_breaker.py` | Circuit breaker opening after failures, fallback |
-| `module-10-production/demo/03_deployment_pipeline.py` | Config per environment, health check endpoint |
+| `module-11-production/demo/01_structured_tracing.py` | Trace IDs propagated through tool calls |
+| `module-11-production/demo/02_circuit_breaker.py` | Circuit breaker opening after failures, fallback |
+| `module-11-production/demo/03_deployment_pipeline.py` | Config per environment, health check endpoint |
 
 **Exercises:**
 
@@ -288,7 +314,7 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 ---
 
-### Module 11 — LangChain with Python
+### Module 12 — LangChain with Python
 
 **Talk about:**
 
@@ -302,9 +328,9 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-11-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
-| `module-11-langchain/demo/02_langchain_agents.py` | Wrap tools, run via AgentExecutor |
-| `module-11-langchain/demo/03_langchain_rag.py` | RetrievalQA chain over knowledge base |
+| `module-12-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
+| `module-12-langchain/demo/02_langchain_agents.py` | Wrap tools, run via AgentExecutor |
+| `module-12-langchain/demo/03_langchain_rag.py` | RetrievalQA chain over knowledge base |
 
 **Exercises:**
 
@@ -316,7 +342,7 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 ---
 
-### Module 12 — Capstone Project
+### Module 13 — Capstone Project
 
 **Talk about:**
 
@@ -328,8 +354,8 @@ A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focu
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-12-capstone/demo/01_architecture_overview.py` | Full system architecture walkthrough |
-| `module-12-capstone/demo/02_demo_scenario.py` | End-to-end query through the full pipeline |
+| `module-13-capstone/demo/01_architecture_overview.py` | Full system architecture walkthrough |
+| `module-13-capstone/demo/02_demo_scenario.py` | End-to-end query through the full pipeline |
 
 **Exercises:**
 

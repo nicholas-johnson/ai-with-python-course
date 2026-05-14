@@ -152,11 +152,14 @@ For regression testing, **mock the LLM** with scripted responses and check that 
 ## Demos
 
 ```bash
-python module-02-agent-core/demo/01_message_format.py
-python module-02-agent-core/demo/02_tool_registry.py
-python module-02-agent-core/demo/03_safety_rails.py
-python module-02-agent-core/demo/04_eval_harness.py
+python module-02-agent-core/demo/demo.py
 ```
+
+Walks through all four topics interactively — press Enter between sections:
+1. **Message format** — live API call that triggers a tool call, traces all 4 roles
+2. **Tool registry** — decorator registration, `list_tools()`, call routing, error handling
+3. **Safety rails** — allowlist blocks `delete_all_data`, rate limiter kicks in, redaction, audit log
+4. **Eval harness** — mock LLM, golden case, pass/fail checks (no API calls)
 
 ## Exercises
 

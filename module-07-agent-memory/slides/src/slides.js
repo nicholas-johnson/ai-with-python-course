@@ -2,8 +2,8 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 7 — Agent Memory + Workflows',
-      subtitle: 'What to remember, what to forget, how to act',
+      title: 'Module 7 — Agent Memory',
+      subtitle: 'What to remember, what to forget, and how to keep it all in context',
       icon: 'brain',
     },
   },
@@ -14,7 +14,7 @@ export const slides = [
       points: [
         'Useful agents need session context, durable preferences, and policies for forgetting.',
         'Short-term vs long-term memory — different stores, different lifetimes.',
-        'Workflow patterns: ReAct, plan-and-execute, and tool routing for multi-step missions.',
+        'Summarisation compresses old conversations to fit the context window.',
       ],
     },
   },
@@ -27,7 +27,7 @@ export const slides = [
         'Implement **short-term memory** (session buffer) separate from **long-term** storage.',
         'Apply **summarisation** to fit context limits gracefully.',
         'Model **decay** and explicit **"do not remember"** controls.',
-        'Compare workflow patterns: **ReAct**, **plan-and-execute**, and tool routing.',
+        'Expose memory as **MCP tools** for any agent to use.',
       ],
     },
   },
@@ -166,68 +166,14 @@ export const slides = [
   {
     type: 'standard',
     content: {
-      title: 'ReAct: Reason → Act → Observe',
-      icon: 'refresh-cw',
+      title: 'Memory as MCP tools',
+      icon: 'wrench',
       points: [
-        '**Thought**: the agent reasons about what to do next.',
-        '**Action**: it calls a tool with specific arguments.',
-        '**Observation**: the tool result is fed back as context.',
-        '**Loop**: repeat until the agent has enough to answer.',
-        'Explicit reasoning traces make debugging much easier.',
+        'Wrap memory behind a **FastMCP server** with remember/recall/forget tools.',
+        'Any agent can connect via stdio and use memory without importing code.',
+        'Memory persists as long as the server runs — agents can restart.',
+        'This is how production systems separate concerns: memory is a service.',
       ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'ReAct loop',
-      code: `def run_react(query, tools, llm, max_steps=5):
-    trace = []
-    context = f"Question: {query}"
-
-    for step in range(max_steps):
-        response = llm.chat(context + "\\nThought:")
-        thought, action, args = parse_react(response)
-        trace.append({"thought": thought, "action": action})
-
-        if action == "FINISH":
-            return {"answer": args, "trace": trace}
-
-        observation = tools[action](**args)
-        trace.append({"observation": observation})
-        context += f"\\nThought: {thought}"
-        context += f"\\nAction: {action}({args})"
-        context += f"\\nObservation: {observation}"
-
-    return {"answer": None, "trace": trace}`,
-      highlights: [
-        'Each step adds to the context — the LLM sees its own reasoning',
-        'FINISH action signals the loop to stop and return',
-      ],
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'ReAct vs plan-and-execute',
-      left: {
-        label: 'ReAct',
-        items: [
-          'Decide one step at a time',
-          'Adapts to unexpected results',
-          'Simple to implement',
-          'Can wander if not constrained',
-        ],
-      },
-      right: {
-        label: 'Plan-and-execute',
-        items: [
-          'Make a full plan upfront',
-          'Execute steps in order',
-          'Better for known procedures',
-          'Re-plan if a step fails',
-        ],
-      },
     },
   },
   {
@@ -246,9 +192,9 @@ export const slides = [
           icon: 'file-minus',
         },
         {
-          rule: 'Trace every ReAct step',
-          example: 'When the agent goes off-track, the trace tells you where.',
-          icon: 'search',
+          rule: 'Honour forget requests immediately',
+          example: 'Privacy is not optional — flag and stop serving.',
+          icon: 'eye-off',
         },
       ],
     },
@@ -258,9 +204,9 @@ export const slides = [
     content: {
       title: 'Exercises — Teaching the ship to remember',
       points: [
-        '01 — Memory store: short-term buffer and long-term memory with decay',
-        '02 — Conversation summary: trim and summarise to fit a token budget',
-        '03 — ReAct loop: implement Reason → Act → Observe',
+        '01 — Memory store: session buffer + long-term memory with decay and forget',
+        '02 — Conversation summary: auto-summarise when the buffer overflows',
+        '03 — Memory MCP server: expose memory as tools, connect an agent via stdio',
       ],
     },
   },
@@ -268,7 +214,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Memory banks online — Module 7',
-      subtitle: 'The ship remembers and reasons. Next: structured knowledge.',
+      subtitle: 'The ship remembers. Next: structured workflows.',
       icon: 'party-popper',
     },
   },

@@ -1,20 +1,17 @@
-# Module 7 — Agent Memory + Workflows
+# Module 7 — Agent Memory
 
-> The Pathfinder AI handles hundreds of conversations a day — bridge crew asking about sensor data, engineering teams debugging reactor anomalies, science officers planning survey missions. Without memory, every conversation starts from scratch. This module gives the agent a memory system with short-term session recall and long-term profile storage, then builds structured workflows — ReAct and plan-and-execute — that let the agent reason methodically instead of guessing.
+> An LLM has no memory between API calls. Every request is stateless — the model sees only the messages you send. "Memory" is a design pattern: you store information externally and inject it into the prompt when relevant. This module gives the agent a memory system with short-term session recall, long-term profile storage, and summarisation to keep conversations within token budgets.
 
 ## Learning goals
 
 - Distinguish **short-term** (session) and **long-term** (profile) memory.
 - Implement **summarisation** to compress conversation history under token budgets.
 - Model **memory decay** and explicit "do not remember" controls for privacy.
-- Build a **ReAct loop** (Reason → Act → Observe).
-- Compare ReAct with **plan-and-execute** workflows.
+- Expose memory as **MCP tools** so any agent can use it.
 
 ---
 
 ## Why agents need memory
-
-An LLM has no memory between API calls. Every request is stateless — the model sees only the messages you send. "Memory" is a design pattern: you store information externally and inject it into the prompt when relevant.
 
 Without memory, a crew member who says "As I mentioned earlier, the reactor is unstable" gets a confused response — the agent has no "earlier" to reference. With memory, the agent retrieves the previous conversation and responds in context.
 
@@ -119,91 +116,36 @@ Replace the oldest N turns with a single system message containing the summary. 
 
 ---
 
-## ReAct — Reason, Act, Observe
-
-ReAct is a structured workflow where the agent explicitly reasons before acting. Each step has three phases:
-
-1. **Thought** — the agent writes its reasoning (visible in logs, not shown to the user).
-2. **Action** — the agent calls a tool.
-3. **Observation** — the tool result is appended to the context.
-
-The loop repeats until the agent's thought concludes with a final answer.
-
-```python
-def react_step(messages, tools) -> ReActStep:
-    response = llm.chat(messages)  # generates Thought + Action
-    thought = extract_thought(response)
-    action = extract_action(response)
-
-    if action.is_final:
-        return ReActStep(thought=thought, answer=action.text)
-
-    result = tools.call(action.tool, action.args)
-    return ReActStep(thought=thought, action=action, observation=result)
-
-def run_react(query, tools, max_steps=10):
-    messages = [system_prompt, {"role": "user", "content": query}]
-    trace = []
-    for _ in range(max_steps):
-        step = react_step(messages, tools)
-        trace.append(step)
-        if step.answer:
-            return ReActResult(answer=step.answer, trace=trace)
-        messages.append(...)  # append thought + observation
-    return ReActResult(answer=None, trace=trace)
-```
-
-The trace is invaluable for debugging — you can see exactly why the agent made each decision. Log it in production.
-
----
-
-## Plan-and-execute
-
-ReAct decides one step at a time. Plan-and-execute takes a different approach: generate a complete plan first, then execute each step.
-
-```
-1. [Plan] Search logs for reactor anomalies
-2. [Plan] Look up maintenance schedule
-3. [Plan] Compare anomaly pattern to known failures
-4. [Plan] Recommend action
-```
-
-The planner generates the full sequence. The executor runs each step, collecting results. If a step fails, the planner can revise the remaining steps.
-
-| | ReAct | Plan-and-execute |
-|-|-------|-----------------|
-| Planning | One step at a time | Full plan up front |
-| Adaptability | Highly reactive | Revises on failure |
-| Traceability | Per-step thought logs | Full plan visible |
-| Token cost | Lower per step | Higher for planning |
-| Best for | Exploratory queries | Structured multi-step tasks |
-
----
-
 ## Field rules
 
 - **Cap session memory.** Unbounded history overflows the context window and inflates costs.
 - **Decay long-term memory.** Without decay, stale facts pollute retrieval.
 - **Honour forget requests immediately.** Privacy is not optional.
-- **Log the ReAct trace.** Thoughts + actions + observations are your best debugging tool.
+- **Summarise before you truncate.** A summary beats silently dropping context.
 
 ---
 
 ## Demos
 
 ```bash
-python module-07-agent-memory/demo/01_memory_types.py
-python module-07-agent-memory/demo/02_summarisation.py
-python module-07-agent-memory/demo/03_workflow_patterns.py
+python module-07-agent-memory/demo/demo.py
 ```
+
+All-in-one interactive walkthrough covering:
+1. Session memory — capped buffer, FIFO eviction
+2. Long-term memory — remember, recall, decay, forget
+3. Summarisation — compress a long conversation
+4. Memory-enhanced agent — chat with auto-memory detection
 
 ## Exercises
 
+The three exercises chain together. Each builds on the last; you can bring your own code forward or use the provided solution.
+
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-memory-store`](exercises/01-memory-store/) | Build session memory with caps and long-term memory with decay. |
-| [`exercises/02-conversation-summary`](exercises/02-conversation-summary/) | Trim and summarise conversation history under a token budget. |
-| [`exercises/03-react-loop`](exercises/03-react-loop/) | Implement a ReAct loop: thought → action → observation. |
+| [`exercises/01-memory-store`](exercises/01-memory-store/) | Build session + long-term memory with decay and forget, wire into a chat agent |
+| [`exercises/02-conversation-summary`](exercises/02-conversation-summary/) | Auto-summarise long conversations to fit token budgets |
+| [`exercises/03-memory-server`](exercises/03-memory-server/) | Expose memory as an MCP server, connect an agent via stdio |
 
 Run tests for this module:
 
@@ -217,6 +159,5 @@ From repo root: `pnpm slides:07`, or `cd module-07-agent-memory/slides && pnpm d
 
 ## Reference
 
-- [ReAct paper (Yao et al. 2023)](https://arxiv.org/abs/2210.03629)
-- [Plan-and-Solve (Wang et al. 2023)](https://arxiv.org/abs/2305.04091)
-- [LangGraph workflows](https://langchain-ai.github.io/langgraph/)
+- [MemGPT (Packer et al. 2023)](https://arxiv.org/abs/2310.08560)
+- [LangChain Memory](https://python.langchain.com/docs/concepts/memory/)

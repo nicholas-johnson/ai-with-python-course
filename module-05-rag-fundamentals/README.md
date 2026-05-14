@@ -182,19 +182,26 @@ Build a set of test queries with known relevant chunks, then measure these metri
 
 ## Demos
 
+The demo is a multi-step walkthrough using a persistent ChromaDB (via Docker). See [`demo/README.md`](demo/README.md) for full instructions.
+
 ```bash
-python module-05-rag-fundamentals/demo/01_chunking.py
-python module-05-rag-fundamentals/demo/02_embeddings_vectors.py
-python module-05-rag-fundamentals/demo/03_retrieval_strategies.py
+cd module-05-rag-fundamentals/demo
+docker compose up -d              # start ChromaDB
+python ingest.py                  # load + chunk + embed + store
+python -m mcp dev server.py       # (optional) inspect tools in browser
+python agent.py                   # chat with the RAG agent
+docker compose down               # clean up
 ```
 
 ## Exercises
 
-| Folder | Mission |
-| ------ | ------- |
-| [`exercises/01-document-chunker`](exercises/01-document-chunker/) | Chunk ship logs with size, overlap, and citation metadata. |
-| [`exercises/02-vector-search`](exercises/02-vector-search/) | Build an in-memory vector store with similarity search. |
-| [`exercises/03-rag-pipeline`](exercises/03-rag-pipeline/) | Retrieve → ground → generate with citations. |
+The three exercises chain together into a complete RAG system. Each builds on the last; you can bring your own code forward or use the provided solution from the previous exercise.
+
+| Folder | What you build |
+| ------ | -------------- |
+| [`exercises/01-build-index`](exercises/01-build-index/) | Chunk ship logs, embed with OpenAI, store in ChromaDB, and search interactively. |
+| [`exercises/02-rag-chat`](exercises/02-rag-chat/) | Build a grounded chat agent with source citations and `/norag` comparison. |
+| [`exercises/03-rag-mcp-server`](exercises/03-rag-mcp-server/) | Wrap the RAG pipeline as an MCP server and connect it to a tool-calling agent. |
 
 Run tests for this module:
 
