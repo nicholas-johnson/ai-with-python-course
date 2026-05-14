@@ -259,62 +259,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 ---
 
-### Module 10 — Adaptive Retrieval
-
-**Talk about:**
-
-- Retrieval routing: vector vs graph vs keyword based on query type
-- Query decomposition: break complex questions into sub-queries
-- Self-critique loops: corrective RAG, evaluate and re-retrieve
-- Multi-source orchestration: fan-out, merge, rank
-
-**Demo:**
-
-| Script | What it shows |
-| ------ | ------------- |
-| `module-10-adaptive-retrieval/demo/01_retrieval_routing.py` | Route queries to different backends |
-| `module-10-adaptive-retrieval/demo/02_self_critique.py` | Evaluate retrieval quality, refine query |
-| `module-10-adaptive-retrieval/demo/03_multi_source.py` | Fan out to multiple sources, merge and rank |
-
-**Exercises:**
-
-| Folder | Delegates build |
-| ------ | --------------- |
-| `exercises/01-retrieval-router` | Route queries to vector, graph, or keyword search |
-| `exercises/02-self-critique` | Evaluate retrieval quality and refine queries |
-| `exercises/03-multi-source-qa` | Fan out, merge, rank, answer with citations |
-
----
-
-### Module 11 — Production & Deployment
-
-**Talk about:**
-
-- Structured tracing: trace IDs, spans, attributing every call
-- Reliability: retries with backoff, timeouts, circuit breakers, fallbacks
-- Cost controls: token budgets, model tiering, caching, batching
-- Deployment: environment config, secrets, Docker, health checks, CI/CD
-
-**Demo:**
-
-| Script | What it shows |
-| ------ | ------------- |
-| `module-11-production/demo/01_structured_tracing.py` | Trace IDs propagated through tool calls |
-| `module-11-production/demo/02_circuit_breaker.py` | Circuit breaker opening after failures, fallback |
-| `module-11-production/demo/03_deployment_pipeline.py` | Config per environment, health check endpoint |
-
-**Exercises:**
-
-| Folder | Delegates build |
-| ------ | --------------- |
-| `exercises/01-trace-middleware` | Add trace IDs and timing to every tool call |
-| `exercises/02-batch-pipeline` | Batch LLM requests with retry and fallback model |
-| `exercises/03-cost-tracker` | Per-session token and cost budget enforcement |
-| `exercises/04-deploy-container` | Health-check app, env config, Dockerfile validation |
-
----
-
-### Module 12 — LangChain with Python
+### Module 10 — LangChain with Python
 
 **Talk about:**
 
@@ -328,9 +273,9 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-12-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
-| `module-12-langchain/demo/02_langchain_agents.py` | Wrap tools, run via AgentExecutor |
-| `module-12-langchain/demo/03_langchain_rag.py` | RetrievalQA chain over knowledge base |
+| `module-10-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
+| `module-10-langchain/demo/02_langchain_agents.py` | Wrap tools, run via AgentExecutor |
+| `module-10-langchain/demo/03_langchain_rag.py` | RetrievalQA chain over knowledge base |
 
 **Exercises:**
 
@@ -342,11 +287,55 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 ---
 
-### Module 13 — Capstone Project
+### Module 11 — Edge Topics
 
 **Talk about:**
 
+- Advanced retrieval patterns: hybrid search, re-ranking, HyDE
+- Agentic RAG: agent-driven retrieval with self-critique and citation verification
+- Evaluation: automated LLM eval metrics, fine-tuning data pipelines
+- Guardrails: input/output validation, safety filters
+- Caching: semantic similarity caching for LLM responses
+- And more: web search backends, text-to-SQL, multimodal RAG, contextual chunking
+- This is a pick-and-choose module — delegates work on topics that interest them most
+
+**Demo:**
+
+| Script | What it shows |
+| ------ | ------------- |
+| `module-11-edge-topics/demo/demo.py` | Interactive walkthrough of hybrid search, agentic RAG, citation verification, semantic caching |
+
+**Exercises (13 standalone exercises, one per topic):**
+
+| Folder | Delegates build |
+| ------ | --------------- |
+| `exercises/01-hybrid-search` | Combine dense and sparse retrieval |
+| `exercises/02-reranking` | Re-rank retrieved results for relevance |
+| `exercises/03-hyde` | Hypothetical Document Embeddings for better retrieval |
+| `exercises/04-agentic-rag` | Agent-driven retrieval with self-critique |
+| `exercises/05-citation-verification` | Verify and ground citations in source documents |
+| `exercises/06-web-search-backend` | Integrate web search as a retrieval source |
+| `exercises/07-text-to-sql` | Natural language to SQL query generation |
+| `exercises/08-llm-eval` | Evaluate LLM outputs with automated metrics |
+| `exercises/09-fine-tuning-data` | Build datasets for fine-tuning |
+| `exercises/10-guardrails` | Input/output validation and safety filters |
+| `exercises/11-semantic-cache` | Cache LLM responses by semantic similarity |
+| `exercises/12-multimodal-rag` | RAG with images and text |
+| `exercises/13-contextual-chunking` | Context-aware document chunking strategies |
+
+---
+
+### Module 12 — Capstone Project
+
+**Talk about:**
+
+- Integrate everything into the Pathfinder Operations AI
+- Production hardening is part of this module: tracing, reliability, cost controls, Docker
 - Architecture overview: chat → router → specialists → supervisor → guardrails → memory
+- Structured tracing: trace IDs, spans, attributing every call
+- Reliability: retries with backoff, timeouts, circuit breakers, fallbacks
+- Cost controls: token budgets, model tiering, caching, batching
+- Deployment: Docker, health checks, environment config
 - Integration testing: happy path, error handling, adversarial inputs
 - Extension points: new tools, new agents, new retrieval sources, new guardrails
 
@@ -354,12 +343,16 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-13-capstone/demo/01_architecture_overview.py` | Full system architecture walkthrough |
-| `module-13-capstone/demo/02_demo_scenario.py` | End-to-end query through the full pipeline |
+| `module-12-capstone/demo/01_architecture_overview.py` | Full system architecture walkthrough |
+| `module-12-capstone/demo/02_demo_scenario.py` | End-to-end query through the full pipeline |
+| `module-12-capstone/demo/03_structured_tracing.py` | Trace IDs propagated through tool calls |
+| `module-12-capstone/demo/04_circuit_breaker.py` | Circuit breaker opening after failures, fallback |
+| `module-12-capstone/demo/05_deployment_pipeline.py` | Config per environment, health check endpoint |
 
 **Exercises:**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-capstone-app` | Integrated chat + RAG + MCP + multi-agent app |
-| `exercises/02-test-and-extend` | Integration tests and extension documentation |
+| `exercises/01-capstone-app` | Integrated chat + RAG + MCP + multi-agent app with tracing |
+| `exercises/02-harden-and-deploy` | Reliability patterns (retries, circuit breakers, fallbacks) + Docker deployment |
+| `exercises/03-test-and-extend` | Integration tests and extension documentation |

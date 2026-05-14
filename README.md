@@ -56,7 +56,7 @@ Shared mission data lives in [`data/`](data/).
 Each module includes a Vite app under `slides/` that renders teaching decks with the workspace package [`slide-deck`](slide-deck/).
 
 ```bash
-pnpm slides:01          # same pattern :00 … :13
+pnpm slides:01          # same pattern :00 … :12
 # or
 cd module-01-working-with-the-llm/slides && pnpm dev
 ```
@@ -87,10 +87,9 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | Block | Module | Topic |
 | ----- | ------ | ----- |
 | 9 | [module-09-multi-agent](module-09-multi-agent/) | Roles, coordination patterns, shared context |
-| 10 | [module-10-adaptive-retrieval](module-10-adaptive-retrieval/) | Retrieval routing, self-critique, query decomposition, multi-source QA |
-| 11 | [module-11-production](module-11-production/) | Tracing, reliability, cost controls, deployment |
-| 12 | [module-12-langchain](module-12-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
-| 13 | [module-13-capstone](module-13-capstone/) | Full agentic app: chatbot + RAG + MCP + multi-agent |
+| 10 | [module-10-langchain](module-10-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
+| 11 | [module-11-edge-topics](module-11-edge-topics/) | Hybrid search, re-ranking, HyDE, agentic RAG, eval, guardrails, and more |
+| 12 | [module-12-capstone](module-12-capstone/) | Full agentic app with production hardening: tracing, reliability, cost controls, Docker |
 
 ## Course outline
 
@@ -196,45 +195,45 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Supervisor-critic | [`exercises/02-supervisor-critic`](module-09-multi-agent/exercises/02-supervisor-critic/) | Supervisor coordinates researcher + critic for mission briefings |
 | Consensus | [`exercises/03-consensus`](module-09-multi-agent/exercises/03-consensus/) | Multiple agents propose answers; vote on the best response |
 
-### Module 10 — [Adaptive Retrieval](module-10-adaptive-retrieval/)
-
-**Topics:** Retrieval routing (vector, graph, keyword), query decomposition, self-critique loops (corrective RAG), multi-source orchestration with merge and ranking.
-
-| Exercise | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Retrieval router | [`exercises/01-retrieval-router`](module-10-adaptive-retrieval/exercises/01-retrieval-router/) | Route queries to vector, graph, or keyword search |
-| Self-critique | [`exercises/02-self-critique`](module-10-adaptive-retrieval/exercises/02-self-critique/) | Evaluate retrieval quality and refine queries |
-| Multi-source QA | [`exercises/03-multi-source-qa`](module-10-adaptive-retrieval/exercises/03-multi-source-qa/) | Fan out to multiple backends, merge, rank, answer with citations |
-
-### Module 11 — [Production & Deployment](module-11-production/)
-
-**Topics:** Structured tracing and logging, reliability (retries, circuit breakers, fallbacks), cost controls (budgets, batching, model tiering), environment config, secrets, containers, CI/CD.
-
-| Exercise | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Trace middleware | [`exercises/01-trace-middleware`](module-11-production/exercises/01-trace-middleware/) | Add trace IDs and timing to every tool call |
-| Batch pipeline | [`exercises/02-batch-pipeline`](module-11-production/exercises/02-batch-pipeline/) | Batch LLM requests with retry and fallback model |
-| Cost tracker | [`exercises/03-cost-tracker`](module-11-production/exercises/03-cost-tracker/) | Per-session token and cost budget enforcement |
-| Deploy container | [`exercises/04-deploy-container`](module-11-production/exercises/04-deploy-container/) | Health-check app, env config, Dockerfile validation |
-
-### Module 12 — [LangChain with Python](module-12-langchain/)
+### Module 10 — [LangChain with Python](module-10-langchain/)
 
 **Topics:** LangChain vs hand-rolled (chains, agents, tools, memory, output parsers), prompt templates and LCEL, rewriting agent loops with LangChain, connecting to MCP and RAG pipelines.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Chain basics | [`exercises/01-chain-basics`](module-12-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
-| Tool agent | [`exercises/02-tool-agent`](module-12-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via AgentExecutor |
-| RAG chain | [`exercises/03-rag-chain`](module-12-langchain/exercises/03-rag-chain/) | RetrievalQA chain over the Pathfinder knowledge base |
+| Chain basics | [`exercises/01-chain-basics`](module-10-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
+| Tool agent | [`exercises/02-tool-agent`](module-10-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via AgentExecutor |
+| RAG chain | [`exercises/03-rag-chain`](module-10-langchain/exercises/03-rag-chain/) | RetrievalQA chain over the Pathfinder knowledge base |
 
-### Module 13 — [Capstone Project](module-13-capstone/)
+### Module 11 — [Edge Topics](module-11-edge-topics/)
 
-**Topics:** Full agentic application integrating chat, RAG, MCP tools, and multi-agent coordination. Demo scenarios, integration tests, extension documentation.
+**Topics:** Advanced retrieval patterns (hybrid search, re-ranking, HyDE), agentic RAG, citation verification, web search backends, text-to-SQL, LLM evaluation, fine-tuning data pipelines, guardrails, semantic caching, multimodal RAG, contextual chunking. Pick-and-choose — delegates work on topics that interest them most.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Capstone app | [`exercises/01-capstone-app`](module-13-capstone/exercises/01-capstone-app/) | Integrated chat + RAG + MCP + multi-agent app |
-| Test and extend | [`exercises/02-test-and-extend`](module-13-capstone/exercises/02-test-and-extend/) | Integration tests and extension documentation |
+| Hybrid search | [`exercises/01-hybrid-search`](module-11-edge-topics/exercises/01-hybrid-search/) | Combine dense and sparse retrieval |
+| Reranking | [`exercises/02-reranking`](module-11-edge-topics/exercises/02-reranking/) | Re-rank retrieved results for relevance |
+| HyDE | [`exercises/03-hyde`](module-11-edge-topics/exercises/03-hyde/) | Hypothetical Document Embeddings for better retrieval |
+| Agentic RAG | [`exercises/04-agentic-rag`](module-11-edge-topics/exercises/04-agentic-rag/) | Agent-driven retrieval with self-critique |
+| Citation verification | [`exercises/05-citation-verification`](module-11-edge-topics/exercises/05-citation-verification/) | Verify and ground citations in source documents |
+| Web search backend | [`exercises/06-web-search-backend`](module-11-edge-topics/exercises/06-web-search-backend/) | Integrate web search as a retrieval source |
+| Text-to-SQL | [`exercises/07-text-to-sql`](module-11-edge-topics/exercises/07-text-to-sql/) | Natural language to SQL query generation |
+| LLM eval | [`exercises/08-llm-eval`](module-11-edge-topics/exercises/08-llm-eval/) | Evaluate LLM outputs with automated metrics |
+| Fine-tuning data | [`exercises/09-fine-tuning-data`](module-11-edge-topics/exercises/09-fine-tuning-data/) | Build datasets for fine-tuning |
+| Guardrails | [`exercises/10-guardrails`](module-11-edge-topics/exercises/10-guardrails/) | Input/output validation and safety filters |
+| Semantic cache | [`exercises/11-semantic-cache`](module-11-edge-topics/exercises/11-semantic-cache/) | Cache LLM responses by semantic similarity |
+| Multimodal RAG | [`exercises/12-multimodal-rag`](module-11-edge-topics/exercises/12-multimodal-rag/) | RAG with images and text |
+| Contextual chunking | [`exercises/13-contextual-chunking`](module-11-edge-topics/exercises/13-contextual-chunking/) | Context-aware document chunking strategies |
+
+### Module 12 — [Capstone Project](module-12-capstone/)
+
+**Topics:** Full agentic application integrating chat, RAG, MCP tools, and multi-agent coordination with production hardening: tracing, reliability, cost controls, Docker. Demo scenarios, integration tests, extension documentation.
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Capstone app | [`exercises/01-capstone-app`](module-12-capstone/exercises/01-capstone-app/) | Integrated chat + RAG + MCP + multi-agent app with tracing |
+| Harden and deploy | [`exercises/02-harden-and-deploy`](module-12-capstone/exercises/02-harden-and-deploy/) | Reliability patterns + Docker deployment |
+| Test and extend | [`exercises/03-test-and-extend`](module-12-capstone/exercises/03-test-and-extend/) | Integration tests and extension documentation |
 
 ## Running tests
 
