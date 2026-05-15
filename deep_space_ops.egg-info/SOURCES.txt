@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+deep_space_ops.egg-info/PKG-INFO
+deep_space_ops.egg-info/SOURCES.txt
+deep_space_ops.egg-info/dependency_links.txt
+deep_space_ops.egg-info/requires.txt
+deep_space_ops.egg-info/top_level.txt
