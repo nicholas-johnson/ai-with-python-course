@@ -66,6 +66,27 @@ export const slides = [
       ],
     },
   },
+
+  // ---- Demo: Message format ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Message format',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Tool calling loop ----
+  {
+    type: 'title',
+    content: {
+      title: 'The tool-calling loop',
+      subtitle: 'From LLM decision to tool execution and back',
+      icon: 'refresh-cw',
+    },
+  },
+
   {
     type: 'code',
     content: {
@@ -128,6 +149,27 @@ def ship_status(system: str) -> dict:
       ],
     },
   },
+
+  // ---- Demo: Tool registry ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Tool registry',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Safety rails ----
+  {
+    type: 'title',
+    content: {
+      title: 'Safety rails',
+      subtitle: 'Allowlists, rate limits, and audit trails',
+      icon: 'shield',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -192,6 +234,27 @@ def ship_status(system: str) -> dict:
       ],
     },
   },
+
+  // ---- Demo: Safety rails ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Safety rails',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Evaluation ----
+  {
+    type: 'title',
+    content: {
+      title: 'Evaluation',
+      subtitle: 'Golden-file tests for deterministic agent checks',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -224,6 +287,27 @@ assert result.passed`,
       ],
     },
   },
+
+  // ---- Demo: Eval harness ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Eval harness',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'lightbulb',
+    },
+  },
+
   {
     type: 'rules',
     content: {

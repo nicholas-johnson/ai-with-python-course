@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 6 — Multi-Agent Systems',
+      title: 'Module 9 — Multi-Agent Systems',
       subtitle: 'Roles, coordination, and shared context aboard the Pathfinder',
       icon: 'users',
     },
@@ -25,8 +25,8 @@ export const slides = [
       icon: 'target',
       points: [
         'Decide **when** multi-agent designs are worth the complexity.',
-        'Model **roles**: router, researcher, coder, critic, executor.',
-        'Implement **coordination patterns**: supervisor, swarm, debate.',
+        'Model **roles**: router, researcher, critic, supervisor, executor.',
+        'Implement **coordination patterns**: supervisor, debate, consensus.',
         'Share **context and tools** safely across agents.',
         'Apply **consensus** and conflict resolution strategies.',
       ],
@@ -50,10 +50,10 @@ export const slides = [
     type: 'standard',
     content: {
       title: 'Common agent roles',
-      icon: 'briefcase',
+      icon: 'user',
       points: [
         '**Router**: classifies the query and dispatches to the right specialist.',
-        '**Researcher**: retrieves data, searches logs, calls tools.',
+        '**Specialist**: domain expert with a focused system prompt and tools.',
         '**Critic**: reviews another agent\'s output for accuracy and gaps.',
         '**Supervisor**: orchestrates the team, merges results, decides when done.',
         '**Executor**: takes the final plan and runs it (deploy, notify, write).',
@@ -63,32 +63,55 @@ export const slides = [
   {
     type: 'code',
     content: {
-      title: 'Router agent',
+      title: 'Router + specialist agents',
       code: `SPECIALISTS = {
     "navigation": nav_agent,
     "engineering": eng_agent,
     "science": sci_agent,
 }
 
-def route(query: str) -> str:
-    department = classify(query)  # LLM or heuristic
-    specialist = SPECIALISTS[department]
-    return specialist.run(query)
+def classify(query, client):
+    """LLM returns JSON: {"department": "..."}"""
+    ...
+
+def route(query, client):
+    dept = classify(query, client)
+    return SPECIALISTS[dept].run(query, client)
 
 # "What is our heading?" → navigation
 # "Hull integrity report" → engineering
 # "Analyse the nebula scan" → science`,
       highlights: [
-        'Classification can be LLM-based or simple keyword rules',
-        'Each specialist has its own system prompt and tools',
+        'LLM-based classification with JSON mode — robust to ambiguous queries',
+        'Each specialist has its own system prompt and domain focus',
       ],
+    },
+  },
+
+  // ---- Demo break 1 ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Specialist agents + router',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Coordination ----
+  {
+    type: 'title',
+    content: {
+      title: 'Coordination patterns',
+      subtitle: 'Supervisor, debate, and other ways to organise a crew',
+      icon: 'git-branch',
     },
   },
   {
     type: 'standard',
     content: {
       title: 'Coordination patterns',
-      icon: 'network',
+      icon: 'git-branch',
       points: [
         '**Supervisor**: one lead agent delegates tasks and merges results.',
         '**Swarm**: agents self-organise, passing context peer-to-peer.',
@@ -101,50 +124,87 @@ def route(query: str) -> str:
   {
     type: 'code',
     content: {
-      title: 'Supervisor pattern',
-      code: `def supervisor(query):
-    research = researcher.run(query)
-    critique = critic.run(
-        f"Review this research for accuracy:\\n{research}"
-    )
+      title: 'Supervisor-critic pipeline',
+      code: `def supervisor(query, client):
+    dept = classify(query, client)
+    answer = specialist(dept, query, client)
 
-    if "APPROVED" in critique:
-        return research
+    for _ in range(max_revisions):
+        review = critic.review(query, answer)
+        if review["approved"]:
+            return answer
 
-    revised = researcher.run(
-        f"Original: {research}\\nFeedback: {critique}\\n"
-        f"Revise your answer."
-    )
-    return revised`,
+        answer = specialist.revise(
+            query, answer, review["feedback"]
+        )
+
+    return answer  # best effort after N rounds`,
       highlights: [
-        'Supervisor controls flow: research → review → revise',
+        'Supervisor controls flow: classify → respond → review → revise',
         'Critic feedback is fed back as context for improvement',
       ],
+    },
+  },
+
+  // ---- Demo break 2 ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Supervisor-critic pipeline',
+      subtitle: 'Switch to terminal: demo/demo.py — Part 2',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Debate ----
+  {
+    type: 'title',
+    content: {
+      title: 'Debate pattern',
+      subtitle: 'Adversarial agents stress-test decisions before commitment',
+      icon: 'scale',
     },
   },
   {
     type: 'code',
     content: {
       title: 'Debate pattern',
-      code: `def debate(question, rounds=2):
-    pro_arg = pro_agent.run(f"Argue FOR: {question}")
-    con_arg = con_agent.run(f"Argue AGAINST: {question}")
+      code: `def debate(question, client, rounds=2):
+    for r in range(rounds):
+        advocate_arg = advocate.argue(question)
+        skeptic_arg = skeptic.counter(advocate_arg)
 
-    for _ in range(rounds):
-        pro_arg = pro_agent.run(
-            f"Counter this: {con_arg}"
-        )
-        con_arg = con_agent.run(
-            f"Counter this: {pro_arg}"
-        )
+    return judge.decide(
+        advocate_arg, skeptic_arg
+    )
 
-    return judge_agent.run(
-        f"PRO: {pro_arg}\\nCON: {con_arg}\\nDecide."
-    )`,
+# Advocate: "Diverting saves 3 days..."
+# Skeptic:  "Asteroid density is too high..."
+# Judge:    "The skeptic's safety case wins."`,
       highlights: [
         'Multiple rounds sharpen arguments before the judge decides',
-        'Useful for high-stakes planning where you want devil\'s advocate',
+        'Useful for high-stakes decisions where you want a devil\'s advocate',
       ],
+    },
+  },
+
+  // ---- Demo break 3 ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Structured debate',
+      subtitle: 'Switch to terminal: demo/demo.py — Part 3',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Shared context & consensus ----
+  {
+    type: 'title',
+    content: {
+      title: 'Shared context + consensus',
+      subtitle: 'How agents share data and resolve disagreements',
+      icon: 'check-square',
     },
   },
   {
@@ -166,12 +226,32 @@ def route(query: str) -> str:
       title: 'Consensus and conflict resolution',
       icon: 'check-square',
       points: [
-        '**Voting**: N agents answer; majority wins.',
+        '**Voting**: N agents answer independently; majority wins.',
         '**Ranked choice**: agents score or rank proposals; aggregate.',
         '**Confidence weighting**: trust the agent that is most sure.',
         '**Tie-breaking**: supervisor or fallback rule decides deadlocks.',
         '**Log dissent**: record minority opinions for audit and debugging.',
       ],
+    },
+  },
+
+  // ---- Demo break 4 ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Consensus voting',
+      subtitle: 'Switch to terminal: demo/demo.py — Part 4',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'When to use multi-agent — and when not to',
+      icon: 'lightbulb',
     },
   },
   {
@@ -201,7 +281,7 @@ def route(query: str) -> str:
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 6',
+      title: 'Field rules — Module 9',
       rules: [
         {
           rule: 'Justify every agent',
@@ -226,17 +306,17 @@ def route(query: str) -> str:
     content: {
       title: 'Exercises — Assembling the crew',
       points: [
-        '01 — Router agent: dispatch queries to navigation, engineering, science',
-        '02 — Research team: supervisor + researcher + critic',
-        '03 — Consensus: multiple proposals, vote, and resolve ties',
+        '01 — Router agent: classify queries and dispatch to specialist agents',
+        '02 — Supervisor-critic: orchestrate specialists with a quality review loop',
+        '03 — Debate + consensus: argue, judge, and vote across multiple agents',
       ],
     },
   },
   {
     type: 'title',
     content: {
-      title: 'Crew assembled — Module 6',
-      subtitle: 'The agents work together. Next: teach them to remember.',
+      title: 'Crew assembled — Module 9',
+      subtitle: 'The agents work together. Next: frameworks with LangChain.',
       icon: 'party-popper',
     },
   },

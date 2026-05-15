@@ -68,6 +68,26 @@ export const slides = [
       ],
     },
   },
+  // ---- Demo: MCP concepts ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — MCP concepts',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Building an MCP server ----
+  {
+    type: 'title',
+    content: {
+      title: 'Building an MCP server',
+      subtitle: 'FastMCP: decorators, schemas, and transports',
+      icon: 'server',
+    },
+  },
+
   {
     type: 'code',
     content: {
@@ -102,6 +122,26 @@ server.run()  # stdio transport`,
       ],
     },
   },
+  // ---- Demo: FastMCP server ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — FastMCP server',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Auth + observability ----
+  {
+    type: 'title',
+    content: {
+      title: 'Auth + observability',
+      subtitle: 'Scopes, structured logs, and audit trails',
+      icon: 'lock',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -147,6 +187,26 @@ server.run()  # stdio transport`,
       ],
     },
   },
+  // ---- Demo: MCP client ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — MCP client',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {

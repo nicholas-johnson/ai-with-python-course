@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 3 — GenAI Strategies',
+      title: 'Module 4 — GenAI Strategies',
       subtitle: 'From prompt engineering to vision, voice, and guardrails',
       icon: 'sparkles',
     },
@@ -107,6 +107,26 @@ def analyse_mission(report: str, llm) -> dict:
       ],
     },
   },
+  // ---- Demo: Prompt engineering ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Prompt engineering',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Model selection + tokens ----
+  {
+    type: 'title',
+    content: {
+      title: 'Model selection + tokens',
+      subtitle: 'Choosing the right model and managing budgets',
+      icon: 'scale',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -145,6 +165,26 @@ def enforce_budget(messages, max_tokens):
       ],
     },
   },
+  // ---- Demo: Model selection ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Model selection',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Multimodal + guardrails ----
+  {
+    type: 'title',
+    content: {
+      title: 'Multimodal + guardrails',
+      subtitle: 'Vision, audio, and defence in depth',
+      icon: 'shield',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -244,10 +284,30 @@ def enforce_budget(messages, max_tokens):
       },
     },
   },
+  // ---- Demo: Guardrails ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Guardrails',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 3',
+      title: 'Field rules — Module 4',
       rules: [
         {
           rule: 'Constrain the output format',
@@ -282,7 +342,7 @@ def enforce_budget(messages, max_tokens):
   {
     type: 'title',
     content: {
-      title: 'Conversation hardened — Module 3',
+      title: 'Conversation hardened — Module 4',
       subtitle: 'Prompts produce structure, budgets hold, guardrails catch the rest.',
       icon: 'party-popper',
     },

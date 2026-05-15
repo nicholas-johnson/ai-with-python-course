@@ -126,6 +126,26 @@ def search(query, index, k=5):
       ],
     },
   },
+  // ---- Demo: Ingest + embed ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Ingest + embed',
+      subtitle: 'Switch to terminal: python demo/ingest.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Retrieval strategies ----
+  {
+    type: 'title',
+    content: {
+      title: 'Retrieval strategies',
+      subtitle: 'Dense, sparse, hybrid, and reranking',
+      icon: 'layers',
+    },
+  },
+
   {
     type: 'comparison',
     content: {
@@ -163,6 +183,26 @@ def search(query, index, k=5):
       ],
     },
   },
+  // ---- Demo: RAG server ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — RAG server',
+      subtitle: 'Switch to terminal: python demo/server.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Grounded generation ----
+  {
+    type: 'title',
+    content: {
+      title: 'Grounded generation',
+      subtitle: 'Citations, evaluation, and knowing when to say "I don\'t know"',
+      icon: 'book-open',
+    },
+  },
+
   {
     type: 'code',
     content: {
@@ -200,6 +240,26 @@ def search(query, index, k=5):
       ],
     },
   },
+  // ---- Demo: RAG agent ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — RAG agent',
+      subtitle: 'Switch to terminal: python demo/agent.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {

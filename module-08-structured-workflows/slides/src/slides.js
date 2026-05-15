@@ -76,6 +76,27 @@ export const slides = [
       ],
     },
   },
+
+  // ---- Demo: ReAct agent ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — ReAct agent',
+      subtitle: 'Switch to terminal: python demo/01_react.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Plan-and-execute ----
+  {
+    type: 'title',
+    content: {
+      title: 'Plan-and-execute',
+      subtitle: 'Full plan upfront, execute in order, re-plan on failure',
+      icon: 'git-branch',
+    },
+  },
+
   {
     type: 'comparison',
     content: {
@@ -125,6 +146,27 @@ export const slides = [
       ],
     },
   },
+
+  // ---- Demo: Plan-and-execute ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Plan-and-execute',
+      subtitle: 'Switch to terminal: python demo/02_plan_and_execute.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "../../../slide-deck/src/**/*.jsx";
 
 @theme {
   --color-primary: #0ea5e9;

@@ -160,18 +160,16 @@ Always log dissent — if an agent disagrees with the consensus, that disagreeme
 ## Demos
 
 ```bash
-python module-09-multi-agent/demo/01_agent_roles.py
-python module-09-multi-agent/demo/02_supervisor_pattern.py
-python module-09-multi-agent/demo/03_debate_pattern.py
+python module-09-multi-agent/demo/demo.py
 ```
 
 ## Exercises
 
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-router-agent`](exercises/01-router-agent/) | Route messages to specialist agents based on content. |
-| [`exercises/02-supervisor-critic`](exercises/02-supervisor-critic/) | Supervisor + researcher + critic with failure handling. |
-| [`exercises/03-consensus`](exercises/03-consensus/) | Vote, rank, and tie-break across multiple agent proposals. |
+| [`exercises/01-router-agent`](exercises/01-router-agent/) | Build specialist agents and an LLM-powered router that classifies queries and dispatches to the right specialist. |
+| [`exercises/02-supervisor-critic`](exercises/02-supervisor-critic/) | Supervisor orchestrates specialists + critic with a revision loop for quality control. |
+| [`exercises/03-consensus`](exercises/03-consensus/) | Debate pattern, judge synthesis, and consensus voting across multiple agents. |
 
 Run tests for this module:
 

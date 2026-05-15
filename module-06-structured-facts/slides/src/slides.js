@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 8 — Structured Facts',
+      title: 'Module 6 — Structured Facts',
       subtitle: 'From raw text to verifiable knowledge',
       icon: 'database',
     },
@@ -87,6 +87,26 @@ fact = Fact.model_validate_json(llm_response)`,
       ],
     },
   },
+  // ---- Demo: Structured extraction ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Structured extraction',
+      subtitle: 'Switch to terminal: python demo/01_extraction.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Knowledge graphs ----
+  {
+    type: 'title',
+    content: {
+      title: 'Knowledge graphs',
+      subtitle: 'Entities, relationships, and multi-hop traversal',
+      icon: 'share-2',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -172,6 +192,26 @@ class KnowledgeGraph:
       ],
     },
   },
+  // ---- Demo: Knowledge graph ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Knowledge graph',
+      subtitle: 'Switch to terminal: python demo/02_graph.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Grounded QA ----
+  {
+    type: 'title',
+    content: {
+      title: 'Grounded QA',
+      subtitle: 'Answering questions with graph evidence and citations',
+      icon: 'help-circle',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -209,10 +249,30 @@ class KnowledgeGraph:
       },
     },
   },
+  // ---- Demo: Grounded QA ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Grounded QA',
+      subtitle: 'Switch to terminal: python demo/03_grounded_qa.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 8',
+      title: 'Field rules — Module 6',
       rules: [
         {
           rule: 'Schema is the contract',
@@ -246,7 +306,7 @@ class KnowledgeGraph:
   {
     type: 'title',
     content: {
-      title: 'Knowledge structured — Module 8',
+      title: 'Knowledge structured — Module 6',
       subtitle: 'Facts extracted, graph built, questions grounded. Next: retrieve smarter.',
       icon: 'party-popper',
     },

@@ -83,6 +83,26 @@ for m in crew:
       ],
     },
   },
+  // ---- Demo: Data structures ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Data structures',
+      subtitle: 'Switch to terminal: python demo/01_data_structures.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Modules, CLI + logging ----
+  {
+    type: 'title',
+    content: {
+      title: 'Modules, CLI + logging',
+      subtitle: 'Organising code for real ship systems',
+      icon: 'box',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -127,6 +147,26 @@ args = parser.parse_args()`,
       ],
     },
   },
+  // ---- Demo: Modules + CLI ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Modules + CLI',
+      subtitle: 'Switch to terminal: python demo/02_modules_cli.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Dataclasses + Protocol ----
+  {
+    type: 'title',
+    content: {
+      title: 'Dataclasses + Protocol',
+      subtitle: 'Type-safe domain modelling without inheritance',
+      icon: 'file-text',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -198,6 +238,26 @@ def print_briefings(items: list[Briefable]):
       ],
     },
   },
+  // ---- Demo: Dataclasses + Protocols ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Dataclasses + Protocols',
+      subtitle: 'Switch to terminal: python demo/03_dataclasses_protocols.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Async essentials ----
+  {
+    type: 'title',
+    content: {
+      title: 'Async essentials',
+      subtitle: 'Concurrent I/O for agent workloads',
+      icon: 'zap',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -256,6 +316,26 @@ task.cancel()`,
       ],
     },
   },
+  // ---- Demo: Async essentials ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Async essentials',
+      subtitle: 'Switch to terminal: python demo/04_async_essentials.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: HTTP basics ----
+  {
+    type: 'title',
+    content: {
+      title: 'HTTP basics',
+      subtitle: 'APIs and testing with FastAPI + httpx',
+      icon: 'globe',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -289,6 +369,26 @@ async def list_missions(status: str | None = None):
       ],
     },
   },
+  // ---- Demo: HTTP + FastAPI ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — HTTP + FastAPI',
+      subtitle: 'Switch to terminal: python demo/05_http_basics.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {

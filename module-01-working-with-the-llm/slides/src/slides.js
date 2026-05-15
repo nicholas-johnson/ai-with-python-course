@@ -50,6 +50,26 @@ export const slides = [
       ],
     },
   },
+  // ---- Demo: Basic chat ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Basic chat',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Streaming ----
+  {
+    type: 'title',
+    content: {
+      title: 'Streaming',
+      subtitle: 'Real-time tokens over Server-Sent Events',
+      icon: 'zap',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -84,6 +104,26 @@ async def chat(request: ChatRequest):
       ],
     },
   },
+  // ---- Demo: Streaming ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Streaming',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Sessions + tool UX ----
+  {
+    type: 'title',
+    content: {
+      title: 'Sessions + tool UX',
+      subtitle: 'Persistence and transparency for the user',
+      icon: 'layers',
+    },
+  },
+
   {
     type: 'comparison',
     content: {
@@ -143,6 +183,26 @@ mgr = SessionManager(FileBackend(Path("./sessions")))`,
       ],
     },
   },
+  // ---- Demo: Prompt engineering ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Prompt engineering',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {

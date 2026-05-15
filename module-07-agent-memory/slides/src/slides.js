@@ -108,6 +108,26 @@ export const slides = [
       ],
     },
   },
+  // ---- Demo: Session + long-term memory ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Session + long-term memory',
+      subtitle: 'Switch to terminal: python demo/demo.py — Parts 1-2',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Summarisation ----
+  {
+    type: 'title',
+    content: {
+      title: 'Summarisation',
+      subtitle: 'Compressing history to fit the context window',
+      icon: 'file-minus',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -150,6 +170,26 @@ export const slides = [
       ],
     },
   },
+  // ---- Demo: Summarisation ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Summarisation',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Privacy + MCP ----
+  {
+    type: 'title',
+    content: {
+      title: 'Privacy + MCP',
+      subtitle: 'Forgetting on demand and memory as a service',
+      icon: 'eye-off',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -176,6 +216,26 @@ export const slides = [
       ],
     },
   },
+  // ---- Demo: Memory-enhanced agent ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Memory-enhanced agent',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
+    },
+  },
+
   {
     type: 'rules',
     content: {

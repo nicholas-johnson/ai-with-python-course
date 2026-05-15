@@ -245,7 +245,7 @@ importers:
         specifier: ^6.0.3
         version: 6.4.1(jiti@2.6.1)(lightningcss@1.32.0)
 
-  module-08-multi-agent/slides:
+  module-08-structured-workflows/slides:
     dependencies:
       react:
         specifier: ^18.3.1
@@ -273,7 +273,7 @@ importers:
         specifier: ^6.0.3
         version: 6.4.1(jiti@2.6.1)(lightningcss@1.32.0)
 
-  module-09-adaptive-retrieval/slides:
+  module-09-multi-agent/slides:
     dependencies:
       react:
         specifier: ^18.3.1
@@ -301,7 +301,7 @@ importers:
         specifier: ^6.0.3
         version: 6.4.1(jiti@2.6.1)(lightningcss@1.32.0)
 
-  module-10-production/slides:
+  module-10-langchain/slides:
     dependencies:
       react:
         specifier: ^18.3.1
@@ -329,7 +329,7 @@ importers:
         specifier: ^6.0.3
         version: 6.4.1(jiti@2.6.1)(lightningcss@1.32.0)
 
-  module-11-langchain/slides:
+  module-11-edge-topics/slides:
     dependencies:
       react:
         specifier: ^18.3.1
