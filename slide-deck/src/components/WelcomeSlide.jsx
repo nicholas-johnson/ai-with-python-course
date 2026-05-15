@@ -1,3 +1,5 @@
+import { InlineMarkdown } from "./InlineMarkdown";
+
 export function WelcomeSlide({ content }) {
   return (
     <div className="flex-1 flex flex-col justify-center items-center animate-fade-in p-8 w-full">
@@ -8,7 +10,7 @@ export function WelcomeSlide({ content }) {
         <ul className="space-y-4">
           {content.points.map((point, i) => (
             <li key={i} className="text-xl md:text-2xl text-gray-200">
-              {point}
+              <InlineMarkdown text={point} />
             </li>
           ))}
         </ul>

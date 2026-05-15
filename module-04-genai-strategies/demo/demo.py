@@ -2,10 +2,9 @@
 Module 4 Demo — GenAI Strategies
 Run:  python module-04-genai-strategies/demo/demo.py
 
-Walks through the full module in one script:
-  Part 1: Prompt engineering — structured outputs, few-shot examples, response_format
-  Part 2: Model selection — compare GPT-4o vs GPT-4o-mini on the same task
-  Part 3: Guardrails — schema validation, content filtering, confidence gating
+Walks through the module in one script:
+  Part 1: Model selection — compare GPT-4o vs GPT-4o-mini on the same task
+  Part 2: Guardrails — schema validation, content filtering, confidence gating
 
 Requires: OPENAI_API_KEY environment variable.
 """
@@ -36,81 +35,12 @@ def pause():
 
 
 # ---------------------------------------------------------------------------
-# Part 1: Prompt engineering — structured outputs
-# ---------------------------------------------------------------------------
-
-
-def demo_prompting(client: OpenAI):
-    section("Part 1: Prompt Engineering — Structured Outputs")
-
-    print("  1a. Vague prompt vs specific prompt\n")
-
-    vague_prompt = "Tell me about transformers."
-    print(f"    Vague: '{vague_prompt}'")
-    resp = client.chat.completions.create(
-        model=MODEL_BUDGET,
-        messages=[{"role": "user", "content": vague_prompt}],
-        max_tokens=80,
-    )
-    print(f"    -> {resp.choices[0].message.content[:120]}...\n")
-
-    specific_prompt = (
-        "Return a JSON object with 'title' (string), 'year' (integer), and "
-        "'summary' (one sentence) about the Transformer architecture in deep learning."
-    )
-    print(f"    Specific: '{specific_prompt}'")
-    resp = client.chat.completions.create(
-        model=MODEL_BUDGET,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a research assistant. Return ONLY valid JSON, no markdown.",
-            },
-            {"role": "user", "content": specific_prompt},
-        ],
-        response_format={"type": "json_object"},
-    )
-    result = resp.choices[0].message.content
-    print(f"    -> {result}\n")
-
-    print("  1b. Few-shot examples\n")
-
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are a research classifier. Classify topics into one of: "
-                "AI, Physics, Biology, Other. Return JSON: {\"topic\": \"...\", \"category\": \"...\"}"
-            ),
-        },
-        {"role": "user", "content": "CRISPR gene editing"},
-        {"role": "assistant", "content": '{"topic": "CRISPR gene editing", "category": "Biology"}'},
-        {"role": "user", "content": "Quantum entanglement"},
-        {"role": "assistant", "content": '{"topic": "Quantum entanglement", "category": "Physics"}'},
-        {"role": "user", "content": "Retrieval-augmented generation"},
-    ]
-
-    resp = client.chat.completions.create(
-        model=MODEL_BUDGET,
-        messages=messages,
-        response_format={"type": "json_object"},
-    )
-    print(f"    Few-shot input: 'Retrieval-augmented generation'")
-    print(f"    -> {resp.choices[0].message.content}\n")
-
-    print("  Key points:")
-    print("  • Specific prompts with a target schema produce parseable output")
-    print("  • response_format='json_object' forces valid JSON")
-    print("  • Few-shot examples teach format without extra instructions")
-
-
-# ---------------------------------------------------------------------------
-# Part 2: Model selection — quality vs cost vs speed
+# Part 1: Model selection — quality vs cost vs speed
 # ---------------------------------------------------------------------------
 
 
 def demo_model_selection(client: OpenAI):
-    section("Part 2: Model Selection — Quality vs Cost vs Speed")
+    section("Part 1: Model Selection — Quality vs Cost vs Speed")
 
     task_prompt = (
         "Explain the attention mechanism in transformers in exactly 2 sentences. "
@@ -157,7 +87,7 @@ def demo_model_selection(client: OpenAI):
 
 
 # ---------------------------------------------------------------------------
-# Part 3: Guardrails — schema + filter + confidence
+# Part 2: Guardrails — schema + filter + confidence
 # ---------------------------------------------------------------------------
 
 
@@ -168,7 +98,7 @@ class ResearchOutput(BaseModel):
 
 
 def demo_guardrails(client: OpenAI):
-    section("Part 3: Guardrails — Defence in Depth")
+    section("Part 2: Guardrails — Defence in Depth")
 
     BLOCKED_TERMS = ["classified", "top secret", "restricted"]
 
@@ -262,9 +192,6 @@ def demo_guardrails(client: OpenAI):
 
 if __name__ == "__main__":
     client = OpenAI()
-
-    demo_prompting(client)
-    pause()
 
     demo_model_selection(client)
     pause()

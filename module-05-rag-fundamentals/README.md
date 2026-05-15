@@ -5,11 +5,9 @@
 ## Learning goals
 
 - Split documents into **chunks** (fixed-size, sentence-aware, structure-aware, overlap).
-- Generate **embeddings** with `text-embedding-3-small` or `sentence-transformers`.
-- Store and query vectors in **chromadb** and understand how FAISS works.
-- Compare **dense**, **sparse**, and **hybrid** retrieval strategies.
+- Generate **embeddings** with `text-embedding-3-small` and store in **ChromaDB**.
 - Build **grounded prompts** with source citations.
-- Evaluate RAG with **recall**, **precision**, and **faithfulness** metrics.
+- Wrap a RAG pipeline as **MCP tools** any agent can call.
 
 ---
 
@@ -175,8 +173,8 @@ Build a set of test queries with known relevant chunks, then measure these metri
 
 - **Chunk for retrieval, not for reading.** 300-500 tokens per chunk is the sweet spot.
 - **Always carry metadata.** Source, index, and timestamp make citations possible.
-- **Hybrid beats pure dense or pure sparse.** Use both for production RAG.
-- **Evaluate continuously.** Recall and faithfulness metrics catch drift early.
+- **Same model for docs and queries.** Mismatched embeddings produce garbage similarity scores.
+- **Always ground with citations.** An answer without a source is just a hallucination with confidence.
 
 ---
 

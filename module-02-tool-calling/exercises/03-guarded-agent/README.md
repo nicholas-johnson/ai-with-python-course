@@ -100,7 +100,7 @@ The agent starts with `search_crew` blocked. Try these:
 ## Tests
 
 ```bash
-pytest module-02-agent-core/exercises/03-guarded-agent/test_start.py -v
+pytest module-02-tool-calling/exercises/03-guarded-agent/test_start.py -v
 ```
 
 ## Stretch goals

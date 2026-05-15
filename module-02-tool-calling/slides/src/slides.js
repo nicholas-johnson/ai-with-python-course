@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 2 — Agent Core',
+      title: 'Module 2 — Tool Calling',
       subtitle: 'The core pattern for AI agents',
       icon: 'cpu',
     },
@@ -27,8 +27,7 @@ export const slides = [
         'Understand the **message format** that drives agent conversations.',
         'Build a **tool-calling loop** from scratch.',
         'Implement a **tool registry** with validation and routing.',
-        'Add **safety rails**: allowlists, rate limits, redaction.',
-        'Write **golden-file tests** for deterministic evaluation.',
+        'Add **safety rails**: allowlists, rate limits, audit logs.',
       ],
     },
   },
@@ -245,59 +244,6 @@ def check_inventory(product: str) -> dict:
     },
   },
 
-  // ---- Section: Evaluation ----
-  {
-    type: 'title',
-    content: {
-      title: 'Evaluation',
-      subtitle: 'Golden-file tests for deterministic agent checks',
-      icon: 'check-square',
-    },
-  },
-
-  {
-    type: 'standard',
-    content: {
-      title: 'Evaluation: golden-file testing',
-      icon: 'check-square',
-      points: [
-        '**Golden case**: fixed input → expected tool calls + answer.',
-        '**Mock LLM**: returns scripted responses (deterministic).',
-        '**Replay**: same inputs always produce same outputs.',
-        'Catches regressions when you change prompts or tool schemas.',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Golden test structure',
-      code: `case = GoldenCase(
-    name="employee count query",
-    user_input="How many in engineering?",
-    expected_tool_names=["count_employees"],
-    expected_answer_contains="3",
-)
-
-result = run_golden_test(case, agent_fn)
-assert result.passed`,
-      highlights: [
-        'Declarative: describe what should happen, not how',
-        'Easy to add new cases as you discover edge cases',
-      ],
-    },
-  },
-
-  // ---- Demo: Eval harness ----
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Eval harness',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
-      icon: 'rocket',
-    },
-  },
-
   // ---- Section: Wrap-up ----
   {
     type: 'title',
@@ -324,9 +270,9 @@ assert result.passed`,
           icon: 'check-square',
         },
         {
-          rule: 'Test with mocks, not live LLMs',
-          example: 'Golden tests are fast, deterministic, and free.',
-          icon: 'flask',
+          rule: 'Log every tool call',
+          example: 'An audit trail is your best debugging tool when agents misbehave.',
+          icon: 'clipboard-list',
         },
       ],
     },
@@ -336,9 +282,9 @@ assert result.passed`,
     content: {
       title: 'Exercises',
       points: [
-        '01 — Tool loop: the minimal LLM → tool → result cycle',
+        '01 — Tool-calling agent: the minimal LLM → tool → result cycle',
         '02 — Tool registry: schema, validation, routing',
-        '03 — Safety + eval: rate limiting and golden-file tests',
+        '03 — Guarded agent: allowlists, rate limits, and audit logs',
       ],
     },
   },

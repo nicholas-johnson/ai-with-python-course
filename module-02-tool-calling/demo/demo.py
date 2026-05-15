@@ -1,6 +1,6 @@
 """
-Module 2 Demo — Agent Core
-Run:  python module-02-agent-core/demo/demo.py
+Module 2 Demo — Tool Calling
+Run:  python module-02-tool-calling/demo/demo.py
 
 Walks through the full module in one script:
   Part 1: Message format — make a real tool call, trace the 4 message roles

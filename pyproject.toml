@@ -37,6 +37,9 @@ structured = [
     "instructor>=1.4",
 ]
 
+[tool.setuptools]
+packages = []
+
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]

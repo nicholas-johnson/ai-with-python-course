@@ -1,3 +1,5 @@
+import { InlineMarkdown } from "./InlineMarkdown";
+
 export function CodeSlide({ content }) {
   return (
     <div className="flex-1 flex flex-col justify-center items-center animate-fade-in p-8 w-full overflow-y-auto">
@@ -19,7 +21,7 @@ export function CodeSlide({ content }) {
               className="flex items-center gap-3 text-lg text-gray-400"
             >
               <span className="text-secondary font-bold">→</span>
-              <span>{highlight}</span>
+              <span><InlineMarkdown text={highlight} /></span>
             </div>
           ))}
         </div>

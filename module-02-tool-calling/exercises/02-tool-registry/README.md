@@ -114,7 +114,7 @@ Try the same questions:
 ## Tests
 
 ```bash
-pytest module-02-agent-core/exercises/02-tool-registry/test_start.py -v
+pytest module-02-tool-calling/exercises/02-tool-registry/test_start.py -v
 ```
 
 ## Stretch goals

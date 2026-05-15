@@ -130,7 +130,7 @@ Try these questions:
 ## Tests
 
 ```bash
-pytest module-02-agent-core/exercises/01-tool-calling-agent/test_start.py -v
+pytest module-02-tool-calling/exercises/01-tool-calling-agent/test_start.py -v
 ```
 
 ## Stretch goals

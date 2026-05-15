@@ -101,43 +101,6 @@ def search_logs(keyword: str, limit: int = 5) -> list[dict]:
 
 ---
 
-## Authentication — scopes and gating
-
-Not every crew member should access every tool. MCP supports authentication through scopes — labels like `sensors:read`, `crew:read`, `logs:admin` that gate access.
-
-```python
-class AuthContext:
-    def __init__(self, user_id: str, scopes: set[str]):
-        self.user_id = user_id
-        self.scopes = scopes
-
-def check_scope(ctx: AuthContext, required: str) -> bool:
-    return required in ctx.scopes
-```
-
-Before executing a tool, the server checks whether the caller's context includes the required scope. Rejected calls return a structured error — the agent can explain to the user why access was denied rather than failing silently.
-
----
-
-## Structured logging — audit everything
-
-Every tool call — allowed or rejected — should be logged with a structured JSON record. This is how you debug incidents, prove compliance, and measure usage.
-
-```python
-{
-    "timestamp": "2287-03-15T14:30:00Z",
-    "user_id": "CRW-001",
-    "tool": "query_crew",
-    "arguments": {"department": "science"},
-    "allowed": true,
-    "result_preview": "[{name: Voss}, {name: Orin}]"
-}
-```
-
-Key fields: `timestamp` for ordering, `user_id` for attribution, `tool` and `arguments` for reproduction, `allowed` for the gate decision, and `result_preview` (truncated) so you can debug without logging full payloads. Never log sensitive data in full — truncate or hash.
-
----
-
 ## Building an MCP client
 
 The other side of the protocol is a **client** that connects to an MCP server, discovers its tools, and calls them. This is what the agent runtime does under the hood.
@@ -166,8 +129,8 @@ The client validates arguments locally before sending them over the wire — thi
 ## Field rules
 
 - **Let the schema speak.** Type hints generate JSON Schema — keep functions simple and well-typed.
-- **Gate before you execute.** Check scopes, then validate, then call.
-- **Log everything structurally.** JSON logs beat free-text for querying and alerting.
+- **Handle errors gracefully.** Return JSON errors, never crash. The agent needs to adapt.
+- **Sanitise all inputs.** Filenames, URLs, queries — never trust user-controlled values.
 
 ---
 

@@ -74,6 +74,13 @@ import {
   User,
   FolderPlus,
   FileCode,
+  Cpu,
+  Shield,
+  MessageSquare,
+  Server,
+  PenTool,
+  Image,
+  List,
 } from "lucide-react";
 
 // Map icon names to Lucide components
@@ -83,6 +90,8 @@ const iconMap = {
   react: Atom,
   code: Code,
   braces: Braces,
+
+  cpu: Cpu,
 
   // Navigation & Direction
   compass: Compass,
@@ -108,15 +117,19 @@ const iconMap = {
   sparkles: Sparkles,
   "party-popper": PartyPopper,
   refresh: RefreshCw,
+  "refresh-cw": RefreshCw,
   recycle: Recycle,
 
   // Design & Styling
+  "pen-tool": PenTool,
+  image: Image,
   palette: Palette,
   paintbrush: Palette,
   waves: Waves,
   ruler: Ruler,
 
   // Data & State
+  list: List,
   clipboard: ClipboardList,
   "clipboard-list": ClipboardList,
   scale: Scale,
@@ -147,6 +160,7 @@ const iconMap = {
   "check-square": CheckSquare,
 
   // Communication
+  "message-square": MessageSquare,
   globe: Globe,
   world: Globe,
   radio: Radio,
@@ -172,6 +186,7 @@ const iconMap = {
   search: Search,
 
   // Devices & Input
+  server: Server,
   smartphone: Smartphone,
   phone: Smartphone,
   mouse: Mouse,
@@ -184,6 +199,7 @@ const iconMap = {
   calendar: Calendar,
 
   // Security
+  shield: Shield,
   lock: Lock,
   key: Lock,
 

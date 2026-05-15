@@ -16,23 +16,51 @@
 
 ## Prerequisites
 
-- **Python** 3.12 or newer (`python --version`)
-- **uv** (recommended) or **pip** — install uv with `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **Python** 3.12 or newer — check with `python3 --version` or `py --version`
+- **pip** (bundled with Python — used inside a virtual environment)
 - **Node.js** v20+ and **pnpm** v10+ (for slides only) — `corepack enable && corepack prepare pnpm@latest --activate`
 - A code editor (VS Code / Cursor recommended)
 - An OpenAI API key (or compatible provider) in your environment
 
 ## Setup
 
+### Python environment
+
+Create a virtual environment and install dependencies:
+
 ```bash
 cd ai-python-course
 
-# Python dependencies
-uv sync                     # or: pip install -e ".[dev]"
+# Create a virtual environment (use whichever python command gives you 3.12+)
+python3 -m venv .venv        # or: py -m venv .venv
 
-# Slides dependencies (pnpm monorepo)
+# Activate it
+source .venv/bin/activate    # macOS / Linux
+# .venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -e .
+
+# With optional extras (pick what you need)
+pip install -e ".[dev]"                        # pytest + ruff
+pip install -e ".[rag]"                        # chromadb, sentence-transformers
+pip install -e ".[langchain]"                  # langchain, langgraph
+pip install -e ".[dev,rag,langchain,structured]"  # everything
+```
+
+> **Tip:** If `python3 --version` shows an old version but `py --version` shows 3.12+, use `py` instead. On macOS with Homebrew Python you **must** use a virtual environment — pip will refuse to install system-wide.
+
+You need to activate the venv (`source .venv/bin/activate`) each time you open a new terminal.
+
+### Slides dependencies (pnpm monorepo)
+
+```bash
 pnpm install
+```
 
+### Running tests
+
+```bash
 # Run all exercise tests (many fail until you complete start.py)
 pytest
 
@@ -69,7 +97,7 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | ----- | ------ | ----- |
 | 0 | [module-00-python-fundamentals](module-00-python-fundamentals/) | Data structures, modules, CLI, logging, async, HTTP |
 | 1 | [module-01-working-with-the-llm](module-01-working-with-the-llm/) | LLM APIs, chat integration, streaming, prompting patterns |
-| 2 | [module-02-agent-core](module-02-agent-core/) | Message format, tool registry, safety rails, eval harness |
+| 2 | [module-02-tool-calling](module-02-tool-calling/) | Message format, tool registry, safety rails, eval harness |
 | 3 | [module-03-mcp-server](module-03-mcp-server/) | MCP concepts, build a server, practical tools, auth |
 | 4 | [module-04-genai-strategies](module-04-genai-strategies/) | Research Assistant app: streaming chat, MCP tools, multimodal — the Day 1 closer |
 
@@ -115,15 +143,15 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Streaming | [`exercises/02-streaming`](module-01-working-with-the-llm/exercises/02-streaming/) | Stream responses token by token |
 | Chat app | [`exercises/03-chat-app`](module-01-working-with-the-llm/exercises/03-chat-app/) | Slash commands + file persistence |
 
-### Module 2 — [Agent Core](module-02-agent-core/)
+### Module 2 — [Tool Calling](module-02-tool-calling/)
 
 **Topics:** Message format + state, tool registry pattern (schema, validation, routing, error handling), safety rails (allowlists, rate limits, redaction, audit logs), evaluation harness (golden tests, replay, deterministic mocks).
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Tool-calling agent | [`exercises/01-tool-calling-agent`](module-02-agent-core/exercises/01-tool-calling-agent/) | Build a tool-calling agent with real OpenAI API calls |
-| Tool registry | [`exercises/02-tool-registry`](module-02-agent-core/exercises/02-tool-registry/) | Decorator-based registry plugged into the agent loop |
-| Guarded agent | [`exercises/03-guarded-agent`](module-02-agent-core/exercises/03-guarded-agent/) | AllowList + RateLimiter + audit log wrapping the agent |
+| Tool-calling agent | [`exercises/01-tool-calling-agent`](module-02-tool-calling/exercises/01-tool-calling-agent/) | Build a tool-calling agent with real OpenAI API calls |
+| Tool registry | [`exercises/02-tool-registry`](module-02-tool-calling/exercises/02-tool-registry/) | Decorator-based registry plugged into the agent loop |
+| Guarded agent | [`exercises/03-guarded-agent`](module-02-tool-calling/exercises/03-guarded-agent/) | AllowList + RateLimiter + audit log wrapping the agent |
 
 ### Module 3 — [MCP Server](module-03-mcp-server/)
 
@@ -234,22 +262,6 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Capstone app | [`exercises/01-capstone-app`](module-12-capstone/exercises/01-capstone-app/) | Integrated chat + RAG + MCP + multi-agent app with tracing |
 | Harden and deploy | [`exercises/02-harden-and-deploy`](module-12-capstone/exercises/02-harden-and-deploy/) | Reliability patterns + Docker deployment |
 | Test and extend | [`exercises/03-test-and-extend`](module-12-capstone/exercises/03-test-and-extend/) | Integration tests and extension documentation |
-
-## Running tests
-
-```bash
-# All exercises
-pytest
-
-# One module
-pytest module-01-working-with-the-llm/
-
-# One exercise
-pytest module-00-python-fundamentals/exercises/01-dataclass-filtering/test_start.py
-
-# With verbose output
-pytest -v module-02-agent-core/
-```
 
 ## License
 

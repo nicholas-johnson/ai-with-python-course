@@ -5,11 +5,10 @@
 ## Learning goals
 
 - Build a **FastAPI app** with SSE streaming chat, tool integration, and multimodal endpoints.
-- Apply **prompt engineering**: system prompts, structured outputs, and grounding.
-- Work with **multimodal** inputs: vision/image analysis via GPT-4o, speech-to-text via Whisper.
 - Connect an **MCP server** to a web API for real-time tool use.
 - Reason about **model selection** trade-offs: quality, cost, latency.
 - Count tokens and enforce **budgets** before calling the model.
+- Work with **multimodal** inputs: vision/image analysis via GPT-4o, speech-to-text via Whisper.
 - Apply **guardrails**: schema validation, content filters, and confidence thresholds.
 
 ---
@@ -25,56 +24,6 @@ exercises/
   02-tool-chat/    <- MCP server + tool-calling loop
   03-multimodal/   <- Vision + audio endpoints
 ```
-
----
-
-## Prompt engineering principles
-
-The difference between a flaky demo and a production AI is prompt engineering. A well-crafted prompt constrains the model's output so your code can reliably parse and act on it.
-
-**Be specific.** Vague prompts produce vague answers. "Tell me about the topic" could return anything. "Return a JSON object with fields `title`, `summary`, and `key_points`" gives the model a target.
-
-**System prompt** — the first message in the conversation. It sets persona, constraints, available tools, and output format. Think of it as the agent's standing orders.
-
-**Few-shot examples** — include 2-3 example user/assistant pairs in the prompt to teach format, tone, and reasoning style in-context. Place them after the system prompt, before the real query.
-
-```python
-messages = [
-    {"role": "system", "content": SYSTEM_PROMPT},
-    # Few-shot example
-    {"role": "user", "content": "Summarise the Wikipedia article on transformers."},
-    {"role": "assistant", "content": json.dumps({
-        "title": "Transformer (deep learning)",
-        "summary": "A neural network architecture based on self-attention.",
-        "key_points": ["Introduced in 2017", "Replaced RNNs", "Powers GPT, BERT, etc."]
-    })},
-    # Real query
-    {"role": "user", "content": actual_query},
-]
-```
-
-Diminishing returns kick in after about 5 examples — keep them tight.
-
-**Grounding** anchors answers to retrieved data, not the model's imagination. You will build full grounding pipelines in Modules 6 and 10.
-
----
-
-## Structured outputs
-
-Free-text responses are hard to parse. A structured output prompt constrains the model to return valid JSON matching a specific schema:
-
-```python
-SYSTEM = """You are a research assistant.
-Return ONLY valid JSON matching this schema:
-{
-  "title": "string",
-  "summary": "one paragraph",
-  "key_points": ["string", ...]
-}
-Do not include any text outside the JSON object."""
-```
-
-On the receiving end, `json.loads` is the simplest validator. For production, use Pydantic `model_validate_json` which gives you type coercion, field constraints, and clear error messages when the model's output drifts.
 
 ---
 
@@ -174,7 +123,6 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 
 ## Field rules
 
-- **Constrain the output format.** JSON schema in the system prompt beats hoping for structure.
 - **Count tokens before you send.** Surprise truncation is worse than deliberate trimming.
 - **Chain guardrails, never skip them.** Schema → filter → confidence. Fail fast, log always.
 
@@ -186,10 +134,9 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 python module-04-genai-strategies/demo/demo.py
 ```
 
-Walks through all three topics interactively — press Enter between sections:
-1. **Prompt engineering** — vague vs specific prompts, `response_format=json_object`, few-shot classification
-2. **Model selection** — same task on GPT-4o vs GPT-4o-mini, comparing latency, tokens, and quality
-3. **Guardrails** — Pydantic schema validation, content filtering, confidence gating — 4 test cases then a live LLM response
+Walks through both topics interactively — press Enter between sections:
+1. **Model selection** — same task on GPT-4o vs GPT-4o-mini, comparing latency, tokens, and quality
+2. **Guardrails** — Pydantic schema validation, content filtering, confidence gating — 4 test cases then a live LLM response
 
 ## Exercises
 
@@ -223,7 +170,6 @@ From repo root: `pnpm slides:04`, or `cd module-04-genai-strategies/slides && pn
 
 ## Reference
 
-- [OpenAI — Prompt engineering](https://platform.openai.com/docs/guides/prompt-engineering)
 - [OpenAI — Vision](https://platform.openai.com/docs/guides/vision)
 - [OpenAI — Speech to text](https://platform.openai.com/docs/guides/speech-to-text)
 - [FastAPI — Server-Sent Events](https://fastapi.tiangolo.com/)

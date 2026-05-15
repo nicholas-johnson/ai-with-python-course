@@ -25,9 +25,9 @@ export const slides = [
       icon: 'target',
       points: [
         'Understand **MCP concepts**: discovery, schemas, calling conventions.',
-        'Build a **minimal MCP server** in Python.',
-        'Implement **practical tools**: user lookup, metrics read, log search.',
-        'Add **auth scopes** and **structured logging**.',
+        'Build a **FastMCP server** with practical tools in Python.',
+        'Build tools that access **live data**: web fetch, file I/O.',
+        'Connect an MCP server to a **real agent** via stdio.',
       ],
     },
   },
@@ -115,10 +115,10 @@ server.run()  # stdio transport`,
       title: 'Practical tools',
       icon: 'wrench',
       points: [
-        '**read_metrics** — system metrics by ID (simulated but deterministic).',
-        '**lookup_users** — user directory filtered by role.',
-        '**search_logs** — keyword search over application log entries.',
-        'All read from shared JSON data files — no side effects.',
+        '**query_crew** — crew directory filtered by department or role.',
+        '**search_logs** — keyword search over ship log entries.',
+        '**read_sensor** — deterministic sensor readings by ID.',
+        '**fetch_url** / **save_note** — tools with real-world side effects.',
       ],
     },
   },
@@ -132,66 +132,11 @@ server.run()  # stdio transport`,
     },
   },
 
-  // ---- Section: Auth + observability ----
+  // ---- Demo: Connecting a client ----
   {
     type: 'title',
     content: {
-      title: 'Auth + observability',
-      subtitle: 'Scopes, structured logs, and audit trails',
-      icon: 'lock',
-    },
-  },
-
-  {
-    type: 'standard',
-    content: {
-      title: 'Auth + permissions model',
-      icon: 'lock',
-      points: [
-        'Not every client should call every tool.',
-        '**Scopes**: `users:read`, `logs:read`, `admin:write` etc.',
-        '**AuthContext**: user_id + role + scopes.',
-        'Check scope before every tool call — deny early, log always.',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Scoped tool execution',
-      code: `class AuthenticatedToolRunner:
-    def call(self, tool, args, auth: AuthContext):
-        required = self._scopes[tool]
-        if required not in auth.scopes:
-            self._log(auth.user_id, tool, False)
-            return {"error": "Access denied"}
-        result = self._handlers[tool](**args)
-        self._log(auth.user_id, tool, True)
-        return {"result": result}`,
-      highlights: [
-        'Scope check before execution, never after',
-        'Every call logged regardless of outcome',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Structured logging for observability',
-      icon: 'clipboard-list',
-      points: [
-        'Every tool call produces a structured log entry.',
-        'Fields: timestamp, user_id, tool, arguments, allowed, result_preview.',
-        'Enables dashboards, alerts, and compliance audits.',
-        'Preview is truncated — never log full secrets or large payloads.',
-      ],
-    },
-  },
-  // ---- Demo: MCP client ----
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — MCP client',
+      title: 'Demo — Connecting a client',
       subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
       icon: 'rocket',
     },
@@ -218,14 +163,14 @@ server.run()  # stdio transport`,
           icon: 'file-text',
         },
         {
-          rule: 'Auth before execution',
-          example: 'Check scope first. No tool runs without authorisation.',
-          icon: 'lock',
+          rule: 'Handle errors gracefully',
+          example: 'Return JSON errors, never crash. The agent needs to adapt.',
+          icon: 'shield',
         },
         {
-          rule: 'Log everything, redact secrets',
-          example: 'Ops needs the trail; they do not need the passwords.',
-          icon: 'clipboard-list',
+          rule: 'Sanitise all inputs',
+          example: 'Filenames, URLs, queries — never trust user-controlled values.',
+          icon: 'lock',
         },
       ],
     },
@@ -235,10 +180,9 @@ server.run()  # stdio transport`,
     content: {
       title: 'Exercises',
       points: [
-        '01 — Hello MCP: your first tool server',
-        '02 — Practical tools: metrics, user lookup, log search',
-        '03 — Auth + observability: scopes and structured logs',
-        '04 — MCP client: discover tools, validate args, call and handle errors',
+        '01 — MCP agent: build a FastMCP server and wire it to a console agent',
+        '02 — Data tools: query crew, logs, sensors, and missions from JSON data',
+        '03 — Live tools: fetch web pages and manage notes on disk',
       ],
     },
   },

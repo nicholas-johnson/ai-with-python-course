@@ -20,7 +20,7 @@ Build production-grade AI systems — agents, tools, RAG pipelines, and multi-ag
 - Implement session storage: in-memory first, then file-based.
 - Apply prompting patterns that hold up in production (structured outputs, grounding).
 
-### Module 2 — Agent Core
+### Module 2 — Tool Calling
 
 - Understand the message format that drives an agent (system, user, assistant, tool messages).
 - Build a tool-calling loop: schema in, action out, result back, repeat.

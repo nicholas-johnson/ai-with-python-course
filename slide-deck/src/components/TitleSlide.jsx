@@ -1,4 +1,5 @@
 import { SlideIcon } from "./SlideIcon";
+import { InlineMarkdown } from "./InlineMarkdown";
 
 export function TitleSlide({ content }) {
   return (
@@ -9,7 +10,7 @@ export function TitleSlide({ content }) {
       <h1 className="text-5xl md:text-6xl font-extrabold mb-4 text-white">
         {content.title}
       </h1>
-      <p className="text-2xl text-gray-400 font-light">{content.subtitle}</p>
+      <p className="text-2xl text-gray-400 font-light"><InlineMarkdown text={content.subtitle} /></p>
     </div>
   );
 }

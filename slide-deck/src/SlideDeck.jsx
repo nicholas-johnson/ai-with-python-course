@@ -17,6 +17,9 @@ import {
   WelcomeSlide,
   ModulesSlide,
   ThreeWayComparison,
+  ImageSlide,
+  EquationSlide,
+  CardsSlide,
 } from "./components";
 
 function SlideViewer({ slides }) {
@@ -75,6 +78,12 @@ function SlideViewer({ slides }) {
         return <WelcomeSlide content={slide.content} />;
       case "modules":
         return <ModulesSlide content={slide.content} />;
+      case "image":
+        return <ImageSlide content={slide.content} />;
+      case "equation":
+        return <EquationSlide content={slide.content} />;
+      case "cards":
+        return <CardsSlide content={slide.content} />;
       default:
         return <StandardSlide content={slide.content} />;
     }

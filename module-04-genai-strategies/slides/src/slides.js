@@ -3,19 +3,20 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 4 — GenAI Strategies',
-      subtitle: 'From prompt engineering to vision, voice, and guardrails',
+      subtitle: 'Model selection, multimodal, and guardrails',
       icon: 'sparkles',
     },
   },
   {
-    type: 'welcome',
+    type: 'standard',
     content: {
       title: 'What this module covers',
+      icon: 'compass',
       points: [
-        'Combine agent core, LLM integration, and prompt engineering into a working pipeline.',
-        'Prompt engineering: system prompts, few-shot examples, structured outputs, and grounding.',
-        'Multimodal: vision/image analysis, speech-to-text (Whisper), text-to-speech.',
-        'Guardrails: model selection, token budgets, content filters, and confidence thresholds.',
+        'Build a **Research Assistant** web app — streaming chat, tool use, vision, and audio.',
+        'Model selection: choosing the right model for **quality, cost, and latency**.',
+        'Multimodal: **vision**/image analysis, **speech-to-text** (Whisper), text-to-speech.',
+        'Guardrails: schema validation, content filters, and **confidence thresholds**.',
       ],
     },
   },
@@ -25,95 +26,12 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Apply **prompt engineering** patterns that hold up under real traffic.',
-        'Build prompts that return **structured, JSON-parseable** outputs.',
+        'Build a **FastAPI app** with SSE streaming chat and tool integration.',
+        'Connect an **MCP server** to a web API for real-time tool use.',
         'Count tokens, enforce **budgets**, and truncate context gracefully.',
-        'Work with **multimodal** inputs: images (GPT-4V), audio (Whisper).',
+        'Work with **multimodal** inputs: images (GPT-4o), audio (Whisper).',
         'Chain **guardrails**: schema check → content filter → confidence gate.',
       ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Prompt engineering principles',
-      icon: 'pen-tool',
-      points: [
-        '**Be specific.** Vague prompts produce vague answers.',
-        '**System prompt** sets persona, constraints, and output format.',
-        '**Few-shot examples** show the model exactly what you want.',
-        '**Grounding** anchors answers to retrieved data, not imagination.',
-        '**Structured outputs** turn freeform text into typed data you can parse.',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Structured output prompt',
-      code: `SYSTEM = """You are a report analyst.
-Return ONLY valid JSON matching this schema:
-{
-  "report_id": "string",
-  "status": "open | resolved | escalated",
-  "priority": "low | medium | high | critical",
-  "summary": "one sentence"
-}
-Do not include any text outside the JSON object."""
-
-def analyse_report(report: str, llm) -> dict:
-    response = llm.chat([
-        {"role": "system", "content": SYSTEM},
-        {"role": "user", "content": report},
-    ])
-    return json.loads(response)`,
-      highlights: [
-        'System prompt locks the output format — no preamble, no extras',
-        'json.loads is the simplest validator; Pydantic is better for production',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Few-shot prompting',
-      icon: 'list',
-      points: [
-        'Include 2-3 **example pairs** in the prompt to set the pattern.',
-        'Examples train format, tone, and reasoning style in-context.',
-        'Place examples after the system prompt, before the user query.',
-        'Diminishing returns after ~5 examples — keep them tight.',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Few-shot in action',
-      code: `messages = [
-    {"role": "system", "content": SYSTEM},
-    {"role": "user", "content": "Server cluster B lost connectivity at 14:30."},
-    {"role": "assistant", "content": json.dumps({
-        "report_id": "INC-7",
-        "status": "escalated",
-        "priority": "critical",
-        "summary": "Connectivity lost in cluster B."
-    })},
-    {"role": "user", "content": actual_report},
-]`,
-      highlights: [
-        'The assistant message IS the example output',
-        'Model mirrors the format — no extra instructions needed',
-      ],
-    },
-  },
-  // ---- Demo: Prompt engineering ----
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Prompt engineering',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
-      icon: 'rocket',
     },
   },
 
@@ -170,7 +88,7 @@ def enforce_budget(messages, max_tokens):
     type: 'title',
     content: {
       title: 'Demo — Model selection',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
       icon: 'rocket',
     },
   },
@@ -289,7 +207,7 @@ def enforce_budget(messages, max_tokens):
     type: 'title',
     content: {
       title: 'Demo — Guardrails',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
       icon: 'rocket',
     },
   },
@@ -310,11 +228,6 @@ def enforce_budget(messages, max_tokens):
       title: 'Field rules — Module 4',
       rules: [
         {
-          rule: 'Constrain the output format',
-          example: 'JSON schema in the system prompt beats hoping for structure.',
-          icon: 'file-text',
-        },
-        {
           rule: 'Count tokens before you send',
           example: 'Surprise truncation is worse than deliberate trimming.',
           icon: 'calculator',
@@ -330,12 +243,11 @@ def enforce_budget(messages, max_tokens):
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Engineering the conversation',
+      title: 'Exercises — Build the Research Assistant',
       points: [
-        '01 — Structured prompts: build prompts that yield JSON-parseable outputs',
-        '02 — Token budget: count tokens and enforce a max budget',
-        '03 — Guardrail chain: schema + content filter + confidence threshold',
-        '04 — Multimodal analysis: vision and audio payloads',
+        '01 — Streaming chat API: FastAPI with SSE streaming endpoints',
+        '02 — MCP research tools: web fetch + notes with a tool-calling loop',
+        '03 — Multimodal: vision (GPT-4o image analysis) and audio (Whisper)',
       ],
     },
   },

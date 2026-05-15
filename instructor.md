@@ -28,7 +28,7 @@
 
 ---
 
-### Module 2 — Agent Core
+### Module 2 — Tool Calling
 
 **Talk about:**
 
@@ -42,7 +42,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-02-agent-core/demo/demo.py` | All four topics in one interactive walkthrough — press Enter between sections. Part 1: live tool call tracing 4 message roles. Part 2: decorator registry, list/call/error handling. Part 3: allowlist, rate limiter, redaction, audit log. Part 4: mock LLM golden tests. |
+| `module-02-tool-calling/demo/demo.py` | All four topics in one interactive walkthrough — press Enter between sections. Part 1: live tool call tracing 4 message roles. Part 2: decorator registry, list/call/error handling. Part 3: allowlist, rate limiter, redaction, audit log. Part 4: mock LLM golden tests. |
 
 **Exercises (chained — each builds on the previous):**
 

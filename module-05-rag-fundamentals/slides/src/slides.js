@@ -26,9 +26,8 @@ export const slides = [
       points: [
         'Design **chunking strategies** for long-form documents and knowledge bases.',
         'Produce **embeddings**, store in a **vector index**, and query effectively.',
-        'Apply **retrieval strategies**: hybrid search, filters, reranking.',
         'Build **grounded prompts** with citations back to source chunks.',
-        'Evaluate RAG with **recall**, **precision**, and adversarial queries.',
+        'Wrap a RAG pipeline as **MCP tools** any agent can call.',
       ],
     },
   },
@@ -288,9 +287,9 @@ def search(query, index, k=5):
     content: {
       title: 'Exercises',
       points: [
-        '01 — Document chunker: split documents into overlapping windows',
-        '02 — Vector search: embed and query a document collection',
-        '03 — RAG pipeline: end-to-end retrieval with citation linking',
+        '01 — Build index: chunk, embed, and search with ChromaDB',
+        '02 — RAG chat: grounded prompts with source citations',
+        '03 — RAG MCP server: wrap the pipeline as tools for any agent',
       ],
     },
   },

@@ -1,4 +1,4 @@
-# Module 2 — Agent Core
+# Module 2 — Tool Calling
 
 > The Pathfinder's AI is not magic — it is a loop. Now that you can talk to the LLM, it is time to give it hands. A crew member asks a question, the model decides whether to think or act, and if it acts it calls a tool, reads the result, and loops until it has an answer. This module builds that loop from scratch using real OpenAI API calls, hardens it with a tool registry that validates every call, and adds safety rails so the agent cannot run amok.
 
@@ -152,7 +152,7 @@ For regression testing, **mock the LLM** with scripted responses and check that 
 ## Demos
 
 ```bash
-python module-02-agent-core/demo/demo.py
+python module-02-tool-calling/demo/demo.py
 ```
 
 Walks through all four topics interactively — press Enter between sections:
@@ -174,12 +174,12 @@ The exercises chain — each one builds on the previous. Run them with `python s
 Run tests for this module:
 
 ```bash
-pytest module-02-agent-core/
+pytest module-02-tool-calling/
 ```
 
 ## Slides
 
-From repo root: `pnpm slides:02`, or `cd module-02-agent-core/slides && pnpm dev`.
+From repo root: `pnpm slides:02`, or `cd module-02-tool-calling/slides && pnpm dev`.
 
 ## Reference
 

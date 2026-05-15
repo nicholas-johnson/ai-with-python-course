@@ -6,4 +6,8 @@ export { RulesSlide } from "./RulesSlide";
 export { WelcomeSlide } from "./WelcomeSlide";
 export { ModulesSlide } from "./ModulesSlide";
 export { ThreeWayComparison } from "./ThreeWayComparison";
+export { ImageSlide } from "./ImageSlide";
+export { EquationSlide } from "./EquationSlide";
+export { CardsSlide } from "./CardsSlide";
 export { SlideIcon, availableIcons } from "./SlideIcon";
+export { InlineMarkdown, parseInlineMarkdown } from "./InlineMarkdown";

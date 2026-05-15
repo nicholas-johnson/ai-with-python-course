@@ -1,4 +1,5 @@
 import { SlideIcon } from "./SlideIcon";
+import { InlineMarkdown } from "./InlineMarkdown";
 
 export function RulesSlide({ content }) {
   return (
@@ -17,10 +18,10 @@ export function RulesSlide({ content }) {
                 <SlideIcon name={item.icon} size={40} />
               </span>
               <span className="text-xl font-semibold text-gray-200">
-                {item.rule}
+                <InlineMarkdown text={item.rule} />
               </span>
               <span className="text-base text-gray-400 italic">
-                {item.example}
+                <InlineMarkdown text={item.example} />
               </span>
             </div>
           ))}
