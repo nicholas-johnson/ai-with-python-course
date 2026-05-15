@@ -3,7 +3,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 10 — LangChain with Python',
-      subtitle: 'Framework-powered AI for the DSS Pathfinder',
+      subtitle: 'Chains, agents, and RAG with LangChain',
       icon: 'link',
     },
   },
@@ -54,15 +54,15 @@ from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "Classify crew reports as: routine, alert, critical. "
+    ("system", "Classify support tickets as: routine, urgent, critical. "
                "Return JSON: {{category, summary}}"),
     ("user", "{report}"),
 ])
 
 chain = prompt | ChatOpenAI(model="gpt-4o-mini") | JsonOutputParser()
 
-result = chain.invoke({"report": "Hull breach detected on deck 7"})
-# {"category": "critical", "summary": "Hull breach on deck 7"}`,
+result = chain.invoke({"report": "Server CPU usage exceeded 95%"})
+# {"category": "critical", "summary": "Server CPU spike"}`,
       highlights: [
         'The pipe operator (|) chains steps: prompt → model → parser',
         'Each step is independently testable and swappable',
@@ -114,20 +114,20 @@ result = chain.invoke({"report": "Hull breach detected on deck 7"})
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 
 @tool
-def read_sensor(sensor_id: str) -> str:
-    """Read the current value of a ship sensor."""
-    return json.dumps(sensors[sensor_id])
+def read_metrics(metric_id: str) -> str:
+    """Read the current value of a system metric."""
+    return json.dumps(metrics[metric_id])
 
 @tool
-def query_crew(department: str) -> str:
-    """Look up crew members by department."""
-    return json.dumps([m for m in crew if m["dept"] == department])
+def lookup_users(role: str) -> str:
+    """Look up users by role."""
+    return json.dumps([u for u in users if u["role"] == role])
 
-tools = [read_sensor, query_crew]
+tools = [read_metrics, lookup_users]
 agent = create_tool_calling_agent(llm, tools, prompt)
 executor = AgentExecutor(agent=agent, tools=tools)
 
-result = executor.invoke({"input": "Who is in engineering?"})`,
+result = executor.invoke({"input": "Who is in the backend team?"})`,
       highlights: [
         '@tool decorator = schema from type hints + docstring',
         'AgentExecutor runs the loop: LLM → tool call → result → repeat',
@@ -164,7 +164,7 @@ rag_chain = (
     | StrOutputParser()
 )
 
-answer = rag_chain.invoke("What happened during the Kepler Sweep?")`,
+answer = rag_chain.invoke("What caused the Q4 outage?")`,
       highlights: [
         'Retriever runs in parallel with question passthrough',
         'Same RAG pattern as Module 5 — LangChain just wires it up',
@@ -212,18 +212,18 @@ answer = rag_chain.invoke("What happened during the Kepler Sweep?")`,
     content: {
       title: 'Exercises — Framework-powered ops',
       points: [
-        '01 — Chain basics: prompt template + chain for crew report classification',
-        '02 — Tool agent: wrap ship tools as LangChain tools, run via AgentExecutor',
-        '03 — RAG chain: RetrievalQA over the Pathfinder knowledge base',
+        '01 — Chain basics: prompt templates, output parsers, ticket classification',
+        '02 — Tool agent: wrap custom tools as LangChain tools, run via AgentExecutor',
+        '03 — RAG chain: RetrievalQA over a document knowledge base',
       ],
     },
   },
   {
     type: 'title',
     content: {
-      title: 'Framework integrated — Module 10',
-      subtitle: 'LangChain online. Next: the capstone — all systems go.',
-      icon: 'party-popper',
+      title: 'Module 10 — Complete',
+      subtitle: 'Next: edge topics',
+      icon: 'check-circle',
     },
   },
 ];

@@ -3,14 +3,14 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 12 — Capstone Project',
-      subtitle: 'Full stack agentic ops for the DSS Pathfinder',
-      icon: 'rocket',
+      subtitle: 'Integrating every technique into a production-grade agent',
+      icon: 'trophy',
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'All systems integrated',
+      title: 'Architecture and integration',
       points: [
         'Everything you built — agent core, RAG, MCP tools, multi-agent — comes together.',
         'Production hardening: tracing, reliability patterns, cost controls, deployment.',
@@ -26,7 +26,7 @@ export const slides = [
       points: [
         'Build a **full agentic app**: chat + RAG + MCP tools + multi-agent coordination.',
         'Harden for production: **tracing**, **retries**, **circuit breakers**, **cost controls**.',
-        'Write **demo scenarios** that show value to mission operations.',
+        'Write **demo scenarios** that demonstrate real-world value.',
         'Add **integration tests** and document **extension points**.',
         '**Containerise and deploy** with Docker, env config, and health checks.',
       ],
@@ -39,8 +39,8 @@ export const slides = [
       icon: 'layers',
       points: [
         '**Chat interface**: CLI or API — user sends questions, gets answers.',
-        '**RAG pipeline**: ship logs, manuals, and star charts indexed and searchable.',
-        '**MCP tool suite**: sensor reads, crew lookups, log queries.',
+        '**RAG pipeline**: documents, knowledge bases, and APIs indexed and searchable.',
+        '**MCP tool suite**: metrics, user lookups, log queries.',
         '**Multi-agent path**: router → specialist → critic for complex questions.',
         '**Production layer**: tracing, retries, circuit breakers, cost tracking.',
       ],
@@ -50,7 +50,7 @@ export const slides = [
     type: 'code',
     content: {
       title: 'Capstone app skeleton',
-      code: `class PathfinderAgent:
+      code: `class CapstoneAgent:
     def __init__(self, llm, tools, retriever, agents):
         self.llm = llm
         self.tools = tools
@@ -197,10 +197,10 @@ export const slides = [
       title: 'Demo scenarios',
       icon: 'play',
       points: [
-        '**Simple Q&A**: "Who is the chief engineer?" → direct tool call.',
-        '**RAG query**: "What happened during the Kepler Sweep?" → retrieval + grounded answer.',
-        '**Multi-step**: "Compare hull integrity reports from last week" → decompose + retrieve + synthesise.',
-        '**Multi-agent**: "Plan a rescue mission" → router → researcher → critic → final plan.',
+        '**Simple Q&A**: "Who is on call this week?" → direct tool call.',
+        '**RAG query**: "What caused the Q4 outage?" → retrieval + grounded answer.',
+        '**Multi-step**: "Compare infrastructure alerts from last week" → decompose + retrieve + synthesise.',
+        '**Multi-agent**: "Triage this customer escalation" → router → researcher → critic → final plan.',
       ],
     },
   },
@@ -221,16 +221,16 @@ export const slides = [
     type: 'code',
     content: {
       title: 'Integration test structure',
-      code: `def test_crew_query(agent, mock_llm):
+      code: `def test_user_query(agent, mock_llm):
     mock_llm.set_response(
-        tool_calls=[{"name": "query_crew",
-                      "arguments": {"department": "science"}}],
-        final="3 crew in science: Voss, Chen, Morel.",
+        tool_calls=[{"name": "lookup_users",
+                      "arguments": {"role": "engineering"}}],
+        final="3 users in engineering: Alice, Bob, Carol.",
     )
-    result = agent.chat("Who is in the science team?")
+    result = agent.chat("Who is in the engineering team?")
 
-    assert "Voss" in result
-    assert mock_llm.tool_calls_made == ["query_crew"]
+    assert "Alice" in result
+    assert mock_llm.tool_calls_made == ["lookup_users"]
 
 def test_unknown_question(agent, mock_llm):
     mock_llm.set_response(
@@ -303,7 +303,7 @@ def test_unknown_question(agent, mock_llm):
           icon: 'lock',
         },
         {
-          rule: 'Ship it',
+          rule: 'Deploy it',
           example: 'A working demo beats a perfect plan. Launch, then iterate.',
           icon: 'rocket',
         },
@@ -313,7 +313,7 @@ def test_unknown_question(agent, mock_llm):
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Final mission',
+      title: 'Exercises — Final project',
       points: [
         '01 — Capstone app: integrated chat + RAG + MCP + multi-agent with tracing',
         '02 — Harden and deploy: reliability patterns, cost controls, Docker container',
@@ -324,9 +324,9 @@ def test_unknown_question(agent, mock_llm):
   {
     type: 'title',
     content: {
-      title: 'Mission complete — Module 12',
-      subtitle: 'The Pathfinder AI is online. Well done, Engineer.',
-      icon: 'party-popper',
+      title: 'Module 12 — Complete',
+      subtitle: 'Well done.',
+      icon: 'check-circle',
     },
   },
 ];

@@ -227,9 +227,9 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Edge Topics — Module 11',
-      subtitle: 'Your advanced toolbox is ready. Build something great.',
-      icon: 'rocket',
+      title: 'Module 11 — Complete',
+      subtitle: 'Next: capstone project',
+      icon: 'check-circle',
     },
   },
 ];

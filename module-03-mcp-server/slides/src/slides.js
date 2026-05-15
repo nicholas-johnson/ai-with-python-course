@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 4 — MCP Server',
+      title: 'Module 3 — MCP Server',
       subtitle: 'Capabilities as tools: the standard protocol for AI agents',
       icon: 'server',
     },
@@ -26,7 +26,7 @@ export const slides = [
       points: [
         'Understand **MCP concepts**: discovery, schemas, calling conventions.',
         'Build a **minimal MCP server** in Python.',
-        'Implement **practical tools**: crew lookup, sensor read, log search.',
+        'Implement **practical tools**: user lookup, metrics read, log search.',
         'Add **auth scopes** and **structured logging**.',
       ],
     },
@@ -51,12 +51,12 @@ export const slides = [
       code: `{
   "tools": [
     {
-      "name": "query_crew",
-      "description": "Look up crew members",
+      "name": "lookup_users",
+      "description": "Look up users by role",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "department": {"type": "string"}
+          "role": {"type": "string"}
         }
       }
     }
@@ -94,12 +94,12 @@ export const slides = [
       title: 'Building an MCP server with FastMCP',
       code: `from mcp.server.fastmcp import FastMCP
 
-server = FastMCP("Pathfinder Tools")
+server = FastMCP("API Tools")
 
 @server.tool()
-def query_crew(department: str | None = None) -> str:
-    """Look up crew members by department."""
-    results = [m for m in crew if ...]
+def lookup_users(role: str | None = None) -> str:
+    """Look up users by role."""
+    results = [m for m in users if ...]
     return json.dumps(results)
 
 server.run()  # stdio transport`,
@@ -112,12 +112,12 @@ server.run()  # stdio transport`,
   {
     type: 'standard',
     content: {
-      title: 'Practical ship tools',
+      title: 'Practical tools',
       icon: 'wrench',
       points: [
-        '**read_sensor** — sensor telemetry by ID (simulated but deterministic).',
-        '**query_crew** — crew manifest filtered by department.',
-        '**search_logs** — keyword search over ship log entries.',
+        '**read_metrics** — system metrics by ID (simulated but deterministic).',
+        '**lookup_users** — user directory filtered by role.',
+        '**search_logs** — keyword search over application log entries.',
         'All read from shared JSON data files — no side effects.',
       ],
     },
@@ -148,8 +148,8 @@ server.run()  # stdio transport`,
       title: 'Auth + permissions model',
       icon: 'lock',
       points: [
-        'Not every officer should call every tool.',
-        '**Scopes**: `crew:read`, `logs:read`, `weapons:fire` etc.',
+        'Not every client should call every tool.',
+        '**Scopes**: `users:read`, `logs:read`, `admin:write` etc.',
         '**AuthContext**: user_id + role + scopes.',
         'Check scope before every tool call — deny early, log always.',
       ],
@@ -210,7 +210,7 @@ server.run()  # stdio transport`,
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 4',
+      title: 'Field rules — Module 3',
       rules: [
         {
           rule: 'Schema is documentation',
@@ -219,7 +219,7 @@ server.run()  # stdio transport`,
         },
         {
           rule: 'Auth before execution',
-          example: 'Check scope first. No tool runs without clearance.',
+          example: 'Check scope first. No tool runs without authorisation.',
           icon: 'lock',
         },
         {
@@ -233,10 +233,10 @@ server.run()  # stdio transport`,
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Wiring the ship',
+      title: 'Exercises',
       points: [
         '01 — Hello MCP: your first tool server',
-        '02 — Ship tools: sensor read, crew lookup, log search',
+        '02 — Practical tools: metrics, user lookup, log search',
         '03 — Auth + observability: scopes and structured logs',
         '04 — MCP client: discover tools, validate args, call and handle errors',
       ],
@@ -245,9 +245,9 @@ server.run()  # stdio transport`,
   {
     type: 'title',
     content: {
-      title: 'Tools online — Module 4',
-      subtitle: 'The ship has capabilities. Next: ground them with RAG.',
-      icon: 'party-popper',
+      title: 'Module 3 — Complete',
+      subtitle: 'Next: GenAI strategies',
+      icon: 'check-circle',
     },
   },
 ];

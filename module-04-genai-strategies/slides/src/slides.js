@@ -12,7 +12,7 @@ export const slides = [
     content: {
       title: 'What this module covers',
       points: [
-        'Build a conversational AI app pulling together agent core, LLM integration, and prompt engineering.',
+        'Combine agent core, LLM integration, and prompt engineering into a working pipeline.',
         'Prompt engineering: system prompts, few-shot examples, structured outputs, and grounding.',
         'Multimodal: vision/image analysis, speech-to-text (Whisper), text-to-speech.',
         'Guardrails: model selection, token budgets, content filters, and confidence thresholds.',
@@ -51,17 +51,17 @@ export const slides = [
     type: 'code',
     content: {
       title: 'Structured output prompt',
-      code: `SYSTEM = """You are a mission analyst for the DSS Pathfinder.
+      code: `SYSTEM = """You are a report analyst.
 Return ONLY valid JSON matching this schema:
 {
-  "mission_id": "string",
-  "status": "active | completed | aborted",
-  "risk_level": "low | medium | high | critical",
+  "report_id": "string",
+  "status": "open | resolved | escalated",
+  "priority": "low | medium | high | critical",
   "summary": "one sentence"
 }
 Do not include any text outside the JSON object."""
 
-def analyse_mission(report: str, llm) -> dict:
+def analyse_report(report: str, llm) -> dict:
     response = llm.chat([
         {"role": "system", "content": SYSTEM},
         {"role": "user", "content": report},
@@ -92,12 +92,12 @@ def analyse_mission(report: str, llm) -> dict:
       title: 'Few-shot in action',
       code: `messages = [
     {"role": "system", "content": SYSTEM},
-    {"role": "user", "content": "Kepler Sweep lost contact at 14:30."},
+    {"role": "user", "content": "Server cluster B lost connectivity at 14:30."},
     {"role": "assistant", "content": json.dumps({
-        "mission_id": "KS-7",
-        "status": "aborted",
-        "risk_level": "critical",
-        "summary": "Contact lost during Kepler Sweep."
+        "report_id": "INC-7",
+        "status": "escalated",
+        "priority": "critical",
+        "summary": "Connectivity lost in cluster B."
     })},
     {"role": "user", "content": actual_report},
 ]`,
@@ -201,13 +201,13 @@ def enforce_budget(messages, max_tokens):
   {
     type: 'code',
     content: {
-      title: 'Vision — analyse a ship image',
+      title: 'Vision — image analysis',
       code: `response = client.chat.completions.create(
     model="gpt-4o",
     messages=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe any damage visible."},
+            {"type": "text", "text": "Describe what you see in this image."},
             {"type": "image_url", "image_url": {
                 "url": f"data:image/png;base64,{img_b64}"
             }},
@@ -335,16 +335,16 @@ def enforce_budget(messages, max_tokens):
         '01 — Structured prompts: build prompts that yield JSON-parseable outputs',
         '02 — Token budget: count tokens and enforce a max budget',
         '03 — Guardrail chain: schema + content filter + confidence threshold',
-        '04 — Multimodal analysis: vision and audio payloads, damage report parsing',
+        '04 — Multimodal analysis: vision and audio payloads',
       ],
     },
   },
   {
     type: 'title',
     content: {
-      title: 'Conversation hardened — Module 4',
-      subtitle: 'Prompts produce structure, budgets hold, guardrails catch the rest.',
-      icon: 'party-popper',
+      title: 'Module 4 — Complete',
+      subtitle: 'Next: RAG fundamentals',
+      icon: 'check-circle',
     },
   },
 ];

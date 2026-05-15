@@ -1,6 +1,6 @@
 # Module 1 — Working with the LLM
 
-> Time to talk to the model. After building a solid Python foundation, the Pathfinder AI needs a voice. This module is your "hello world" with LLMs — making real API calls, building a CLI chat interface where crew members type questions and see answers stream back token by token, and learning how to craft prompts that get the results you want. By the end of this module you have a working chatbot and a toolkit of prompting techniques you can apply immediately.
+> Time to talk to the model. After building a solid Python foundation, this module is your "hello world" with LLMs — making real API calls, building a CLI chat interface where users type questions and see answers stream back token by token, and learning how to craft prompts that get the results you want. By the end of this module you have a working chatbot and a toolkit of prompting techniques you can apply immediately.
 
 ## Learning goals
 
@@ -64,7 +64,7 @@ def stream_response(client, messages):
     return "".join(tokens)
 ```
 
-Each chunk contains a `delta` with a fragment of the response. Print it immediately and the user sees words appear as they are generated. Streaming also lets you show **tool calls in progress** in later modules — the user sees "Querying crew database..." before the final answer.
+Each chunk contains a `delta` with a fragment of the response. Print it immediately and the user sees words appear as they are generated. Progressive rendering keeps the user engaged during generation.
 
 ---
 
@@ -105,19 +105,10 @@ The key insight is that prompts are **instructions, not wishes**. Vague prompts 
 
 ---
 
-## Tool call UX
-
-When the agent calls a tool mid-conversation, the user should see what is happening. Stream a `tool_call` event with the tool name and arguments, then a `tool_result` event with the outcome, before the final answer resumes. This makes the AI transparent — the crew can see it querying the crew database, not just producing an answer from thin air.
-
-Citations work the same way: when the answer references data from a tool call, link it back to the source so the user can verify.
-
----
-
 ## Field rules
 
 - **Stream by default.** Waiting 5 seconds for a response feels broken.
 - **Prompt with intent.** Vague instructions get vague results. Be explicit about format, scope, and persona.
-- **Show your work.** Tool calls in the stream let users see what the AI is doing.
 
 ---
 

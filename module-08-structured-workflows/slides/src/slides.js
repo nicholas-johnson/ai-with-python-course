@@ -204,9 +204,9 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Workflows online — Module 8',
-      subtitle: 'Agents that plan before they act. Next: multi-agent coordination.',
-      icon: 'party-popper',
+      title: 'Module 8 — Complete',
+      subtitle: 'Next: multi-agent systems',
+      icon: 'check-circle',
     },
   },
 ];

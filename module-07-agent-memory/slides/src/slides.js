@@ -10,7 +10,7 @@ export const slides = [
   {
     type: 'welcome',
     content: {
-      title: 'The ship remembers',
+      title: 'Persistence strategies for conversational agents',
       points: [
         'Useful agents need session context, durable preferences, and policies for forgetting.',
         'Short-term vs long-term memory — different stores, different lifetimes.',
@@ -262,7 +262,7 @@ export const slides = [
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Teaching the ship to remember',
+      title: 'Exercises',
       points: [
         '01 — Memory store: session buffer + long-term memory with decay and forget',
         '02 — Conversation summary: auto-summarise when the buffer overflows',
@@ -273,9 +273,9 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Memory banks online — Module 7',
-      subtitle: 'The ship remembers. Next: structured workflows.',
-      icon: 'party-popper',
+      title: 'Module 7 — Complete',
+      subtitle: 'Next: structured workflows',
+      icon: 'check-circle',
     },
   },
 ];

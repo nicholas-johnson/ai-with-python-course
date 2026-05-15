@@ -3,14 +3,14 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 9 — Multi-Agent Systems',
-      subtitle: 'Roles, coordination, and shared context aboard the Pathfinder',
+      subtitle: 'Roles, coordination, and shared context across cooperating agents',
       icon: 'users',
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'Many minds, one mission',
+      title: 'When and how to distribute work across multiple agents',
       points: [
         'Sometimes one agent is not enough — and sometimes it is.',
         'Multi-agent adds latency and failure modes. Use it when it earns its keep.',
@@ -38,7 +38,7 @@ export const slides = [
       title: 'When to go multi-agent',
       icon: 'git-branch',
       points: [
-        '**Yes**: different expertise needed (navigation vs science vs engineering).',
+        '**Yes**: different expertise needed (finance vs legal vs technical).',
         '**Yes**: critic/reviewer improves quality of high-stakes answers.',
         '**Yes**: parallel research on independent sub-questions.',
         '**No**: single-domain Q&A where one prompt + tools suffices.',
@@ -65,9 +65,9 @@ export const slides = [
     content: {
       title: 'Router + specialist agents',
       code: `SPECIALISTS = {
-    "navigation": nav_agent,
-    "engineering": eng_agent,
-    "science": sci_agent,
+    "finance": fin_agent,
+    "technical": tech_agent,
+    "legal": legal_agent,
 }
 
 def classify(query, client):
@@ -78,9 +78,9 @@ def route(query, client):
     dept = classify(query, client)
     return SPECIALISTS[dept].run(query, client)
 
-# "What is our heading?" → navigation
-# "Hull integrity report" → engineering
-# "Analyse the nebula scan" → science`,
+# "What is our budget?" → finance
+# "Why is the API slow?" → technical
+# "Review the contract terms" → legal`,
       highlights: [
         'LLM-based classification with JSON mode — robust to ambiguous queries',
         'Each specialist has its own system prompt and domain focus',
@@ -103,7 +103,7 @@ def route(query, client):
     type: 'title',
     content: {
       title: 'Coordination patterns',
-      subtitle: 'Supervisor, debate, and other ways to organise a crew',
+      subtitle: 'Supervisor, debate, and other ways to organise cooperating agents',
       icon: 'git-branch',
     },
   },
@@ -178,9 +178,9 @@ def route(query, client):
         advocate_arg, skeptic_arg
     )
 
-# Advocate: "Diverting saves 3 days..."
-# Skeptic:  "Asteroid density is too high..."
-# Judge:    "The skeptic's safety case wins."`,
+# Advocate: "Migrating saves 3 sprints..."
+# Skeptic:  "Migration risk is too high..."
+# Judge:    "The skeptic's risk case wins."`,
       highlights: [
         'Multiple rounds sharpen arguments before the judge decides',
         'Useful for high-stakes decisions where you want a devil\'s advocate',
@@ -290,7 +290,7 @@ def route(query, client):
         },
         {
           rule: 'Scope tools per agent',
-          example: 'The critic should not fire the weapons system.',
+          example: 'The critic should not delete production data.',
           icon: 'lock',
         },
         {
@@ -304,7 +304,7 @@ def route(query, client):
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Assembling the crew',
+      title: 'Exercises',
       points: [
         '01 — Router agent: classify queries and dispatch to specialist agents',
         '02 — Supervisor-critic: orchestrate specialists with a quality review loop',
@@ -315,9 +315,9 @@ def route(query, client):
   {
     type: 'title',
     content: {
-      title: 'Crew assembled — Module 9',
-      subtitle: 'The agents work together. Next: frameworks with LangChain.',
-      icon: 'party-popper',
+      title: 'Module 9 — Complete',
+      subtitle: 'Next: frameworks with LangChain',
+      icon: 'check-circle',
     },
   },
 ];

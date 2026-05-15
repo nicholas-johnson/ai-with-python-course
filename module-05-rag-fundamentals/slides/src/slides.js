@@ -3,7 +3,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 5 — RAG Fundamentals',
-      subtitle: 'Ground answers in ship knowledge, not guesses',
+      subtitle: 'Retrieval-augmented generation from ingestion to citation',
       icon: 'book-open',
     },
   },
@@ -12,7 +12,7 @@ export const slides = [
     content: {
       title: 'Why RAG?',
       points: [
-        'LLMs hallucinate. Ship logs do not.',
+        'LLMs hallucinate. Source documents do not.',
         'Retrieval-Augmented Generation feeds real documents into the prompt.',
         'The model answers from evidence — and you can cite the source.',
       ],
@@ -24,7 +24,7 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Design **chunking strategies** for long-form ship logs and manuals.',
+        'Design **chunking strategies** for long-form documents and knowledge bases.',
         'Produce **embeddings**, store in a **vector index**, and query effectively.',
         'Apply **retrieval strategies**: hybrid search, filters, reranking.',
         'Build **grounded prompts** with citations back to source chunks.',
@@ -218,8 +218,8 @@ def search(query, index, k=5):
         f"Question: {query}"
     )
 
-# Answer: "The hull breach occurred on deck 7 [2]
-#          during the Kepler Sweep [0]."`,
+# Answer: "The outage began at 14:32 UTC [2]
+#          affecting the payments service [0]."`,
       highlights: [
         'Numbered passages let the model cite its sources',
         'ONLY constrains answers to retrieved evidence',
@@ -286,10 +286,10 @@ def search(query, index, k=5):
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Mining the ship archives',
+      title: 'Exercises',
       points: [
-        '01 — Document chunker: split ship logs into overlapping windows',
-        '02 — Vector search: embed and search the mission archives',
+        '01 — Document chunker: split documents into overlapping windows',
+        '02 — Vector search: embed and query a document collection',
         '03 — RAG pipeline: end-to-end retrieval with citation linking',
       ],
     },
@@ -297,9 +297,9 @@ def search(query, index, k=5):
   {
     type: 'title',
     content: {
-      title: 'Archives online — Module 5',
-      subtitle: 'The ship has memory now. Next: give it colleagues.',
-      icon: 'party-popper',
+      title: 'Module 5 — Complete',
+      subtitle: 'Next: structured facts and knowledge graphs',
+      icon: 'check-circle',
     },
   },
 ];

@@ -3,16 +3,16 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 1 — Working with the LLM',
-      subtitle: 'The front door: giving the Pathfinder AI a voice',
+      subtitle: 'CLI, API, and streaming',
       icon: 'message-square',
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'Every ship needs a computer you can talk to',
+      title: 'The user-facing layer',
       points: [
-        'We covered Python fundamentals (Module 0). Now it needs a voice.',
+        'Module 0 covered Python fundamentals. This module adds the LLM interface layer.',
         'CLI, API, and session memory — the user-facing layer.',
         'Streaming makes the AI feel responsive, not stuck.',
       ],
@@ -27,7 +27,6 @@ export const slides = [
         'Build a **CLI chat loop** with conversation history.',
         'Create a **FastAPI streaming endpoint** (SSE).',
         'Implement **pluggable session storage**: in-memory, file-based.',
-        'Understand **tool call UX** — showing progress during execution.',
       ],
     },
   },
@@ -78,7 +77,7 @@ export const slides = [
       points: [
         'Users perceive streaming as **faster** even when total time is the same.',
         'First token appears in ~200ms vs waiting 2-5s for full response.',
-        'Shows tool calls **in progress** — the user knows something is happening.',
+        'Progressive rendering keeps the user engaged during generation.',
         'Server-Sent Events (SSE) — simple, HTTP-native, no WebSocket complexity.',
       ],
     },
@@ -100,7 +99,7 @@ async def chat(request: ChatRequest):
     return EventSourceResponse(generate())`,
       highlights: [
         'Each yield is an SSE event the client receives immediately',
-        'Structured events: session, token, tool_call, done',
+        'Structured events: session, token, done',
       ],
     },
   },
@@ -114,12 +113,12 @@ async def chat(request: ChatRequest):
     },
   },
 
-  // ---- Section: Sessions + tool UX ----
+  // ---- Section: Sessions ----
   {
     type: 'title',
     content: {
-      title: 'Sessions + tool UX',
-      subtitle: 'Persistence and transparency for the user',
+      title: 'Session management',
+      subtitle: 'Pluggable persistence for conversation history',
       icon: 'layers',
     },
   },
@@ -170,19 +169,6 @@ mgr = SessionManager(FileBackend(Path("./sessions")))`,
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'Tool call UX',
-      icon: 'wrench',
-      points: [
-        'Stream a `tool_call` event when the AI invokes a tool.',
-        'Show the tool name and arguments — transparency builds trust.',
-        'Stream the `tool_result` before the final answer resumes.',
-        'Citations: link answers back to their data sources.',
-      ],
-    },
-  },
   // ---- Demo: Prompt engineering ----
   {
     type: 'title',
@@ -218,18 +204,13 @@ mgr = SessionManager(FileBackend(Path("./sessions")))`,
           example: 'Code to Protocol, not to dict or file.',
           icon: 'layers',
         },
-        {
-          rule: 'Show your work',
-          example: 'Tool calls in the stream let users see what the AI is doing.',
-          icon: 'search',
-        },
       ],
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Building the bridge console',
+      title: 'Exercises',
       points: [
         '01 — Chat loop: conversation history and LLM interaction',
         '02 — Streaming API: FastAPI + SSE endpoint',
@@ -240,9 +221,9 @@ mgr = SessionManager(FileBackend(Path("./sessions")))`,
   {
     type: 'title',
     content: {
-      title: 'Comms online — Module 1',
-      subtitle: 'The Pathfinder has a voice. Next: make it smart with prompting.',
-      icon: 'party-popper',
+      title: 'Module 1 — Complete',
+      subtitle: 'Next: the agent core',
+      icon: 'check-circle',
     },
   },
 ];

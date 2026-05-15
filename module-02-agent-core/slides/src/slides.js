@@ -3,7 +3,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 2 — Agent Core',
-      subtitle: 'The tool-using loop that powers every AI on the Pathfinder',
+      subtitle: 'The core pattern for AI agents',
       icon: 'cpu',
     },
   },
@@ -50,15 +50,15 @@ export const slides = [
     content: {
       title: 'Conversation state',
       code: `messages = [
-    {"role": "system", "content": "You are the Pathfinder AI..."},
-    {"role": "user", "content": "Who is on the Kepler Sweep?"},
+    {"role": "system", "content": "You are a helpful assistant..."},
+    {"role": "user", "content": "How many engineers are in the London office?"},
     {"role": "assistant", "tool_calls": [
-        {"id": "c1", "name": "query_crew", "arguments": {...}}
+        {"id": "c1", "name": "lookup_employees", "arguments": {...}}
     ]},
     {"role": "tool", "tool_call_id": "c1",
-     "content": '[{"name": "Voss"}, ...]'},
+     "content": '[{"name": "Alice"}, ...]'},
     {"role": "assistant",
-     "content": "4 crew assigned: Voss, Chen, Morel, Kwan."},
+     "content": "3 engineers found: Alice, Bob, Carol."},
 ]`,
       highlights: [
         'The LLM decides whether to call a tool or answer directly',
@@ -131,18 +131,18 @@ export const slides = [
       code: `registry = ToolRegistry()
 
 @registry.register(
-    name="ship_status",
-    description="Get current status of a ship system",
+    name="check_inventory",
+    description="Check current inventory for a product",
     parameters={
         "type": "object",
         "properties": {
-            "system": {"type": "string"}
+            "product": {"type": "string"}
         },
-        "required": ["system"],
+        "required": ["product"],
     },
 )
-def ship_status(system: str) -> dict:
-    return {"system": system, "status": "online"}`,
+def check_inventory(product: str) -> dict:
+    return {"product": product, "stock": 42}`,
       highlights: [
         'Decorator pattern: schema lives next to the handler',
         'JSON schema doubles as documentation and validation spec',
@@ -273,9 +273,9 @@ def ship_status(system: str) -> dict:
     content: {
       title: 'Golden test structure',
       code: `case = GoldenCase(
-    name="crew count query",
-    user_input="How many in science?",
-    expected_tool_names=["get_crew_count"],
+    name="employee count query",
+    user_input="How many in engineering?",
+    expected_tool_names=["count_employees"],
     expected_answer_contains="3",
 )
 
@@ -334,7 +334,7 @@ assert result.passed`,
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Engineering the agent core',
+      title: 'Exercises',
       points: [
         '01 — Tool loop: the minimal LLM → tool → result cycle',
         '02 — Tool registry: schema, validation, routing',
@@ -345,9 +345,9 @@ assert result.passed`,
   {
     type: 'title',
     content: {
-      title: 'Core online — Module 2',
-      subtitle: 'The agent loop is running. Next: give it a voice.',
-      icon: 'party-popper',
+      title: 'Module 2 — Complete',
+      subtitle: 'Next: MCP and tool integration',
+      icon: 'check-circle',
     },
   },
 ];

@@ -78,9 +78,9 @@ fact = Fact.model_validate_json(llm_response)`,
         f"Text:\\n{text}"
     )
 
-# Input:  "Voss commands the Kepler Sweep mission."
-# Output: [{"subject": "Voss", "predicate": "commands",
-#           "object": "Kepler Sweep", ...}]`,
+# Input:  "Alice manages the infrastructure team."
+# Output: [{"subject": "Alice", "predicate": "manages",
+#           "object": "infrastructure team", ...}]`,
       highlights: [
         'Explicit schema in the prompt keeps the output predictable',
         'Confidence lets you filter low-quality extractions downstream',
@@ -126,10 +126,10 @@ fact = Fact.model_validate_json(llm_response)`,
       title: 'Knowledge graphs',
       icon: 'share-2',
       points: [
-        '**Nodes** = entities (crew members, missions, ship systems).',
-        '**Edges** = relationships (commands, assigned_to, located_at).',
+        '**Nodes** = entities (people, organisations, products).',
+        '**Edges** = relationships (manages, works_at, supplies).',
         'Build from extracted facts: subject → edge → object.',
-        'Traversal: "Who is connected to Voss within 2 hops?"',
+        'Traversal: "Who is connected to Acme Corp within 2 hops?"',
       ],
     },
   },
@@ -295,7 +295,7 @@ class KnowledgeGraph:
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Extracting ship knowledge',
+      title: 'Exercises',
       points: [
         '01 — Fact extractor: Pydantic schemas and LLM extraction with validation',
         '02 — Knowledge graph: entities, relationships, and multi-hop traversal',
@@ -306,9 +306,9 @@ class KnowledgeGraph:
   {
     type: 'title',
     content: {
-      title: 'Knowledge structured — Module 6',
-      subtitle: 'Facts extracted, graph built, questions grounded. Next: retrieve smarter.',
-      icon: 'party-popper',
+      title: 'Module 6 — Complete',
+      subtitle: 'Next: agent memory',
+      icon: 'check-circle',
     },
   },
 ];

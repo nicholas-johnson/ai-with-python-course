@@ -15,7 +15,7 @@ import sys
 from openai import OpenAI
 
 MODEL = "gpt-4o-mini"
-SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful, concise, and professional."
+SYSTEM_PROMPT = "You are a helpful AI assistant. Be concise and professional."
 
 
 # ---------------------------------------------------------------------------

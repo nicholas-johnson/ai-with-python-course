@@ -3,16 +3,16 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 0 — Python Fundamentals',
-      subtitle: 'Ship systems programming for the DSS Pathfinder',
-      icon: 'rocket',
+      subtitle: 'Core Python for AI development',
+      icon: 'code',
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'All hands to stations',
+      title: 'What this module covers',
       points: [
-        'The Pathfinder runs Python from bridge to engine room.',
+        'This module covers the Python patterns used throughout the course.',
         'Before we build a single agent, we need a solid foundation.',
         'Data structures, modules, async, and HTTP — the core toolkit.',
       ],
@@ -35,12 +35,12 @@ export const slides = [
   {
     type: 'standard',
     content: {
-      title: 'Data structures — the cargo hold',
+      title: 'Data structures',
       icon: 'database',
       points: [
-        '**Lists** — ordered, mutable, iterable. Crew roster, sensor readings.',
-        '**Dicts** — O(1) key-value lookup. Crew by ID, config maps.',
-        '**Sets** — unique elements, fast membership, set algebra. Specializations.',
+        '**Lists** — ordered, mutable, iterable. User records, event logs.',
+        '**Dicts** — O(1) key-value lookup. Lookup tables, configuration.',
+        '**Sets** — unique elements, fast membership, set algebra. Tags, categories.',
         '**Tuples** — immutable sequences. Fixed records, function returns.',
       ],
     },
@@ -49,14 +49,14 @@ export const slides = [
     type: 'code',
     content: {
       title: 'List comprehensions',
-      code: `crew = load_json("crew.json")
+      code: `users = load_json("users.json")
 
 # Filter + transform in one expression
-active_scientists = [
-    m["name"]
-    for m in crew
-    if m["department"] == "science"
-    and m["activeMission"] is not None
+active_engineers = [
+    u["name"]
+    for u in users
+    if u["role"] == "engineer"
+    and u["active_project"] is not None
 ]`,
       highlights: [
         'Comprehensions replace verbose for-loops for filter+map',
@@ -69,14 +69,14 @@ active_scientists = [
     content: {
       title: 'Dict operations',
       code: `# Build a lookup table
-crew_by_id = {m["id"]: m for m in crew}
-engineer = crew_by_id["CRW-003"]
+users_by_id = {u["id"]: u for u in users}
+admin = users_by_id["USR-003"]
 
-# Count by department
+# Count by role
 counts: dict[str, int] = {}
-for m in crew:
-    dept = m["department"]
-    counts[dept] = counts.get(dept, 0) + 1`,
+for u in users:
+    role = u["role"]
+    counts[role] = counts.get(role, 0) + 1`,
       highlights: [
         'Dict comprehensions for instant lookups',
         '.get(key, default) avoids KeyError',
@@ -89,7 +89,7 @@ for m in crew:
     content: {
       title: 'Demo — Data structures',
       subtitle: 'Switch to terminal: python demo/01_data_structures.py',
-      icon: 'rocket',
+      icon: 'terminal',
     },
   },
 
@@ -98,7 +98,7 @@ for m in crew:
     type: 'title',
     content: {
       title: 'Modules, CLI + logging',
-      subtitle: 'Organising code for real ship systems',
+      subtitle: 'Organising code for maintainable projects',
       icon: 'box',
     },
   },
@@ -123,7 +123,7 @@ for m in crew:
       code: `import argparse
 
 parser = argparse.ArgumentParser(
-    description="Pathfinder crew query tool"
+    description="User management CLI"
 )
 parser.add_argument("--department", "-d")
 parser.add_argument("--min-clearance", "-c", type=int, default=0)
@@ -142,7 +142,7 @@ args = parser.parse_args()`,
       points: [
         '`logging.basicConfig(level=logging.INFO)` — one-line setup.',
         'Levels: DEBUG → INFO → WARNING → ERROR → CRITICAL.',
-        '`logger.info("Loaded %d crew", count)` — lazy formatting.',
+        '`logger.info("Loaded %d records", count)` — lazy formatting.',
         'Production: structured logs (JSON), not print statements.',
       ],
     },
@@ -153,7 +153,7 @@ args = parser.parse_args()`,
     content: {
       title: 'Demo — Modules + CLI',
       subtitle: 'Switch to terminal: python demo/02_modules_cli.py',
-      icon: 'rocket',
+      icon: 'terminal',
     },
   },
 
@@ -170,7 +170,7 @@ args = parser.parse_args()`,
   {
     type: 'standard',
     content: {
-      title: 'Dataclasses — structured ship records',
+      title: 'Dataclasses and protocols',
       icon: 'file-text',
       points: [
         '`@dataclass` generates `__init__`, `__repr__`, `__eq__` for you.',
@@ -187,17 +187,17 @@ args = parser.parse_args()`,
       code: `from dataclasses import dataclass, field
 
 @dataclass
-class CrewMember:
+class Employee:
     id: str
     name: str
     role: str
-    clearance_level: int = 1
-    specializations: list[str] = field(default_factory=list)
-    active_mission: str | None = None
+    access_level: int = 1
+    skills: list[str] = field(default_factory=list)
+    active_project: str | None = None
 
     @property
     def is_available(self) -> bool:
-        return self.active_mission is None`,
+        return self.active_project is None`,
       highlights: [
         'str | None — Python 3.10+ union syntax',
         'Properties for derived state without extra storage',
@@ -230,7 +230,7 @@ def print_briefings(items: list[Briefable]):
     for item in items:
         print(item.briefing())
 
-# Mission and ShipSystem both work —
+# Order and Invoice both qualify —
 # no shared base class needed`,
       highlights: [
         'Structural subtyping: if it has .briefing(), it qualifies',
@@ -244,7 +244,7 @@ def print_briefings(items: list[Briefable]):
     content: {
       title: 'Demo — Dataclasses + Protocols',
       subtitle: 'Switch to terminal: python demo/03_dataclasses_protocols.py',
-      icon: 'rocket',
+      icon: 'terminal',
     },
   },
 
@@ -278,8 +278,8 @@ def print_briefings(items: list[Briefable]):
       code: `import asyncio
 
 async def producer(queue: asyncio.Queue):
-    for reading in sensor_data:
-        await queue.put(reading)
+    for event in events:
+        await queue.put(event)
     await queue.put(None)  # sentinel
 
 async def consumer(queue: asyncio.Queue):
@@ -322,7 +322,7 @@ task.cancel()`,
     content: {
       title: 'Demo — Async essentials',
       subtitle: 'Switch to terminal: python demo/04_async_essentials.py',
-      icon: 'rocket',
+      icon: 'terminal',
     },
   },
 
@@ -357,12 +357,12 @@ task.cancel()`,
 
 app = FastAPI()
 
-@app.get("/missions")
-async def list_missions(status: str | None = None):
-    results = MISSIONS
+@app.get("/projects")
+async def list_projects(status: str | None = None):
+    results = PROJECTS
     if status:
-        results = [m for m in results if m["status"] == status]
-    return {"count": len(results), "missions": results}`,
+        results = [p for p in results if p["status"] == status]
+    return {"count": len(results), "projects": results}`,
       highlights: [
         'Type hints become query parameter validation',
         'Return dicts/lists — FastAPI serializes to JSON',
@@ -375,7 +375,7 @@ async def list_missions(status: str | None = None):
     content: {
       title: 'Demo — HTTP + FastAPI',
       subtitle: 'Switch to terminal: python demo/05_http_basics.py',
-      icon: 'rocket',
+      icon: 'terminal',
     },
   },
 
@@ -415,20 +415,20 @@ async def list_missions(status: str | None = None):
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Pathfinder systems check',
+      title: 'Exercises',
       points: [
-        '01 — Crew manifest: dataclasses, filtering, formatting',
-        '02 — Async sensor relay: queues, timeouts, producer/consumer',
-        '03 — Mission API: FastAPI CRUD with httpx tests',
+        '01 — Data processing: dataclasses, filtering, formatting',
+        '02 — Async pipeline: queues, timeouts, producer/consumer',
+        '03 — REST API: FastAPI CRUD with httpx tests',
       ],
     },
   },
   {
     type: 'title',
     content: {
-      title: 'Stations secured — Module 0',
-      subtitle: 'Run the demos, pass the tests, then report to Module 1',
-      icon: 'party-popper',
+      title: 'Module 0 — Complete',
+      subtitle: 'Next: working with the LLM',
+      icon: 'check-circle',
     },
   },
 ];
