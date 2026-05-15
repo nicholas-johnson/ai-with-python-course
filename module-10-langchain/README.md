@@ -1,13 +1,13 @@
 # Module 10 — LangChain with Python
 
-> You have built agents from scratch — loops, registries, memory stores, RAG pipelines. Now meet LangChain, the framework that packages these patterns into reusable components. LangChain is not magic; it is the same concepts you already know wrapped in a consistent API. This module teaches you the framework's building blocks, when to use them, and when to roll your own.
+> LangChain packages common AI patterns into composable building blocks. Prompt templates, tool agents, RAG pipelines — the same things you built by hand, but with less boilerplate. This module teaches you to use LangChain practically: build a chain, add tools, add retrieval. Each exercise builds on the last, so by the end you have a working RAG agent assembled from LangChain components.
 
 ## Learning goals
 
-- Understand LangChain's building blocks: **chains**, **prompt templates**, **output parsers**, **LCEL**.
-- Build a **tool-calling agent** with `create_tool_calling_agent` and `AgentExecutor`.
-- Construct **RAG chains** with `RetrievalQA` and LCEL.
-- Evaluate the **trade-offs** between LangChain and hand-rolled solutions.
+- Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.
+- Wrap functions as **LangChain tools** and run them via **AgentExecutor**.
+- Construct a **RAG chain** with a LangChain retriever and ChromaDB.
+- Know when to use LangChain and when to stay hand-rolled.
 
 ---
 
@@ -65,7 +65,7 @@ LCEL chains are:
 
 ## Tool-calling agents
 
-LangChain wraps the tool-calling loop from Module 3 into `AgentExecutor`. You define tools, create an agent, and run it — the framework handles the loop, tool dispatch, and error recovery.
+LangChain wraps the tool-calling loop from Module 2 into `AgentExecutor`. You define tools, create an agent, and run it — the framework handles the loop, tool dispatch, and error recovery.
 
 ```python
 from langchain_core.tools import tool
@@ -89,13 +89,13 @@ executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 result = executor.invoke({"input": "What is the reactor temperature?"})
 ```
 
-The `@tool` decorator generates the JSON Schema from the function's type hints and docstring — same pattern as the `ToolRegistry` you built in Module 3, but standardised. `verbose=True` prints the thought/action/observation trace.
+The `@tool` decorator generates the JSON Schema from the function's type hints and docstring — same pattern as the `ToolRegistry` you built in Module 2, but standardised. `verbose=True` prints the thought/action/observation trace.
 
 ---
 
 ## RAG chains with LCEL
 
-LangChain's retrieval chain follows the same pattern from Module 6, but with less boilerplate:
+LangChain's retrieval chain follows the same pattern from Module 5, but with less boilerplate:
 
 ```python
 from langchain_core.runnables import RunnablePassthrough
@@ -133,13 +133,13 @@ LangChain accelerates development when you are building standard patterns (RAG, 
 | **Dependencies** | Large dependency tree | Minimal — just `openai` and your code |
 | **Learning value** | Hides mechanics | Teaches fundamentals |
 
-The recommendation: **understand the fundamentals first** (Modules 1-9), then use LangChain to accelerate production work. You can debug a LangChain chain because you know what it does under the hood.
+The recommendation: **know the pattern first, then use the framework**. You can debug a LangChain chain because you know what it does under the hood.
 
 ---
 
 ## Field rules
 
-- **Learn the loop before the framework.** LangChain is the tool-calling loop, abstracted.
+- **Know the pattern, then pick the tool.** LangChain is faster only if you know what it does underneath.
 - **Use LCEL for standard pipelines.** Prompt → model → parser is one line.
 - **Keep `verbose=True` during development.** The trace shows every tool call and decision.
 - **Know when to eject.** If the framework fights you, go back to plain Python.
@@ -156,11 +156,13 @@ python module-10-langchain/demo/03_langchain_rag.py
 
 ## Exercises
 
-| Folder | Mission |
-| ------ | ------- |
-| [`exercises/01-chain-basics`](exercises/01-chain-basics/) | Build an LCEL chain: prompt → model → JSON parser. |
-| [`exercises/02-tool-agent`](exercises/02-tool-agent/) | Wrap ship tools with `@tool` and run them via `AgentExecutor`. |
-| [`exercises/03-rag-chain`](exercises/03-rag-chain/) | Build a RAG chain with LCEL: retriever → prompt → model → answer. |
+The three exercises chain together. Each builds on the last; you can bring your own code forward or use the provided solution from the previous exercise.
+
+| Folder | What you build |
+| ------ | -------------- |
+| [`exercises/01-chain-basics`](exercises/01-chain-basics/) | LCEL chain that classifies crew reports into category, summary, and priority. |
+| [`exercises/02-tool-agent`](exercises/02-tool-agent/) | Tool agent that wraps the classifier from 01 + ship tools in AgentExecutor. |
+| [`exercises/03-rag-chain`](exercises/03-rag-chain/) | RAG chain that adds retrieval over ship logs to the agent from 02. |
 
 Run tests for this module:
 

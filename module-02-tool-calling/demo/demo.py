@@ -3,22 +3,23 @@ Module 2 Demo — Tool Calling
 Run:  python module-02-tool-calling/demo/demo.py
 
 Walks through the full module in one script:
-  Part 1: Message format — make a real tool call, trace the 4 message roles
-  Part 2: Tool registry — decorator registration, validation, routing, error handling
-  Part 3: Safety rails — allowlists, rate limits, redaction, audit logs
-  Part 4: Eval harness — golden tests with a mock LLM (no API calls)
+  Part 1: Tool-call message flow — live tool call, trace the 4 message roles
+  Part 2: Tool registry — live agent with decorator-registered tools
+  Part 3: Guarded agent — safety rails (allowlist, rate limit, redaction, audit) wrapping the agent
 
-Requires: OPENAI_API_KEY environment variable (Parts 1 only).
+Requires: OPENAI_API_KEY environment variable.
 """
 
 import json
 import re
-import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 MODEL = "gpt-4o-mini"
 
@@ -32,10 +33,6 @@ def section(title: str):
     print(f"\n{'='*60}")
     print(f"  {title}")
     print(f"{'='*60}\n")
-
-
-def pause():
-    input("  [press Enter to continue]\n")
 
 
 # ---------------------------------------------------------------------------
@@ -81,10 +78,11 @@ def execute_tool(name: str, arguments: dict) -> str:
 
 
 def demo_message_format(client: OpenAI):
-    section("Part 1: Message Format — Live Tool Call")
+    section("Part 1: Tool-Call Message Flow — The 4 Roles")
 
-    print("  Sending a question that will trigger a tool call...")
-    print("  Question: 'Who is assigned to mission MSN-001?'\n")
+    print("  Chat with the Pathfinder AI. It has one tool: query_crew.")
+    print("  Watch the message flow: SYSTEM → USER → ASSISTANT (tool_call) → TOOL → ASSISTANT")
+    print("  Type 'quit' to return to the menu.\n")
 
     messages = [
         {
@@ -94,46 +92,91 @@ def demo_message_format(client: OpenAI):
                 "for looking up crew assigned to missions. Always cite the data source."
             ),
         },
-        {"role": "user", "content": "Who is assigned to mission MSN-001?"},
     ]
 
-    print("  [SYSTEM] Sets the agent persona + available tools")
-    print("  [USER]   'Who is assigned to mission MSN-001?'")
+    while True:
+        try:
+            user_msg = input("You> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not user_msg or user_msg.lower() == "quit":
+            break
 
-    response = client.chat.completions.create(
-        model=MODEL, messages=messages, tools=TOOLS
-    )
-    assistant_msg = response.choices[0].message
+        messages.append({"role": "user", "content": user_msg})
+        print(f"  [USER]      {user_msg}")
 
-    if assistant_msg.tool_calls:
-        tc = assistant_msg.tool_calls[0]
-        print(f"  [ASSISTANT] tool_call: {tc.function.name}({tc.function.arguments})")
-
-        args = json.loads(tc.function.arguments)
-        result = execute_tool(tc.function.name, args)
-        print(f"  [TOOL]      result: {result[:80]}...")
-
-        messages.append(assistant_msg)
-        messages.append(
-            {"role": "tool", "tool_call_id": tc.id, "content": result}
-        )
-
-        final = client.chat.completions.create(
+        response = client.chat.completions.create(
             model=MODEL, messages=messages, tools=TOOLS
         )
-        print(f"  [ASSISTANT] {final.choices[0].message.content}")
-    else:
-        print(f"  [ASSISTANT] {assistant_msg.content}")
+        assistant_msg = response.choices[0].message
 
-    print("\n  Key points:")
-    print("  • 4 roles: system, user, assistant, tool")
-    print("  • Assistant decides whether to call a tool or answer directly")
+        if assistant_msg.tool_calls:
+            messages.append(assistant_msg)
+            for tc in assistant_msg.tool_calls:
+                args = json.loads(tc.function.arguments)
+                print(f"  [ASSISTANT] tool_call → {tc.function.name}({tc.function.arguments})")
+                result = execute_tool(tc.function.name, args)
+                print(f"  [TOOL]      {tc.function.name} returned: {result[:120]}")
+                messages.append(
+                    {"role": "tool", "tool_call_id": tc.id, "content": result}
+                )
+
+            final = client.chat.completions.create(
+                model=MODEL, messages=messages, tools=TOOLS
+            )
+            answer = final.choices[0].message.content
+            messages.append({"role": "assistant", "content": answer})
+            print(f"  [ASSISTANT] {answer}\n")
+        else:
+            content = assistant_msg.content
+            messages.append({"role": "assistant", "content": content})
+            print(f"  [ASSISTANT] {content}\n")
+
+    print("  Key concepts:")
+    print("  • 4 message roles: system, user, assistant, tool")
+    print("  • The model decides whether to call a tool or answer directly")
     print("  • Tool results feed back as messages — the model interprets them")
-    print("  • This loop is the foundation of every agent")
+    print("  • This request-response loop is the foundation of every agent")
 
 
 # ---------------------------------------------------------------------------
-# Part 2: Tool registry — decorator pattern
+# Shared: live agent loop (used by Parts 2 and 3)
+# ---------------------------------------------------------------------------
+
+
+def agent_loop(client: OpenAI, messages: list[dict], tools_list: list[dict],
+               tool_handler, *, label: str = ""):
+    """One turn of the agent loop: call LLM, handle tool calls, return final answer."""
+    response = client.chat.completions.create(
+        model=MODEL, messages=messages, tools=tools_list
+    )
+    assistant_msg = response.choices[0].message
+
+    if not assistant_msg.tool_calls:
+        messages.append({"role": "assistant", "content": assistant_msg.content})
+        print(f"  [ASSISTANT] {assistant_msg.content}\n")
+        return
+
+    messages.append(assistant_msg)
+    for tc in assistant_msg.tool_calls:
+        args = json.loads(tc.function.arguments)
+        print(f"  [ASSISTANT] tool_call → {tc.function.name}({tc.function.arguments})")
+        result, allowed = tool_handler(tc.function.name, args)
+        tag = "ALLOWED" if allowed else "BLOCKED"
+        print(f"  [{tag}]     {tc.function.name} → {result[:120]}")
+        messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+
+    final = client.chat.completions.create(
+        model=MODEL, messages=messages, tools=tools_list
+    )
+    answer = final.choices[0].message.content
+    messages.append({"role": "assistant", "content": answer})
+    print(f"  [ASSISTANT] {answer}\n")
+
+
+# ---------------------------------------------------------------------------
+# Part 2: Tool registry — decorator pattern, live agent
 # ---------------------------------------------------------------------------
 
 
@@ -222,31 +265,51 @@ def ship_status(system: str) -> dict:
     return systems.get(system, {"system": system, "status": "unknown"})
 
 
-def demo_tool_registry():
-    section("Part 2: Tool Registry — Decorator Pattern")
+def demo_tool_registry(client: OpenAI):
+    section("Part 2: Tool Registry — Live Agent with Decorator-Registered Tools")
 
-    print("  Registered tools:")
+    print("  Registered tools (via @registry.register decorator):")
     for tool in registry.list_tools():
         fn = tool["function"]
-        print(f"    • {fn['name']}: {fn['description']}")
+        params = ", ".join(fn["parameters"].get("required", []))
+        print(f"    • {fn['name']}({params}) — {fn['description']}")
 
-    print("\n  Calling tools:\n")
+    print("\n  Chat with the agent. The LLM picks which tool to call;")
+    print("  the registry dispatches to the right handler.")
+    print("  Type 'quit' to return to the menu.\n")
 
-    result = registry.call("get_crew_count", {"department": "science"})
-    print(f"    get_crew_count(science) -> {result}")
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are the DSS Pathfinder ship AI. Use get_crew_count to look up "
+                "department headcounts and ship_status to check system health. "
+                "Always report exact numbers from the tools."
+            ),
+        },
+    ]
 
-    result = registry.call("ship_status", {"system": "sensors"})
-    print(f"    ship_status(sensors)    -> {result}")
+    def handle_via_registry(name: str, arguments: dict) -> tuple[str, bool]:
+        result = registry.call(name, arguments)
+        return result, True
 
-    result = registry.call("unknown_tool", {})
-    print(f"    unknown_tool()          -> {result}")
+    while True:
+        try:
+            user_msg = input("You> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not user_msg or user_msg.lower() == "quit":
+            break
 
-    result = registry.call("get_crew_count", {"wrong_param": "x"})
-    print(f"    get_crew_count(bad)     -> {result}")
+        messages.append({"role": "user", "content": user_msg})
+        print(f"  [USER]      {user_msg}")
+        agent_loop(client, messages, registry.list_tools(), handle_via_registry)
 
-    print("\n  Key points:")
-    print("  • Decorator keeps schema next to the handler")
-    print("  • list_tools() returns OpenAI-compatible definitions")
+    print("  Key concepts:")
+    print("  • @registry.register() decorator — schema lives next to the handler")
+    print("  • list_tools() returns OpenAI-compatible function definitions")
+    print("  • call() dispatches by name with argument validation")
     print("  • Unknown tools and bad arguments return errors, not crashes")
 
 
@@ -299,8 +362,8 @@ class SafetyLayer:
         ))
 
 
-def demo_safety_rails():
-    section("Part 3: Safety Rails — Defence in Depth")
+def demo_safety_rails(client: OpenAI):
+    section("Part 3: Guarded Agent — Safety Rails Wrapping the Tool Registry")
 
     safety = SafetyLayer(
         allowed_tools={"get_crew_count", "ship_status"},
@@ -308,159 +371,116 @@ def demo_safety_rails():
         rate_window=10.0,
     )
 
-    print("  1. Allowlist:")
-    print(f"     get_crew_count -> {'ALLOWED' if safety.check_allowed('get_crew_count') else 'BLOCKED'}")
-    print(f"     delete_all_data -> {'ALLOWED' if safety.check_allowed('delete_all_data') else 'BLOCKED'}")
+    print("  Same agent as Part 2, but every tool call now passes through:")
+    print("    1. Allowlist    — only {get_crew_count, ship_status} permitted")
+    print("    2. Rate limiter — max 3 calls per 10s sliding window")
+    print("    3. Redaction    — strips clearanceLevel, api_key from output")
+    print("    4. Audit log    — every call recorded (allowed or blocked)")
+    print()
+    print("  Chat normally. Try asking fast to hit the rate limit.")
+    print("  Type 'audit' to view the log, 'quit' to return.\n")
 
-    print("\n  2. Rate limiting (max 3 calls per 10s):")
-    for i in range(5):
-        ok = safety.check_rate_limit()
-        print(f"     Call {i + 1}: {'OK' if ok else 'BLOCKED'}")
-
-    print("\n  3. Redaction:")
-    raw = '{"name": "Voss", "clearanceLevel": 5, "api_key": "sk-secret123"}'
-    print(f"     Raw:      {raw}")
-    print(f"     Redacted: {safety.redact(raw)}")
-
-    print("\n  4. Audit log:")
-    safety.audit("get_crew_count", {"department": "science"}, '{"count": 3}', True)
-    safety.audit("delete_all_data", {}, "", False)
-    for entry in safety.audit_log:
-        status = "ALLOWED" if entry.allowed else "BLOCKED"
-        print(f"     [{status}] {entry.tool_name}")
-
-    print("\n  Key points:")
-    print("  • Allowlist blocks before execution — no handler runs for blocked tools")
-    print("  • Rate limiter prevents runaway loops and cost explosions")
-    print("  • Redaction strips secrets from logs and audit trails")
-    print("  • Every call is audited — allowed or blocked")
-
-
-# ---------------------------------------------------------------------------
-# Part 4: Eval harness — golden tests with a mock LLM
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class GoldenCase:
-    name: str
-    user_input: str
-    expected_tool_calls: list[dict]
-    expected_final_answer: str | None = None
-
-
-@dataclass
-class MockLLMResponse:
-    content: str | None = None
-    tool_calls: list[dict] = field(default_factory=list)
-
-
-class MockLLM:
-    """Deterministic mock — returns pre-scripted responses in order."""
-
-    def __init__(self, responses: list[MockLLMResponse]):
-        self._responses = list(responses)
-        self._call_count = 0
-
-    def chat(self, messages: list[dict]) -> MockLLMResponse:
-        if self._call_count >= len(self._responses):
-            return MockLLMResponse(content="(no more scripted responses)")
-        resp = self._responses[self._call_count]
-        self._call_count += 1
-        return resp
-
-
-def run_agent_loop(llm: MockLLM, user_input: str, tool_handler) -> dict:
     messages = [
-        {"role": "system", "content": "You are the Pathfinder ship AI."},
-        {"role": "user", "content": user_input},
+        {
+            "role": "system",
+            "content": (
+                "You are the DSS Pathfinder ship AI. Use get_crew_count to look up "
+                "department headcounts and ship_status to check system health. "
+                "Always report exact numbers from the tools."
+            ),
+        },
     ]
-    tool_calls_made = []
-    final_answer = None
 
-    for _ in range(10):
-        response = llm.chat(messages)
-        if response.tool_calls:
-            for tc in response.tool_calls:
-                result = tool_handler(tc["name"], tc["arguments"])
-                tool_calls_made.append(tc)
-                messages.append({"role": "assistant", "tool_calls": [tc]})
-                messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": result})
-        elif response.content:
-            final_answer = response.content
+    def handle_guarded(name: str, arguments: dict) -> tuple[str, bool]:
+        if not safety.check_allowed(name):
+            result = json.dumps({"error": f"Tool '{name}' is not on the allowlist"})
+            safety.audit(name, arguments, result, False)
+            return result, False
+
+        if not safety.check_rate_limit():
+            result = json.dumps({"error": "Rate limit exceeded"})
+            safety.audit(name, arguments, result, False)
+            return result, False
+
+        result = registry.call(name, arguments)
+        safety.audit(name, arguments, result, True)
+        return safety.redact(result), True
+
+    while True:
+        try:
+            user_msg = input("You> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not user_msg or user_msg.lower() == "quit":
             break
 
-    return {"tool_calls": tool_calls_made, "final_answer": final_answer}
+        if user_msg.lower() == "audit":
+            if not safety.audit_log:
+                print("  (audit log is empty)\n")
+            else:
+                print(f"  Audit log ({len(safety.audit_log)} entries):")
+                for entry in safety.audit_log:
+                    status = "ALLOWED" if entry.allowed else "BLOCKED"
+                    print(f"    [{status}] {entry.tool_name}({entry.arguments}) → {entry.result[:80]}")
+                print()
+            continue
 
+        messages.append({"role": "user", "content": user_msg})
+        print(f"  [USER]      {user_msg}")
+        agent_loop(client, messages, registry.list_tools(), handle_guarded)
 
-def demo_eval_harness():
-    section("Part 4: Eval Harness — Golden Tests (No API Calls)")
-
-    def mock_tool_handler(name: str, arguments: dict) -> str:
-        if name == "get_crew_count":
-            return json.dumps({"department": arguments.get("department"), "count": 3})
-        return json.dumps({"error": "unknown tool"})
-
-    golden = GoldenCase(
-        name="crew count query",
-        user_input="How many people are in the science department?",
-        expected_tool_calls=[{"name": "get_crew_count", "arguments": {"department": "science"}}],
-        expected_final_answer="3",
-    )
-
-    llm = MockLLM([
-        MockLLMResponse(
-            tool_calls=[{"id": "call_1", "name": "get_crew_count", "arguments": {"department": "science"}}]
-        ),
-        MockLLMResponse(content="The science department has 3 crew members."),
-    ])
-
-    print(f"  Golden case: {golden.name}")
-    print(f"  User input:  '{golden.user_input}'\n")
-
-    result = run_agent_loop(llm, golden.user_input, mock_tool_handler)
-    print(f"  Tool calls made: {[tc['name'] for tc in result['tool_calls']]}")
-    print(f"  Final answer:    '{result['final_answer']}'\n")
-
-    actual_tool_names = [tc["name"] for tc in result["tool_calls"]]
-    expected_tool_names = [tc["name"] for tc in golden.expected_tool_calls]
-
-    checks = {
-        "tool_names_match": actual_tool_names == expected_tool_names,
-        "answer_contains_expected": golden.expected_final_answer.lower()
-        in (result["final_answer"] or "").lower(),
-    }
-
-    for check, passed in checks.items():
-        status = "PASS" if passed else "FAIL"
-        print(f"  [{status}] {check}")
-
-    print("\n  Key points:")
-    print("  • Mock LLM — no API calls, no cost, deterministic results")
-    print("  • Golden cases define expected tool calls + final answer")
-    print("  • Fast enough for CI — run hundreds of cases in seconds")
-    print("  • Use real API for development, mocks for regression testing")
-
+    print("  Key concepts:")
+    print("  • Allowlist — blocks disallowed tools before execution")
+    print("  • Rate limiter — sliding window prevents runaway loops and cost spikes")
+    print("  • Redaction — strips sensitive data from output before logging")
+    print("  • Audit log — immutable record of every call, allowed or blocked")
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 
+DEMOS = {
+    "1": ("Tool-call message flow",                         demo_message_format),
+    "2": ("Tool registry — live agent, decorator dispatch", demo_tool_registry),
+    "3": ("Guarded agent — safety rails wrapping the registry", demo_safety_rails),
+}
+
+
 if __name__ == "__main__":
     client = OpenAI()
 
-    demo_message_format(client)
-    pause()
+    print("\n" + "=" * 60)
+    print("  MODULE 2 DEMO — TOOL CALLING")
+    print("=" * 60)
 
-    demo_tool_registry()
-    pause()
+    while True:
+        print("\nPick a section:\n")
+        for key, (label, _) in DEMOS.items():
+            print(f"  {key}. {label}")
+        print(f"  q. Quit\n")
 
-    demo_safety_rails()
-    pause()
+        try:
+            choice = input("Enter choice> ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
 
-    demo_eval_harness()
+        if choice in ("q", "quit", ""):
+            break
+        elif choice in DEMOS:
+            _, fn = DEMOS[choice]
+            fn(client)
+        else:
+            print(f"Unknown option: {choice}")
 
     print("\n" + "=" * 60)
-    print("  Demo complete. Ready for exercises!")
+    print("  RECAP")
+    print("=" * 60)
+    print()
+    print("  1. Message flow   — system → user → assistant (tool_call) → tool → assistant")
+    print("  2. Tool registry  — @register decorator, schema + handler in one place")
+    print("  3. Guarded agent  — allowlist, rate limiter, redaction, audit log")
+    print()
     print("=" * 60)

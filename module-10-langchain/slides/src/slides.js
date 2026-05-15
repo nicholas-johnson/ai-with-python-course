@@ -3,18 +3,18 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 10 — LangChain with Python',
-      subtitle: 'Chains, agents, and RAG with LangChain',
+      subtitle: 'Automate the patterns you already know',
       icon: 'link',
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'From hand-rolled to framework',
+      title: 'Why LangChain?',
       points: [
-        'You built agents, tools, RAG, and multi-agent systems from scratch.',
-        'LangChain wraps the same patterns into composable building blocks.',
-        'This module bridges understanding with framework productivity.',
+        'LangChain packages common AI patterns into composable building blocks.',
+        'Prompt → model → parser becomes one line with the pipe operator.',
+        'Tool agents, RAG pipelines — same patterns, less boilerplate.',
       ],
     },
   },
@@ -24,13 +24,15 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Understand what **LangChain** provides vs. building from scratch.',
-        'Use **prompt templates**, **output parsers**, and **chains**.',
-        'Rewrite the hand-rolled agent loop with **LangChain agents + tools**.',
-        'Connect LangChain to **MCP tools** and **RAG pipelines** from earlier modules.',
+        'Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.',
+        'Wrap functions as **LangChain tools** and run them via **AgentExecutor**.',
+        'Construct a **RAG chain** with a LangChain retriever and ChromaDB.',
+        'Know when to use LangChain and when to stay hand-rolled.',
       ],
     },
   },
+
+  // ---- Section: LCEL chains ----
   {
     type: 'standard',
     content: {
@@ -41,68 +43,63 @@ export const slides = [
         '**ChatModel**: LLM wrapper (OpenAI, Anthropic, local models).',
         '**OutputParser**: structured extraction from model responses.',
         '**Chain (LCEL)**: compose steps with the `|` pipe operator.',
-        '**Agent + Tools**: LLM decides which tools to call and when.',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Prompt template + chain',
+      title: 'LCEL chain — prompt | model | parser',
       code: `from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "Classify support tickets as: routine, urgent, critical. "
-               "Return JSON: {{category, summary}}"),
-    ("user", "{report}"),
+    ("system", "Classify crew reports as: navigation, engineering, "
+               "science, medical, operations. "
+               "Return JSON: {{category, summary, priority}}"),
+    ("human", "{report}"),
 ])
 
 chain = prompt | ChatOpenAI(model="gpt-4o-mini") | JsonOutputParser()
 
-result = chain.invoke({"report": "Server CPU usage exceeded 95%"})
-# {"category": "critical", "summary": "Server CPU spike"}`,
+result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
+# {"category": "engineering", "summary": "...", "priority": "high"}`,
       highlights: [
         'The pipe operator (|) chains steps: prompt → model → parser',
         'Each step is independently testable and swappable',
       ],
     },
   },
+  // ---- Demo: Chains and prompts ----
   {
-    type: 'comparison',
+    type: 'title',
     content: {
-      title: 'Hand-rolled vs LangChain',
-      left: {
-        label: 'Hand-rolled',
-        items: [
-          'Full control over every detail',
-          'No framework dependency',
-          'You write the retry / parse / routing logic',
-          'Better for learning fundamentals',
-        ],
-      },
-      right: {
-        label: 'LangChain',
-        items: [
-          'Composable building blocks',
-          'Batteries included (tools, memory, RAG)',
-          'Faster to prototype',
-          'Abstraction hides details (harder to debug)',
-        ],
-      },
+      title: 'Demo — Chains and prompts',
+      subtitle: 'Switch to terminal: python demo/01_chains_and_prompts.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Tool agents ----
+  {
+    type: 'title',
+    content: {
+      title: 'LangChain tools and agents',
+      subtitle: 'The tool-calling loop, automated',
+      icon: 'wrench',
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'LangChain tools',
+      title: 'From @tool to AgentExecutor',
       icon: 'wrench',
       points: [
-        'Wrap any Python function as a LangChain **@tool**.',
-        'The decorator generates the schema from type hints + docstring.',
-        'Same concept as MCP tools — different interface.',
-        'AgentExecutor handles the tool-calling loop for you.',
+        'The **@tool** decorator generates JSON Schema from type hints + docstring.',
+        '`create_tool_calling_agent` builds the agent from model + tools + prompt.',
+        '**AgentExecutor** runs the loop: LLM → tool call → result → repeat.',
+        '`verbose=True` prints the full thought/action/observation trace.',
       ],
     },
   },
@@ -114,36 +111,79 @@ result = chain.invoke({"report": "Server CPU usage exceeded 95%"})
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 
 @tool
-def read_metrics(metric_id: str) -> str:
-    """Read the current value of a system metric."""
-    return json.dumps(metrics[metric_id])
+def read_sensor(sensor_name: str) -> str:
+    """Read the current value of a ship sensor."""
+    return json.dumps(SENSOR_DATA[sensor_name])
 
 @tool
-def lookup_users(role: str) -> str:
-    """Look up users by role."""
-    return json.dumps([u for u in users if u["role"] == role])
+def query_crew(department: str) -> str:
+    """Look up crew members by department."""
+    return json.dumps([c for c in CREW if c["department"] == department])
 
-tools = [read_metrics, lookup_users]
-agent = create_tool_calling_agent(llm, tools, prompt)
-executor = AgentExecutor(agent=agent, tools=tools)
+tools = [read_sensor, query_crew]
+agent = create_tool_calling_agent(model, tools, prompt)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-result = executor.invoke({"input": "Who is in the backend team?"})`,
+result = executor.invoke({"input": "What is the shield integrity?"})`,
       highlights: [
         '@tool decorator = schema from type hints + docstring',
-        'AgentExecutor runs the loop: LLM → tool call → result → repeat',
+        'AgentExecutor handles the loop — same pattern as Module 2',
       ],
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Hand-rolled vs LangChain',
+      left: {
+        label: 'Hand-rolled (Module 2)',
+        items: [
+          'Full control over the loop',
+          'No framework dependency',
+          'You write retry / parse / routing',
+          'Easier to debug',
+        ],
+      },
+      right: {
+        label: 'LangChain',
+        items: [
+          'Composable building blocks',
+          'Batteries included (tools, memory, RAG)',
+          'Faster to prototype standard patterns',
+          'Abstraction hides details',
+        ],
+      },
+    },
+  },
+  // ---- Demo: LangChain agents ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — LangChain agents',
+      subtitle: 'Switch to terminal: python demo/02_langchain_agents.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: RAG chains ----
+  {
+    type: 'title',
+    content: {
+      title: 'RAG with LangChain',
+      subtitle: 'Retrieval chains in a few lines',
+      icon: 'book-open',
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'LangChain RAG',
+      title: 'LangChain RAG components',
       icon: 'book-open',
       points: [
-        '**Retriever**: any object with a `.invoke(query)` that returns documents.',
-        '**RetrievalQA / LCEL chain**: retriever → format docs → LLM → answer.',
-        'Works with ChromaDB, FAISS, Pinecone, or your custom vector store.',
-        'Compare: your Module 5 RAG pipeline reimplemented in ~10 lines.',
+        '**Retriever**: `.invoke(query)` returns documents. Wraps ChromaDB, FAISS, etc.',
+        '**format_docs**: formats retrieved passages with source labels.',
+        '**RunnablePassthrough**: passes the question through unchanged.',
+        'The chain: retriever | format → prompt → model → parser.',
       ],
     },
   },
@@ -151,24 +191,46 @@ result = executor.invoke({"input": "Who is in the backend team?"})`,
     type: 'code',
     content: {
       title: 'RAG chain with LCEL',
-      code: `from langchain_core.runnables import RunnablePassthrough
+      code: `from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_core.runnables import RunnablePassthrough
+
+vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings(), metadatas=metas)
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 
 def format_docs(docs):
-    return "\\n\\n".join(d.page_content for d in docs)
+    return "\\n\\n".join(
+        f"[Source {i+1}: {d.metadata['source']}] {d.page_content}"
+        for i, d in enumerate(docs)
+    )
 
 rag_chain = (
-    {"context": retriever | format_docs,
-     "question": RunnablePassthrough()}
-    | prompt
-    | llm
-    | StrOutputParser()
-)
-
-answer = rag_chain.invoke("What caused the Q4 outage?")`,
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | prompt | model | StrOutputParser()
+)`,
       highlights: [
-        'Retriever runs in parallel with question passthrough',
-        'Same RAG pattern as Module 5 — LangChain just wires it up',
+        'Chroma.from_texts() — embed and store in one call',
+        'Same RAG pattern as Module 5, wired up with LCEL',
       ],
+    },
+  },
+  // ---- Demo: LangChain RAG ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — LangChain RAG',
+      subtitle: 'Switch to terminal: python demo/03_langchain_rag.py',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Putting it all together',
+      subtitle: 'Field rules and exercises',
+      icon: 'check-square',
     },
   },
   {
@@ -177,9 +239,9 @@ answer = rag_chain.invoke("What caused the Q4 outage?")`,
       title: 'When to use a framework',
       icon: 'scale',
       points: [
-        '**Use LangChain** when you want fast prototyping and standard patterns.',
+        '**Use LangChain** for standard patterns: chains, tool agents, RAG.',
         '**Skip it** when you need full control or minimal dependencies.',
-        'Understand the pattern first (you already do), then decide on tooling.',
+        'You already know the patterns — the framework just accelerates them.',
         'Frameworks change fast — fundamentals endure.',
       ],
     },
@@ -190,8 +252,8 @@ answer = rag_chain.invoke("What caused the Q4 outage?")`,
       title: 'Field rules — Module 10',
       rules: [
         {
-          rule: 'Understand the pattern, then pick the tool',
-          example: 'LangChain is faster only if you know what it is doing underneath.',
+          rule: 'Know the pattern, then pick the tool',
+          example: 'LangChain is faster only if you know what it does underneath.',
           icon: 'layers',
         },
         {
@@ -210,11 +272,11 @@ answer = rag_chain.invoke("What caused the Q4 outage?")`,
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — Framework-powered ops',
+      title: 'Exercises',
       points: [
-        '01 — Chain basics: prompt templates, output parsers, ticket classification',
-        '02 — Tool agent: wrap custom tools as LangChain tools, run via AgentExecutor',
-        '03 — RAG chain: RetrievalQA over a document knowledge base',
+        '01 — Chain basics: LCEL chain that classifies crew reports',
+        '02 — Tool agent: wraps the classifier + ship tools in AgentExecutor (builds on 01)',
+        '03 — RAG chain: adds retrieval to the agent over ship logs (builds on 02)',
       ],
     },
   },

@@ -66,12 +66,12 @@ export const slides = [
     },
   },
 
-  // ---- Demo: Message format ----
+  // ---- Demo: Tool-call message flow ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Message format',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      title: 'Demo — Tool-call message flow',
+      subtitle: 'Switch to terminal: python demo/demo.py → Part 1',
       icon: 'rocket',
     },
   },
@@ -149,12 +149,12 @@ def check_inventory(product: str) -> dict:
     },
   },
 
-  // ---- Demo: Tool registry ----
+  // ---- Demo: Tool registry (live agent) ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Tool registry',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      title: 'Demo — Tool registry (live agent)',
+      subtitle: 'Switch to terminal: python demo/demo.py → Part 2',
       icon: 'rocket',
     },
   },
@@ -234,12 +234,12 @@ def check_inventory(product: str) -> dict:
     },
   },
 
-  // ---- Demo: Safety rails ----
+  // ---- Demo: Guarded agent ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Safety rails',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      title: 'Demo — Guarded agent',
+      subtitle: 'Switch to terminal: python demo/demo.py → Part 3',
       icon: 'rocket',
     },
   },
@@ -274,6 +274,27 @@ def check_inventory(product: str) -> dict:
           example: 'An audit trail is your best debugging tool when agents misbehave.',
           icon: 'clipboard-list',
         },
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Exercises',
+      subtitle: 'Time to build',
+      icon: 'code',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Getting started',
+      icon: 'settings',
+      points: [
+        'Activate your venv: **`source .venv/bin/activate`**.',
+        'Each exercise has a **`start.py`** (your work) and **`test_start.py`** (pytest).',
+        'Run tests with: **`pytest module-02-tool-calling/exercises/01-tool-calling-agent/`**.',
+        'Solutions are in **`solution.py`** — try the exercise first!',
       ],
     },
   },

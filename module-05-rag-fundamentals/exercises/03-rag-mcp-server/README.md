@@ -28,7 +28,7 @@ Two files:
 1. **`server.py`** -- A FastMCP server that builds the index on startup and exposes RAG tools
 2. **`start.py`** -- A console agent that connects to the server via stdio and uses OpenAI tool-calling
 
-The Exercise 1 and 2 solutions are provided as `index_builder.py` and `rag_utils.py`.
+The Exercise 1 and 2 code (index builder + RAG chat) is already inlined at the top of `server.py` — you'll add the MCP tools below it.
 
 ## Step-by-step
 
@@ -38,11 +38,11 @@ Create a FastMCP server that initializes the index on module load and registers 
 
 ```python
 from mcp.server.fastmcp import FastMCP
-from index_builder import load_logs, build_index, search
 
 mcp = FastMCP("RAG Server")
 
-# Build the index at server startup
+# The index builder and RAG chat functions are already at the top of the file.
+# Build the index at server startup:
 logs = load_logs()
 collection = build_index(logs)
 

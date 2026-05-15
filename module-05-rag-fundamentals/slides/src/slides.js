@@ -135,69 +135,12 @@ def search(query, index, k=5):
     },
   },
 
-  // ---- Section: Retrieval strategies ----
-  {
-    type: 'title',
-    content: {
-      title: 'Retrieval strategies',
-      subtitle: 'Dense, sparse, hybrid, and reranking',
-      icon: 'layers',
-    },
-  },
-
-  {
-    type: 'comparison',
-    content: {
-      title: 'Dense vs sparse retrieval',
-      left: {
-        label: 'Dense (vector)',
-        items: [
-          'Understands meaning and synonyms',
-          'Needs an embedding model',
-          'Great for natural-language questions',
-          'Misses exact terms (serial numbers)',
-        ],
-      },
-      right: {
-        label: 'Sparse (keyword / BM25)',
-        items: [
-          'Exact term matching',
-          'No model needed — fast and simple',
-          'Great for codes, IDs, error strings',
-          'Misses paraphrases and synonyms',
-        ],
-      },
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Hybrid search and reranking',
-      icon: 'layers',
-      points: [
-        '**Hybrid**: run both dense and sparse, merge results.',
-        '**Reciprocal rank fusion (RRF)**: combine ranked lists without scores.',
-        '**Reranker**: a cross-encoder rescores the top-N for better precision.',
-        '**Metadata filters**: narrow by date, author, department before search.',
-      ],
-    },
-  },
-  // ---- Demo: RAG server ----
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — RAG server',
-      subtitle: 'Switch to terminal: python demo/server.py',
-      icon: 'rocket',
-    },
-  },
-
   // ---- Section: Grounded generation ----
   {
     type: 'title',
     content: {
       title: 'Grounded generation',
-      subtitle: 'Citations, evaluation, and knowing when to say "I don\'t know"',
+      subtitle: 'Citations and knowing when to say "I don\'t know"',
       icon: 'book-open',
     },
   },
@@ -225,25 +168,70 @@ def search(query, index, k=5):
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'Evaluating RAG',
-      icon: 'check-square',
-      points: [
-        '**Retrieval recall**: are the right chunks in the top-k?',
-        '**Retrieval precision**: are irrelevant chunks polluting the context?',
-        '**Answer faithfulness**: does the answer stick to retrieved evidence?',
-        '**Adversarial tests**: questions with no answer in the corpus.',
-        'A RAG system that says "I don\'t know" when it shouldn\'t guess is a good system.',
-      ],
-    },
-  },
-  // ---- Demo: RAG agent ----
+
+  // ---- Section: RAG as MCP tools ----
   {
     type: 'title',
     content: {
-      title: 'Demo — RAG agent',
+      title: 'RAG as MCP tools',
+      subtitle: 'Make your pipeline a pluggable capability',
+      icon: 'server',
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'Why wrap RAG in MCP?',
+      icon: 'layers',
+      points: [
+        'The agent calls `search_docs` or `ask_docs` — it never touches embeddings or ChromaDB.',
+        'Any MCP-compatible agent can use your RAG pipeline without code changes.',
+        'The server owns the index lifecycle: build once at startup, serve many queries.',
+        'Separation of concerns — swap the vector store without touching the agent.',
+      ],
+    },
+  },
+
+  {
+    type: 'code',
+    content: {
+      title: 'FastMCP tool registration',
+      code: `from mcp.server.fastmcp import FastMCP
+from index_builder import load_logs, build_index, search
+
+mcp = FastMCP("RAG Server")
+logs = load_logs()
+collection = build_index(logs)
+
+@mcp.tool()
+def search_docs(query: str, k: int = 5) -> str:
+    """Search the document index for relevant passages."""
+    hits = search(collection, query, k)
+    return "\\n".join(
+        f"[{h['id']}] (score {h['score']:.2f}) {h['text'][:200]}"
+        for h in hits
+    )`,
+      highlights: [
+        'Type hints generate JSON Schema — the agent discovers parameters automatically',
+        'The index is built once at import time and shared across all tool calls',
+      ],
+    },
+  },
+  // ---- Demo: RAG MCP server ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — RAG MCP server',
+      subtitle: 'Switch to terminal: python demo/server.py',
+      icon: 'rocket',
+    },
+  },
+  // ---- Demo: RAG agent via MCP ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — RAG agent via MCP',
       subtitle: 'Switch to terminal: python demo/agent.py',
       icon: 'rocket',
     },

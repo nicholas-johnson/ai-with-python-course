@@ -24,7 +24,7 @@ This forces the LLM to stay grounded in your data and makes hallucinations easy 
 
 ## What you build
 
-A console chat agent in **`start.py`** that uses the index from Exercise 1 (the solution is provided) to answer questions with citations.
+A console chat agent in **`start.py`** that uses the index from Exercise 1 to answer questions with citations. The Exercise 1 code (load, chunk, embed, search) is already inlined at the top of `start.py` — you'll add the grounded prompt and RAG chat below it.
 
 **Key functions:**
 
@@ -35,13 +35,9 @@ A console chat agent in **`start.py`** that uses the index from Exercise 1 (the 
 
 ## Step-by-step
 
-### 1. Import the index builder
+### 1. Review the inlined index builder
 
-The Exercise 1 solution is provided as `index_builder.py`. Import and use it:
-
-```python
-from index_builder import load_logs, build_index, search
-```
+The Exercise 1 solution (`load_logs`, `chunk_text`, `build_index`, `search`) is already at the top of `start.py`. You don't need to change it — just call `build_index()` and `search()` in your code below.
 
 ### 2. Implement `build_grounded_prompt`
 

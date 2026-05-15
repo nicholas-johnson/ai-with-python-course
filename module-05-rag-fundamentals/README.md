@@ -114,25 +114,6 @@ results = collection.query(
 
 ---
 
-## Retrieval strategies
-
-**Dense retrieval** embeds the query and finds nearest neighbours. Great for semantic similarity ("damage to the ship" matches "hull breach detected") but can miss exact terms.
-
-**Sparse retrieval** (BM25 / TF-IDF) matches on exact keywords. Good for specific identifiers ("CRW-003", "MSN-001") that dense embeddings treat as opaque tokens.
-
-**Hybrid search** combines both: run dense and sparse in parallel, merge the ranked results. This is the production standard — you get semantic understanding and keyword precision.
-
-**Reranking** takes the top results from retrieval and rescores them with a more expensive model (cross-encoder). It improves precision at the cost of latency. Run retrieval to get 20 candidates, rerank to pick the best 5.
-
-| Strategy | Strength | Weakness |
-| -------- | -------- | -------- |
-| Dense | Semantic matching | Misses exact terms |
-| Sparse (BM25) | Exact keyword matching | Misses synonyms |
-| Hybrid | Best of both | Two indices to maintain |
-| Reranking | High precision | Adds latency |
-
----
-
 ## Grounded prompts with citations
 
 The whole point of RAG is grounding: the model's answer should be based on retrieved evidence, not its training data. Build the prompt to make this explicit:
@@ -154,18 +135,6 @@ Answer:"""
 ```
 
 The `[Source N]` format lets you trace every claim back to a chunk. Post-processing can link these references to original documents, pages, or timestamps for the crew to verify.
-
----
-
-## RAG evaluation
-
-A RAG pipeline is only as good as its retrieval. Evaluate with:
-
-- **Recall@k** — of all relevant chunks, how many appear in the top k results?
-- **Precision@k** — of the top k results, how many are actually relevant?
-- **Faithfulness** — does the generated answer only contain information from the retrieved passages? (Test by checking for claims not in any source.)
-
-Build a set of test queries with known relevant chunks, then measure these metrics automatically. Run the eval suite after every change to the chunking strategy, embedding model, or retrieval parameters.
 
 ---
 
