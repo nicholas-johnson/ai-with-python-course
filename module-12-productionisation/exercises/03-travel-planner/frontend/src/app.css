@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+	--color-background: oklch(0.98 0.005 170);
+	--color-foreground: oklch(0.15 0.03 170);
+	--color-primary: oklch(0.55 0.15 170);
+	--color-primary-foreground: oklch(0.98 0 0);
+	--color-muted: oklch(0.93 0.02 170);
+	--color-muted-foreground: oklch(0.45 0.03 170);
+	--color-border: oklch(0.88 0.03 170);
+	--color-card: oklch(1 0 0);
+	--color-accent: oklch(0.7 0.12 80);
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+		font-family: system-ui, -apple-system, sans-serif;
+	}
+}

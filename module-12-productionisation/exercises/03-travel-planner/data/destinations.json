@@ -1,0 +1,808 @@
+[
+  {
+    "id": "dest-001",
+    "city": "Tokyo",
+    "country": "Japan",
+    "description": "A dazzling megacity where ancient temples sit beside neon-lit skyscrapers. Tokyo offers unmatched food culture, from Michelin-starred sushi to ¥500 ramen. Cherry blossom season and autumn foliage make it magical year-round.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 80, "mid_range": 150, "luxury": 400},
+    "attractions": [
+      {"name": "Senso-ji Temple", "description": "Tokyo's oldest Buddhist temple in the heart of Asakusa.", "cost_usd": 0, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Shibuya Crossing", "description": "The world's busiest pedestrian crossing — iconic Tokyo energy.", "cost_usd": 0, "duration_hours": 0.5, "category": "culture"},
+      {"name": "Tsukiji Outer Market", "description": "Fresh sushi, street food, and Japanese kitchen knives.", "cost_usd": 20, "duration_hours": 2, "category": "food"},
+      {"name": "Meiji Shrine", "description": "Peaceful Shinto shrine surrounded by forest in central Tokyo.", "cost_usd": 0, "duration_hours": 1, "category": "nature"},
+      {"name": "TeamLab Borderless", "description": "Immersive digital art museum — stunning interactive exhibits.", "cost_usd": 30, "duration_hours": 2.5, "category": "culture"},
+      {"name": "Golden Gai", "description": "Narrow alleyways packed with tiny themed bars in Shinjuku.", "cost_usd": 25, "duration_hours": 2, "category": "nightlife"}
+    ],
+    "restaurants": [
+      {"name": "Ichiran Ramen", "cuisine": "Japanese", "price_range": "$", "description": "Famous solo-dining ramen chain with customizable noodles."},
+      {"name": "Sushi Dai", "cuisine": "Japanese", "price_range": "$$", "description": "Legendary sushi counter near Tsukiji — worth the queue."},
+      {"name": "Gonpachi Nishi-Azabu", "cuisine": "Japanese", "price_range": "$$", "description": "The restaurant that inspired Kill Bill's fight scene."},
+      {"name": "Afuri", "cuisine": "Japanese", "price_range": "$", "description": "Light, citrusy yuzu shio ramen — a modern classic."}
+    ],
+    "hotels": [
+      {"name": "Park Hyatt Tokyo", "stars": 5, "price_per_night_usd": 450, "description": "Iconic luxury hotel featured in Lost in Translation."},
+      {"name": "Hotel Gracery Shinjuku", "stars": 3, "price_per_night_usd": 120, "description": "Great location with a Godzilla head on the roof."},
+      {"name": "Khaosan Tokyo Kabuki", "stars": 2, "price_per_night_usd": 35, "description": "Fun, social hostel in Asakusa — great for solo travellers."}
+    ],
+    "travel_tips": ["Get a Suica card for seamless train travel.", "Carry cash — many small restaurants are cash only.", "Bow slightly when greeting people.", "Convenience stores (konbini) have excellent cheap meals."],
+    "safety_notes": "Extremely safe. Japan has one of the lowest crime rates in the world."
+  },
+  {
+    "id": "dest-002",
+    "city": "Paris",
+    "country": "France",
+    "description": "The City of Light captivates with world-class art, romantic boulevards, and pastries that defy description. Every arrondissement tells a different story, from the bohemian Marais to the elegant Champs-Élysées.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 90, "mid_range": 180, "luxury": 500},
+    "attractions": [
+      {"name": "Eiffel Tower", "description": "The icon of Paris — sunset views from the second floor are unforgettable.", "cost_usd": 30, "duration_hours": 2, "category": "culture"},
+      {"name": "Louvre Museum", "description": "Home to the Mona Lisa and 35,000 other works of art.", "cost_usd": 20, "duration_hours": 3, "category": "culture"},
+      {"name": "Montmartre & Sacré-Cœur", "description": "Hilltop artists' quarter with panoramic city views.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Seine River Cruise", "description": "See Paris from the water at golden hour.", "cost_usd": 15, "duration_hours": 1, "category": "culture"},
+      {"name": "Le Marais", "description": "Historic district with boutiques, falafel, and vibrant nightlife.", "cost_usd": 0, "duration_hours": 3, "category": "shopping"}
+    ],
+    "restaurants": [
+      {"name": "Le Bouillon Chartier", "cuisine": "French", "price_range": "$", "description": "Stunning belle-époque dining hall serving affordable French classics since 1896."},
+      {"name": "Breizh Café", "cuisine": "French", "price_range": "$$", "description": "The best crêpes and galettes in Paris — Cancale butter is the secret."},
+      {"name": "L'As du Fallafel", "cuisine": "Middle Eastern", "price_range": "$", "description": "Legendary falafel in the Marais — huge portions, always a queue."},
+      {"name": "Le Comptoir du Panthéon", "cuisine": "French", "price_range": "$$", "description": "Classic brasserie overlooking the Panthéon."}
+    ],
+    "hotels": [
+      {"name": "Hôtel Plaza Athénée", "stars": 5, "price_per_night_usd": 800, "description": "Legendary palace hotel on Avenue Montaigne."},
+      {"name": "Hôtel Jeanne d'Arc Le Marais", "stars": 3, "price_per_night_usd": 140, "description": "Charming hotel in the heart of the Marais."},
+      {"name": "Generator Paris", "stars": 2, "price_per_night_usd": 40, "description": "Stylish hostel near Canal Saint-Martin."}
+    ],
+    "travel_tips": ["Buy a carnet of 10 metro tickets to save money.", "Museums are free on the first Sunday of each month.", "Tipping is included in the bill but rounding up is appreciated.", "Learn basic French phrases — locals appreciate the effort."],
+    "safety_notes": "Generally safe. Watch for pickpockets at tourist hotspots and on the metro."
+  },
+  {
+    "id": "dest-003",
+    "city": "Bangkok",
+    "country": "Thailand",
+    "description": "A sensory overload in the best way — ornate temples, chaotic markets, rooftop bars, and street food that costs almost nothing. Bangkok is where backpackers and luxury travellers intersect.",
+    "best_seasons": ["winter"],
+    "avg_daily_budget_usd": {"budget": 35, "mid_range": 80, "luxury": 250},
+    "attractions": [
+      {"name": "Grand Palace & Wat Phra Kaew", "description": "Dazzling royal palace and Thailand's most sacred temple.", "cost_usd": 15, "duration_hours": 2, "category": "culture"},
+      {"name": "Chatuchak Weekend Market", "description": "15,000 stalls — the world's largest outdoor market.", "cost_usd": 0, "duration_hours": 3, "category": "shopping"},
+      {"name": "Wat Arun", "description": "Temple of Dawn — stunning at sunset from across the river.", "cost_usd": 3, "duration_hours": 1, "category": "culture"},
+      {"name": "Chinatown (Yaowarat)", "description": "Neon-lit street food paradise — best after dark.", "cost_usd": 10, "duration_hours": 2, "category": "food"},
+      {"name": "Sky Bar at Lebua", "description": "Rooftop bar from The Hangover II — spectacular city views.", "cost_usd": 20, "duration_hours": 1.5, "category": "nightlife"}
+    ],
+    "restaurants": [
+      {"name": "Jay Fai", "cuisine": "Thai", "price_range": "$$", "description": "Street food legend with a Michelin star — try the crab omelette."},
+      {"name": "Pad Thai Thip Samai", "cuisine": "Thai", "price_range": "$", "description": "Bangkok's most famous pad Thai — wrapped in a crispy egg."},
+      {"name": "Som Tam Nua", "cuisine": "Thai", "price_range": "$", "description": "Incredible papaya salad and fried chicken in Siam Square."}
+    ],
+    "hotels": [
+      {"name": "Mandarin Oriental Bangkok", "stars": 5, "price_per_night_usd": 350, "description": "Historic riverside luxury — hosted writers and royalty since 1876."},
+      {"name": "Ibis Styles Bangkok Sukhumvit 4", "stars": 3, "price_per_night_usd": 50, "description": "Modern hotel near Nana BTS — great value."},
+      {"name": "NapPark Hostel", "stars": 2, "price_per_night_usd": 15, "description": "Stylish capsule hostel near Khao San Road."}
+    ],
+    "travel_tips": ["Use the BTS Skytrain to avoid traffic jams.", "Negotiate tuk-tuk prices before getting in.", "Dress modestly when visiting temples (cover knees and shoulders).", "Street food is safe — look for busy stalls with high turnover."],
+    "safety_notes": "Generally safe. Beware of common tourist scams (gem shops, closed temple trick)."
+  },
+  {
+    "id": "dest-004",
+    "city": "Rome",
+    "country": "Italy",
+    "description": "The Eternal City layers 2,800 years of history with la dolce vita. Every cobblestone street leads to a piazza, a ruin, or a gelato shop. The food alone is worth the flight.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 75, "mid_range": 160, "luxury": 400},
+    "attractions": [
+      {"name": "Colosseum", "description": "Ancient amphitheatre where gladiators fought — book skip-the-line tickets.", "cost_usd": 18, "duration_hours": 2, "category": "culture"},
+      {"name": "Vatican Museums & Sistine Chapel", "description": "Michelangelo's ceiling and one of the world's greatest art collections.", "cost_usd": 20, "duration_hours": 3, "category": "culture"},
+      {"name": "Trastevere", "description": "Charming medieval neighbourhood — the best area for evening dining.", "cost_usd": 0, "duration_hours": 3, "category": "food"},
+      {"name": "Trevi Fountain", "description": "Baroque masterpiece — toss a coin and you'll return to Rome.", "cost_usd": 0, "duration_hours": 0.5, "category": "culture"},
+      {"name": "Pantheon", "description": "2,000-year-old temple with a perfect concrete dome — free entry.", "cost_usd": 0, "duration_hours": 1, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Da Enzo al 29", "cuisine": "Italian", "price_range": "$$", "description": "Tiny Trastevere trattoria — best cacio e pepe in Rome."},
+      {"name": "Pizzarium", "cuisine": "Italian", "price_range": "$", "description": "Gabriele Bonci's legendary pizza al taglio — crispy, creative toppings."},
+      {"name": "Roscioli", "cuisine": "Italian", "price_range": "$$$", "description": "Deli-restaurant hybrid with incredible pasta and wine selection."}
+    ],
+    "hotels": [
+      {"name": "Hotel de Russie", "stars": 5, "price_per_night_usd": 500, "description": "Rocco Forte luxury between the Spanish Steps and Piazza del Popolo."},
+      {"name": "Hotel Santa Maria", "stars": 3, "price_per_night_usd": 130, "description": "Peaceful courtyard hotel in Trastevere — orange trees included."},
+      {"name": "The Yellow Hostel", "stars": 2, "price_per_night_usd": 30, "description": "Lively hostel near Termini with a rooftop bar."}
+    ],
+    "travel_tips": ["Book Colosseum and Vatican tickets online in advance.", "Avoid restaurants right on major piazzas — tourist prices.", "Carry a water bottle — Rome has free drinking fountains (nasoni) everywhere.", "Rome is very walkable — don't bother with taxis for central sights."],
+    "safety_notes": "Generally safe. Watch for pickpockets on buses and at tourist sites."
+  },
+  {
+    "id": "dest-005",
+    "city": "New York City",
+    "country": "United States",
+    "description": "The city that never sleeps delivers on every cliché. World-class museums, Broadway shows, food from every culture on earth, and an energy that's impossible to replicate anywhere else.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 100, "mid_range": 220, "luxury": 600},
+    "attractions": [
+      {"name": "Central Park", "description": "843 acres of green in the middle of Manhattan — walk, bike, or boat.", "cost_usd": 0, "duration_hours": 2, "category": "nature"},
+      {"name": "Metropolitan Museum of Art", "description": "One of the world's largest art museums — pay what you wish for NY residents.", "cost_usd": 25, "duration_hours": 3, "category": "culture"},
+      {"name": "Brooklyn Bridge Walk", "description": "Iconic walk across the East River with skyline views.", "cost_usd": 0, "duration_hours": 1, "category": "culture"},
+      {"name": "Broadway Show", "description": "See a world-class musical or play in the Theatre District.", "cost_usd": 100, "duration_hours": 2.5, "category": "culture"},
+      {"name": "High Line", "description": "Elevated park on a former railway — great for a sunset stroll.", "cost_usd": 0, "duration_hours": 1.5, "category": "nature"}
+    ],
+    "restaurants": [
+      {"name": "Joe's Pizza", "cuisine": "American", "price_range": "$", "description": "Classic New York slice in Greenwich Village since 1975."},
+      {"name": "Xi'an Famous Foods", "cuisine": "Chinese", "price_range": "$", "description": "Hand-pulled noodles with spicy cumin lamb — addictive."},
+      {"name": "Peter Luger Steak House", "cuisine": "American", "price_range": "$$$", "description": "Brooklyn's legendary steakhouse since 1887 — cash only."},
+      {"name": "Los Tacos No. 1", "cuisine": "Mexican", "price_range": "$", "description": "Authentic Mexican tacos in Chelsea Market."}
+    ],
+    "hotels": [
+      {"name": "The Plaza", "stars": 5, "price_per_night_usd": 700, "description": "Legendary luxury on the corner of Central Park."},
+      {"name": "Pod 51", "stars": 3, "price_per_night_usd": 140, "description": "Micro-rooms, great location in Midtown — smart budget choice."},
+      {"name": "HI New York City Hostel", "stars": 2, "price_per_night_usd": 50, "description": "Huge hostel on the Upper West Side near Central Park."}
+    ],
+    "travel_tips": ["Get a 7-day unlimited MetroCard if staying more than 3 days.", "Broadway TKTS booth sells same-day discount tickets.", "Walk everywhere in Manhattan — it's faster than you think.", "Tip 18-20% at restaurants — it's expected, not optional."],
+    "safety_notes": "Generally safe in tourist areas. Stay aware late at night in less-busy neighborhoods."
+  },
+  {
+    "id": "dest-006",
+    "city": "Barcelona",
+    "country": "Spain",
+    "description": "Gaudí's surreal architecture, golden beaches, and tapas bars that stay open until 3am. Barcelona blends Catalan culture, Mediterranean lifestyle, and avant-garde art into something completely unique.",
+    "best_seasons": ["spring", "early_autumn"],
+    "avg_daily_budget_usd": {"budget": 70, "mid_range": 140, "luxury": 350},
+    "attractions": [
+      {"name": "Sagrada Família", "description": "Gaudí's unfinished masterpiece — book tickets for the towers.", "cost_usd": 26, "duration_hours": 2, "category": "culture"},
+      {"name": "Park Güell", "description": "Colourful mosaic park with panoramic city views.", "cost_usd": 10, "duration_hours": 1.5, "category": "culture"},
+      {"name": "La Boqueria Market", "description": "Famous food market on Las Ramblas — incredible fresh produce and juices.", "cost_usd": 15, "duration_hours": 1.5, "category": "food"},
+      {"name": "Barceloneta Beach", "description": "City beach with chiringuitos (beach bars) and seafood.", "cost_usd": 0, "duration_hours": 3, "category": "nature"},
+      {"name": "Gothic Quarter", "description": "Medieval streets full of hidden squares, bars, and street art.", "cost_usd": 0, "duration_hours": 2, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Cal Pep", "cuisine": "Spanish", "price_range": "$$", "description": "Legendary tapas bar — sit at the counter for the full experience."},
+      {"name": "La Boqueria Pinotxo Bar", "cuisine": "Spanish", "price_range": "$", "description": "Tiny counter bar inside the market — chickpeas, fried egg, perfection."},
+      {"name": "Can Culleretes", "cuisine": "Catalan", "price_range": "$$", "description": "Barcelona's oldest restaurant (1786) — classic Catalan dishes."}
+    ],
+    "hotels": [
+      {"name": "Hotel Arts Barcelona", "stars": 5, "price_per_night_usd": 350, "description": "Beachfront luxury with Frank Gehry's golden fish sculpture."},
+      {"name": "Hotel Brummell", "stars": 3, "price_per_night_usd": 110, "description": "Hip boutique hotel in Poble-sec with a rooftop pool."},
+      {"name": "Sant Jordi Hostels Sagrada Família", "stars": 2, "price_per_night_usd": 25, "description": "Social hostel with a pool — right near the Sagrada Família."}
+    ],
+    "travel_tips": ["Book Sagrada Família tickets online — they sell out.", "Lunch is the main meal — take advantage of menú del día deals.", "Be careful of pickpockets on Las Ramblas and the metro.", "The T-Casual card gives 10 rides on public transport."],
+    "safety_notes": "Generally safe. Pickpocketing is common in tourist areas — use a front pocket or money belt."
+  },
+  {
+    "id": "dest-007",
+    "city": "Bali",
+    "country": "Indonesia",
+    "description": "The Island of the Gods delivers terraced rice paddies, volcanic peaks, surf breaks, and Hindu temples draped in flowers. Ubud for culture, Canggu for vibes, Uluwatu for cliffs and sunsets.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 30, "mid_range": 70, "luxury": 250},
+    "attractions": [
+      {"name": "Tegallalang Rice Terraces", "description": "Iconic emerald-green rice paddies near Ubud.", "cost_usd": 3, "duration_hours": 2, "category": "nature"},
+      {"name": "Uluwatu Temple", "description": "Clifftop temple with Kecak fire dance at sunset.", "cost_usd": 5, "duration_hours": 2, "category": "culture"},
+      {"name": "Ubud Monkey Forest", "description": "Sacred forest sanctuary with 700+ macaques.", "cost_usd": 5, "duration_hours": 1.5, "category": "nature"},
+      {"name": "Mount Batur Sunrise Trek", "description": "Pre-dawn hike to watch sunrise over the caldera.", "cost_usd": 40, "duration_hours": 5, "category": "adventure"},
+      {"name": "Seminyak Beach Club", "description": "Swim, cocktails, and DJ sets overlooking the Indian Ocean.", "cost_usd": 20, "duration_hours": 3, "category": "nightlife"}
+    ],
+    "restaurants": [
+      {"name": "Locavore", "cuisine": "Indonesian fusion", "price_range": "$$$", "description": "Asia's 50 Best — hyper-local tasting menus in Ubud."},
+      {"name": "Warung Babi Guling Ibu Oka", "cuisine": "Balinese", "price_range": "$", "description": "Famous roast suckling pig — Anthony Bourdain approved."},
+      {"name": "Crate Café", "cuisine": "International", "price_range": "$", "description": "Canggu's iconic brunch spot — smoothie bowls and flat whites."}
+    ],
+    "hotels": [
+      {"name": "Four Seasons at Sayan", "stars": 5, "price_per_night_usd": 500, "description": "Floating above the Ayung River valley — pure luxury in the jungle."},
+      {"name": "Bisma Eight Ubud", "stars": 4, "price_per_night_usd": 100, "description": "Boutique infinity pool hotel in central Ubud."},
+      {"name": "Tribal Bali Hostel", "stars": 2, "price_per_night_usd": 15, "description": "Social hostel in Canggu with pool and co-working space."}
+    ],
+    "travel_tips": ["Rent a scooter (but drive carefully — traffic is chaotic).", "Bargain at markets — start at 30% of the asking price.", "Carry small notes — change can be hard to get.", "Don't touch anyone's head — it's sacred in Hindu culture."],
+    "safety_notes": "Generally safe. Watch for scooter theft and beware of monkeys stealing belongings."
+  },
+  {
+    "id": "dest-008",
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "description": "Canals, bicycles, Rembrandt, and gezelligheid. Amsterdam is compact enough to walk everywhere and deep enough to spend weeks. The museum district alone could fill a trip.",
+    "best_seasons": ["spring", "summer"],
+    "avg_daily_budget_usd": {"budget": 80, "mid_range": 160, "luxury": 400},
+    "attractions": [
+      {"name": "Rijksmuseum", "description": "Vermeer, Rembrandt, and 8,000 years of Dutch art and history.", "cost_usd": 22, "duration_hours": 3, "category": "culture"},
+      {"name": "Anne Frank House", "description": "The hiding place where Anne wrote her diary — deeply moving.", "cost_usd": 16, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Vondelpark", "description": "Amsterdam's green lung — locals picnic, jog, and play music here.", "cost_usd": 0, "duration_hours": 1, "category": "nature"},
+      {"name": "Canal Ring Boat Tour", "description": "See the UNESCO-listed canals from the water.", "cost_usd": 15, "duration_hours": 1, "category": "culture"},
+      {"name": "Jordaan Neighbourhood", "description": "Narrow streets full of independent boutiques, cafés, and galleries.", "cost_usd": 0, "duration_hours": 2, "category": "shopping"}
+    ],
+    "restaurants": [
+      {"name": "Foodhallen", "cuisine": "International", "price_range": "$$", "description": "Trendy food hall in a former tram depot — 20+ vendors."},
+      {"name": "The Pancake Bakery", "cuisine": "Dutch", "price_range": "$", "description": "Dutch pancakes in a 17th-century canal house."},
+      {"name": "Café Winkel 43", "cuisine": "Dutch", "price_range": "$", "description": "The best apple pie in Amsterdam — fact, not opinion."}
+    ],
+    "hotels": [
+      {"name": "Waldorf Astoria Amsterdam", "stars": 5, "price_per_night_usd": 450, "description": "Six canal houses merged into one palatial hotel."},
+      {"name": "Hotel V Nesplein", "stars": 3, "price_per_night_usd": 130, "description": "Stylish hotel in a great central location."},
+      {"name": "ClinkNOORD", "stars": 2, "price_per_night_usd": 35, "description": "Design hostel across the IJ river — free ferry to Centraal."}
+    ],
+    "travel_tips": ["Rent a bike — it's how locals get around.", "Book Anne Frank House tickets exactly 6 weeks in advance.", "Watch out for bikes when crossing cycle lanes.", "An I amsterdam City Card covers museums and transport."],
+    "safety_notes": "Very safe. Watch for bicycle accidents (look both ways!) and pickpockets at Centraal Station."
+  },
+  {
+    "id": "dest-009",
+    "city": "Marrakech",
+    "country": "Morocco",
+    "description": "Sensory overload in the best possible way: spice-scented souks, mosaic-tiled riads, rooftop terraces overlooking the Atlas Mountains. Marrakech feels like stepping into another century.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 40, "mid_range": 90, "luxury": 300},
+    "attractions": [
+      {"name": "Jemaa el-Fnaa", "description": "The main square — snake charmers, food stalls, and storytellers at night.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Bahia Palace", "description": "Stunning 19th-century palace with intricate tilework and gardens.", "cost_usd": 8, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Majorelle Garden", "description": "Yves Saint Laurent's cobalt-blue garden oasis.", "cost_usd": 12, "duration_hours": 1.5, "category": "nature"},
+      {"name": "The Souks", "description": "Labyrinthine markets selling everything from leather to lanterns.", "cost_usd": 0, "duration_hours": 3, "category": "shopping"},
+      {"name": "Hammam", "description": "Traditional Moroccan bath house — scrub, steam, and massage.", "cost_usd": 25, "duration_hours": 1.5, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Café Nomad", "cuisine": "Moroccan", "price_range": "$$", "description": "Rooftop views over the souk — modern Moroccan dishes."},
+      {"name": "Al Fassia", "cuisine": "Moroccan", "price_range": "$$", "description": "Run entirely by women — traditional Moroccan cuisine at its best."},
+      {"name": "Jemaa el-Fnaa Food Stalls", "cuisine": "Moroccan", "price_range": "$", "description": "Night market food stalls — grilled meats, snails, fresh juice."}
+    ],
+    "hotels": [
+      {"name": "Royal Mansour", "stars": 5, "price_per_night_usd": 600, "description": "King-owned palace hotel — private riads within the hotel."},
+      {"name": "Riad Yasmine", "stars": 4, "price_per_night_usd": 80, "description": "Instagram-famous riad with a green-tiled plunge pool."},
+      {"name": "Equity Point Hostel", "stars": 2, "price_per_night_usd": 15, "description": "Former palace turned hostel — incredible rooftop terrace."}
+    ],
+    "travel_tips": ["Bargain hard in the souks — the first price is 3-5x what you should pay.", "Carry small change for tips (guides, bag carriers, toilet attendants).", "Drink mint tea — it's the social glue of Morocco.", "Book a riad in the medina for the authentic experience."],
+    "safety_notes": "Generally safe. Beware of aggressive touts and fake guides. Women may experience catcalling."
+  },
+  {
+    "id": "dest-010",
+    "city": "Sydney",
+    "country": "Australia",
+    "description": "Harbour city with a perfect blend of beaches, bushwalks, food, and culture. The Opera House and Harbour Bridge are just the start — Sydney's best moments are often unplanned.",
+    "best_seasons": ["autumn", "spring"],
+    "avg_daily_budget_usd": {"budget": 90, "mid_range": 180, "luxury": 450},
+    "attractions": [
+      {"name": "Sydney Opera House", "description": "Jørn Utzon's masterpiece — take a tour or see a performance.", "cost_usd": 30, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Bondi to Coogee Walk", "description": "Spectacular coastal walk past cliffs, rock pools, and beaches.", "cost_usd": 0, "duration_hours": 2, "category": "nature"},
+      {"name": "Sydney Harbour Bridge Climb", "description": "Climb to the top of the bridge for 360-degree harbour views.", "cost_usd": 200, "duration_hours": 3, "category": "adventure"},
+      {"name": "The Rocks", "description": "Historic waterfront precinct with weekend markets and pubs.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Taronga Zoo", "description": "Zoo with a view — giraffes against the Sydney skyline.", "cost_usd": 40, "duration_hours": 3, "category": "nature"}
+    ],
+    "restaurants": [
+      {"name": "Bourke Street Bakery", "cuisine": "Australian", "price_range": "$", "description": "Famous pork and fennel sausage rolls — multiple locations."},
+      {"name": "Quay", "cuisine": "Modern Australian", "price_range": "$$$", "description": "Fine dining with harbour views — Peter Gilmore's tasting menus."},
+      {"name": "Mary's Burgers", "cuisine": "American", "price_range": "$", "description": "Dive bar meets gourmet smashed burgers in Newtown."}
+    ],
+    "hotels": [
+      {"name": "Park Hyatt Sydney", "stars": 5, "price_per_night_usd": 650, "description": "Opera House views from your bathtub — doesn't get better."},
+      {"name": "Ovolo Woolloomooloo", "stars": 4, "price_per_night_usd": 180, "description": "Converted wharf hotel with harbour views and free minibar."},
+      {"name": "Wake Up! Sydney", "stars": 2, "price_per_night_usd": 35, "description": "Massive social hostel opposite Central Station."}
+    ],
+    "travel_tips": ["Opal card for public transport — caps daily spending.", "Bondi Beach is overrated for swimming — try Coogee or Bronte instead.", "Ferry to Manly is the best cheap activity in the city.", "Wear sunscreen — Australian UV is no joke."],
+    "safety_notes": "Very safe. Swim between the flags at the beach and watch for rip currents."
+  },
+  {
+    "id": "dest-011",
+    "city": "Seoul",
+    "country": "South Korea",
+    "description": "Ancient palaces beside K-pop culture, incredible street food, saunas (jjimjilbangs) where you can sleep overnight, and more beauty products than you can carry home. Seoul is addictive.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 50, "mid_range": 110, "luxury": 300},
+    "attractions": [
+      {"name": "Gyeongbokgung Palace", "description": "Grand Joseon dynasty palace — rent a hanbok for free entry.", "cost_usd": 3, "duration_hours": 2, "category": "culture"},
+      {"name": "Bukchon Hanok Village", "description": "Traditional Korean houses on hilly streets — Instagram heaven.", "cost_usd": 0, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Myeongdong", "description": "Shopping district for K-beauty, fashion, and street food.", "cost_usd": 0, "duration_hours": 2, "category": "shopping"},
+      {"name": "Hongdae", "description": "University district with buskers, clubs, and quirky cafés.", "cost_usd": 0, "duration_hours": 3, "category": "nightlife"},
+      {"name": "Dragon Hill Spa", "description": "Multi-floor jjimjilbang (Korean spa) — try the salt room.", "cost_usd": 15, "duration_hours": 3, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Gwangjang Market", "cuisine": "Korean", "price_range": "$", "description": "Street food market — bindaetteok (mung bean pancakes) and mayak kimbap."},
+      {"name": "Jungsik", "cuisine": "Modern Korean", "price_range": "$$$", "description": "Two Michelin stars — modern Korean tasting menus."},
+      {"name": "Myeongdong Kyoja", "cuisine": "Korean", "price_range": "$", "description": "Famous handmade kalguksu noodles since 1966."}
+    ],
+    "hotels": [
+      {"name": "Signiel Seoul", "stars": 5, "price_per_night_usd": 350, "description": "Occupying the top floors of Lotte World Tower — 100th-floor views."},
+      {"name": "Hotel28 Myeongdong", "stars": 3, "price_per_night_usd": 90, "description": "Stylish boutique hotel in the heart of Myeongdong shopping."},
+      {"name": "Hongdae Blueprint Hostel", "stars": 2, "price_per_night_usd": 20, "description": "Clean, well-designed hostel in the Hongdae party district."}
+    ],
+    "travel_tips": ["T-money card works on all transport including taxis.", "Korean BBQ is a group activity — don't go alone.", "Download Naver Maps — Google Maps doesn't work well in Korea.", "Try a hanbok rental for free palace entry and great photos."],
+    "safety_notes": "Extremely safe — one of the safest cities in the world. You can leave belongings unattended."
+  },
+  {
+    "id": "dest-012",
+    "city": "Mexico City",
+    "country": "Mexico",
+    "description": "A sprawling capital with world-class museums, pre-Columbian ruins, and a food scene that rivals any city on earth. Tacos al pastor at 2am might be the single best meal of your life.",
+    "best_seasons": ["winter", "spring"],
+    "avg_daily_budget_usd": {"budget": 40, "mid_range": 90, "luxury": 250},
+    "attractions": [
+      {"name": "Museo Nacional de Antropología", "description": "The Aztec Sun Stone and one of the world's great museums.", "cost_usd": 5, "duration_hours": 3, "category": "culture"},
+      {"name": "Chapultepec Castle", "description": "Hilltop castle overlooking Mexico City — beautiful murals inside.", "cost_usd": 5, "duration_hours": 2, "category": "culture"},
+      {"name": "Xochimilco Canals", "description": "Colourful trajineras (boats) on ancient Aztec canals — bring speakers and food.", "cost_usd": 20, "duration_hours": 3, "category": "culture"},
+      {"name": "Coyoacán & Frida Kahlo Museum", "description": "Frida's Blue House and the bohemian neighbourhood she loved.", "cost_usd": 12, "duration_hours": 2, "category": "culture"},
+      {"name": "Roma Norte & Condesa", "description": "Tree-lined streets, art deco buildings, and Mexico City's best cafés.", "cost_usd": 0, "duration_hours": 3, "category": "food"}
+    ],
+    "restaurants": [
+      {"name": "El Huequito", "cuisine": "Mexican", "price_range": "$", "description": "Birthplace of tacos al pastor — a tiny counter that changed Mexican cuisine."},
+      {"name": "Pujol", "cuisine": "Modern Mexican", "price_range": "$$$", "description": "World's 50 Best — Enrique Olvera's mole madre has aged for 2,500+ days."},
+      {"name": "Mercado Roma", "cuisine": "International", "price_range": "$$", "description": "Upscale food market in Roma Norte — artisanal everything."}
+    ],
+    "hotels": [
+      {"name": "Four Seasons Mexico City", "stars": 5, "price_per_night_usd": 400, "description": "Elegant hotel on Paseo de la Reforma with a beautiful courtyard."},
+      {"name": "Casa Comtesse", "stars": 3, "price_per_night_usd": 70, "description": "Charming boutique in Condesa with a rooftop terrace."},
+      {"name": "Hostel Home", "stars": 2, "price_per_night_usd": 15, "description": "Clean, friendly hostel in the Zona Rosa area."}
+    ],
+    "travel_tips": ["Uber is safer and cheaper than taxis — use it everywhere.", "Don't drink the tap water — buy garrafones (jugs) from OXXO.", "Tuesday is free museum day.", "Learn some Spanish — English is less common outside tourist areas."],
+    "safety_notes": "Safe in tourist areas (Roma, Condesa, Coyoacán, Centro). Use Uber instead of street taxis at night."
+  },
+  {
+    "id": "dest-013",
+    "city": "Prague",
+    "country": "Czech Republic",
+    "description": "A fairytale city of Gothic spires, Baroque palaces, and bridges over the Vltava. Prague delivers old-world charm at central European prices — with some of the world's best beer.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 50, "mid_range": 100, "luxury": 280},
+    "attractions": [
+      {"name": "Charles Bridge", "description": "14th-century stone bridge lined with Baroque statues — magical at dawn.", "cost_usd": 0, "duration_hours": 1, "category": "culture"},
+      {"name": "Prague Castle", "description": "World's largest ancient castle complex — includes St. Vitus Cathedral.", "cost_usd": 15, "duration_hours": 3, "category": "culture"},
+      {"name": "Old Town Square", "description": "Astronomical Clock, colourful buildings, and the best people-watching.", "cost_usd": 0, "duration_hours": 1, "category": "culture"},
+      {"name": "Letná Park Beer Garden", "description": "Cold Pilsner Urquell with panoramic views over the city.", "cost_usd": 5, "duration_hours": 1.5, "category": "nightlife"}
+    ],
+    "restaurants": [
+      {"name": "Lokál Dlouhááá", "cuisine": "Czech", "price_range": "$", "description": "Perfectly poured Pilsner and Czech comfort food — try the svíčková."},
+      {"name": "Eska", "cuisine": "Modern Czech", "price_range": "$$", "description": "Fermentation-focused modern Czech cuisine in a converted factory."},
+      {"name": "Naše Maso", "cuisine": "Czech", "price_range": "$", "description": "Butcher shop with steak tartare you spread yourself."}
+    ],
+    "hotels": [
+      {"name": "Four Seasons Hotel Prague", "stars": 5, "price_per_night_usd": 350, "description": "Stunning views of Prague Castle from the Vltava riverbank."},
+      {"name": "Hotel Josef", "stars": 4, "price_per_night_usd": 100, "description": "Minimalist design hotel in the Jewish Quarter."},
+      {"name": "Hostel One Prague", "stars": 2, "price_per_night_usd": 18, "description": "Social hostel with free dinner and pub crawls."}
+    ],
+    "travel_tips": ["Czech crowns (CZK) get better rates than paying in euros.", "Walk Charles Bridge before 7am to avoid crowds.", "Prague's beer is cheaper than water — enjoy responsibly.", "The metro is fast, clean, and cheap."],
+    "safety_notes": "Very safe. Minor pickpocket risk on Charles Bridge and in tourist areas."
+  },
+  {
+    "id": "dest-014",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "description": "A futuristic desert city of superlatives — tallest building, biggest mall, indoor ski slope. Dubai is extravagant, multicultural, and surprisingly easy to visit on a mid-range budget.",
+    "best_seasons": ["winter"],
+    "avg_daily_budget_usd": {"budget": 70, "mid_range": 180, "luxury": 600},
+    "attractions": [
+      {"name": "Burj Khalifa", "description": "The world's tallest building — sunset views from the 148th floor.", "cost_usd": 40, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Dubai Creek & Old Souk", "description": "Abra boat ride across the creek and gold/spice souks.", "cost_usd": 1, "duration_hours": 2, "category": "culture"},
+      {"name": "Desert Safari", "description": "Dune bashing, camel rides, and BBQ dinner under the stars.", "cost_usd": 60, "duration_hours": 5, "category": "adventure"},
+      {"name": "Dubai Mall & Aquarium", "description": "1,200 shops, an ice rink, and one of the world's largest aquariums.", "cost_usd": 30, "duration_hours": 3, "category": "shopping"}
+    ],
+    "restaurants": [
+      {"name": "Ravi Restaurant", "cuisine": "Pakistani", "price_range": "$", "description": "Legendary cheap eats in Satwa — open since the 1970s."},
+      {"name": "Pierchic", "cuisine": "Seafood", "price_range": "$$$", "description": "Seafood restaurant on a pier — Arabian Gulf views."},
+      {"name": "Al Ustad Special Kebab", "cuisine": "Iranian", "price_range": "$", "description": "Hole-in-the-wall kebab shop — the shah ate here."}
+    ],
+    "hotels": [
+      {"name": "Burj Al Arab", "stars": 5, "price_per_night_usd": 1500, "description": "The world's most luxurious hotel — sail-shaped icon on its own island."},
+      {"name": "Rove Downtown", "stars": 3, "price_per_night_usd": 80, "description": "Walking distance to Burj Khalifa — great value."},
+      {"name": "Barsha Backpackers", "stars": 2, "price_per_night_usd": 20, "description": "Clean budget option near Mall of the Emirates."}
+    ],
+    "travel_tips": ["The metro is modern and covers major attractions.", "Dress modestly in malls and public areas.", "Friday brunch is a Dubai institution — book one.", "Alcohol is only served in licensed hotels and restaurants."],
+    "safety_notes": "Extremely safe. Very strict laws — be aware of local customs and regulations."
+  },
+  {
+    "id": "dest-015",
+    "city": "Cape Town",
+    "country": "South Africa",
+    "description": "Where Table Mountain meets the Atlantic Ocean. Cape Town offers beaches, wine estates, incredible wildlife, and one of the world's most stunning settings — all at favourable exchange rates.",
+    "best_seasons": ["summer", "autumn"],
+    "avg_daily_budget_usd": {"budget": 45, "mid_range": 100, "luxury": 300},
+    "attractions": [
+      {"name": "Table Mountain", "description": "Hike or take the cable car for panoramic views of the city and ocean.", "cost_usd": 18, "duration_hours": 3, "category": "nature"},
+      {"name": "Cape of Good Hope", "description": "The dramatic tip of the Cape Peninsula — wild beauty.", "cost_usd": 15, "duration_hours": 4, "category": "nature"},
+      {"name": "Boulders Beach Penguins", "description": "African penguins on a sheltered beach — you can swim with them.", "cost_usd": 8, "duration_hours": 1.5, "category": "nature"},
+      {"name": "Stellenbosch Wine Route", "description": "World-class wine estates 45 minutes from the city.", "cost_usd": 30, "duration_hours": 5, "category": "food"},
+      {"name": "Robben Island", "description": "Nelson Mandela's former prison — a powerful historical experience.", "cost_usd": 25, "duration_hours": 3.5, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "The Test Kitchen", "cuisine": "Modern South African", "price_range": "$$$", "description": "Luke Dale-Roberts' innovative tasting menus in Woodstock."},
+      {"name": "Mzansi", "cuisine": "South African", "price_range": "$$", "description": "Braai (BBQ) and traditional dishes — real South African food."},
+      {"name": "Old Biscuit Mill", "cuisine": "International", "price_range": "$$", "description": "Saturday Neighbourgoods Market — artisanal food from 100+ vendors."}
+    ],
+    "hotels": [
+      {"name": "One&Only Cape Town", "stars": 5, "price_per_night_usd": 400, "description": "Waterfront luxury with Table Mountain views."},
+      {"name": "POD Camps Bay", "stars": 4, "price_per_night_usd": 150, "description": "Boutique hotel overlooking Camps Bay beach."},
+      {"name": "Never@Home", "stars": 2, "price_per_night_usd": 15, "description": "Social hostel in Green Point with rooftop braais."}
+    ],
+    "travel_tips": ["Rent a car — public transport is limited.", "Use Uber rather than metered taxis.", "Book Table Mountain cable car online to skip the queue.", "The Rand makes Cape Town excellent value for international visitors."],
+    "safety_notes": "Tourist areas are generally safe. Don't walk alone at night in non-tourist areas. Leave valuables in your hotel safe."
+  },
+  {
+    "id": "dest-016",
+    "city": "Singapore",
+    "country": "Singapore",
+    "description": "A tiny city-state with outsized ambitions — hawker centres serving $3 Michelin meals, futuristic gardens, multicultural neighbourhoods, and the world's best airport. Spotlessly clean and efficient.",
+    "best_seasons": ["winter", "spring"],
+    "avg_daily_budget_usd": {"budget": 60, "mid_range": 140, "luxury": 400},
+    "attractions": [
+      {"name": "Gardens by the Bay", "description": "Futuristic supertree grove and cloud forest — stunning at night.", "cost_usd": 20, "duration_hours": 2, "category": "nature"},
+      {"name": "Marina Bay Sands", "description": "Iconic rooftop infinity pool and SkyPark observation deck.", "cost_usd": 25, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Chinatown", "description": "Heritage shophouses, temples, and some of the best food in Asia.", "cost_usd": 0, "duration_hours": 2, "category": "food"},
+      {"name": "Little India", "description": "Colourful streets, flower garlands, and fiery South Indian food.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Sentosa Island", "description": "Beaches, Universal Studios, and S.E.A. Aquarium.", "cost_usd": 40, "duration_hours": 4, "category": "adventure"}
+    ],
+    "restaurants": [
+      {"name": "Liao Fan Hawker Chan", "cuisine": "Chinese", "price_range": "$", "description": "World's cheapest Michelin-starred meal — soya sauce chicken rice."},
+      {"name": "Jumbo Seafood", "cuisine": "Singaporean", "price_range": "$$", "description": "Signature chilli crab — messy, spicy, glorious."},
+      {"name": "Tiong Bahru Bakery", "cuisine": "French-Asian", "price_range": "$", "description": "Croissants and kouign-amann in Singapore's hippest neighbourhood."}
+    ],
+    "hotels": [
+      {"name": "Raffles Hotel", "stars": 5, "price_per_night_usd": 700, "description": "Colonial-era icon — birthplace of the Singapore Sling."},
+      {"name": "Naumi Hotel", "stars": 4, "price_per_night_usd": 150, "description": "Rooftop infinity pool with Marina Bay views."},
+      {"name": "5footway.inn Project Chinatown", "stars": 2, "price_per_night_usd": 30, "description": "Clean boutique hostel in a heritage shophouse."}
+    ],
+    "travel_tips": ["MRT (metro) covers everywhere — use a stored-value card.", "Hawker centres are where locals eat — cheaper and better than restaurants.", "Chewing gum is famously banned — don't bring any.", "Indoor air conditioning is fierce — carry a light jacket."],
+    "safety_notes": "One of the safest cities in the world. Strict laws are taken seriously."
+  },
+  {
+    "id": "dest-017",
+    "city": "Lisbon",
+    "country": "Portugal",
+    "description": "A sun-drenched city of seven hills with pastel buildings, melancholic fado music, and custard tarts that will haunt your dreams. Lisbon is Europe's best-value capital — and it knows it.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 55, "mid_range": 110, "luxury": 300},
+    "attractions": [
+      {"name": "Belém Tower", "description": "16th-century fortified tower on the Tagus River.", "cost_usd": 10, "duration_hours": 1, "category": "culture"},
+      {"name": "Alfama", "description": "The oldest district — narrow alleys, fado bars, and rooftop views.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Tram 28", "description": "The iconic yellow tram — a scenic ride through Lisbon's hills.", "cost_usd": 3, "duration_hours": 1, "category": "culture"},
+      {"name": "Time Out Market", "description": "Lisbon's best chefs under one roof in a historic market hall.", "cost_usd": 20, "duration_hours": 1.5, "category": "food"},
+      {"name": "LX Factory", "description": "Creative hub in a former fabric factory — shops, galleries, brunch.", "cost_usd": 0, "duration_hours": 2, "category": "shopping"}
+    ],
+    "restaurants": [
+      {"name": "Pastéis de Belém", "cuisine": "Portuguese", "price_range": "$", "description": "The original pastel de nata since 1837 — warm, flaky, perfect."},
+      {"name": "Cervejaria Ramiro", "cuisine": "Seafood", "price_range": "$$", "description": "Best seafood restaurant in Lisbon — end with a steak sandwich."},
+      {"name": "A Cevicheria", "cuisine": "Peruvian-Portuguese", "price_range": "$$", "description": "Chef Kiko Martins' ceviche bar with a giant octopus hanging from the ceiling."}
+    ],
+    "hotels": [
+      {"name": "Four Seasons Hotel Ritz Lisbon", "stars": 5, "price_per_night_usd": 400, "description": "Grand hotel overlooking Eduardo VII Park."},
+      {"name": "The Lumiares", "stars": 4, "price_per_night_usd": 120, "description": "Converted palace in Bairro Alto with a rooftop terrace."},
+      {"name": "Goodmorning Hostel", "stars": 2, "price_per_night_usd": 22, "description": "Excellent hostel in Baixa — free walking tours."}
+    ],
+    "travel_tips": ["Get a Viva Viagem card for public transport.", "Wear comfortable shoes — the hills are serious.", "Book fado performances at smaller houses for authenticity.", "Side trip to Sintra is unmissable (30 minutes by train)."],
+    "safety_notes": "Very safe. Watch for pickpockets on Tram 28 and in Alfama."
+  },
+  {
+    "id": "dest-018",
+    "city": "Buenos Aires",
+    "country": "Argentina",
+    "description": "The Paris of South America dances to a tango beat. Steak, Malbec, bookshops, street art, and football passion — Buenos Aires has soul in a way few cities can match.",
+    "best_seasons": ["autumn", "spring"],
+    "avg_daily_budget_usd": {"budget": 35, "mid_range": 80, "luxury": 220},
+    "attractions": [
+      {"name": "La Boca & Caminito", "description": "Colourful tin houses and street tango in the most photogenic barrio.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Recoleta Cemetery", "description": "Ornate mausoleums including Evita Perón's — hauntingly beautiful.", "cost_usd": 0, "duration_hours": 1.5, "category": "culture"},
+      {"name": "San Telmo Market", "description": "Sunday antiques market with live tango, street food, and vintage finds.", "cost_usd": 0, "duration_hours": 3, "category": "shopping"},
+      {"name": "Tango Show at Café Tortoni", "description": "Historic café (1858) with intimate tango performances.", "cost_usd": 25, "duration_hours": 1.5, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Don Julio", "cuisine": "Argentinian", "price_range": "$$", "description": "World's best steak — the 'bife de chorizo' is life-changing."},
+      {"name": "El Sanjuanino", "cuisine": "Argentinian", "price_range": "$", "description": "Huge empanadas and humita in a no-frills setting."},
+      {"name": "Café San Juan", "cuisine": "Modern Argentinian", "price_range": "$$", "description": "Chef Lele Cristóbal's relaxed neighbourhood bistro in San Telmo."}
+    ],
+    "hotels": [
+      {"name": "Alvear Palace Hotel", "stars": 5, "price_per_night_usd": 300, "description": "Grand palace hotel in Recoleta — impeccable service."},
+      {"name": "Mine Hotel", "stars": 3, "price_per_night_usd": 80, "description": "Stylish boutique in Palermo Hollywood."},
+      {"name": "Milhouse Hostel", "stars": 2, "price_per_night_usd": 12, "description": "Party hostel in a beautiful old building near Plaza de Mayo."}
+    ],
+    "travel_tips": ["Blue dollar rate gives much better value — check current rates.", "Steak for dinner is customary around 9-10pm.", "Subte (metro) is fast for getting around the centre.", "Learn a few tango steps — milongas (dance halls) welcome beginners."],
+    "safety_notes": "Generally safe in tourist areas. Avoid flashing valuables and use registered taxis or Uber."
+  },
+  {
+    "id": "dest-019",
+    "city": "London",
+    "country": "United Kingdom",
+    "description": "History, culture, and an absurdly good food scene hidden behind a reputation for bad weather. London delivers world-class museums (free!), theatre, parks, and pubs with real ales.",
+    "best_seasons": ["spring", "summer"],
+    "avg_daily_budget_usd": {"budget": 80, "mid_range": 180, "luxury": 500},
+    "attractions": [
+      {"name": "British Museum", "description": "The Rosetta Stone, Egyptian mummies, and centuries of global history — free.", "cost_usd": 0, "duration_hours": 3, "category": "culture"},
+      {"name": "Tower of London", "description": "1,000-year-old fortress housing the Crown Jewels.", "cost_usd": 35, "duration_hours": 2.5, "category": "culture"},
+      {"name": "Borough Market", "description": "London's oldest food market — cheese, bread, oysters, and more.", "cost_usd": 20, "duration_hours": 2, "category": "food"},
+      {"name": "West End Theatre", "description": "World-class musicals and plays in Theatreland.", "cost_usd": 50, "duration_hours": 2.5, "category": "culture"},
+      {"name": "Hyde Park & Kensington Gardens", "description": "Central London's green escape — rowing, swimming, or just sitting.", "cost_usd": 0, "duration_hours": 2, "category": "nature"}
+    ],
+    "restaurants": [
+      {"name": "Dishoom", "cuisine": "Indian", "price_range": "$$", "description": "Bombay-inspired café — the bacon naan roll is legendary."},
+      {"name": "Bao", "cuisine": "Taiwanese", "price_range": "$$", "description": "Steamed buns with inventive fillings — worth the queue."},
+      {"name": "St. JOHN", "cuisine": "British", "price_range": "$$$", "description": "Fergus Henderson's nose-to-tail pioneering — roasted bone marrow is the signature."}
+    ],
+    "hotels": [
+      {"name": "The Savoy", "stars": 5, "price_per_night_usd": 600, "description": "Legendary riverside hotel — art deco grandeur since 1889."},
+      {"name": "The Z Hotel Soho", "stars": 3, "price_per_night_usd": 120, "description": "Compact but stylish rooms in the heart of Soho."},
+      {"name": "Generator London", "stars": 2, "price_per_night_usd": 30, "description": "Massive hostel near Russell Square with a bar and events."}
+    ],
+    "travel_tips": ["Oyster card or contactless payment for transport — daily caps apply.", "Most major museums are free — plan around them.", "Queue for day seats at the National Theatre for cheap tickets.", "Pubs close at 11pm (some earlier) — plan accordingly."],
+    "safety_notes": "Generally safe. Watch for pickpockets on the Tube and in busy tourist areas."
+  },
+  {
+    "id": "dest-020",
+    "city": "Santorini",
+    "country": "Greece",
+    "description": "Blue-domed churches, white-washed buildings cascading down volcanic cliffs, and the most photographed sunsets in the world. Santorini is romantic, dramatic, and utterly unforgettable.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 80, "mid_range": 170, "luxury": 500},
+    "attractions": [
+      {"name": "Oia Sunset", "description": "The world's most famous sunset — arrive early for a spot.", "cost_usd": 0, "duration_hours": 1.5, "category": "nature"},
+      {"name": "Fira to Oia Hike", "description": "10km cliffside trail with caldera views the entire way.", "cost_usd": 0, "duration_hours": 4, "category": "adventure"},
+      {"name": "Red Beach", "description": "Dramatic red volcanic cliffs meeting deep blue water.", "cost_usd": 0, "duration_hours": 2, "category": "nature"},
+      {"name": "Akrotiri Archaeological Site", "description": "A Minoan Pompeii — ancient city preserved under volcanic ash.", "cost_usd": 12, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Wine Tasting", "description": "Volcanic soil produces unique Assyrtiko wines — visit Santo Wines.", "cost_usd": 20, "duration_hours": 1.5, "category": "food"}
+    ],
+    "restaurants": [
+      {"name": "Ammoudi Fish Taverna", "cuisine": "Greek", "price_range": "$$", "description": "Fresh fish by the water at the bottom of 300 steps from Oia."},
+      {"name": "Metaxy Mas", "cuisine": "Greek", "price_range": "$$", "description": "Off-the-beaten-path taverna — locals' favourite."},
+      {"name": "Lucky's Souvlaki", "cuisine": "Greek", "price_range": "$", "description": "Best cheap eat in Fira — massive pita wraps."}
+    ],
+    "hotels": [
+      {"name": "Mystique", "stars": 5, "price_per_night_usd": 600, "description": "Luxury cave hotel in Oia with infinity pool caldera views."},
+      {"name": "Aethrio Hotel", "stars": 3, "price_per_night_usd": 120, "description": "Charming family-run hotel in Oia with great views."},
+      {"name": "Caveland Hostel", "stars": 2, "price_per_night_usd": 30, "description": "Stay in an actual cave — unique hostel in Karterados."}
+    ],
+    "travel_tips": ["Visit in May or September to avoid cruise-ship crowds.", "Rent an ATV to explore the island — roads are narrow for cars.", "Sunset in Oia is crowded — try Imerovigli for fewer people.", "Book caldera-view accommodation well in advance."],
+    "safety_notes": "Very safe. The main risk is sunburn and the steep stairs after wine tasting."
+  },
+  {
+    "id": "dest-021",
+    "city": "Vancouver",
+    "country": "Canada",
+    "description": "Mountains meet ocean in Canada's most livable city. Ski in the morning, kayak in the afternoon, then eat world-class sushi. Vancouver's natural setting is jaw-dropping.",
+    "best_seasons": ["summer", "autumn"],
+    "avg_daily_budget_usd": {"budget": 80, "mid_range": 160, "luxury": 400},
+    "attractions": [
+      {"name": "Stanley Park", "description": "1,000-acre urban park — seawall walk, totem poles, and beaches.", "cost_usd": 0, "duration_hours": 3, "category": "nature"},
+      {"name": "Grouse Mountain", "description": "Gondola ride with city views — hiking in summer, skiing in winter.", "cost_usd": 50, "duration_hours": 4, "category": "adventure"},
+      {"name": "Granville Island", "description": "Public market, art studios, and craft breweries on a former industrial island.", "cost_usd": 0, "duration_hours": 2, "category": "food"},
+      {"name": "Capilano Suspension Bridge", "description": "Sway 230 feet above a temperate rainforest canyon.", "cost_usd": 45, "duration_hours": 2, "category": "nature"}
+    ],
+    "restaurants": [
+      {"name": "Miku", "cuisine": "Japanese", "price_range": "$$$", "description": "Aburi (flame-seared) sushi overlooking the harbour."},
+      {"name": "Japadog", "cuisine": "Japanese-Canadian", "price_range": "$", "description": "Japanese-style hot dogs — a Vancouver street food icon."},
+      {"name": "Vij's", "cuisine": "Indian", "price_range": "$$", "description": "No-reservation Indian restaurant that's worth every minute of the wait."}
+    ],
+    "hotels": [
+      {"name": "Fairmont Pacific Rim", "stars": 5, "price_per_night_usd": 450, "description": "Luxury waterfront hotel with mountain views."},
+      {"name": "Skwachàys Lodge", "stars": 3, "price_per_night_usd": 130, "description": "Indigenous arts hotel — each room designed by a different artist."},
+      {"name": "HI Vancouver Central", "stars": 2, "price_per_night_usd": 40, "description": "Great downtown location near Granville Street."}
+    ],
+    "travel_tips": ["The SeaBus to North Vancouver is a beautiful (and cheap) harbour ride.", "Bring layers — weather changes quickly.", "Dim sum in Richmond rivals Hong Kong.", "The city is very bike-friendly — rent one."],
+    "safety_notes": "Very safe. Some areas of the Downtown Eastside are best avoided at night."
+  },
+  {
+    "id": "dest-022",
+    "city": "Rio de Janeiro",
+    "country": "Brazil",
+    "description": "Christ the Redeemer, Copacabana, samba rhythms, and the world's biggest party (Carnival). Rio has an infectious joy that's impossible to resist — plus some of the most dramatic urban scenery anywhere.",
+    "best_seasons": ["autumn", "winter"],
+    "avg_daily_budget_usd": {"budget": 45, "mid_range": 100, "luxury": 300},
+    "attractions": [
+      {"name": "Christ the Redeemer", "description": "The 30m statue atop Corcovado — city-wide views.", "cost_usd": 20, "duration_hours": 2, "category": "culture"},
+      {"name": "Sugarloaf Mountain", "description": "Cable car to the summit — best at sunset.", "cost_usd": 25, "duration_hours": 2, "category": "nature"},
+      {"name": "Copacabana Beach", "description": "The world's most famous beach — 4km of sand and people-watching.", "cost_usd": 0, "duration_hours": 3, "category": "nature"},
+      {"name": "Santa Teresa", "description": "Bohemian hillside neighbourhood — art galleries, bars, and colonial architecture.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Lapa Arches", "description": "Friday night samba clubs under the colonial aqueduct — Rio's best nightlife.", "cost_usd": 10, "duration_hours": 3, "category": "nightlife"}
+    ],
+    "restaurants": [
+      {"name": "Confeitaria Colombo", "cuisine": "Brazilian", "price_range": "$$", "description": "Stunning belle-époque café — afternoon tea since 1894."},
+      {"name": "Aprazível", "cuisine": "Brazilian", "price_range": "$$", "description": "Treehouse restaurant in Santa Teresa — tropical garden setting."},
+      {"name": "Bar do Mineiro", "cuisine": "Brazilian", "price_range": "$", "description": "Cold chopp beer and feijoada (black bean stew) in Santa Teresa."}
+    ],
+    "hotels": [
+      {"name": "Belmond Copacabana Palace", "stars": 5, "price_per_night_usd": 500, "description": "Grand dame of Copacabana — Art Deco luxury since 1923."},
+      {"name": "Mama Ruisa", "stars": 4, "price_per_night_usd": 120, "description": "Charming boutique in Santa Teresa with city views."},
+      {"name": "El Misti Hostel Copacabana", "stars": 2, "price_per_night_usd": 15, "description": "Rooftop hostel two blocks from Copacabana Beach."}
+    ],
+    "travel_tips": ["Don't bring valuables to the beach.", "Uber is the safest transport option.", "Learn some Portuguese — it goes a long way.", "Carnival happens in February/March — book months ahead."],
+    "safety_notes": "Tourist areas are generally safe during the day. Avoid favelas unless with a reputable guide. Don't walk on beaches at night."
+  },
+  {
+    "id": "dest-023",
+    "city": "Queenstown",
+    "country": "New Zealand",
+    "description": "The adventure capital of the world — bungee jumping, skydiving, jet boats, and skiing — all set against impossibly beautiful Southern Alps and Lake Wakatipu scenery.",
+    "best_seasons": ["summer", "winter"],
+    "avg_daily_budget_usd": {"budget": 70, "mid_range": 150, "luxury": 400},
+    "attractions": [
+      {"name": "Bungee Jump (Kawarau Bridge)", "description": "The original commercial bungee — 43m above the river.", "cost_usd": 150, "duration_hours": 2, "category": "adventure"},
+      {"name": "Milford Sound Day Trip", "description": "Fiord cruise through towering peaks and waterfalls.", "cost_usd": 100, "duration_hours": 12, "category": "nature"},
+      {"name": "Skyline Gondola & Luge", "description": "Ride up for lake views, then luge down the mountain.", "cost_usd": 45, "duration_hours": 2, "category": "adventure"},
+      {"name": "Remarkables Ski Field", "description": "World-class skiing with stunning mountain scenery.", "cost_usd": 100, "duration_hours": 6, "category": "adventure"}
+    ],
+    "restaurants": [
+      {"name": "Fergburger", "cuisine": "Burgers", "price_range": "$", "description": "The world's most famous burger joint — queue any time, day or night."},
+      {"name": "Rata", "cuisine": "Modern NZ", "price_range": "$$$", "description": "Josh Emett's fine dining using local ingredients."},
+      {"name": "The Bathhouse", "cuisine": "Modern NZ", "price_range": "$$", "description": "Waterfront dining on the lake — stunning setting."}
+    ],
+    "hotels": [
+      {"name": "Eichardt's Private Hotel", "stars": 5, "price_per_night_usd": 500, "description": "Lakefront boutique luxury — Queenstown's finest."},
+      {"name": "Novotel Queenstown", "stars": 4, "price_per_night_usd": 130, "description": "Lake views and central location — good mid-range pick."},
+      {"name": "Adventure Queenstown Hostel", "stars": 2, "price_per_night_usd": 30, "description": "Social hostel with sauna and mountain views."}
+    ],
+    "travel_tips": ["Book activities online in advance — especially Milford Sound.", "Winter (June-August) is ski season; summer (December-February) is hiking season.", "A car is essential for day trips.", "Fergburger is open until 5am — perfect post-adventure fuel."],
+    "safety_notes": "Very safe. Weather can change rapidly in the mountains — always be prepared."
+  },
+  {
+    "id": "dest-024",
+    "city": "Istanbul",
+    "country": "Turkey",
+    "description": "The only city on two continents, Istanbul layers 2,000 years of Byzantine and Ottoman history with a buzzing modern art scene, kebabs at 3am, and tea on every corner.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 40, "mid_range": 90, "luxury": 250},
+    "attractions": [
+      {"name": "Hagia Sophia", "description": "1,500-year-old cathedral-turned-mosque — architectural wonder.", "cost_usd": 0, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Grand Bazaar", "description": "One of the world's oldest covered markets — 4,000 shops.", "cost_usd": 0, "duration_hours": 2, "category": "shopping"},
+      {"name": "Blue Mosque", "description": "Iconic 17th-century mosque with six minarets and blue İznik tiles.", "cost_usd": 0, "duration_hours": 1, "category": "culture"},
+      {"name": "Bosphorus Cruise", "description": "Ferry between Europe and Asia — Ottoman palaces on both shores.", "cost_usd": 10, "duration_hours": 2, "category": "culture"},
+      {"name": "Basilica Cistern", "description": "Underground 6th-century water storage — atmospheric and mysterious.", "cost_usd": 12, "duration_hours": 1, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Çiya Sofrası", "cuisine": "Turkish", "price_range": "$$", "description": "Regional Anatolian dishes you won't find anywhere else — Kadıköy gem."},
+      {"name": "Karaköy Güllüoğlu", "cuisine": "Turkish", "price_range": "$", "description": "The best baklava in Istanbul since 1949."},
+      {"name": "Mikla", "cuisine": "Modern Turkish", "price_range": "$$$", "description": "Rooftop fine dining with Bosphorus views — Turkish-Scandinavian fusion."}
+    ],
+    "hotels": [
+      {"name": "Four Seasons at Sultanahmet", "stars": 5, "price_per_night_usd": 400, "description": "Former prison turned luxury hotel — steps from Hagia Sophia."},
+      {"name": "Hotel Empress Zoe", "stars": 3, "price_per_night_usd": 80, "description": "Charming boutique with archaeological ruins in the garden."},
+      {"name": "Cheers Hostel", "stars": 2, "price_per_night_usd": 15, "description": "Rooftop with Blue Mosque views — unbeatable for the price."}
+    ],
+    "travel_tips": ["Get an Istanbulkart for all public transport.", "The Asian side (Kadıköy) has better food and fewer tourists.", "Bargain in the Grand Bazaar — never pay the first price.", "Turkish breakfast is a ceremony — try it at a kahvaltıcı."],
+    "safety_notes": "Generally safe. Normal tourist precautions apply. Some areas of Taksim can be rowdy at night."
+  },
+  {
+    "id": "dest-025",
+    "city": "Kyoto",
+    "country": "Japan",
+    "description": "Japan's cultural heart — 2,000 temples and shrines, geisha districts, bamboo groves, and the most exquisite food presentation on earth. Kyoto moves at a gentler pace than Tokyo.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 70, "mid_range": 140, "luxury": 400},
+    "attractions": [
+      {"name": "Fushimi Inari Shrine", "description": "Thousands of vermillion torii gates winding up the mountainside.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Arashiyama Bamboo Grove", "description": "Towering bamboo forest — arrive at dawn for the best experience.", "cost_usd": 0, "duration_hours": 1.5, "category": "nature"},
+      {"name": "Kinkaku-ji (Golden Pavilion)", "description": "Gold-leaf temple reflected in a mirror pond — quintessential Kyoto.", "cost_usd": 5, "duration_hours": 1, "category": "culture"},
+      {"name": "Gion District", "description": "Traditional geisha quarter — preserved machiya townhouses.", "cost_usd": 0, "duration_hours": 2, "category": "culture"},
+      {"name": "Nishiki Market", "description": "Kyoto's kitchen — 400 years of food stalls and specialties.", "cost_usd": 15, "duration_hours": 1.5, "category": "food"}
+    ],
+    "restaurants": [
+      {"name": "Nishiki Warai", "cuisine": "Japanese", "price_range": "$", "description": "Okonomiyaki (savoury pancakes) near Nishiki Market."},
+      {"name": "Kikunoi", "cuisine": "Kaiseki", "price_range": "$$$", "description": "Three Michelin stars — the pinnacle of traditional Japanese cuisine."},
+      {"name": "Ippudo Ramen", "cuisine": "Japanese", "price_range": "$", "description": "Tonkotsu ramen chain — always reliable and quick."}
+    ],
+    "hotels": [
+      {"name": "Aman Kyoto", "stars": 5, "price_per_night_usd": 800, "description": "Hidden forest retreat — minimalist luxury."},
+      {"name": "Hotel Kanra Kyoto", "stars": 4, "price_per_night_usd": 150, "description": "Modern machiya-style rooms with private onsen baths."},
+      {"name": "Piece Hostel Kyoto", "stars": 2, "price_per_night_usd": 30, "description": "Design hostel near the station — excellent facilities."}
+    ],
+    "travel_tips": ["Rent a bicycle — Kyoto is flat and bike-friendly.", "Visit temples early morning to avoid crowds.", "Buy a one-day bus pass for ¥700.", "Fushimi Inari is open 24 hours — midnight visits are magical."],
+    "safety_notes": "Extremely safe. Be respectful at temples — follow the signs and etiquette."
+  },
+  {
+    "id": "dest-026",
+    "city": "Reykjavik",
+    "country": "Iceland",
+    "description": "Gateway to otherworldly landscapes — geysers, glaciers, volcanoes, and the Northern Lights. Reykjavik itself is a colourful, creative capital with an outsized music and food scene.",
+    "best_seasons": ["summer", "winter"],
+    "avg_daily_budget_usd": {"budget": 120, "mid_range": 250, "luxury": 600},
+    "attractions": [
+      {"name": "Golden Circle", "description": "Day trip: Þingvellir, Geysir, and Gullfoss waterfall.", "cost_usd": 80, "duration_hours": 8, "category": "nature"},
+      {"name": "Blue Lagoon", "description": "Geothermal spa in a lava field — milky blue water.", "cost_usd": 70, "duration_hours": 3, "category": "nature"},
+      {"name": "Northern Lights Tour", "description": "Chase the aurora borealis from September to March.", "cost_usd": 80, "duration_hours": 4, "category": "nature"},
+      {"name": "Hallgrímskirkja", "description": "Reykjavik's landmark church — tower views over the city.", "cost_usd": 10, "duration_hours": 1, "category": "culture"}
+    ],
+    "restaurants": [
+      {"name": "Bæjarins Beztu Pylsur", "cuisine": "Icelandic", "price_range": "$", "description": "The best hot dog stand in the world — Bill Clinton approved."},
+      {"name": "Grillið", "cuisine": "Modern Nordic", "price_range": "$$$", "description": "Fine dining at the top of the Saga Hotel — tasting menus with a view."},
+      {"name": "Hlemmur Mathöll", "cuisine": "International", "price_range": "$$", "description": "Food hall with Icelandic and international vendors."}
+    ],
+    "hotels": [
+      {"name": "The Retreat at Blue Lagoon", "stars": 5, "price_per_night_usd": 900, "description": "Built into a lava flow — private lagoon access."},
+      {"name": "Canopy by Hilton Reykjavik", "stars": 4, "price_per_night_usd": 180, "description": "Central location with an excellent restaurant."},
+      {"name": "KEX Hostel", "stars": 2, "price_per_night_usd": 40, "description": "Quirky hostel in a former biscuit factory — great bar."}
+    ],
+    "travel_tips": ["Rent a 4WD for the Ring Road.", "Iceland is expensive — bring snacks and a water bottle.", "Tap water is glacier-fed and delicious.", "Summer has 24 hours of daylight — bring an eye mask."],
+    "safety_notes": "Extremely safe. Weather changes rapidly — always check road conditions and never drive off marked roads."
+  },
+  {
+    "id": "dest-027",
+    "city": "Hanoi",
+    "country": "Vietnam",
+    "description": "Chaotic, charming, and delicious. Hanoi's Old Quarter buzzes with scooters and street food stalls — sit on a tiny plastic stool, eat the best pho of your life, and fall in love with this city.",
+    "best_seasons": ["autumn", "spring"],
+    "avg_daily_budget_usd": {"budget": 25, "mid_range": 60, "luxury": 180},
+    "attractions": [
+      {"name": "Old Quarter", "description": "36 ancient streets named after the goods they sold — now pure energy.", "cost_usd": 0, "duration_hours": 3, "category": "culture"},
+      {"name": "Hoan Kiem Lake", "description": "The heart of Hanoi — morning tai chi, evening strolls.", "cost_usd": 0, "duration_hours": 1, "category": "nature"},
+      {"name": "Temple of Literature", "description": "Vietnam's first university (1070) — beautiful courtyards.", "cost_usd": 3, "duration_hours": 1, "category": "culture"},
+      {"name": "Train Street", "description": "Houses inches from the railway — trains pass through twice daily.", "cost_usd": 0, "duration_hours": 0.5, "category": "culture"},
+      {"name": "Ha Long Bay Day Trip", "description": "Limestone karsts rising from emerald water — UNESCO World Heritage.", "cost_usd": 60, "duration_hours": 12, "category": "nature"}
+    ],
+    "restaurants": [
+      {"name": "Pho Gia Truyen", "cuisine": "Vietnamese", "price_range": "$", "description": "The city's most famous pho — open since 1977."},
+      {"name": "Bún Chả Hương Liên", "cuisine": "Vietnamese", "price_range": "$", "description": "Where Obama ate with Bourdain — grilled pork with noodles."},
+      {"name": "Bia Hoi Corner", "cuisine": "Vietnamese", "price_range": "$", "description": "Cheap fresh beer (bia hoi) and street food — Old Quarter institution."}
+    ],
+    "hotels": [
+      {"name": "Sofitel Legend Metropole", "stars": 5, "price_per_night_usd": 250, "description": "French colonial legend — writers and diplomats since 1901."},
+      {"name": "Hanoi La Siesta Hotel", "stars": 4, "price_per_night_usd": 60, "description": "Beautiful boutique in the Old Quarter — outstanding service."},
+      {"name": "Old Quarter View Hostel", "stars": 2, "price_per_night_usd": 8, "description": "Rooftop views and tiny prices — classic Hanoi backpacker spot."}
+    ],
+    "travel_tips": ["Cross the road with confidence — scooters will go around you.", "Street food is the best food — eat where locals eat.", "Grab (ride-hailing) is the easiest way to get around.", "Overnight train to Sapa is a great adventure."],
+    "safety_notes": "Generally safe. Watch for motorbike bag snatching and negotiate prices before services."
+  },
+  {
+    "id": "dest-028",
+    "city": "Cartagena",
+    "country": "Colombia",
+    "description": "A Caribbean colonial gem — colourful buildings, cobblestoned streets, salsa-filled nights, and ceviche on the beach. Cartagena's walled old town feels like stepping into a Gabriel García Márquez novel.",
+    "best_seasons": ["winter", "spring"],
+    "avg_daily_budget_usd": {"budget": 35, "mid_range": 80, "luxury": 250},
+    "attractions": [
+      {"name": "Walled City (Centro Histórico)", "description": "UNESCO-listed colonial quarter — flower-draped balconies and plazas.", "cost_usd": 0, "duration_hours": 3, "category": "culture"},
+      {"name": "Castillo de San Felipe", "description": "Massive 17th-century fortress with underground tunnels.", "cost_usd": 12, "duration_hours": 1.5, "category": "culture"},
+      {"name": "Rosario Islands", "description": "Boat trip to white-sand islands with crystal-clear water.", "cost_usd": 30, "duration_hours": 6, "category": "nature"},
+      {"name": "Getsemaní", "description": "Street art, local bars, and Cartagena's coolest neighbourhood.", "cost_usd": 0, "duration_hours": 2, "category": "nightlife"}
+    ],
+    "restaurants": [
+      {"name": "La Cevichería", "cuisine": "Seafood", "price_range": "$$", "description": "Best ceviche in the city — Obama ate here too."},
+      {"name": "El Boliche", "cuisine": "Colombian", "price_range": "$", "description": "Cheap lunch counter — arroz con coco and fried fish."},
+      {"name": "Carmen", "cuisine": "Modern Colombian", "price_range": "$$$", "description": "Latin America's 50 Best — elegant colonial house setting."}
+    ],
+    "hotels": [
+      {"name": "Casa San Agustín", "stars": 5, "price_per_night_usd": 350, "description": "Boutique luxury in a 17th-century convent."},
+      {"name": "Hotel Casa Lola", "stars": 3, "price_per_night_usd": 80, "description": "Colourful boutique in the walled city — great rooftop."},
+      {"name": "Media Luna Hostel", "stars": 2, "price_per_night_usd": 12, "description": "Party hostel in Getsemaní with pool and rum punch."}
+    ],
+    "travel_tips": ["Negotiate taxi fares before getting in.", "Carry small bills — change is always an issue.", "Drink lots of water — the humidity is intense.", "Take a salsa class — it's the social language of Colombia."],
+    "safety_notes": "Tourist areas are safe. Avoid deserted streets at night. Don't wear flashy jewellery."
+  },
+  {
+    "id": "dest-029",
+    "city": "Vienna",
+    "country": "Austria",
+    "description": "Imperial palaces, Klimt masterpieces, coffeehouses where you can linger for hours, and the world's best classical music scene. Vienna is sophisticated without being stuffy.",
+    "best_seasons": ["spring", "autumn"],
+    "avg_daily_budget_usd": {"budget": 65, "mid_range": 140, "luxury": 350},
+    "attractions": [
+      {"name": "Schönbrunn Palace", "description": "1,441-room Habsburg summer palace — gardens are free.", "cost_usd": 20, "duration_hours": 3, "category": "culture"},
+      {"name": "Belvedere Palace", "description": "Houses Klimt's The Kiss — one of the world's most famous paintings.", "cost_usd": 18, "duration_hours": 2, "category": "culture"},
+      {"name": "Vienna State Opera", "description": "Standing tickets for €4 — world-class opera at budget prices.", "cost_usd": 4, "duration_hours": 3, "category": "culture"},
+      {"name": "Naschmarkt", "description": "Vienna's biggest market — Middle Eastern food, wine bars, vintage stalls.", "cost_usd": 15, "duration_hours": 1.5, "category": "food"}
+    ],
+    "restaurants": [
+      {"name": "Café Central", "cuisine": "Viennese", "price_range": "$$", "description": "Historic coffeehouse where Freud and Trotsky once debated."},
+      {"name": "Figlmüller", "cuisine": "Austrian", "price_range": "$$", "description": "Vienna's most famous Wiener Schnitzel — bigger than the plate."},
+      {"name": "Bitzinger Würstelstand", "cuisine": "Austrian", "price_range": "$", "description": "Gourmet sausage stand behind the Opera — champagne and käsekrainer."}
+    ],
+    "hotels": [
+      {"name": "Hotel Sacher", "stars": 5, "price_per_night_usd": 500, "description": "Home of the original Sachertorte — imperial luxury."},
+      {"name": "Hotel Capricorno", "stars": 3, "price_per_night_usd": 100, "description": "Central location near St. Stephen's Cathedral."},
+      {"name": "Wombat's City Hostel", "stars": 2, "price_per_night_usd": 25, "description": "Near Naschmarkt — good base with bar and terrace."}
+    ],
+    "travel_tips": ["Vienna City Card covers transport and museum discounts.", "Standing tickets at the Opera are the best deal in Vienna.", "Try Sturm (partially fermented grape juice) in autumn.", "Coffeehouse culture is UNESCO-listed — take your time."],
+    "safety_notes": "One of the safest capitals in Europe. Minimal crime — enjoy the city freely."
+  },
+  {
+    "id": "dest-030",
+    "city": "Cusco",
+    "country": "Peru",
+    "description": "Gateway to Machu Picchu and the Sacred Valley. Cusco blends Incan ruins with Spanish colonial architecture, vibrant textiles, and Andean cuisine at 3,400m altitude.",
+    "best_seasons": ["winter"],
+    "avg_daily_budget_usd": {"budget": 35, "mid_range": 80, "luxury": 220},
+    "attractions": [
+      {"name": "Machu Picchu", "description": "The Lost City of the Incas — one of the New Seven Wonders.", "cost_usd": 70, "duration_hours": 10, "category": "culture"},
+      {"name": "Sacred Valley", "description": "Incan terraces, colourful markets, and mountain villages.", "cost_usd": 30, "duration_hours": 8, "category": "culture"},
+      {"name": "Plaza de Armas", "description": "Cusco's main square — colonial churches and Incan foundations.", "cost_usd": 0, "duration_hours": 1, "category": "culture"},
+      {"name": "Rainbow Mountain", "description": "Striped mineral mountain at 5,200m — challenging but stunning.", "cost_usd": 20, "duration_hours": 10, "category": "adventure"},
+      {"name": "San Pedro Market", "description": "Local market with fresh juices, alpaca products, and cheap lunches.", "cost_usd": 5, "duration_hours": 1.5, "category": "food"}
+    ],
+    "restaurants": [
+      {"name": "Central (Lima satellite)", "cuisine": "Peruvian", "price_range": "$$$", "description": "Virgilio Martínez's altitude-themed tasting menu."},
+      {"name": "Jack's Café", "cuisine": "International", "price_range": "$", "description": "Huge breakfasts — fuel for altitude and hiking."},
+      {"name": "Chicha by Gastón Acurio", "cuisine": "Peruvian", "price_range": "$$", "description": "Elevated Andean cuisine in a beautiful colonial setting."}
+    ],
+    "hotels": [
+      {"name": "Belmond Hotel Monasterio", "stars": 5, "price_per_night_usd": 400, "description": "Converted 16th-century monastery — oxygen-enriched rooms for altitude."},
+      {"name": "Antigua Casona", "stars": 3, "price_per_night_usd": 70, "description": "Colonial house with a courtyard — quiet and central."},
+      {"name": "Wild Rover Hostel", "stars": 2, "price_per_night_usd": 10, "description": "Famous party hostel — social but not for light sleepers."}
+    ],
+    "travel_tips": ["Acclimatize for 2 days before doing anything strenuous.", "Coca tea helps with altitude sickness.", "Book Machu Picchu tickets well in advance — daily limits apply.", "Trek the Inca Trail (4 days) or take the train — both are incredible."],
+    "safety_notes": "Generally safe. Altitude sickness is the main risk — take it slowly. Watch for taxi scams."
+  }
+]

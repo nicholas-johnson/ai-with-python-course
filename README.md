@@ -117,7 +117,7 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | 9 | [module-09-multi-agent](module-09-multi-agent/) | Roles, coordination patterns, shared context |
 | 10 | [module-10-langchain](module-10-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
 | 11 | [module-11-edge-topics](module-11-edge-topics/) | Hybrid search, re-ranking, HyDE, agentic RAG, eval, guardrails, and more |
-| 12 | [module-12-capstone](module-12-capstone/) | Full agentic app with production hardening: tracing, reliability, cost controls, Docker |
+| 12 | [module-12-productionisation](module-12-productionisation/) | Production hardening + capstone apps: tracing, reliability, cost controls, deployment |
 
 ## Course outline
 
@@ -253,15 +253,16 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Multimodal RAG | [`exercises/12-multimodal-rag`](module-11-edge-topics/exercises/12-multimodal-rag/) | RAG with images and text |
 | Contextual chunking | [`exercises/13-contextual-chunking`](module-11-edge-topics/exercises/13-contextual-chunking/) | Context-aware document chunking strategies |
 
-### Module 12 — [Capstone Project](module-12-capstone/)
+### Module 12 — [Productionisation](module-12-productionisation/)
 
-**Topics:** Full agentic application integrating chat, RAG, MCP tools, and multi-agent coordination with production hardening: tracing, reliability, cost controls, Docker. Demo scenarios, integration tests, extension documentation.
+**Topics:** Production hardening (tracing, retries, circuit breakers, cost controls, deployment) plus capstone apps. Choose one full-stack app and build a production-ready FastAPI backend for a provided frontend.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Capstone app | [`exercises/01-capstone-app`](module-12-capstone/exercises/01-capstone-app/) | Integrated chat + RAG + MCP + multi-agent app with tracing |
-| Harden and deploy | [`exercises/02-harden-and-deploy`](module-12-capstone/exercises/02-harden-and-deploy/) | Reliability patterns + Docker deployment |
-| Test and extend | [`exercises/03-test-and-extend`](module-12-capstone/exercises/03-test-and-extend/) | Integration tests and extension documentation |
+| Recipe Finder | [`exercises/01-recipe-finder`](module-12-productionisation/exercises/01-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| Movie Night | [`exercises/02-movie-night`](module-12-productionisation/exercises/02-movie-night/) | RAG, hybrid search, text-to-SQL, structured output, charts |
+| Travel Planner | [`exercises/03-travel-planner`](module-12-productionisation/exercises/03-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
+| Personal Assistant | [`exercises/04-personal-assistant`](module-12-productionisation/exercises/04-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar management, cost controls |
 
 ## License
 

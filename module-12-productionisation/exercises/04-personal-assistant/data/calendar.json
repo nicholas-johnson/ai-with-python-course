@@ -1,0 +1,137 @@
+[
+  {
+    "id": "event-001",
+    "title": "Team standup",
+    "date": "2025-03-17",
+    "time": "09:00",
+    "duration_minutes": 15,
+    "location": "Zoom",
+    "notes": "Keep it short — async updates in Slack first"
+  },
+  {
+    "id": "event-002",
+    "title": "1:1 with Jordan",
+    "date": "2025-03-17",
+    "time": "11:00",
+    "duration_minutes": 30,
+    "location": "Meeting Room B",
+    "notes": "Follow up on caching layer project and tech lead goals"
+  },
+  {
+    "id": "event-003",
+    "title": "Gym — upper body",
+    "date": "2025-03-17",
+    "time": "17:45",
+    "duration_minutes": 60,
+    "location": "PureGym Angel",
+    "notes": "Focus on shoulders and back"
+  },
+  {
+    "id": "event-004",
+    "title": "Team standup",
+    "date": "2025-03-18",
+    "time": "09:00",
+    "duration_minutes": 15,
+    "location": "Zoom",
+    "notes": "Sprint midpoint check-in"
+  },
+  {
+    "id": "event-005",
+    "title": "Interval run — half marathon training",
+    "date": "2025-03-18",
+    "time": "07:00",
+    "duration_minutes": 45,
+    "location": "Regent's Canal",
+    "notes": "6x800m intervals with 90s recovery"
+  },
+  {
+    "id": "event-006",
+    "title": "Call Mum — birthday",
+    "date": "2025-03-18",
+    "time": "18:00",
+    "duration_minutes": 30,
+    "location": "Home",
+    "notes": "Wish her happy birthday, confirm Kew Gardens plan"
+  },
+  {
+    "id": "event-007",
+    "title": "API rate limiting RFC review",
+    "date": "2025-03-19",
+    "time": "14:00",
+    "duration_minutes": 60,
+    "location": "Meeting Room A",
+    "notes": "Present the token bucket approach to the backend team"
+  },
+  {
+    "id": "event-008",
+    "title": "Dentist check-up",
+    "date": "2025-03-19",
+    "time": "10:30",
+    "duration_minutes": 45,
+    "location": "Islington Dental Care, Upper Street",
+    "notes": "Routine check-up and hygienist — arrive 10 mins early"
+  },
+  {
+    "id": "event-009",
+    "title": "Team standup",
+    "date": "2025-03-20",
+    "time": "09:00",
+    "duration_minutes": 15,
+    "location": "Zoom",
+    "notes": "Discuss sprint progress"
+  },
+  {
+    "id": "event-010",
+    "title": "Tempo run",
+    "date": "2025-03-20",
+    "time": "07:00",
+    "duration_minutes": 40,
+    "location": "Finsbury Park",
+    "notes": "5km at threshold pace"
+  },
+  {
+    "id": "event-011",
+    "title": "Date night with Sam",
+    "date": "2025-03-20",
+    "time": "19:30",
+    "duration_minutes": 120,
+    "location": "Mildreds, King's Cross",
+    "notes": "Booked for 7:30 — table for two under Alex"
+  },
+  {
+    "id": "event-012",
+    "title": "Sprint planning",
+    "date": "2025-03-21",
+    "time": "10:00",
+    "duration_minutes": 90,
+    "location": "Zoom",
+    "notes": "Review backlog, estimate stories for next sprint. Jordan to present caching layer tickets."
+  },
+  {
+    "id": "event-013",
+    "title": "Long run — 14km",
+    "date": "2025-03-22",
+    "time": "08:00",
+    "duration_minutes": 80,
+    "location": "Hampstead Heath",
+    "notes": "Easy pace, take gels after 10km. Foam roll afterwards."
+  },
+  {
+    "id": "event-014",
+    "title": "Dinner at Sam's — cooking together",
+    "date": "2025-03-22",
+    "time": "18:00",
+    "duration_minutes": 180,
+    "location": "Sam's flat",
+    "notes": "Making Thai green curry from the recipe. Bring tofu and coconut cream."
+  },
+  {
+    "id": "event-015",
+    "title": "Sunday meal prep",
+    "date": "2025-03-23",
+    "time": "11:00",
+    "duration_minutes": 120,
+    "location": "Home",
+    "notes": "Black bean chilli and mushroom lasagne. Check tahini stock before starting."
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "name": "Alex",
+  "timezone": "Europe/London",
+  "interests": ["cooking", "hiking", "sci-fi movies", "Python programming", "gardening", "running"],
+  "work_hours": {"start": "09:00", "end": "17:30"},
+  "preferred_greeting": "casual",
+  "dietary_restrictions": ["vegetarian"],
+  "favourite_cuisines": ["Thai", "Middle Eastern", "Italian"],
+  "exercise_goals": ["half marathon in May", "gym 3x per week"],
+  "notification_preferences": {
+    "morning_summary": true,
+    "reminder_lead_time_minutes": 15
+  }
+}

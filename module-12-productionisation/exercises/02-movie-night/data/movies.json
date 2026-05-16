@@ -1,0 +1,1362 @@
+[
+  {
+    "id": "movie-001",
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "genres": ["drama"],
+    "director": "Frank Darabont",
+    "cast": ["Tim Robbins", "Morgan Freeman"],
+    "plot": "A banker is sentenced to life in Shawshank State Penitentiary for the murder of his wife and her lover, despite his claims of innocence. Over two decades, he forms a friendship with a fellow inmate and finds solace and eventual redemption through acts of common decency.",
+    "rating": 9.3,
+    "runtime_minutes": 142,
+    "mood_tags": ["inspiring", "emotional", "intense"],
+    "reviews": [
+      "A masterpiece of hope and perseverance. One of those rare films that stays with you forever.",
+      "Beautifully acted and directed. The ending is absolutely perfect.",
+      "Slow burn that rewards patience. Morgan Freeman's narration is iconic."
+    ]
+  },
+  {
+    "id": "movie-002",
+    "title": "The Godfather",
+    "year": 1972,
+    "genres": ["drama", "crime"],
+    "director": "Francis Ford Coppola",
+    "cast": ["Marlon Brando", "Al Pacino", "James Caan"],
+    "plot": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son. As Michael Corleone rises to power, he transforms from a war hero into a ruthless mafia boss.",
+    "rating": 9.2,
+    "runtime_minutes": 175,
+    "mood_tags": ["intense", "dark", "epic"],
+    "reviews": [
+      "The definitive gangster film. Every scene is perfectly crafted.",
+      "Brando and Pacino deliver performances for the ages. A film that earns every minute of its runtime.",
+      "Dark, operatic, and unforgettable. Changed cinema forever."
+    ]
+  },
+  {
+    "id": "movie-003",
+    "title": "Pulp Fiction",
+    "year": 1994,
+    "genres": ["drama", "crime", "comedy"],
+    "director": "Quentin Tarantino",
+    "cast": ["John Travolta", "Uma Thurman", "Samuel L. Jackson"],
+    "plot": "Several interconnected stories of Los Angeles criminals, a boxer, and a pair of bandits interweave in a non-linear narrative. Sharp dialogue and unexpected violence collide in this genre-defying crime anthology.",
+    "rating": 8.9,
+    "runtime_minutes": 154,
+    "mood_tags": ["intense", "funny", "edgy"],
+    "reviews": [
+      "Tarantino rewrote the rules of storytelling. Every line of dialogue crackles with energy.",
+      "Endlessly quotable and rewatchable. A cultural earthquake of a film.",
+      "Not for everyone, but if you get it, you REALLY get it."
+    ]
+  },
+  {
+    "id": "movie-004",
+    "title": "Inception",
+    "year": 2010,
+    "genres": ["sci-fi", "action", "thriller"],
+    "director": "Christopher Nolan",
+    "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ellen Page"],
+    "plot": "A skilled thief who steals secrets from people's dreams is given the inverse task of planting an idea into a CEO's subconscious. He assembles a team for this impossible heist through multiple layers of dreamscapes.",
+    "rating": 8.8,
+    "runtime_minutes": 148,
+    "mood_tags": ["mind-bending", "intense", "adventurous"],
+    "reviews": [
+      "Nolan at his most ambitious. A puzzle box that's also a spectacular action film.",
+      "The hallway fight scene alone is worth the price of admission. Brilliant on every level.",
+      "Had to watch it three times to catch everything. Still not sure what the ending means."
+    ]
+  },
+  {
+    "id": "movie-005",
+    "title": "The Dark Knight",
+    "year": 2008,
+    "genres": ["action", "drama", "thriller"],
+    "director": "Christopher Nolan",
+    "cast": ["Christian Bale", "Heath Ledger", "Aaron Eckhart"],
+    "plot": "Batman faces his greatest psychological and physical challenge when the Joker, a criminal mastermind, wreaks havoc on Gotham City. The escalating battle forces Batman to confront fundamental questions about justice and chaos.",
+    "rating": 9.0,
+    "runtime_minutes": 152,
+    "mood_tags": ["intense", "dark", "thrilling"],
+    "reviews": [
+      "Heath Ledger's Joker is one of cinema's greatest villains. Absolutely electrifying.",
+      "Transcends the superhero genre entirely. This is a crime epic that happens to have a guy in a cape.",
+      "The pencil trick scene made me gasp out loud in the theater."
+    ]
+  },
+  {
+    "id": "movie-006",
+    "title": "Forrest Gump",
+    "year": 1994,
+    "genres": ["drama", "comedy", "romance"],
+    "director": "Robert Zemeckis",
+    "cast": ["Tom Hanks", "Robin Wright", "Gary Sinise"],
+    "plot": "A man with a low IQ but a kind heart inadvertently influences several major historical events in the 20th century United States. From Vietnam to Watergate to the rise of Apple, Forrest's simple decency carries him through extraordinary circumstances.",
+    "rating": 8.8,
+    "runtime_minutes": 142,
+    "mood_tags": ["heartwarming", "emotional", "inspiring"],
+    "reviews": [
+      "Tom Hanks is absolutely perfect in this role. Makes you laugh and cry in equal measure.",
+      "A love letter to American optimism. Manipulative? Maybe. Effective? Absolutely.",
+      "Some find it sentimental, but I think it's genuinely moving."
+    ]
+  },
+  {
+    "id": "movie-007",
+    "title": "The Matrix",
+    "year": 1999,
+    "genres": ["sci-fi", "action"],
+    "director": "Lana Wachowski",
+    "cast": ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"],
+    "plot": "A computer hacker discovers that reality as he knows it is a simulation created by machines to subdue humanity. Recruited by rebels, he must embrace his destiny as 'The One' to fight back against the system.",
+    "rating": 8.7,
+    "runtime_minutes": 136,
+    "mood_tags": ["mind-bending", "intense", "adventurous"],
+    "reviews": [
+      "Revolutionary in every sense. Changed action filmmaking and sci-fi philosophy overnight.",
+      "The bullet-dodge scene still gives me chills. A perfect marriage of style and substance.",
+      "Somehow manages to be both a deep philosophical treatise and an incredible action movie."
+    ]
+  },
+  {
+    "id": "movie-008",
+    "title": "Goodfellas",
+    "year": 1990,
+    "genres": ["drama", "crime"],
+    "director": "Martin Scorsese",
+    "cast": ["Robert De Niro", "Ray Liotta", "Joe Pesci"],
+    "plot": "The story of Henry Hill and his life in the mob, covering his relationship with his wife Karen and his mob partners Jimmy Conway and Tommy DeVito. Chronicles the seductive rise and inevitable fall of life in organized crime.",
+    "rating": 8.7,
+    "runtime_minutes": 146,
+    "mood_tags": ["intense", "dark", "thrilling"],
+    "reviews": [
+      "Scorsese's kinetic masterpiece. The Copacabana tracking shot is pure cinema magic.",
+      "Joe Pesci is terrifying. You never know when he's joking or about to kill someone.",
+      "The best mob movie ever made. Yes, I'm including The Godfather in that statement."
+    ]
+  },
+  {
+    "id": "movie-009",
+    "title": "Schindler's List",
+    "year": 1993,
+    "genres": ["drama", "history"],
+    "director": "Steven Spielberg",
+    "cast": ["Liam Neeson", "Ralph Fiennes", "Ben Kingsley"],
+    "plot": "German industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis. He spends his fortune to save over a thousand lives during the Holocaust.",
+    "rating": 9.0,
+    "runtime_minutes": 195,
+    "mood_tags": ["emotional", "intense", "devastating"],
+    "reviews": [
+      "The most important film Spielberg ever made. Devastating and necessary.",
+      "Ralph Fiennes as Amon Goeth is pure evil incarnate. Hard to watch but essential.",
+      "I've only been able to watch it twice. Both times it destroyed me."
+    ]
+  },
+  {
+    "id": "movie-010",
+    "title": "Fight Club",
+    "year": 1999,
+    "genres": ["drama", "thriller"],
+    "director": "David Fincher",
+    "cast": ["Brad Pitt", "Edward Norton", "Helena Bonham Carter"],
+    "plot": "A disillusioned office worker forms an underground fight club with a charismatic soap salesman. What begins as bare-knuckle therapy evolves into something far more dangerous and anarchic.",
+    "rating": 8.8,
+    "runtime_minutes": 139,
+    "mood_tags": ["intense", "edgy", "mind-bending"],
+    "reviews": [
+      "The twist recontextualizes everything. One of those films that demands immediate rewatching.",
+      "A savage critique of consumer culture wrapped in the most entertaining package imaginable.",
+      "Misunderstood by many, worshipped by some. The truth is somewhere in between."
+    ]
+  },
+  {
+    "id": "movie-011",
+    "title": "Toy Story",
+    "year": 1995,
+    "genres": ["animation", "comedy", "family"],
+    "director": "John Lasseter",
+    "cast": ["Tom Hanks", "Tim Allen"],
+    "plot": "A cowboy doll is profoundly threatened when a new spaceman action figure supplants him as top toy in a boy's room. Their rivalry gives way to friendship as they must work together to reunite with their owner.",
+    "rating": 8.3,
+    "runtime_minutes": 81,
+    "mood_tags": ["heartwarming", "funny", "adventurous"],
+    "reviews": [
+      "The film that launched Pixar and proved animation could tell stories for all ages.",
+      "Still holds up perfectly. The Woody-Buzz dynamic is comedy gold.",
+      "My kids love it, I love it, my parents love it. Truly universal."
+    ]
+  },
+  {
+    "id": "movie-012",
+    "title": "The Silence of the Lambs",
+    "year": 1991,
+    "genres": ["thriller", "horror", "drama"],
+    "director": "Jonathan Demme",
+    "cast": ["Jodie Foster", "Anthony Hopkins"],
+    "plot": "A young FBI trainee seeks the help of incarcerated cannibalistic serial killer Dr. Hannibal Lecter to catch another killer who skins his victims. The psychological cat-and-mouse game between them is as dangerous as the case itself.",
+    "rating": 8.6,
+    "runtime_minutes": 118,
+    "mood_tags": ["scary", "intense", "suspenseful"],
+    "reviews": [
+      "Hopkins has maybe 16 minutes of screen time and completely dominates the entire film.",
+      "Genuinely terrifying without relying on cheap scares. The tension is suffocating.",
+      "Jodie Foster matches Hopkins beat for beat. Their scenes together are electric."
+    ]
+  },
+  {
+    "id": "movie-013",
+    "title": "Spirited Away",
+    "year": 2001,
+    "genres": ["animation", "fantasy"],
+    "director": "Hayao Miyazaki",
+    "cast": ["Rumi Hiiragi", "Miyu Irino"],
+    "plot": "A ten-year-old girl wanders into a world of spirits and must work in a bathhouse for the gods to free herself and her parents, who have been transformed into pigs. A coming-of-age tale wrapped in breathtaking fantasy.",
+    "rating": 8.6,
+    "runtime_minutes": 125,
+    "mood_tags": ["magical", "heartwarming", "adventurous"],
+    "reviews": [
+      "Every frame could be hung in a gallery. Miyazaki's imagination is boundless.",
+      "Unlike anything Western animation was producing at the time. Pure wonder.",
+      "Watched it as a kid and it scared me. Watched it as an adult and it moved me to tears."
+    ]
+  },
+  {
+    "id": "movie-014",
+    "title": "The Big Lebowski",
+    "year": 1998,
+    "genres": ["comedy", "crime"],
+    "director": "Joel Coen",
+    "cast": ["Jeff Bridges", "John Goodman", "Julianne Moore"],
+    "plot": "A laid-back Los Angeles slacker who calls himself 'The Dude' is mistaken for a millionaire and gets drawn into a bizarre kidnapping scheme. His bowling buddies and a cast of eccentrics complicate matters further.",
+    "rating": 8.1,
+    "runtime_minutes": 117,
+    "mood_tags": ["funny", "relaxing", "quirky"],
+    "reviews": [
+      "The Dude abides, and so does this film's legacy. Gets funnier with every rewatch.",
+      "Nobody in the movie knows what's going on, and that's kind of the point.",
+      "Jeff Bridges IS The Dude. One of cinema's most beloved characters."
+    ]
+  },
+  {
+    "id": "movie-015",
+    "title": "Interstellar",
+    "year": 2014,
+    "genres": ["sci-fi", "drama"],
+    "director": "Christopher Nolan",
+    "cast": ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
+    "plot": "As Earth becomes uninhabitable, a former NASA pilot is recruited for a desperate mission through a wormhole to find a new home for humanity. The journey tests the limits of human endurance and the bonds between parent and child.",
+    "rating": 8.7,
+    "runtime_minutes": 169,
+    "mood_tags": ["emotional", "epic", "mind-bending"],
+    "reviews": [
+      "The docking scene had me holding my breath. Hans Zimmer's score is transcendent.",
+      "McConaughey watching the video messages is the most devastating scene in any Nolan film.",
+      "Ambitious, flawed, and absolutely unforgettable. Nolan swinging for the fences."
+    ]
+  },
+  {
+    "id": "movie-016",
+    "title": "The Princess Bride",
+    "year": 1987,
+    "genres": ["comedy", "romance", "fantasy"],
+    "director": "Rob Reiner",
+    "cast": ["Cary Elwes", "Robin Wright", "Mandy Patinkin"],
+    "plot": "A farmhand-turned-pirate must rescue his true love from a scheming prince, navigating sword fights, giants, and a devious Sicilian along the way. A grandfather reads this adventure to his skeptical grandson.",
+    "rating": 8.0,
+    "runtime_minutes": 98,
+    "mood_tags": ["funny", "romantic", "adventurous"],
+    "reviews": [
+      "Inconceivable that any film could be this consistently charming. Pure joy from start to finish.",
+      "Quotable in a way few films achieve. Every character is a delight.",
+      "The perfect date movie, family movie, and comfort movie all rolled into one."
+    ]
+  },
+  {
+    "id": "movie-017",
+    "title": "Parasite",
+    "year": 2019,
+    "genres": ["drama", "thriller", "comedy"],
+    "director": "Bong Joon-ho",
+    "cast": ["Song Kang-ho", "Lee Sun-kyun", "Cho Yeo-jeong"],
+    "plot": "A poor family schemes to infiltrate a wealthy household by posing as unrelated, highly qualified workers. What begins as a darkly comic con job takes a shocking turn that exposes the violence of class inequality.",
+    "rating": 8.5,
+    "runtime_minutes": 132,
+    "mood_tags": ["intense", "dark", "mind-bending"],
+    "reviews": [
+      "Shifts genres so seamlessly you don't realize what's happening until it's too late.",
+      "The less you know going in, the better. A masterclass in tonal control.",
+      "Deserved every Oscar it won. Bong Joon-ho is a genius."
+    ]
+  },
+  {
+    "id": "movie-018",
+    "title": "Back to the Future",
+    "year": 1985,
+    "genres": ["sci-fi", "comedy", "adventure"],
+    "director": "Robert Zemeckis",
+    "cast": ["Michael J. Fox", "Christopher Lloyd"],
+    "plot": "A teenager is accidentally sent thirty years into the past in a time-traveling DeLorean invented by his eccentric scientist friend. He must make his parents fall in love or cease to exist, all while finding a way home.",
+    "rating": 8.5,
+    "runtime_minutes": 116,
+    "mood_tags": ["funny", "adventurous", "heartwarming"],
+    "reviews": [
+      "The most perfectly constructed blockbuster ever made. Not a wasted second.",
+      "Michael J. Fox has never been more charismatic. Pure 80s joy.",
+      "Still feels fresh and exciting. Time travel movies don't get better than this."
+    ]
+  },
+  {
+    "id": "movie-019",
+    "title": "Alien",
+    "year": 1979,
+    "genres": ["sci-fi", "horror"],
+    "director": "Ridley Scott",
+    "cast": ["Sigourney Weaver", "Tom Skerritt", "John Hurt"],
+    "plot": "The crew of a commercial space tug answers a distress signal on a remote planet, inadvertently bringing a deadly alien organism aboard. Trapped in their own ship, they are picked off one by one by the perfect predator.",
+    "rating": 8.5,
+    "runtime_minutes": 117,
+    "mood_tags": ["scary", "intense", "suspenseful"],
+    "reviews": [
+      "In space, no one can hear you scream. But in the theater, everyone heard me.",
+      "Ridley Scott turned a B-movie concept into high art. The chestburster scene is legendary.",
+      "Sigourney Weaver invented the modern action heroine. Still the gold standard for sci-fi horror."
+    ]
+  },
+  {
+    "id": "movie-020",
+    "title": "Finding Nemo",
+    "year": 2003,
+    "genres": ["animation", "comedy", "family"],
+    "director": "Andrew Stanton",
+    "cast": ["Albert Brooks", "Ellen DeGeneres"],
+    "plot": "An overprotective clownfish embarks on a perilous journey across the ocean to rescue his son, who has been captured and placed in a fish tank in a dentist's office. Along the way, he's joined by a forgetful blue tang.",
+    "rating": 8.2,
+    "runtime_minutes": 100,
+    "mood_tags": ["heartwarming", "funny", "adventurous"],
+    "reviews": [
+      "Pixar at their emotional best. The opening scene is devastatingly effective.",
+      "Dory is one of the greatest animated characters ever created. Ellen DeGeneres is perfect.",
+      "Beautiful to look at, funny, and genuinely touching. Peak family filmmaking."
+    ]
+  },
+  {
+    "id": "movie-021",
+    "title": "No Country for Old Men",
+    "year": 2007,
+    "genres": ["thriller", "drama", "crime"],
+    "director": "Joel Coen",
+    "cast": ["Javier Bardem", "Josh Brolin", "Tommy Lee Jones"],
+    "plot": "A hunter stumbles upon a drug deal gone wrong and takes a satchel of two million dollars, setting off a cat-and-mouse chase with a psychopathic killer armed with a cattle gun. A weary sheriff tries to make sense of the escalating violence.",
+    "rating": 8.2,
+    "runtime_minutes": 122,
+    "mood_tags": ["intense", "dark", "suspenseful"],
+    "reviews": [
+      "Bardem's Anton Chigurh is the scariest villain in modern cinema. That haircut alone is terrifying.",
+      "The Coens strip away all movie comfort. No score, no heroics, just dread.",
+      "The coin toss scene is the most tension I've ever felt watching a film."
+    ]
+  },
+  {
+    "id": "movie-022",
+    "title": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "genres": ["fantasy", "adventure", "drama"],
+    "director": "Peter Jackson",
+    "cast": ["Elijah Wood", "Ian McKellen", "Viggo Mortensen"],
+    "plot": "A young hobbit inherits a powerful ring that could doom the world and must undertake an epic quest to destroy it. He is joined by a fellowship of men, elves, dwarves, and wizards who vow to protect him.",
+    "rating": 8.8,
+    "runtime_minutes": 178,
+    "mood_tags": ["epic", "adventurous", "emotional"],
+    "reviews": [
+      "Peter Jackson achieved the impossible. This IS Middle-earth brought to life.",
+      "The Mines of Moria sequence is peak cinema. 'You shall not pass' gives me goosebumps every time.",
+      "Three hours fly by. You immediately want to put on The Two Towers."
+    ]
+  },
+  {
+    "id": "movie-023",
+    "title": "Eternal Sunshine of the Spotless Mind",
+    "year": 2004,
+    "genres": ["romance", "sci-fi", "drama"],
+    "director": "Michel Gondry",
+    "cast": ["Jim Carrey", "Kate Winslet"],
+    "plot": "After discovering his ex-girlfriend has had her memories of their relationship erased, a man undergoes the same procedure. But as his memories dissolve, he realizes he wants to hold onto them desperately.",
+    "rating": 8.3,
+    "runtime_minutes": 108,
+    "mood_tags": ["emotional", "romantic", "mind-bending"],
+    "reviews": [
+      "Jim Carrey proves he's a serious actor. Heartbreaking and inventive in equal measure.",
+      "The most honest portrayal of love and loss I've ever seen in a film.",
+      "Charlie Kaufman's script is a miracle. Somehow makes the surreal feel deeply personal."
+    ]
+  },
+  {
+    "id": "movie-024",
+    "title": "Gladiator",
+    "year": 2000,
+    "genres": ["action", "drama", "history"],
+    "director": "Ridley Scott",
+    "cast": ["Russell Crowe", "Joaquin Phoenix", "Connie Nielsen"],
+    "plot": "A Roman general is betrayed and his family murdered by the emperor's corrupt son. Reduced to slavery, he rises through the ranks of gladiatorial combat to avenge his family and challenge the throne.",
+    "rating": 8.5,
+    "runtime_minutes": 155,
+    "mood_tags": ["epic", "intense", "inspiring"],
+    "reviews": [
+      "Russell Crowe commands every frame. 'Are you not entertained?' Yes. Yes I am.",
+      "Revived the sword-and-sandal epic and made it feel vital again.",
+      "Joaquin Phoenix is deliciously hateable as Commodus. Perfect villain casting."
+    ]
+  },
+  {
+    "id": "movie-025",
+    "title": "Get Out",
+    "year": 2017,
+    "genres": ["horror", "thriller"],
+    "director": "Jordan Peele",
+    "cast": ["Daniel Kaluuya", "Allison Williams", "Bradley Whitford"],
+    "plot": "A young African-American man visits his white girlfriend's family estate for a weekend getaway. Beneath their overly accommodating behavior lurks a sinister secret that puts his life in danger.",
+    "rating": 7.7,
+    "runtime_minutes": 104,
+    "mood_tags": ["scary", "intense", "thought-provoking"],
+    "reviews": [
+      "Jordan Peele reinvented horror for the modern era. Social commentary as genre filmmaking.",
+      "The sunken place is one of the most chilling concepts in recent horror history.",
+      "Started as uncomfortable, became terrifying. A stunning debut."
+    ]
+  },
+  {
+    "id": "movie-026",
+    "title": "Whiplash",
+    "year": 2014,
+    "genres": ["drama", "music"],
+    "director": "Damien Chazelle",
+    "cast": ["Miles Teller", "J.K. Simmons"],
+    "plot": "A young jazz drummer enrolls at a cutthroat conservatory where he is mentored by an abusive instructor who pushes him beyond his limits. The pursuit of perfection becomes a battle of wills with devastating consequences.",
+    "rating": 8.5,
+    "runtime_minutes": 106,
+    "mood_tags": ["intense", "inspiring", "thrilling"],
+    "reviews": [
+      "J.K. Simmons is absolutely ferocious. The most stressful film about drumming ever made.",
+      "The finale had me literally on the edge of my seat. My heart was pounding.",
+      "Not quite my tempo... but this film? Absolutely perfect tempo."
+    ]
+  },
+  {
+    "id": "movie-027",
+    "title": "The Truman Show",
+    "year": 1998,
+    "genres": ["drama", "comedy", "sci-fi"],
+    "director": "Peter Weir",
+    "cast": ["Jim Carrey", "Ed Harris", "Laura Linney"],
+    "plot": "An insurance salesman discovers his entire life is actually a reality TV show, with his town being an elaborate set and everyone he knows being actors. He must find the courage to break free from his manufactured world.",
+    "rating": 8.2,
+    "runtime_minutes": 103,
+    "mood_tags": ["thought-provoking", "emotional", "inspiring"],
+    "reviews": [
+      "Prophetic in ways we couldn't have imagined in 1998. More relevant every year.",
+      "Jim Carrey's best dramatic performance. The final scene is perfect.",
+      "A brilliant concept executed flawlessly. Makes you question everything."
+    ]
+  },
+  {
+    "id": "movie-028",
+    "title": "Django Unchained",
+    "year": 2012,
+    "genres": ["drama", "western", "action"],
+    "director": "Quentin Tarantino",
+    "cast": ["Jamie Foxx", "Christoph Waltz", "Leonardo DiCaprio"],
+    "plot": "A freed slave teams up with a German bounty hunter to rescue his wife from a brutal Mississippi plantation owner. Their journey through the antebellum South is violent, darkly comic, and ultimately cathartic.",
+    "rating": 8.4,
+    "runtime_minutes": 165,
+    "mood_tags": ["intense", "adventurous", "edgy"],
+    "reviews": [
+      "Christoph Waltz steals the show yet again. Tarantino at his most crowd-pleasing.",
+      "DiCaprio clearly had the time of his life playing Calvin Candie. Magnetic villainy.",
+      "Violent, provocative, and absolutely thrilling. The dinner scene is unbearably tense."
+    ]
+  },
+  {
+    "id": "movie-029",
+    "title": "Up",
+    "year": 2009,
+    "genres": ["animation", "comedy", "adventure"],
+    "director": "Pete Docter",
+    "cast": ["Ed Asner", "Jordan Nagai"],
+    "plot": "A 78-year-old widower ties thousands of balloons to his house and flies to South America to fulfill a promise to his late wife. A young Wilderness Explorer accidentally comes along for the adventure.",
+    "rating": 8.3,
+    "runtime_minutes": 96,
+    "mood_tags": ["heartwarming", "emotional", "adventurous"],
+    "reviews": [
+      "The first ten minutes are the most emotionally devastating sequence Pixar ever created.",
+      "How does a movie about a flying house make me cry this hard? Pixar magic.",
+      "A beautiful meditation on grief, adventure, and finding new purpose."
+    ]
+  },
+  {
+    "id": "movie-030",
+    "title": "Jaws",
+    "year": 1975,
+    "genres": ["thriller", "horror"],
+    "director": "Steven Spielberg",
+    "cast": ["Roy Scheider", "Robert Shaw", "Richard Dreyfuss"],
+    "plot": "A giant great white shark terrorizes a small island community during tourist season. The police chief, a marine biologist, and a grizzled fisherman set out to hunt the beast before it claims more victims.",
+    "rating": 8.0,
+    "runtime_minutes": 124,
+    "mood_tags": ["scary", "thrilling", "suspenseful"],
+    "reviews": [
+      "Invented the summer blockbuster. Spielberg was 27 and already a master of suspense.",
+      "Robert Shaw's USS Indianapolis monologue is one of cinema's greatest scenes.",
+      "Still makes me nervous about going in the ocean. That's the power of great filmmaking."
+    ]
+  },
+  {
+    "id": "movie-031",
+    "title": "Mad Max: Fury Road",
+    "year": 2015,
+    "genres": ["action", "sci-fi"],
+    "director": "George Miller",
+    "cast": ["Tom Hardy", "Charlize Theron"],
+    "plot": "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler and flees in a war rig, aided by a drifter named Max. What follows is an extended, relentless chase across the desert that never lets up.",
+    "rating": 8.1,
+    "runtime_minutes": 120,
+    "mood_tags": ["intense", "thrilling", "adventurous"],
+    "reviews": [
+      "Two hours of pure adrenaline. George Miller made this at 70 years old. Legend.",
+      "Charlize Theron's Furiosa is an all-time action hero. Better than most male counterparts.",
+      "Practical stunts that put CGI blockbusters to shame. Cinema as pure kinetic energy."
+    ]
+  },
+  {
+    "id": "movie-032",
+    "title": "Amélie",
+    "year": 2001,
+    "genres": ["comedy", "romance"],
+    "director": "Jean-Pierre Jeunet",
+    "cast": ["Audrey Tautou", "Mathieu Kassovitz"],
+    "plot": "A shy Parisian waitress decides to change the lives of those around her for the better while struggling with her own isolation and longing for connection. Her secret acts of kindness are whimsical, inventive, and sometimes mischievous.",
+    "rating": 8.3,
+    "runtime_minutes": 122,
+    "mood_tags": ["heartwarming", "quirky", "romantic"],
+    "reviews": [
+      "Paris has never looked more magical. Every frame is saturated with warmth and color.",
+      "Audrey Tautou is impossibly charming. A film that makes you want to be a better person.",
+      "Whimsical without being cloying. The kind of movie that makes the world feel a little brighter."
+    ]
+  },
+  {
+    "id": "movie-033",
+    "title": "There Will Be Blood",
+    "year": 2007,
+    "genres": ["drama"],
+    "director": "Paul Thomas Anderson",
+    "cast": ["Daniel Day-Lewis", "Paul Dano"],
+    "plot": "A misanthropic silver miner turned oil prospector moves to a rural town where his ruthless ambition brings him into conflict with a young charismatic preacher. Their rivalry spans decades of American expansion.",
+    "rating": 8.2,
+    "runtime_minutes": 158,
+    "mood_tags": ["intense", "dark", "epic"],
+    "reviews": [
+      "Daniel Day-Lewis gives the performance of a lifetime. 'I drink your milkshake!'",
+      "A slow, volcanic film that erupts in the most unforgettable final scene.",
+      "PTA and Day-Lewis at the absolute peak of their powers. American cinema at its finest."
+    ]
+  },
+  {
+    "id": "movie-034",
+    "title": "The Departed",
+    "year": 2006,
+    "genres": ["drama", "thriller", "crime"],
+    "director": "Martin Scorsese",
+    "cast": ["Leonardo DiCaprio", "Matt Damon", "Jack Nicholson"],
+    "plot": "An undercover cop and a mole in the police force try to identify each other while infiltrating an Irish gang in Boston. As both men's identities begin to unravel, the stakes become fatally high.",
+    "rating": 8.5,
+    "runtime_minutes": 151,
+    "mood_tags": ["intense", "thrilling", "dark"],
+    "reviews": [
+      "The elevator scene made the entire theater gasp. Scorsese still has the ability to shock.",
+      "The ensemble cast is ridiculous. Everyone is operating at their highest level.",
+      "Tense from the first minute to the last. Finally got Scorsese his Oscar."
+    ]
+  },
+  {
+    "id": "movie-035",
+    "title": "WALL-E",
+    "year": 2008,
+    "genres": ["animation", "sci-fi", "romance"],
+    "director": "Andrew Stanton",
+    "cast": ["Ben Burtt", "Elissa Knight"],
+    "plot": "A lonely waste-collecting robot on an abandoned Earth falls in love with a sleek reconnaissance robot and follows her across the galaxy. Their unlikely romance becomes a catalyst for humanity's return home.",
+    "rating": 8.4,
+    "runtime_minutes": 98,
+    "mood_tags": ["heartwarming", "romantic", "thought-provoking"],
+    "reviews": [
+      "The first 30 minutes are essentially a silent film and they're perfect. Bold storytelling.",
+      "A love story between two robots that's more romantic than most human romance films.",
+      "Pixar smuggled an environmental warning into the cutest movie ever made. Brilliant."
+    ]
+  },
+  {
+    "id": "movie-036",
+    "title": "The Shining",
+    "year": 1980,
+    "genres": ["horror", "thriller"],
+    "director": "Stanley Kubrick",
+    "cast": ["Jack Nicholson", "Shelley Duvall"],
+    "plot": "A family moves to an isolated hotel for the winter where a sinister presence influences the father into violence, while his psychic son sees horrifying visions from the past and future of the hotel.",
+    "rating": 8.4,
+    "runtime_minutes": 146,
+    "mood_tags": ["scary", "intense", "unsettling"],
+    "reviews": [
+      "Kubrick creates dread out of symmetry, silence, and Nicholson's unhinged grin.",
+      "The twins. The elevator. The maze. Images that burn into your brain permanently.",
+      "Stephen King hated it but audiences love it. One of the greatest horror films ever made."
+    ]
+  },
+  {
+    "id": "movie-037",
+    "title": "Inside Out",
+    "year": 2015,
+    "genres": ["animation", "comedy", "drama"],
+    "director": "Pete Docter",
+    "cast": ["Amy Poehler", "Phyllis Smith", "Bill Hader"],
+    "plot": "When an 11-year-old girl moves to a new city, her personified emotions—Joy, Sadness, Anger, Fear, and Disgust—struggle to cope with the upheaval. Joy and Sadness must journey through the girl's mind to restore balance.",
+    "rating": 8.1,
+    "runtime_minutes": 95,
+    "mood_tags": ["emotional", "heartwarming", "funny"],
+    "reviews": [
+      "Pixar made a movie about depression for children and it's absolutely brilliant.",
+      "The scene with Bing Bong devastated every adult in the theater.",
+      "Teaches emotional intelligence better than any textbook. Also really funny."
+    ]
+  },
+  {
+    "id": "movie-038",
+    "title": "Blade Runner 2049",
+    "year": 2017,
+    "genres": ["sci-fi", "drama", "thriller"],
+    "director": "Denis Villeneuve",
+    "cast": ["Ryan Gosling", "Harrison Ford", "Ana de Armas"],
+    "plot": "A young blade runner discovers a long-buried secret that could plunge society into chaos. His investigation leads him on a quest to find a former blade runner who has been missing for thirty years.",
+    "rating": 8.0,
+    "runtime_minutes": 164,
+    "mood_tags": ["mind-bending", "atmospheric", "emotional"],
+    "reviews": [
+      "Visually the most stunning film of the decade. Roger Deakins finally got his Oscar.",
+      "A sequel that actually justifies its existence. Thoughtful, slow, and mesmerizing.",
+      "Gosling's quiet, soulful performance carries the film. The hologram scene is heartbreaking."
+    ]
+  },
+  {
+    "id": "movie-039",
+    "title": "Jurassic Park",
+    "year": 1993,
+    "genres": ["sci-fi", "adventure", "thriller"],
+    "director": "Steven Spielberg",
+    "cast": ["Sam Neill", "Laura Dern", "Jeff Goldblum"],
+    "plot": "A billionaire invites scientists to preview his theme park of cloned dinosaurs before opening day. When the security systems fail during a tropical storm, the prehistoric predators break free and hunt the visitors.",
+    "rating": 8.2,
+    "runtime_minutes": 127,
+    "mood_tags": ["thrilling", "adventurous", "scary"],
+    "reviews": [
+      "The T-Rex breakout scene is the moment I fell in love with movies as a kid.",
+      "Effects that still hold up 30 years later. Spielberg knew when to use CGI and when not to.",
+      "Jeff Goldblum's 'life finds a way' is peak chaotic scientist energy."
+    ]
+  },
+  {
+    "id": "movie-040",
+    "title": "La La Land",
+    "year": 2016,
+    "genres": ["romance", "comedy", "music"],
+    "director": "Damien Chazelle",
+    "cast": ["Ryan Gosling", "Emma Stone"],
+    "plot": "An aspiring actress and a jazz musician fall in love while pursuing their dreams in Los Angeles. As success beckons for both, they must choose between their art and their relationship.",
+    "rating": 8.0,
+    "runtime_minutes": 128,
+    "mood_tags": ["romantic", "bittersweet", "inspiring"],
+    "reviews": [
+      "The epilogue montage is cinema at its most achingly beautiful. Destroyed me.",
+      "Emma Stone deserved that Oscar. Her audition scene is raw and real.",
+      "A love letter to dreamers and the compromises life demands. The ending haunts you."
+    ]
+  },
+  {
+    "id": "movie-041",
+    "title": "Apocalypse Now",
+    "year": 1979,
+    "genres": ["drama", "war"],
+    "director": "Francis Ford Coppola",
+    "cast": ["Martin Sheen", "Marlon Brando", "Robert Duvall"],
+    "plot": "During the Vietnam War, a captain is sent on a classified mission up a river in Cambodia to assassinate a renegade colonel who has gone insane and set himself up as a god among local tribesmen. The journey into the jungle becomes a journey into madness.",
+    "rating": 8.4,
+    "runtime_minutes": 147,
+    "mood_tags": ["intense", "dark", "epic"],
+    "reviews": [
+      "The horror... the horror. A film that captures war's insanity like no other.",
+      "Robert Duvall's 'I love the smell of napalm' scene alone makes this essential viewing.",
+      "Coppola nearly died making this. You can feel that desperation in every frame."
+    ]
+  },
+  {
+    "id": "movie-042",
+    "title": "Groundhog Day",
+    "year": 1993,
+    "genres": ["comedy", "romance", "fantasy"],
+    "director": "Harold Ramis",
+    "cast": ["Bill Murray", "Andie MacDowell"],
+    "plot": "A cynical TV weatherman covering the annual Groundhog Day event finds himself reliving the same day over and over. Through countless repetitions, he gradually transforms from a selfish misanthrope into a better person.",
+    "rating": 8.0,
+    "runtime_minutes": 101,
+    "mood_tags": ["funny", "heartwarming", "thought-provoking"],
+    "reviews": [
+      "Bill Murray at his absolute best—sardonic, vulnerable, and ultimately uplifting.",
+      "Gets more philosophically profound the more you think about it. Like the day itself.",
+      "A perfect comedy that's also somehow about the meaning of life."
+    ]
+  },
+  {
+    "id": "movie-043",
+    "title": "Moonlight",
+    "year": 2016,
+    "genres": ["drama"],
+    "director": "Barry Jenkins",
+    "cast": ["Mahershala Ali", "Trevante Rhodes", "Naomie Harris"],
+    "plot": "A young African-American man grapples with his identity and sexuality while growing up in a rough Miami neighborhood. Told in three chapters spanning childhood, adolescence, and adulthood.",
+    "rating": 7.4,
+    "runtime_minutes": 111,
+    "mood_tags": ["emotional", "intimate", "poetic"],
+    "reviews": [
+      "Tender, gorgeous, and quietly devastating. Every frame is painted with care.",
+      "Mahershala Ali has maybe 20 minutes of screen time and leaves an indelible mark.",
+      "The diner scene in the final act is one of the most vulnerable moments ever filmed."
+    ]
+  },
+  {
+    "id": "movie-044",
+    "title": "Saving Private Ryan",
+    "year": 1998,
+    "genres": ["drama", "war"],
+    "director": "Steven Spielberg",
+    "cast": ["Tom Hanks", "Matt Damon", "Tom Sizemore"],
+    "plot": "Following the Normandy invasion, a group of US soldiers go behind enemy lines to retrieve a paratrooper whose brothers have all been killed in action. Captain Miller must weigh the lives of his men against one man's survival.",
+    "rating": 8.6,
+    "runtime_minutes": 169,
+    "mood_tags": ["intense", "emotional", "devastating"],
+    "reviews": [
+      "The opening 27 minutes redefined how war could be depicted on film. Harrowing.",
+      "Tom Hanks brings quiet dignity to an impossible situation. His hand tremor says everything.",
+      "Veterans walked out of theaters because it was too real. That tells you all you need to know."
+    ]
+  },
+  {
+    "id": "movie-045",
+    "title": "The Grand Budapest Hotel",
+    "year": 2014,
+    "genres": ["comedy", "drama", "adventure"],
+    "director": "Wes Anderson",
+    "cast": ["Ralph Fiennes", "Tony Revolori", "F. Murray Abraham"],
+    "plot": "A legendary concierge at a famous European hotel between the wars takes a young lobby boy under his wing. Together they become embroiled in the theft of a priceless painting and a battle for an enormous family fortune.",
+    "rating": 8.1,
+    "runtime_minutes": 99,
+    "mood_tags": ["funny", "quirky", "heartwarming"],
+    "reviews": [
+      "Wes Anderson's most visually stunning film, which is saying something. Every frame is a painting.",
+      "Ralph Fiennes delivers rapid-fire dialogue with impeccable comic timing. Revelatory.",
+      "Somehow both a screwball comedy and a meditation on the death of a civilized world."
+    ]
+  },
+  {
+    "id": "movie-046",
+    "title": "Arrival",
+    "year": 2016,
+    "genres": ["sci-fi", "drama"],
+    "director": "Denis Villeneuve",
+    "cast": ["Amy Adams", "Jeremy Renner", "Forest Whitaker"],
+    "plot": "When mysterious spacecraft land around the world, a linguist is recruited to communicate with the alien visitors. As she deciphers their language, she begins experiencing time in a radically different way.",
+    "rating": 7.9,
+    "runtime_minutes": 116,
+    "mood_tags": ["mind-bending", "emotional", "thought-provoking"],
+    "reviews": [
+      "The rare sci-fi film that's really about grief and acceptance. The twist reframes everything.",
+      "Amy Adams is phenomenal. Somehow makes linguistics feel thrilling.",
+      "Proof that science fiction can be quiet, cerebral, and still deeply moving."
+    ]
+  },
+  {
+    "id": "movie-047",
+    "title": "Superbad",
+    "year": 2007,
+    "genres": ["comedy"],
+    "director": "Greg Mottola",
+    "cast": ["Jonah Hill", "Michael Cera", "Christopher Mintz-Plasse"],
+    "plot": "Two inseparable best friends try to score alcohol for a party on one of their last nights before college, hoping to impress girls. Their wild night takes them through a series of increasingly absurd misadventures.",
+    "rating": 7.6,
+    "runtime_minutes": 113,
+    "mood_tags": ["funny", "nostalgic", "heartwarming"],
+    "reviews": [
+      "The funniest coming-of-age comedy since... ever? McLovin is a cultural institution.",
+      "Underneath all the crude humor is a genuinely sweet story about male friendship.",
+      "Quotable from start to finish. Seth and Evan's goodbye scene actually makes me emotional."
+    ]
+  },
+  {
+    "id": "movie-048",
+    "title": "Blade Runner",
+    "year": 1982,
+    "genres": ["sci-fi", "thriller"],
+    "director": "Ridley Scott",
+    "cast": ["Harrison Ford", "Rutger Hauer", "Sean Young"],
+    "plot": "In a dystopian Los Angeles, a weary detective is forced to hunt down four escaped replicants—bioengineered beings virtually identical to humans. His pursuit raises profound questions about what it means to be alive.",
+    "rating": 8.1,
+    "runtime_minutes": 117,
+    "mood_tags": ["atmospheric", "mind-bending", "dark"],
+    "reviews": [
+      "Rutger Hauer's 'tears in rain' monologue is perhaps cinema's most beautiful dying moment.",
+      "Created the entire visual language of cyberpunk. Everything since is a tribute.",
+      "Slow and meditative, but the atmosphere is intoxicating. Gets better with age."
+    ]
+  },
+  {
+    "id": "movie-049",
+    "title": "The Social Network",
+    "year": 2010,
+    "genres": ["drama"],
+    "director": "David Fincher",
+    "cast": ["Jesse Eisenberg", "Andrew Garfield", "Justin Timberlake"],
+    "plot": "The founding of Facebook is told through depositions from two lawsuits against its creator, Mark Zuckerberg. A story of genius, betrayal, and the human cost of building a billion-dollar empire.",
+    "rating": 7.8,
+    "runtime_minutes": 120,
+    "mood_tags": ["intense", "thought-provoking", "dark"],
+    "reviews": [
+      "Aaron Sorkin's dialogue is machine-gun fast and razor sharp. The opening scene is a masterclass.",
+      "Makes coding and legal depositions as thrilling as any heist film.",
+      "Eisenberg's Zuckerberg is fascinating—you can't tell if he's a genius or a monster. Probably both."
+    ]
+  },
+  {
+    "id": "movie-050",
+    "title": "Coco",
+    "year": 2017,
+    "genres": ["animation", "fantasy", "family"],
+    "director": "Lee Unkrich",
+    "cast": ["Anthony Gonzalez", "Gael García Bernal"],
+    "plot": "A twelve-year-old aspiring musician is accidentally transported to the Land of the Dead, where he seeks the help of his deceased ancestors to return home. He discovers the true story of his family along the way.",
+    "rating": 8.4,
+    "runtime_minutes": 105,
+    "mood_tags": ["emotional", "heartwarming", "magical"],
+    "reviews": [
+      "The 'Remember Me' scene at the end had me sobbing uncontrollably. Pixar's most emotional gut-punch.",
+      "A gorgeous celebration of Mexican culture. Respectful, vibrant, and deeply moving.",
+      "Went in expecting a fun cartoon. Came out an emotional wreck. Thanks, Pixar."
+    ]
+  },
+  {
+    "id": "movie-051",
+    "title": "Taxi Driver",
+    "year": 1976,
+    "genres": ["drama", "thriller"],
+    "director": "Martin Scorsese",
+    "cast": ["Robert De Niro", "Jodie Foster", "Cybill Shepherd"],
+    "plot": "A mentally unstable Vietnam veteran works as a nighttime taxi driver in New York City, where the perceived decadence around him drives him toward violent action. His isolation and paranoia build toward an explosive climax.",
+    "rating": 8.2,
+    "runtime_minutes": 114,
+    "mood_tags": ["dark", "intense", "unsettling"],
+    "reviews": [
+      "De Niro's Travis Bickle is simultaneously pitiable and terrifying. 'You talkin' to me?'",
+      "A portrait of urban alienation that feels disturbingly timeless.",
+      "Scorsese and De Niro's first masterpiece together. The city has never felt more menacing."
+    ]
+  },
+  {
+    "id": "movie-052",
+    "title": "Everything Everywhere All at Once",
+    "year": 2022,
+    "genres": ["sci-fi", "action", "comedy"],
+    "director": "Daniel Kwan",
+    "cast": ["Michelle Yeoh", "Ke Huy Quan", "Stephanie Hsu"],
+    "plot": "A Chinese-American woman being audited by the IRS discovers she can access the skills and memories of parallel universe versions of herself. She must use this power to fight a threat to all of existence while fixing her family.",
+    "rating": 7.8,
+    "runtime_minutes": 139,
+    "mood_tags": ["mind-bending", "emotional", "funny"],
+    "reviews": [
+      "Michelle Yeoh deserved that Oscar decades ago. The most inventive film in years.",
+      "Somehow combines multiverse absurdity with genuine family drama. The googly eyes scene!",
+      "Chaotic, beautiful, and deeply human. A film about everything that's really about one thing: love."
+    ]
+  },
+  {
+    "id": "movie-053",
+    "title": "One Flew Over the Cuckoo's Nest",
+    "year": 1975,
+    "genres": ["drama"],
+    "director": "Milos Forman",
+    "cast": ["Jack Nicholson", "Louise Fletcher"],
+    "plot": "A criminal pleads insanity to serve his sentence in a mental institution rather than prison. His rebellious spirit inspires the other patients but puts him in direct conflict with the tyrannical head nurse.",
+    "rating": 8.7,
+    "runtime_minutes": 133,
+    "mood_tags": ["emotional", "inspiring", "intense"],
+    "reviews": [
+      "Nicholson IS McMurphy. One of the most magnetic performances in film history.",
+      "Louise Fletcher's Nurse Ratched is terrifying precisely because she seems so reasonable.",
+      "The ending broke me. A film about the cost of fighting the system."
+    ]
+  },
+  {
+    "id": "movie-054",
+    "title": "Her",
+    "year": 2013,
+    "genres": ["romance", "sci-fi", "drama"],
+    "director": "Spike Jonze",
+    "cast": ["Joaquin Phoenix", "Scarlett Johansson"],
+    "plot": "A lonely writer develops a relationship with an artificially intelligent operating system. Their love is genuine but raises questions about connection, consciousness, and what constitutes a real relationship.",
+    "rating": 8.0,
+    "runtime_minutes": 126,
+    "mood_tags": ["romantic", "melancholy", "thought-provoking"],
+    "reviews": [
+      "Eerily prescient about our relationship with technology. Spike Jonze saw the future.",
+      "Joaquin Phoenix makes you believe a man can fall in love with a voice. Tender and strange.",
+      "Beautiful, sad, and achingly human despite being about an AI. More relevant every year."
+    ]
+  },
+  {
+    "id": "movie-055",
+    "title": "Die Hard",
+    "year": 1988,
+    "genres": ["action", "thriller"],
+    "director": "John McTiernan",
+    "cast": ["Bruce Willis", "Alan Rickman"],
+    "plot": "An NYPD officer tries to save his wife and several others taken hostage by German terrorists during a Christmas party at a Los Angeles skyscraper. Barefoot and outgunned, he picks off the villains one by one.",
+    "rating": 8.2,
+    "runtime_minutes": 132,
+    "mood_tags": ["thrilling", "funny", "intense"],
+    "reviews": [
+      "Yes, it IS a Christmas movie. Also the perfect action film. Alan Rickman is sublime.",
+      "Bruce Willis made the everyman action hero work. John McClane bleeds, hurts, and wisecracks.",
+      "Yippee-ki-yay. The gold standard against which all action movies should be measured."
+    ]
+  },
+  {
+    "id": "movie-056",
+    "title": "Ferris Bueller's Day Off",
+    "year": 1986,
+    "genres": ["comedy"],
+    "director": "John Hughes",
+    "cast": ["Matthew Broderick", "Alan Ruck", "Mia Sara"],
+    "plot": "A charismatic high school student fakes illness to skip school, borrowing his best friend's father's Ferrari for a day of adventure in Chicago. His principal is determined to catch him in the act.",
+    "rating": 7.8,
+    "runtime_minutes": 103,
+    "mood_tags": ["funny", "feel-good", "nostalgic"],
+    "reviews": [
+      "Life moves pretty fast. This movie is about seizing the day, and it makes you want to.",
+      "Matthew Broderick has never been more charming. The parade scene is pure happiness.",
+      "A love letter to skipping responsibilities. Hughes understood teenagers like nobody else."
+    ]
+  },
+  {
+    "id": "movie-057",
+    "title": "Pan's Labyrinth",
+    "year": 2006,
+    "genres": ["fantasy", "drama", "horror"],
+    "director": "Guillermo del Toro",
+    "cast": ["Ivana Baquero", "Sergi López", "Doug Jones"],
+    "plot": "In post-Civil War Spain, a young girl discovers a mysterious labyrinth and meets a faun who gives her three tasks to prove she's the reincarnation of a princess. The fairy tale runs parallel to the brutal reality of fascist oppression.",
+    "rating": 8.2,
+    "runtime_minutes": 118,
+    "mood_tags": ["dark", "magical", "emotional"],
+    "reviews": [
+      "Del Toro's masterpiece. The Pale Man scene is the most terrifying thing I've ever seen.",
+      "A brutal fairy tale that doesn't flinch from violence in either world. Hauntingly beautiful.",
+      "The final scene is either deeply sad or deeply hopeful depending on how you read it."
+    ]
+  },
+  {
+    "id": "movie-058",
+    "title": "The Breakfast Club",
+    "year": 1985,
+    "genres": ["drama", "comedy"],
+    "director": "John Hughes",
+    "cast": ["Emilio Estevez", "Molly Ringwald", "Judd Nelson"],
+    "plot": "Five high school students from different social cliques are forced to spend a Saturday in detention together. Over the course of the day, they break down their stereotypes and discover they have more in common than they thought.",
+    "rating": 7.8,
+    "runtime_minutes": 97,
+    "mood_tags": ["emotional", "nostalgic", "heartwarming"],
+    "reviews": [
+      "Defined a generation's identity. These five characters represent every teenager who ever lived.",
+      "The essay at the end still gives me chills. Hughes treated teens like real people.",
+      "Simple premise, extraordinary execution. Proof you don't need explosions to make a great film."
+    ]
+  },
+  {
+    "id": "movie-059",
+    "title": "Dunkirk",
+    "year": 2017,
+    "genres": ["action", "drama", "war"],
+    "director": "Christopher Nolan",
+    "cast": ["Fionn Whitehead", "Tom Hardy", "Mark Rylance"],
+    "plot": "Allied soldiers from Belgium, Britain, and France are surrounded by the German army and evacuated from the beaches of Dunkirk. The story unfolds across three timelines: land, sea, and air.",
+    "rating": 7.8,
+    "runtime_minutes": 106,
+    "mood_tags": ["intense", "suspenseful", "immersive"],
+    "reviews": [
+      "Hans Zimmer's ticking clock score made my anxiety go through the roof. Visceral filmmaking.",
+      "Nolan strips away character backstory and lets pure survival drive the tension.",
+      "See it in IMAX or don't bother. A technical achievement of the highest order."
+    ]
+  },
+  {
+    "id": "movie-060",
+    "title": "Ratatouille",
+    "year": 2007,
+    "genres": ["animation", "comedy", "family"],
+    "director": "Brad Bird",
+    "cast": ["Patton Oswalt", "Ian Holm", "Peter O'Toole"],
+    "plot": "A rat with a passion for cooking makes an unlikely alliance with a young garbage boy in a Parisian restaurant. Together they navigate the cutthroat culinary world while keeping the rat's existence a secret.",
+    "rating": 8.1,
+    "runtime_minutes": 111,
+    "mood_tags": ["heartwarming", "inspiring", "funny"],
+    "reviews": [
+      "Anton Ego's review at the end is the most beautiful monologue about art and criticism ever written.",
+      "Only Pixar could make you root for a rat in a kitchen. Brad Bird is a genius.",
+      "'Anyone can cook' is a message that transcends the film. Inspiring for creators everywhere."
+    ]
+  },
+  {
+    "id": "movie-061",
+    "title": "Zodiac",
+    "year": 2007,
+    "genres": ["thriller", "drama", "crime"],
+    "director": "David Fincher",
+    "cast": ["Jake Gyllenhaal", "Mark Ruffalo", "Robert Downey Jr."],
+    "plot": "A San Francisco cartoonist becomes obsessed with tracking down the Zodiac killer, a serial murderer who taunts police with cryptic messages and ciphers. The investigation consumes decades and destroys relationships.",
+    "rating": 7.7,
+    "runtime_minutes": 157,
+    "mood_tags": ["suspenseful", "intense", "unsettling"],
+    "reviews": [
+      "Fincher turns obsession itself into the horror. The basement scene is pure terror.",
+      "A procedural that's really about how an unsolved case can devour your entire life.",
+      "Patient, meticulous, and deeply unsettling. The scariest thing is that they never caught him."
+    ]
+  },
+  {
+    "id": "movie-062",
+    "title": "Oldboy",
+    "year": 2003,
+    "genres": ["thriller", "drama", "action"],
+    "director": "Park Chan-wook",
+    "cast": ["Choi Min-sik", "Yoo Ji-tae"],
+    "plot": "A man is inexplicably imprisoned in a cell for fifteen years, then released with a phone, money, and expensive clothes. He has five days to discover why he was locked up, leading to a devastating revelation.",
+    "rating": 8.4,
+    "runtime_minutes": 120,
+    "mood_tags": ["intense", "dark", "mind-bending"],
+    "reviews": [
+      "The corridor fight scene, done in a single take, is one of the greatest action sequences ever filmed.",
+      "The twist ending made me feel physically ill. In the best possible way.",
+      "Korean cinema at its most visceral and uncompromising. Not for the faint of heart."
+    ]
+  },
+  {
+    "id": "movie-063",
+    "title": "The Lion King",
+    "year": 1994,
+    "genres": ["animation", "drama", "family"],
+    "director": "Roger Allers",
+    "cast": ["Matthew Broderick", "James Earl Jones", "Jeremy Irons"],
+    "plot": "A young lion prince flees his kingdom after his father's murder, living in exile with carefree friends. He must eventually return to face his treacherous uncle and claim his rightful place as king.",
+    "rating": 8.5,
+    "runtime_minutes": 88,
+    "mood_tags": ["emotional", "epic", "heartwarming"],
+    "reviews": [
+      "Mufasa's death scarred an entire generation. Hamlet for kids, done perfectly.",
+      "The Circle of Life opening is one of cinema's most iconic sequences. Hans Zimmer's score soars.",
+      "Jeremy Irons as Scar is deliciously evil. Peak Disney villainy."
+    ]
+  },
+  {
+    "id": "movie-064",
+    "title": "Inglourious Basterds",
+    "year": 2009,
+    "genres": ["drama", "war", "action"],
+    "director": "Quentin Tarantino",
+    "cast": ["Brad Pitt", "Christoph Waltz", "Mélanie Laurent"],
+    "plot": "In Nazi-occupied France, a group of Jewish-American soldiers plan a daring assassination plot against the Third Reich's leadership. Meanwhile, a cinema owner plots her own revenge against the Nazis who killed her family.",
+    "rating": 8.3,
+    "runtime_minutes": 153,
+    "mood_tags": ["intense", "thrilling", "darkly funny"],
+    "reviews": [
+      "Christoph Waltz's Hans Landa is one of cinema's all-time great villains. Chilling and charming.",
+      "The opening farmhouse scene and the bar scene are masterclasses in sustained tension.",
+      "Tarantino rewrites history with gleeful audacity. The cinema fire finale is cathartic."
+    ]
+  },
+  {
+    "id": "movie-065",
+    "title": "Dune",
+    "year": 2021,
+    "genres": ["sci-fi", "adventure", "drama"],
+    "director": "Denis Villeneuve",
+    "cast": ["Timothée Chalamet", "Rebecca Ferguson", "Oscar Isaac"],
+    "plot": "A brilliant young man born into a great destiny travels to the most dangerous planet in the universe to ensure the future of his family and his people. A tale of politics, religion, and ecology on a desert world.",
+    "rating": 8.0,
+    "runtime_minutes": 155,
+    "mood_tags": ["epic", "immersive", "intense"],
+    "reviews": [
+      "Villeneuve finally cracked the 'unfilmable' novel. Visually overwhelming in the best way.",
+      "The sandworm reveal had the whole theater gasping. Scale like nothing else in modern cinema.",
+      "Hans Zimmer's score is almost alien in its power. A sensory experience as much as a story."
+    ]
+  },
+  {
+    "id": "movie-066",
+    "title": "Goodnight Mommy",
+    "year": 2014,
+    "genres": ["horror", "thriller"],
+    "director": "Severin Fiala",
+    "cast": ["Susanne Wuest", "Lukas Schwarz", "Elias Schwarz"],
+    "plot": "Twin boys begin to doubt that the bandaged woman who returned from the hospital is actually their mother. Their suspicion and fear escalate into something far more disturbing than they imagined.",
+    "rating": 6.7,
+    "runtime_minutes": 99,
+    "mood_tags": ["scary", "unsettling", "suspenseful"],
+    "reviews": [
+      "Austrian horror that gets under your skin through silence and dread rather than jump scares.",
+      "The less you know going in, the more effective the twist. Deeply uncomfortable.",
+      "Not a film you enjoy so much as endure. Effective horror filmmaking."
+    ]
+  },
+  {
+    "id": "movie-067",
+    "title": "The Prestige",
+    "year": 2006,
+    "genres": ["drama", "thriller", "sci-fi"],
+    "director": "Christopher Nolan",
+    "cast": ["Christian Bale", "Hugh Jackman", "Scarlett Johansson"],
+    "plot": "Two rival magicians in Victorian London engage in an escalating battle of one-upmanship, each trying to create the ultimate illusion. Their obsession costs them everything they hold dear.",
+    "rating": 8.5,
+    "runtime_minutes": 130,
+    "mood_tags": ["mind-bending", "intense", "dark"],
+    "reviews": [
+      "Are you watching closely? A puzzle box of a film that rewards multiple viewings.",
+      "Bale and Jackman are perfectly matched. The final revelation is devastating.",
+      "Nolan's most underrated film. Every scene contains clues hiding in plain sight."
+    ]
+  },
+  {
+    "id": "movie-068",
+    "title": "Little Miss Sunshine",
+    "year": 2006,
+    "genres": ["comedy", "drama"],
+    "director": "Jonathan Dayton",
+    "cast": ["Greg Kinnear", "Steve Carell", "Toni Collette", "Abigail Breslin"],
+    "plot": "A dysfunctional family piles into their VW bus to take their young daughter to a beauty pageant in California. The road trip forces them to confront their failures and find strength in each other.",
+    "rating": 7.8,
+    "runtime_minutes": 101,
+    "mood_tags": ["funny", "heartwarming", "bittersweet"],
+    "reviews": [
+      "The dance at the end is one of cinema's most joyous, subversive moments.",
+      "Steve Carell plays against type brilliantly. Every family member feels real.",
+      "A film about losers that makes losing feel like winning. Absolutely charming."
+    ]
+  },
+  {
+    "id": "movie-069",
+    "title": "Hereditary",
+    "year": 2018,
+    "genres": ["horror", "drama"],
+    "director": "Ari Aster",
+    "cast": ["Toni Collette", "Alex Wolff", "Milly Shapiro"],
+    "plot": "After the family matriarch passes away, a grieving family begins to unravel cryptic and increasingly terrifying secrets about their ancestry. The more they discover, the more they fall into a sinister fate.",
+    "rating": 7.3,
+    "runtime_minutes": 127,
+    "mood_tags": ["scary", "intense", "devastating"],
+    "reviews": [
+      "Toni Collette was robbed of an Oscar. Her dinner table scene is viscerally horrifying.",
+      "That car scene. You know the one. I've never heard a theater react like that.",
+      "Less a horror film and more a prolonged anxiety attack. Ari Aster is a sadist and I mean that as praise."
+    ]
+  },
+  {
+    "id": "movie-070",
+    "title": "Raiders of the Lost Ark",
+    "year": 1981,
+    "genres": ["action", "adventure"],
+    "director": "Steven Spielberg",
+    "cast": ["Harrison Ford", "Karen Allen"],
+    "plot": "Archaeologist Indiana Jones races against Nazis to find the Ark of the Covenant, an ancient artifact of immense power. His globe-trotting adventure takes him from the jungles of South America to the deserts of Egypt.",
+    "rating": 8.4,
+    "runtime_minutes": 115,
+    "mood_tags": ["adventurous", "thrilling", "fun"],
+    "reviews": [
+      "The boulder scene, the truck chase, the face-melting finale—pure adventure cinema.",
+      "Harrison Ford made a bullwhip and fedora the coolest outfit in movie history.",
+      "Spielberg and Lucas at their absolute peak. The template for every adventure film since."
+    ]
+  },
+  {
+    "id": "movie-071",
+    "title": "12 Angry Men",
+    "year": 1957,
+    "genres": ["drama"],
+    "director": "Sidney Lumet",
+    "cast": ["Henry Fonda", "Lee J. Cobb"],
+    "plot": "A jury of twelve men deliberates the fate of a teenager accused of murder. Initially, eleven vote guilty, but one dissenting juror forces the others to reconsider the evidence through patient reasoning.",
+    "rating": 9.0,
+    "runtime_minutes": 96,
+    "mood_tags": ["intense", "thought-provoking", "inspiring"],
+    "reviews": [
+      "Proof that you can create unbearable tension with nothing but dialogue and a single room.",
+      "Henry Fonda is quiet, rational, and utterly compelling. A masterclass in persuasion.",
+      "Made in 1957 and still feels urgent. A film about the duty of critical thinking."
+    ]
+  },
+  {
+    "id": "movie-072",
+    "title": "The Thing",
+    "year": 1982,
+    "genres": ["horror", "sci-fi"],
+    "director": "John Carpenter",
+    "cast": ["Kurt Russell", "Wilford Brimley"],
+    "plot": "A research team in Antarctica is hunted by a shape-shifting alien organism that can perfectly imitate any living thing. Paranoia tears the group apart as they can no longer trust who is human.",
+    "rating": 8.2,
+    "runtime_minutes": 109,
+    "mood_tags": ["scary", "intense", "suspenseful"],
+    "reviews": [
+      "The blood test scene is the most perfectly constructed horror set piece ever made.",
+      "Practical effects that still look better than most modern CGI. Grotesque and gorgeous.",
+      "Carpenter's masterpiece of paranoia. You trust no one by the end, just like the characters."
+    ]
+  },
+  {
+    "id": "movie-073",
+    "title": "Vertigo",
+    "year": 1958,
+    "genres": ["thriller", "romance", "drama"],
+    "director": "Alfred Hitchcock",
+    "cast": ["James Stewart", "Kim Novak"],
+    "plot": "A retired detective suffering from vertigo is hired to follow a friend's wife, with whom he becomes dangerously obsessed. When tragedy strikes, he encounters a woman who bears a haunting resemblance to the dead woman.",
+    "rating": 8.3,
+    "runtime_minutes": 128,
+    "mood_tags": ["suspenseful", "romantic", "unsettling"],
+    "reviews": [
+      "Hitchcock's most personal and psychologically complex film. A study in male obsession.",
+      "Gets better with each viewing. The layers of deception are endlessly fascinating.",
+      "The restoration scene is deeply uncomfortable—you're watching a man remake a woman. Brilliant and disturbing."
+    ]
+  },
+  {
+    "id": "movie-074",
+    "title": "Knives Out",
+    "year": 2019,
+    "genres": ["comedy", "thriller", "drama"],
+    "director": "Rian Johnson",
+    "cast": ["Daniel Craig", "Ana de Armas", "Chris Evans"],
+    "plot": "When a renowned crime novelist is found dead after his 85th birthday party, a detective investigates his dysfunctional family. Everyone is a suspect and everyone is lying in this modern whodunit.",
+    "rating": 7.9,
+    "runtime_minutes": 130,
+    "mood_tags": ["funny", "thrilling", "clever"],
+    "reviews": [
+      "Daniel Craig's Southern accent alone is worth the price of admission. Hugely entertaining.",
+      "A whodunit that keeps subverting your expectations. Rian Johnson is having a blast.",
+      "The entire ensemble is fantastic, but Ana de Armas is the heart of the film."
+    ]
+  },
+  {
+    "id": "movie-075",
+    "title": "Titanic",
+    "year": 1997,
+    "genres": ["romance", "drama"],
+    "director": "James Cameron",
+    "cast": ["Leonardo DiCaprio", "Kate Winslet", "Billy Zane"],
+    "plot": "A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the ill-fated RMS Titanic. Their brief romance unfolds against the backdrop of the ship's catastrophic maiden voyage.",
+    "rating": 7.9,
+    "runtime_minutes": 194,
+    "mood_tags": ["romantic", "epic", "emotional"],
+    "reviews": [
+      "Say what you will about the script—the sinking sequence is the most spectacular disaster filmmaking ever.",
+      "DiCaprio and Winslet have undeniable chemistry. The drawing scene is iconic.",
+      "Yes it's melodramatic. Yes I still cry every single time. The door was big enough, Jack."
+    ]
+  },
+  {
+    "id": "movie-076",
+    "title": "Hot Fuzz",
+    "year": 2007,
+    "genres": ["comedy", "action"],
+    "director": "Edgar Wright",
+    "cast": ["Simon Pegg", "Nick Frost"],
+    "plot": "A top London cop is transferred to a seemingly sleepy village where a series of suspicious 'accidents' suggests something sinister. The truth behind the quaint facade is far more absurd than he imagined.",
+    "rating": 7.8,
+    "runtime_minutes": 121,
+    "mood_tags": ["funny", "thrilling", "clever"],
+    "reviews": [
+      "Edgar Wright's editing is a masterclass. Every joke is set up three scenes earlier.",
+      "Gets better every time you watch it. The density of callbacks and visual gags is insane.",
+      "The greatest action-comedy ever made. Yarp."
+    ]
+  },
+  {
+    "id": "movie-077",
+    "title": "Mulholland Drive",
+    "year": 2001,
+    "genres": ["drama", "thriller"],
+    "director": "David Lynch",
+    "cast": ["Naomi Watts", "Laura Harring"],
+    "plot": "A woman suffering from amnesia after a car accident is helped by an aspiring actress newly arrived in Los Angeles. Their investigation into the woman's identity leads down a rabbit hole where nothing is as it seems.",
+    "rating": 7.9,
+    "runtime_minutes": 147,
+    "mood_tags": ["mind-bending", "dark", "unsettling"],
+    "reviews": [
+      "Lynch's dreamlike masterpiece. The diner scene behind Winkie's is pure concentrated dread.",
+      "Naomi Watts gives two completely different performances and both are extraordinary.",
+      "I've watched it five times and have a different interpretation each time. That's the point."
+    ]
+  },
+  {
+    "id": "movie-078",
+    "title": "The Incredibles",
+    "year": 2004,
+    "genres": ["animation", "action", "comedy"],
+    "director": "Brad Bird",
+    "cast": ["Craig T. Nelson", "Holly Hunter", "Samuel L. Jackson"],
+    "plot": "A family of undercover superheroes is forced into civilian life, struggling with suburban monotony. When a mysterious assignment lures the father to a remote island, the whole family must suit up to save him and the world.",
+    "rating": 8.0,
+    "runtime_minutes": 115,
+    "mood_tags": ["adventurous", "funny", "heartwarming"],
+    "reviews": [
+      "The best Fantastic Four movie ever made, and it's not even about the Fantastic Four.",
+      "Brad Bird understood that superhero stories work best when grounded in family dynamics.",
+      "Edna Mode steals every scene she's in. 'No capes!' is eternal wisdom."
+    ]
+  },
+  {
+    "id": "movie-079",
+    "title": "Memories of Murder",
+    "year": 2003,
+    "genres": ["thriller", "drama", "crime"],
+    "director": "Bong Joon-ho",
+    "cast": ["Song Kang-ho", "Kim Sang-kyung"],
+    "plot": "Based on true events, two detectives in 1980s rural South Korea investigate the country's first serial murders. Their methods clash as traditional interrogation meets modern forensics, all while the killer remains elusive.",
+    "rating": 8.1,
+    "runtime_minutes": 131,
+    "mood_tags": ["intense", "dark", "suspenseful"],
+    "reviews": [
+      "Bong Joon-ho's earlier masterpiece. The final shot looking into the camera is chilling.",
+      "Mixes dark humor with genuine horror seamlessly. Song Kang-ho is a national treasure.",
+      "A procedural about failure that's more gripping than most films about success."
+    ]
+  },
+  {
+    "id": "movie-080",
+    "title": "The Wizard of Oz",
+    "year": 1939,
+    "genres": ["fantasy", "musical", "family"],
+    "director": "Victor Fleming",
+    "cast": ["Judy Garland", "Frank Morgan", "Ray Bolger"],
+    "plot": "A Kansas farm girl is swept away by a tornado to the magical Land of Oz. She must follow the Yellow Brick Road to the Emerald City to find the wizard who can help her get home, making friends and enemies along the way.",
+    "rating": 8.1,
+    "runtime_minutes": 102,
+    "mood_tags": ["magical", "adventurous", "heartwarming"],
+    "reviews": [
+      "The transition from sepia to Technicolor is still one of cinema's most magical moments.",
+      "There's no place like home—and no film quite like this one. Timeless in every sense.",
+      "Judy Garland's 'Somewhere Over the Rainbow' is the greatest movie song ever recorded. Period."
+    ]
+  }
+]

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "note-001",
+    "title": "Meeting notes: Q3 planning",
+    "content": "Discussed roadmap priorities for Q3. The team agreed to focus on the new API redesign and improving onboarding metrics. Sarah will lead the API workstream and I'll handle the analytics dashboard migration.",
+    "tags": ["work", "meetings"],
+    "created_at": "2025-03-10T10:30:00Z"
+  },
+  {
+    "id": "note-002",
+    "title": "Thai green curry recipe",
+    "content": "Sam's amazing green curry: fry paste in coconut cream (not milk) for 2 mins until fragrant. Add aubergine and tofu first since they take longest. Finish with Thai basil and lime juice off the heat. Serve with jasmine rice.",
+    "tags": ["recipes", "cooking"],
+    "created_at": "2025-03-08T19:15:00Z"
+  },
+  {
+    "id": "note-003",
+    "title": "Book list from podcast",
+    "content": "Recommendations from the Ezra Klein episode: 'Thinking in Systems' by Donella Meadows, 'The Alignment Problem' by Brian Christian, and 'Designing Data-Intensive Applications' by Martin Kleppmann. Start with the Kleppmann book since it's most relevant to work.",
+    "tags": ["books", "learning"],
+    "created_at": "2025-03-12T08:45:00Z"
+  },
+  {
+    "id": "note-004",
+    "title": "Flat renovation ideas",
+    "content": "Kitchen: replace worktops with butcher block, paint cabinets sage green. Living room: floating shelves above the desk, better cable management. Look into getting a quote from the joiner Mum recommended — his name is Dave and his number is on the fridge.",
+    "tags": ["personal", "home"],
+    "created_at": "2025-02-28T14:20:00Z"
+  },
+  {
+    "id": "note-005",
+    "title": "Sprint retro action items",
+    "content": "Three things to improve: 1) Move PR reviews to mornings so they don't block afternoon work. 2) Add integration tests before merging to staging. 3) Reduce standup to 15 mins max — keep updates async in Slack where possible.",
+    "tags": ["work", "engineering"],
+    "created_at": "2025-03-14T16:00:00Z"
+  },
+  {
+    "id": "note-006",
+    "title": "Running plan — half marathon prep",
+    "content": "Following the 12-week plan from Runner's World. Currently on week 6. Tuesday: intervals, Thursday: tempo run, Saturday: long run. Need to increase long run to 14km this weekend. Remember to foam roll after every session — knees have been tight.",
+    "tags": ["fitness", "health"],
+    "created_at": "2025-03-05T07:30:00Z"
+  },
+  {
+    "id": "note-007",
+    "title": "Restaurant shortlist for dinner with Sam",
+    "content": "Options for Saturday: 1) Dishoom — always good but might be busy, book early. 2) Mildreds — fully veggie so no menu stress. 3) The Gate — Sam mentioned wanting to try it. Leaning towards Mildreds since Sam enjoyed it last time.",
+    "tags": ["personal", "food"],
+    "created_at": "2025-03-13T12:00:00Z"
+  },
+  {
+    "id": "note-008",
+    "title": "Python async patterns to explore",
+    "content": "Look into structured concurrency with asyncio.TaskGroup (Python 3.11+). Also want to try the 'anyio' library for backend services. Read the blog post about using async generators for streaming API responses — could be useful for the new events endpoint.",
+    "tags": ["learning", "python"],
+    "created_at": "2025-03-11T09:00:00Z"
+  },
+  {
+    "id": "note-009",
+    "title": "Weekend trip to the Cotswolds",
+    "content": "Thinking of going the last weekend of March. Check availability at The Old Stocks Inn in Stow-on-the-Wold. Drive up Friday evening, walk the Windrush Way on Saturday, Sunday morning at Bourton-on-the-Water then drive back. Need to book restaurant for Saturday dinner.",
+    "tags": ["travel", "personal"],
+    "created_at": "2025-03-09T20:30:00Z"
+  },
+  {
+    "id": "note-010",
+    "title": "1:1 notes with Jordan",
+    "content": "Jordan wants to move into a tech lead role by end of year. Suggested they start by leading the caching layer project. Also discussed their concerns about on-call rotation — will bring up with the team to make the rota fairer.",
+    "tags": ["work", "management"],
+    "created_at": "2025-03-13T11:00:00Z"
+  },
+  {
+    "id": "note-011",
+    "title": "Sourdough troubleshooting",
+    "content": "Last loaf was too dense. Possible causes: starter wasn't active enough (try feeding twice before bake day), or I didn't stretch and fold enough during bulk ferment. Next attempt: longer autolyse (1 hour), four stretch-and-folds at 30 min intervals.",
+    "tags": ["recipes", "cooking"],
+    "created_at": "2025-03-02T16:45:00Z"
+  },
+  {
+    "id": "note-012",
+    "title": "Side project: garden sensor dashboard",
+    "content": "Build a Raspberry Pi sensor hub for the balcony garden. Soil moisture, temperature, and light sensors feeding into a FastAPI backend with a simple HTML dashboard. Could use HTMX for live updates. Order the DHT22 sensor and capacitive soil moisture sensor from Pimoroni.",
+    "tags": ["projects", "python"],
+    "created_at": "2025-03-07T21:00:00Z"
+  },
+  {
+    "id": "note-013",
+    "title": "Meditation habit tracking",
+    "content": "Completed 30 consecutive days of morning meditation. 10 minutes seems to be the sweet spot — long enough to settle in but short enough to stick with. Using the Waking Up app. Try the new series on meta-awareness next week.",
+    "tags": ["health", "personal"],
+    "created_at": "2025-03-14T07:15:00Z"
+  },
+  {
+    "id": "note-014",
+    "title": "API rate limiting design",
+    "content": "Proposed approach: token bucket algorithm with Redis as the backing store. Set default limits at 100 req/min for free tier, 1000 req/min for paid. Need to handle burst traffic gracefully — allow 20% overage with a warning header. Write up the RFC by Friday.",
+    "tags": ["work", "engineering"],
+    "created_at": "2025-03-12T15:30:00Z"
+  },
+  {
+    "id": "note-015",
+    "title": "Gift ideas for Mum's birthday",
+    "content": "Her birthday is the 18th. Ideas: a nice cookbook (Ottolenghi's new one?), theatre tickets to see something at the National, or a day trip to Kew Gardens. Could combine the Kew trip with lunch at their restaurant. Ask Dad if he wants to go in on something together.",
+    "tags": ["personal", "family"],
+    "created_at": "2025-03-06T18:00:00Z"
+  },
+  {
+    "id": "note-016",
+    "title": "Sci-fi watchlist",
+    "content": "Films to watch: Arrival (rewatch), Annihilation, Ex Machina (rewatch with Sam), Coherence, The Vast of Night. TV: start Severance season 2, catch up on Silo. Sam also recommended Dark on Netflix — supposedly very good but need to watch with subtitles.",
+    "tags": ["entertainment", "personal"],
+    "created_at": "2025-03-04T22:00:00Z"
+  },
+  {
+    "id": "note-017",
+    "title": "Allotment planting schedule",
+    "content": "March: sow tomatoes and peppers indoors. April: plant out broad beans and peas directly. May: courgettes and runner beans after last frost. Need to order seeds from Real Seeds this week. Also repair the cold frame before the tomato seedlings are ready to harden off.",
+    "tags": ["personal", "gardening"],
+    "created_at": "2025-03-01T10:00:00Z"
+  },
+  {
+    "id": "note-018",
+    "title": "Caching layer architecture notes",
+    "content": "Jordan and I sketched out the caching approach. Three tiers: in-memory LRU for hot data (< 1ms), Redis for warm data (< 5ms), and Postgres for cold data. Cache invalidation via pub/sub events from the write path. Start with the user profile cache as the pilot.",
+    "tags": ["work", "engineering"],
+    "created_at": "2025-03-14T14:00:00Z"
+  },
+  {
+    "id": "note-019",
+    "title": "Bike maintenance checklist",
+    "content": "Before the Cotswolds trip: check tyre pressure (100 PSI front, 110 rear), lube chain, inspect brake pads. The rear derailleur has been a bit sluggish — might need cable tension adjustment. If it's still bad, take it to the shop on Holloway Road.",
+    "tags": ["personal", "cycling"],
+    "created_at": "2025-03-10T17:00:00Z"
+  },
+  {
+    "id": "note-020",
+    "title": "Veggie meal prep ideas",
+    "content": "This week's batch cooking: black bean chilli (freezes well), roasted cauliflower and chickpea bowls with tahini dressing, mushroom and spinach lasagne. Prep the chilli and lasagne on Sunday, assemble the bowls fresh each day. Buy extra tahini — nearly out.",
+    "tags": ["recipes", "cooking", "meal-prep"],
+    "created_at": "2025-03-15T09:00:00Z"
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "reminder-001",
+    "text": "Call Mum for her birthday",
+    "due_date": "2025-03-18",
+    "due_time": "18:00",
+    "recurring": false,
+    "completed": false
+  },
+  {
+    "id": "reminder-002",
+    "text": "Submit API rate limiting RFC",
+    "due_date": "2025-03-19",
+    "due_time": "12:00",
+    "recurring": false,
+    "completed": false
+  },
+  {
+    "id": "reminder-003",
+    "text": "Order seeds from Real Seeds",
+    "due_date": "2025-03-17",
+    "due_time": "20:00",
+    "recurring": false,
+    "completed": false
+  },
+  {
+    "id": "reminder-004",
+    "text": "Take vitamins",
+    "due_date": "2025-03-17",
+    "due_time": "08:00",
+    "recurring": true,
+    "completed": false
+  },
+  {
+    "id": "reminder-005",
+    "text": "Book restaurant for Cotswolds weekend",
+    "due_date": "2025-03-20",
+    "due_time": "13:00",
+    "recurring": false,
+    "completed": false
+  },
+  {
+    "id": "reminder-006",
+    "text": "Buy tahini and coconut cream for Saturday cooking",
+    "due_date": "2025-03-21",
+    "due_time": "17:30",
+    "recurring": false,
+    "completed": false
+  },
+  {
+    "id": "reminder-007",
+    "text": "Stretch and foam roll",
+    "due_date": "2025-03-17",
+    "due_time": "21:00",
+    "recurring": true,
+    "completed": false
+  },
+  {
+    "id": "reminder-008",
+    "text": "Chase joiner Dave for kitchen quote",
+    "due_date": "2025-03-19",
+    "due_time": "10:00",
+    "recurring": false,
+    "completed": false
+  }
+]

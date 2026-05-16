@@ -325,34 +325,30 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 ---
 
-### Module 12 — Capstone Project
+### Module 12 — Productionisation
 
 **Talk about:**
 
-- Integrate everything into the Pathfinder Operations AI
-- Production hardening is part of this module: tracing, reliability, cost controls, Docker
-- Architecture overview: chat → router → specialists → supervisor → guardrails → memory
-- Structured tracing: trace IDs, spans, attributing every call
-- Reliability: retries with backoff, timeouts, circuit breakers, fallbacks
-- Cost controls: token budgets, model tiering, caching, batching
-- Deployment: Docker, health checks, environment config
-- Integration testing: happy path, error handling, adversarial inputs
-- Extension points: new tools, new agents, new retrieval sources, new guardrails
+- Production hardening: what changes between a prototype and a production AI system
+- Structured tracing: trace IDs, spans, JSON logging, observability platforms
+- Reliability: retries with exponential backoff + jitter, timeouts, circuit breakers, fallbacks
+- Cost controls: token budgets (per-session, per-day), model tiering, caching, batching
+- Deployment: Docker, health checks, environment config, secrets management
+- Then hand off to capstone exercises — learners choose one app and build it
 
 **Demo:**
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-12-capstone/demo/01_architecture_overview.py` | Full system architecture walkthrough |
-| `module-12-capstone/demo/02_demo_scenario.py` | End-to-end query through the full pipeline |
-| `module-12-capstone/demo/03_structured_tracing.py` | Trace IDs propagated through tool calls |
-| `module-12-capstone/demo/04_circuit_breaker.py` | Circuit breaker opening after failures, fallback |
-| `module-12-capstone/demo/05_deployment_pipeline.py` | Config per environment, health check endpoint |
+| `module-12-productionisation/demo/01_tracing.py` | TraceContext with spans, timing, JSON output |
+| `module-12-productionisation/demo/02_circuit_breaker.py` | Circuit breaker states, failure handling, recovery |
+| `module-12-productionisation/demo/03_cost_controls.py` | Token budgets, model tiering, cost tracking |
 
-**Exercises:**
+**Exercises (choose one):**
 
-| Folder | Delegates build |
-| ------ | --------------- |
-| `exercises/01-capstone-app` | Integrated chat + RAG + MCP + multi-agent app with tracing |
-| `exercises/02-harden-and-deploy` | Reliability patterns (retries, circuit breakers, fallbacks) + Docker deployment |
-| `exercises/03-test-and-extend` | Integration tests and extension documentation |
+| Folder | What you build |
+| ------ | -------------- |
+| `exercises/01-recipe-finder` | RAG + hybrid search + multimodal vision + allergen guardrails |
+| `exercises/02-movie-night` | RAG + text-to-SQL + reranking + chart data |
+| `exercises/03-travel-planner` | Agentic RAG + tool calling + structured itineraries |
+| `exercises/04-personal-assistant` | Chat + tools + MCP + RAG notes + calendar management |
