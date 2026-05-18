@@ -1,5 +1,5 @@
 """
-Exercise 02 — Tool Agent (DSS Pathfinder)
+Exercise 02 — Tool Agent (CSS Horizon)
 Wrap ship tools as LangChain tools and run via AgentExecutor.
 
 Run:  python start.py
@@ -19,15 +19,15 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 MODEL = "gpt-4o-mini"
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-CREW = json.loads((PROJECT_ROOT / "data" / "crew.json").read_text())
+EXERCISE_DATA = Path(__file__).resolve().parents[1] / "data"
+CREW = json.loads((EXERCISE_DATA / "horizon_crew.json").read_text())
 
 SENSOR_DATA = {
-    "hull_temperature": {"value": 272, "unit": "K", "status": "nominal"},
-    "reactor_output": {"value": 94.2, "unit": "%", "status": "nominal"},
-    "shield_integrity": {"value": 87, "unit": "%", "status": "warning"},
-    "oxygen_level": {"value": 21.1, "unit": "%", "status": "nominal"},
-    "radiation": {"value": 0.3, "unit": "mSv/h", "status": "nominal"},
+    "cargo_hold_pressure": {"value": 101.2, "unit": "kPa", "status": "nominal"},
+    "main_drive_output": {"value": 96.0, "unit": "%", "status": "nominal"},
+    "docking_seal_integrity": {"value": 94.0, "unit": "%", "status": "nominal"},
+    "life_support_o2": {"value": 20.9, "unit": "%", "status": "nominal"},
+    "background_radiation": {"value": 0.12, "unit": "mSv/h", "status": "nominal"},
 }
 
 
@@ -38,7 +38,7 @@ SENSOR_DATA = {
 _classify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
-        "You are a ship incident classifier for the DSS Pathfinder.\n"
+        "You are a ship incident classifier for the CSS Horizon.\n"
         "Classify the crew report into exactly one category: "
         "navigation, engineering, science, medical, or operations.\n"
         "Respond with ONLY a JSON object (no markdown fences) containing:\n"
@@ -88,7 +88,7 @@ def classify_report(report: str) -> dict:
 
 # tools = [classify, read_sensor, query_crew]
 # prompt = ChatPromptTemplate.from_messages([
-#     ("system", "You are the DSS Pathfinder AI assistant. ..."),
+#     ("system", "You are the CSS Horizon AI assistant. ..."),
 #     ("placeholder", "{chat_history}"),
 #     ("human", "{input}"),
 #     ("placeholder", "{agent_scratchpad}"),

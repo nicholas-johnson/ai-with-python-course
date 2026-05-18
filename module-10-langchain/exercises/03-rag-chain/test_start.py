@@ -11,7 +11,7 @@ def test_ask_returns_answer_and_docs():
     vectorstore = build_vectorstore(texts, metadatas)
     chain, retriever = build_rag_chain(vectorstore)
 
-    answer, docs = ask(chain, retriever, "What are the navigation protocols for sector 7?")
+    answer, docs = ask(chain, retriever, "What happened with docking seal ring 3 at L5-Prime?")
     assert isinstance(answer, str)
     assert len(answer) > 0
     assert isinstance(docs, list)

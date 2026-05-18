@@ -1,0 +1,98 @@
+[
+  {
+    "id": "HZL-001",
+    "timestamp": "2348-09-02T06:00:00Z",
+    "author": "Captain Rina Okoye",
+    "category": "command",
+    "content": "CSS Horizon docked at Lagrange Station L5-Prime for resupply leg two. Manifest verified against station manifest — 840 tonnes dry goods, 120 tonnes cryo-fuel. Berth 7-C secured. Survey shuttle prepped for detached asteroid belt run.",
+    "tags": ["lagrange", "resupply", "docking"]
+  },
+  {
+    "id": "HZL-002",
+    "timestamp": "2348-09-02T10:15:00Z",
+    "author": "Chief Engineer Yuki Sato",
+    "category": "engineering",
+    "content": "Main drive output holding at 91% during station-side power draw. Cargo hold pressure stable at 101.2 kPa. Minor leak detected in docking seal ring 3 — patched with emergency sealant, monitoring integrity at 89%.",
+    "tags": ["main-drive", "cargo-hold", "docking-seal"]
+  },
+  {
+    "id": "HZL-003",
+    "timestamp": "2348-09-02T14:40:00Z",
+    "author": "Dr. Mateo Alvarez",
+    "category": "science",
+    "content": "Pre-survey briefing for Cluster Theta-9: spectroscopy suggests nickel-iron rubble with trace platinum group metals. Recommend low-thrust approach along the L4 drift lane. Requesting 18-hour detached ops window after fuel top-off.",
+    "tags": ["survey", "theta-9", "spectroscopy"]
+  },
+  {
+    "id": "HZL-004",
+    "timestamp": "2348-09-03T02:30:00Z",
+    "author": "Ensign Priya Nair",
+    "category": "operations",
+    "content": "Night shift: crane cycle completed for pallet batch 14–19. Station traffic control cleared Horizon for undock at 0600. Life support O2 mix nominal. Background radiation within expected L5 shielding envelope.",
+    "tags": ["night-watch", "cargo", "operations"]
+  },
+  {
+    "id": "HZL-005",
+    "timestamp": "2348-09-03T08:00:00Z",
+    "author": "Dr. Helena Weiss",
+    "category": "medical",
+    "content": "Pre-undock health screening complete. Two crew flagged for mild decompression fatigue after extended EVA prep — cleared for light duty only. Updated quarantine protocols for returned core samples per station directive 44-B.",
+    "tags": ["medical", "EVA", "quarantine"]
+  },
+  {
+    "id": "HZL-006",
+    "timestamp": "2348-09-03T11:20:00Z",
+    "author": "Lt. Omar Farouk",
+    "category": "navigation",
+    "content": "Undock from L5-Prime complete. Plotting transfer burn to Theta-9 survey box. Convoy channel reserved on nav beacon 7. ETA to survey coordinates: 14 hours at economical thrust.",
+    "tags": ["navigation", "undock", "theta-9"]
+  },
+  {
+    "id": "HZL-007",
+    "timestamp": "2348-09-04T05:45:00Z",
+    "author": "Lt. Jonas Kline",
+    "category": "security",
+    "content": "Security sweep before detached survey: cargo bay sealed, access logs reviewed. No unauthorized manifests. Posted watch on external grapple ports during sample intake window.",
+    "tags": ["security", "cargo", "survey"]
+  },
+  {
+    "id": "HZL-008",
+    "timestamp": "2348-09-04T12:10:00Z",
+    "author": "Specialist Anika Desai",
+    "category": "science",
+    "content": "First core sample from Theta-9 fragment T9-04 shows elevated cobalt and nickel. Mass spectrometer calibration drifted 0.3% — recalibrated. Recommending second core from the sunward face.",
+    "tags": ["samples", "theta-9", "spectrometry"]
+  },
+  {
+    "id": "HZL-009",
+    "timestamp": "2348-09-04T18:00:00Z",
+    "author": "Chief Engineer Yuki Sato",
+    "category": "engineering",
+    "content": "Docking seal ring 3 integrity improved to 94% after replacement gasket install. Main drive output restored to 96% post-calibration. Cargo hold pressure holding steady through sample loading vibration.",
+    "tags": ["maintenance", "docking-seal", "cargo-hold"]
+  },
+  {
+    "id": "HZL-010",
+    "timestamp": "2348-09-05T07:30:00Z",
+    "author": "Captain Rina Okoye",
+    "category": "command",
+    "content": "Theta-9 survey phase one complete. Sample yield exceeds contract minimum by 22%. Approved return leg to L5-Prime for offload. Next convoy slot reserved in 36 hours.",
+    "tags": ["survey", "lagrange", "status"]
+  },
+  {
+    "id": "HZL-011",
+    "timestamp": "2348-09-05T15:00:00Z",
+    "author": "Lt. Cmdr. Fatima Rahman",
+    "category": "navigation",
+    "content": "Return approach to L5-Prime filed. Traffic congestion near berth 7 — requesting alternate berth 9-A. Fuel reserves sufficient with 8% margin after survey detour.",
+    "tags": ["navigation", "lagrange", "berthing"]
+  },
+  {
+    "id": "HZL-012",
+    "timestamp": "2348-09-06T09:15:00Z",
+    "author": "Ensign Luca Romano",
+    "category": "engineering",
+    "content": "Pre-dock checklist: life support O2 at 20.9%, cargo hold pressure green, background radiation nominal. Pump test on cryo line 2 passed. Standing by for coupling with station refueling arm.",
+    "tags": ["engineering", "pre-dock", "life-support"]
+  }
+]

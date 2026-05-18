@@ -1,5 +1,7 @@
 # Exercise 2: Tool Agent
 
+> **Scenario:** Hands-on work uses the **CSS Horizon** and `module-10-langchain/exercises/data/horizon_crew.json`. Module demos use the **DSS Pathfinder** and `data/crew.json` at the repo root.
+
 ## Recap
 
 In Module 2 you built a tool-calling agent loop by hand — the LLM decides whether to respond or call a tool, you execute the tool, feed the result back, and repeat. LangChain wraps this entire loop in two components:
@@ -59,15 +61,20 @@ Define inline data for the agent's tools:
 
 ```python
 SENSOR_DATA = {
-    "hull_temperature": {"value": 272, "unit": "K", "status": "nominal"},
-    "reactor_output": {"value": 94.2, "unit": "%", "status": "nominal"},
-    "shield_integrity": {"value": 87, "unit": "%", "status": "warning"},
-    "oxygen_level": {"value": 21.1, "unit": "%", "status": "nominal"},
-    "radiation": {"value": 0.3, "unit": "mSv/h", "status": "nominal"},
+    "cargo_hold_pressure": {"value": 101.2, "unit": "kPa", "status": "nominal"},
+    "main_drive_output": {"value": 96.0, "unit": "%", "status": "nominal"},
+    "docking_seal_integrity": {"value": 94.0, "unit": "%", "status": "nominal"},
+    "life_support_o2": {"value": 20.9, "unit": "%", "status": "nominal"},
+    "background_radiation": {"value": 0.12, "unit": "mSv/h", "status": "nominal"},
 }
 ```
 
-Load crew data from `data/crew.json` at the project root.
+Load crew data from `module-10-langchain/exercises/data/horizon_crew.json`:
+
+```python
+EXERCISE_DATA = Path(__file__).resolve().parents[1] / "data"
+CREW = json.loads((EXERCISE_DATA / "horizon_crew.json").read_text())
+```
 
 ### 3. Create `@tool` functions
 
@@ -99,7 +106,7 @@ Create a prompt, model, and agent:
 
 ```python
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are the DSS Pathfinder AI assistant. Use your tools to help the crew."),
+    ("system", "You are the CSS Horizon AI assistant. Use your tools to help the crew."),
     ("placeholder", "{chat_history}"),
     ("human", "{input}"),
     ("placeholder", "{agent_scratchpad}"),
@@ -138,7 +145,7 @@ cd module-10-langchain/exercises/02-tool-agent
 python start.py
 ```
 
-Try queries that require tools: "What is the shield integrity?", "Classify this report: Warp core fluctuations detected", "Who is in the engineering department?"
+Try queries that require tools: "What is the docking seal integrity?", "Classify this report: Cargo hold pressure dropped during sample loading", "Who is in the engineering department?"
 
 ## Tests
 

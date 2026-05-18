@@ -17,10 +17,10 @@ load_dotenv()
 MODEL = "gpt-4o-mini"
 
 SAMPLE_REPORTS = [
-    "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B.",
-    "Long-range sensors detecting unusual spectral signature at bearing 047 mark 3.",
-    "Crew member reported dizziness and nausea after EVA — possible radiation exposure.",
-    "Course correction complete. New heading 127 mark 4, ETA Kepler-442 in 68 hours.",
+    "Main drive output at 91% during station power draw. Cargo hold pressure stable.",
+    "Spectroscopy on Cluster Theta-9 suggests nickel-iron rubble with trace platinum.",
+    "Docking seal ring 3 integrity at 89% after patch — monitoring before undock.",
+    "Berth 9-A assigned at L5-Prime. Fuel reserves sufficient with 8% margin.",
 ]
 
 # ---------------------------------------------------------------------------
@@ -30,7 +30,7 @@ SAMPLE_REPORTS = [
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
-        "You are a ship incident classifier for the DSS Pathfinder.\n"
+        "You are a ship incident classifier for the CSS Horizon.\n"
         "Classify the crew report into exactly one category: "
         "navigation, engineering, science, medical, or operations.\n"
         "Respond with ONLY a JSON object (no markdown fences) containing:\n"

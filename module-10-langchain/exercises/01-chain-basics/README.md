@@ -1,5 +1,7 @@
 # Exercise 1: Chain Basics
 
+> **Scenario:** Hands-on work uses the **CSS Horizon** cargo survey vessel and sample reports below. Module demos use the **DSS Pathfinder** and `data/ship_logs.json` at the repo root.
+
 ## Recap
 
 LangChain's core idea is **composable steps**. Instead of writing a function that builds a prompt string, calls the API, and parses the result, you snap three components together with the pipe (`|`) operator:

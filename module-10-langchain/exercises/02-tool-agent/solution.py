@@ -18,15 +18,15 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 MODEL = "gpt-4o-mini"
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-CREW = json.loads((PROJECT_ROOT / "data" / "crew.json").read_text())
+EXERCISE_DATA = Path(__file__).resolve().parents[1] / "data"
+CREW = json.loads((EXERCISE_DATA / "horizon_crew.json").read_text())
 
 SENSOR_DATA = {
-    "hull_temperature": {"value": 272, "unit": "K", "status": "nominal"},
-    "reactor_output": {"value": 94.2, "unit": "%", "status": "nominal"},
-    "shield_integrity": {"value": 87, "unit": "%", "status": "warning"},
-    "oxygen_level": {"value": 21.1, "unit": "%", "status": "nominal"},
-    "radiation": {"value": 0.3, "unit": "mSv/h", "status": "nominal"},
+    "cargo_hold_pressure": {"value": 101.2, "unit": "kPa", "status": "nominal"},
+    "main_drive_output": {"value": 96.0, "unit": "%", "status": "nominal"},
+    "docking_seal_integrity": {"value": 94.0, "unit": "%", "status": "nominal"},
+    "life_support_o2": {"value": 20.9, "unit": "%", "status": "nominal"},
+    "background_radiation": {"value": 0.12, "unit": "mSv/h", "status": "nominal"},
 }
 
 # --- Classifier chain from Exercise 01 ---
@@ -34,7 +34,7 @@ SENSOR_DATA = {
 _classify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
-        "You are a ship incident classifier for the DSS Pathfinder.\n"
+        "You are a ship incident classifier for the CSS Horizon.\n"
         "Classify the crew report into exactly one category: "
         "navigation, engineering, science, medical, or operations.\n"
         "Respond with ONLY a JSON object (no markdown fences) containing:\n"
@@ -61,7 +61,7 @@ def classify(report: str) -> str:
 
 @tool
 def read_sensor(sensor_name: str) -> str:
-    """Read the current value of a ship sensor. Available: hull_temperature, reactor_output, shield_integrity, oxygen_level, radiation."""
+    """Read the current value of a ship sensor. Available: cargo_hold_pressure, main_drive_output, docking_seal_integrity, life_support_o2, background_radiation."""
     data = SENSOR_DATA.get(sensor_name)
     if not data:
         return json.dumps({"error": f"Unknown sensor '{sensor_name}'", "available": list(SENSOR_DATA.keys())})
@@ -84,7 +84,7 @@ tools = [classify, read_sensor, query_crew]
 
 agent_prompt = ChatPromptTemplate.from_messages([
     ("system",
-     "You are the DSS Pathfinder AI assistant. "
+     "You are the CSS Horizon AI assistant. "
      "Use your tools to help the crew. Do not guess — always use a tool when data is needed."),
     ("placeholder", "{chat_history}"),
     ("human", "{input}"),

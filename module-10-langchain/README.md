@@ -156,6 +156,8 @@ python module-10-langchain/demo/03_langchain_rag.py
 
 ## Exercises
 
+**Demos vs exercises:** Demos use the **DSS Pathfinder** and shared repo data (`data/ship_logs.json`, `data/crew.json`). Exercises use the **CSS Horizon** cargo survey vessel and local data in [`exercises/data/`](exercises/data/) (`horizon_logs.json`, `horizon_crew.json`) — same LangChain patterns, different scenario so you apply what you saw in the demo rather than copy it verbatim.
+
 The three exercises chain together. Each builds on the last; you can bring your own code forward or use the provided solution from the previous exercise.
 
 | Folder | What you build |

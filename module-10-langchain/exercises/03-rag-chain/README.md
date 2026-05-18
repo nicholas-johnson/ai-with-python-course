@@ -1,5 +1,7 @@
 # Exercise 3: RAG Chain
 
+> **Scenario:** Hands-on work uses the **CSS Horizon** and `module-10-langchain/exercises/data/horizon_logs.json`. Module demos use the **DSS Pathfinder** and `data/ship_logs.json` at the repo root.
+
 ## Recap
 
 In Module 5 you built a RAG pipeline by hand — chunk, embed, store, retrieve, ground, generate. LangChain wraps this in a retrieval chain where each step is a composable LCEL component.
@@ -51,7 +53,12 @@ The Exercise 1 and 2 code (classifier chain, tools, agent) is already inlined at
 
 ### 1. Load the ship logs
 
-Load `data/ship_logs.json` from the project root. Each entry has `id`, `content`, `author`, and `category`.
+Load `module-10-langchain/exercises/data/horizon_logs.json`. Each entry has `id`, `content`, `author`, and `category`.
+
+```python
+EXERCISE_DATA = Path(__file__).resolve().parents[1] / "data"
+logs = json.loads((EXERCISE_DATA / "horizon_logs.json").read_text())
+```
 
 ### 2. Build the vectorstore
 
@@ -128,7 +135,7 @@ cd module-10-langchain/exercises/03-rag-chain
 python start.py
 ```
 
-Ask questions about the ship logs: mission status, engineering issues, crew activities, sensor anomalies. Use `/norag` to compare RAG answers with raw LLM answers.
+Ask questions about Horizon logs: Lagrange resupply, Theta-9 survey, docking seals, cargo operations. Use `/norag` to compare RAG answers with raw LLM answers.
 
 ## Tests
 

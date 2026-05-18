@@ -1,0 +1,102 @@
+[
+  {
+    "id": "HZ-001",
+    "name": "Captain Rina Okoye",
+    "role": "captain",
+    "department": "command",
+    "clearanceLevel": 5,
+    "specializations": ["convoy-leadership", "trade-law", "crisis-management"],
+    "activeMission": "HZ-RESUPPLY-12",
+    "yearsOfService": 16
+  },
+  {
+    "id": "HZ-002",
+    "name": "Dr. Mateo Alvarez",
+    "role": "science-officer",
+    "department": "science",
+    "clearanceLevel": 4,
+    "specializations": ["orbital-mechanics", "cargo-spectrometry", "hazard-mapping"],
+    "activeMission": "HZ-SURVEY-07",
+    "yearsOfService": 11
+  },
+  {
+    "id": "HZ-003",
+    "name": "Chief Engineer Yuki Sato",
+    "role": "engineer",
+    "department": "engineering",
+    "clearanceLevel": 4,
+    "specializations": ["ion-drives", "pressure-systems", "dock-couplers"],
+    "activeMission": "HZ-RESUPPLY-12",
+    "yearsOfService": 14
+  },
+  {
+    "id": "HZ-004",
+    "name": "Lt. Omar Farouk",
+    "role": "navigator",
+    "department": "operations",
+    "clearanceLevel": 3,
+    "specializations": ["lagrange-navigation", "berth-scheduling", "traffic-control"],
+    "activeMission": "HZ-RESUPPLY-12",
+    "yearsOfService": 8
+  },
+  {
+    "id": "HZ-005",
+    "name": "Ensign Priya Nair",
+    "role": "ops",
+    "department": "operations",
+    "clearanceLevel": 2,
+    "specializations": ["manifest-tracking", "crane-ops", "station-comms"],
+    "activeMission": "HZ-RESUPPLY-12",
+    "yearsOfService": 2
+  },
+  {
+    "id": "HZ-006",
+    "name": "Dr. Helena Weiss",
+    "role": "medical-officer",
+    "department": "medical",
+    "clearanceLevel": 4,
+    "specializations": ["microgravity-medicine", "decompression", "quarantine"],
+    "activeMission": null,
+    "yearsOfService": 9
+  },
+  {
+    "id": "HZ-007",
+    "name": "Lt. Jonas Kline",
+    "role": "security-chief",
+    "department": "security",
+    "clearanceLevel": 4,
+    "specializations": ["cargo-inspection", "access-control", "piracy-response"],
+    "activeMission": "HZ-RESUPPLY-12",
+    "yearsOfService": 10
+  },
+  {
+    "id": "HZ-008",
+    "name": "Specialist Anika Desai",
+    "role": "science-officer",
+    "department": "science",
+    "clearanceLevel": 3,
+    "specializations": ["asteroid-composition", "sample-coring", "mass-spectrometry"],
+    "activeMission": "HZ-SURVEY-07",
+    "yearsOfService": 5
+  },
+  {
+    "id": "HZ-009",
+    "name": "Ensign Luca Romano",
+    "role": "engineer",
+    "department": "engineering",
+    "clearanceLevel": 2,
+    "specializations": ["seal-maintenance", "pump-systems", "welding"],
+    "activeMission": "HZ-RESUPPLY-12",
+    "yearsOfService": 1
+  },
+  {
+    "id": "HZ-010",
+    "name": "Lt. Cmdr. Fatima Rahman",
+    "role": "navigator",
+    "department": "operations",
+    "clearanceLevel": 4,
+    "specializations": ["convoy-routing", "fuel-optimization", "station-approach"],
+    "activeMission": "HZ-SURVEY-07",
+    "yearsOfService": 13
+  }
+]
