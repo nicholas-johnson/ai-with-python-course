@@ -11,26 +11,26 @@ from openai import OpenAI
 
 load_dotenv()
 
-DEPARTMENTS = ["navigation", "engineering", "science"]
+DEPARTMENTS = ["medical", "tactical", "comms"]
 
 SPECIALIST_PROMPTS = {
-    "navigation": (
-        "You are the Navigation Officer aboard the DSS Pathfinder. "
-        "You handle all questions about course headings, star charts, "
-        "jump calculations, orbital mechanics, and positioning. "
+    "medical": (
+        "You are the Medical Officer aboard the DSS Pathfinder. "
+        "You handle all questions about crew health, injuries, quarantine "
+        "protocols, radiation exposure, and bio-hazard containment. "
+        "Answer concisely with clinical precision."
+    ),
+    "tactical": (
+        "You are the Tactical Officer aboard the DSS Pathfinder. "
+        "You handle all questions about threat assessment, shields, "
+        "weapons systems, evasive maneuvers, and defense protocols. "
         "Answer concisely and with authority."
     ),
-    "engineering": (
-        "You are the Chief Engineer aboard the DSS Pathfinder. "
-        "You handle all questions about engines, hull integrity, "
-        "power systems, shields, life support, and repairs. "
-        "Answer concisely with technical precision."
-    ),
-    "science": (
-        "You are the Science Officer aboard the DSS Pathfinder. "
-        "You handle all questions about anomalies, sensor readings, "
-        "nebula analysis, xenobiology, and research findings. "
-        "Answer concisely and cite data where possible."
+    "comms": (
+        "You are the Communications Officer aboard the DSS Pathfinder. "
+        "You handle all questions about hailing frequencies, signal "
+        "decryption, subspace relays, distress beacons, and encrypted "
+        "transmissions. Answer concisely and cite signal data where possible."
     ),
 }
 
@@ -38,7 +38,7 @@ SPECIALIST_PROMPTS = {
 def classify_query(query: str, client: OpenAI) -> str:
     """Use the LLM to classify a query into a department.
 
-    Returns one of: 'navigation', 'engineering', 'science'.
+    Returns one of: 'medical', 'tactical', 'comms'.
 
     Steps:
         1. Call client.chat.completions.create with gpt-4o-mini
@@ -46,7 +46,7 @@ def classify_query(query: str, client: OpenAI) -> str:
         3. System prompt: instruct the model to classify into one of the
            three departments and return JSON: {"department": "<name>"}
         4. Parse the JSON response and return the department string
-        5. If parsing fails or department is invalid, default to "science"
+        5. If parsing fails or department is invalid, default to "medical"
     """
     # TODO: implement LLM-based classification
     raise NotImplementedError("TODO")
@@ -57,6 +57,7 @@ def specialist_agent(department: str, query: str, client: OpenAI) -> str:
 
     Steps:
         1. Look up the system prompt from SPECIALIST_PROMPTS for the department
+           (fall back to "medical" for unknown departments)
         2. Call client.chat.completions.create with gpt-4o-mini
         3. Pass the system prompt and the user's query
         4. Return the response text

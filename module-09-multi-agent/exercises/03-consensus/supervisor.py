@@ -76,7 +76,7 @@ class SupervisorAgent:
         return {"department": department, "response": response, "trace": trace}
 
     def _revise(self, department: str, query: str, previous: str, feedback: str) -> str:
-        system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
+        system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])
         result = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[

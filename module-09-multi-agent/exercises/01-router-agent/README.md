@@ -24,7 +24,7 @@ Each specialist agent is a simple function: it takes a query, runs it through th
 
 ## What you build
 
-A console app in **`start.py`** with three specialist agents (navigation, engineering, science) and an LLM-powered router. The system prompt for each specialist is already provided -- you implement the functions that use them.
+A console app in **`start.py`** with three specialist agents (medical, tactical, comms) and an LLM-powered router. The system prompt for each specialist is already provided -- you implement the functions that use them.
 
 **Key functions:**
 
@@ -41,15 +41,15 @@ A console app in **`start.py`** with three specialist agents (navigation, engine
 Use `client.chat.completions.create` with JSON mode to classify a query:
 
 - Set `response_format={"type": "json_object"}`
-- System prompt: instruct the model to classify into one of three departments (`navigation`, `engineering`, `science`) and return `{"department": "<name>"}`
+- System prompt: instruct the model to classify into one of three departments (`medical`, `tactical`, `comms`) and return `{"department": "<name>"}`
 - Parse the response JSON and return the department string
-- If parsing fails or the department is not in the valid list, default to `"science"`
+- If parsing fails or the department is not in the valid list, default to `"medical"`
 
 ### 2. Implement `specialist_agent`
 
 Look up the system prompt from `SPECIALIST_PROMPTS` for the given department, then make a chat completion call:
 
-- Use `SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])` to handle unknown departments gracefully
+- Use `SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])` to handle unknown departments gracefully
 - Pass the system prompt and the user query as messages
 - Return the response text
 
@@ -80,9 +80,9 @@ python start.py
 ```
 
 Try different types of queries:
-- "What is our current heading?" (should route to navigation)
-- "Hull integrity report" (should route to engineering)
-- "Analyse the nebula readings" (should route to science)
+- "Crew radiation exposure levels?" (should route to medical)
+- "Raise shields, hostiles incoming!" (should route to tactical)
+- "Decrypt the incoming transmission" (should route to comms)
 
 Use `/route` to check classification without executing the specialist.
 
@@ -94,7 +94,7 @@ pytest test_start.py -v
 
 The tests check:
 - `classify_query` returns a valid department name
-- `classify_query` defaults to "science" on bad JSON or unknown departments
+- `classify_query` defaults to "medical" on bad JSON or unknown departments
 - `specialist_agent` returns a non-empty string and uses the correct system prompt
 - `route_and_respond` returns a dict with both keys and makes at least 2 LLM calls
 - No real OpenAI calls -- all tests use mocked clients

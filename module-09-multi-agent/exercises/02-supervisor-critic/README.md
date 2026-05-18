@@ -93,21 +93,21 @@ python start.py
 Try queries and use `/trace` to see the full pipeline:
 
 ```
-You: What is our current heading?
-[navigation] (approved)
-Agent: Current heading is 045 mark 2, bearing towards the Kepler-442 system.
+You: Crew radiation exposure levels?
+[medical] (approved)
+Agent: All crew members within safe limits. Deck 4 personnel at 12 mSv — monitoring advised.
 
 You: /trace
 [Agent Trace]
-  1. {'agent': 'router', 'department': 'navigation'}
-  2. {'agent': 'specialist', 'department': 'navigation', 'response': '...'}
+  1. {'agent': 'router', 'department': 'medical'}
+  2. {'agent': 'specialist', 'department': 'medical', 'response': '...'}
   3. {'agent': 'critic', 'approved': True, 'feedback': 'Accurate and complete.'}
 
 You: /max-revisions 0
 [Max revisions set to 0]
 
-You: Analyse the nebula
-[science] (max revisions reached)
+You: Decrypt the signal
+[comms] (max revisions reached)
 Agent: ...
 ```
 

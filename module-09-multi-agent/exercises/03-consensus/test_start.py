@@ -123,7 +123,7 @@ def test_consensus_vote_returns_correct_structure():
                 choices=[
                     MagicMock(
                         message=MagicMock(
-                            content=json.dumps({"vote": "science"})
+                            content=json.dumps({"vote": "medical"})
                         )
                     )
                 ]
@@ -163,7 +163,7 @@ def test_consensus_vote_responses_have_department_and_response():
                 choices=[
                     MagicMock(
                         message=MagicMock(
-                            content=json.dumps({"vote": "navigation"})
+                            content=json.dumps({"vote": "tactical"})
                         )
                     )
                 ]

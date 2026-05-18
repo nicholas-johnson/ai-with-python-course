@@ -113,7 +113,10 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 @tool
 def read_sensor(sensor_name: str) -> str:
     """Read the current value of a ship sensor."""
-    return json.dumps(SENSOR_DATA[sensor_name])
+    data = SENSOR_DATA.get(sensor_name)
+    if not data:
+        return json.dumps({"error": f"Unknown sensor '{sensor_name}'"})
+    return json.dumps(data)
 
 @tool
 def query_crew(department: str) -> str:
@@ -257,13 +260,13 @@ rag_chain = (
           icon: 'layers',
         },
         {
-          rule: 'Test chains as units',
-          example: 'Each chain step should be independently verifiable.',
+          rule: 'Keep verbose=True during development',
+          example: 'The trace shows every tool call and decision.',
           icon: 'check-square',
         },
         {
-          rule: 'Pin framework versions',
-          example: 'LangChain moves fast — unversioned deps break silently.',
+          rule: 'Know when to eject',
+          example: 'If the framework fights you, go back to plain Python.',
           icon: 'lock',
         },
       ],

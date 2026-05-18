@@ -66,7 +66,7 @@ def test_critic_review_returns_approved_and_feedback():
     client = _mock_client_json({"approved": True, "feedback": "Looks good."})
     critic = mod.CriticAgent(client)
 
-    result = critic.review("What is our heading?", "Heading is 045 mark 2.")
+    result = critic.review("Crew radiation levels?", "All crew within safe limits.")
     assert isinstance(result, dict)
     assert "approved" in result
     assert "feedback" in result
@@ -80,17 +80,17 @@ def test_critic_review_approved_true():
     client = _mock_client_json({"approved": True, "feedback": "Accurate."})
     critic = mod.CriticAgent(client)
 
-    result = critic.review("heading?", "045 mark 2")
+    result = critic.review("injury report?", "Two minor cases in sickbay.")
     assert result["approved"] is True
 
 
 def test_critic_review_approved_false():
     """CriticAgent.review correctly parses a rejection."""
     mod = _import_start()
-    client = _mock_client_json({"approved": False, "feedback": "Missing coordinates."})
+    client = _mock_client_json({"approved": False, "feedback": "Missing dosage details."})
     critic = mod.CriticAgent(client)
 
-    result = critic.review("heading?", "We are going forward")
+    result = critic.review("treatment plan?", "Give them some medicine")
     assert result["approved"] is False
     assert len(result["feedback"]) > 0
 
@@ -114,14 +114,14 @@ def test_supervisor_run_returns_required_keys():
     """SupervisorAgent.run returns department, response, and trace."""
     mod = _import_start()
     responses = [
-        json.dumps({"department": "navigation"}),
-        "Current heading is 045 mark 2.",
+        json.dumps({"department": "medical"}),
+        "All crew vitals are within normal parameters.",
         json.dumps({"approved": True, "feedback": "Accurate."}),
     ]
     client = _mock_client_sequence(responses)
     supervisor = mod.SupervisorAgent(client, max_revisions=2)
 
-    result = supervisor.run("What is our heading?")
+    result = supervisor.run("Crew health status?")
     assert isinstance(result, dict)
     assert "department" in result
     assert "response" in result
@@ -133,14 +133,14 @@ def test_supervisor_approved_trace_has_three_entries():
     """When critic approves first time, trace has exactly 3 entries."""
     mod = _import_start()
     responses = [
-        json.dumps({"department": "engineering"}),
-        "Warp core is stable at 98% efficiency.",
+        json.dumps({"department": "tactical"}),
+        "Shields holding at 94%, no incoming threats detected.",
         json.dumps({"approved": True, "feedback": "Good."}),
     ]
     client = _mock_client_sequence(responses)
     supervisor = mod.SupervisorAgent(client, max_revisions=2)
 
-    result = supervisor.run("Warp core status?")
+    result = supervisor.run("Shield status?")
     assert len(result["trace"]) == 3
 
 
@@ -148,16 +148,16 @@ def test_supervisor_rejected_trace_has_revision():
     """When critic rejects, trace includes revision entries."""
     mod = _import_start()
     responses = [
-        json.dumps({"department": "science"}),
-        "The anomaly is interesting.",
-        json.dumps({"approved": False, "feedback": "Too vague, need sensor data."}),
-        "Revised: anomaly at coordinates 7.3.2, energy spike of 4.7 terawatts.",
+        json.dumps({"department": "comms"}),
+        "We received a signal.",
+        json.dumps({"approved": False, "feedback": "Too vague, need frequency and origin data."}),
+        "Revised: signal on frequency 147.3 MHz from sector 9, encrypted with standard cipher.",
         json.dumps({"approved": True, "feedback": "Much better."}),
     ]
     client = _mock_client_sequence(responses)
     supervisor = mod.SupervisorAgent(client, max_revisions=2)
 
-    result = supervisor.run("Analyse the anomaly")
+    result = supervisor.run("Decrypt the incoming signal")
     assert len(result["trace"]) > 3
     revision_steps = [s for s in result["trace"] if s.get("revision")]
     assert len(revision_steps) >= 1
@@ -167,7 +167,7 @@ def test_supervisor_respects_max_revisions():
     """SupervisorAgent stops after max_revisions even if critic keeps rejecting."""
     mod = _import_start()
     responses = [
-        json.dumps({"department": "navigation"}),
+        json.dumps({"department": "tactical"}),
         "First attempt.",
         json.dumps({"approved": False, "feedback": "Bad."}),
         "Second attempt.",
@@ -179,7 +179,7 @@ def test_supervisor_respects_max_revisions():
     client = _mock_client_sequence(responses)
     supervisor = mod.SupervisorAgent(client, max_revisions=2)
 
-    result = supervisor.run("heading?")
+    result = supervisor.run("threat assessment?")
     critic_steps = [s for s in result["trace"] if s.get("agent") == "critic"]
     assert len(critic_steps) <= 3
 
@@ -188,15 +188,15 @@ def test_supervisor_uses_department_from_classifier():
     """SupervisorAgent uses the department returned by the router."""
     mod = _import_start()
     responses = [
-        json.dumps({"department": "engineering"}),
-        "Hull at 100%.",
+        json.dumps({"department": "tactical"}),
+        "Shields at 100%.",
         json.dumps({"approved": True, "feedback": "OK."}),
     ]
     client = _mock_client_sequence(responses)
     supervisor = mod.SupervisorAgent(client, max_revisions=1)
 
-    result = supervisor.run("Hull status?")
-    assert result["department"] == "engineering"
+    result = supervisor.run("Shield status?")
+    assert result["department"] == "tactical"
 
 
 # --- run_supervised_query tests ---
@@ -205,13 +205,13 @@ def test_run_supervised_query_returns_result():
     """run_supervised_query returns the same structure as SupervisorAgent.run."""
     mod = _import_start()
     responses = [
-        json.dumps({"department": "science"}),
-        "Nebula analysis complete.",
+        json.dumps({"department": "comms"}),
+        "Distress beacon decoded successfully.",
         json.dumps({"approved": True, "feedback": "Good analysis."}),
     ]
     client = _mock_client_sequence(responses)
 
-    result = mod.run_supervised_query("Analyse the nebula", client, max_revisions=1)
+    result = mod.run_supervised_query("Decode the distress beacon", client, max_revisions=1)
     assert isinstance(result, dict)
     assert "department" in result
     assert "response" in result

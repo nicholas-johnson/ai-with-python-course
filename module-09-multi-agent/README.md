@@ -167,7 +167,7 @@ python module-09-multi-agent/demo/demo.py
 
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-router-agent`](exercises/01-router-agent/) | Build specialist agents and an LLM-powered router that classifies queries and dispatches to the right specialist. |
+| [`exercises/01-router-agent`](exercises/01-router-agent/) | Build specialist agents (medical, tactical, comms) and an LLM-powered router that classifies queries and dispatches to the right specialist. |
 | [`exercises/02-supervisor-critic`](exercises/02-supervisor-critic/) | Supervisor orchestrates specialists + critic with a revision loop for quality control. |
 | [`exercises/03-consensus`](exercises/03-consensus/) | Debate pattern, judge synthesis, and consensus voting across multiple agents. |
 

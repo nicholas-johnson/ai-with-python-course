@@ -5,6 +5,8 @@ Run:  python solution.py
 
 from __future__ import annotations
 
+import time
+
 from dotenv import load_dotenv
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -65,7 +67,7 @@ def main():
     for i, report in enumerate(SAMPLE_REPORTS, 1):
         print(f"  {i}. {report[:70]}...")
 
-    print("\nCommands: /stream, /raw, quit\n")
+    print("\nCommands: /stream, /raw, /batch, /compare, quit\n")
 
     last_report = None
 
@@ -88,6 +90,28 @@ def main():
         if user_input == "/raw" and last_report:
             raw = raw_chain.invoke({"report": last_report})
             print(f"\n  Raw output: {raw}\n")
+            continue
+
+        if user_input == "/batch":
+            print("\n  Classifying 4 reports in parallel with chain.batch()...\n")
+            inputs = [{"report": r} for r in SAMPLE_REPORTS]
+            t0 = time.perf_counter()
+            results = chain.batch(inputs)
+            elapsed = time.perf_counter() - t0
+            for i, (report, result) in enumerate(zip(SAMPLE_REPORTS, results), 1):
+                cat = result.get("category", "?")
+                pri = result.get("priority", "?")
+                summary = result.get("summary", "?")
+                print(f"  {i}. {cat:<12} | {pri:<8} | {summary}")
+            print(f"\n  Done in {elapsed:.1f}s (batch sends all requests concurrently)\n")
+            continue
+
+        if user_input == "/compare" and last_report:
+            structured = chain.invoke({"report": last_report})
+            raw = raw_chain.invoke({"report": last_report})
+            print(f"\n  JSON parser:   {structured}")
+            print(f"  String parser: {raw}")
+            print("\n  Same prompt, same model — swap the parser, change the output type.\n")
             continue
 
         last_report = user_input

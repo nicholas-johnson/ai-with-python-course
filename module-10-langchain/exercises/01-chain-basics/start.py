@@ -76,6 +76,14 @@ def main():
         # if user_input == "/stream": ...
         # if user_input == "/raw": ...
 
+        # TODO: handle /batch — use chain.batch() to classify all SAMPLE_REPORTS
+        #   in parallel; wrap in time.perf_counter() to show wall-clock time
+        # if user_input == "/batch": ...
+
+        # TODO: handle /compare — invoke both JsonOutputParser chain and
+        #   StrOutputParser chain on the last report to show composability
+        # if user_input == "/compare" and last_report: ...
+
         last_report = user_input
         try:
             result = classify_report(user_input)

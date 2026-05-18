@@ -42,8 +42,10 @@ The Exercise 1 and 2 code (classifier chain, tools, agent) is already inlined at
 
 | Function | Description |
 |---|---|
-| `build_index(logs)` | Load ship logs into a LangChain ChromaDB vectorstore |
-| `ask(question)` | Run the RAG chain, return an answer with citations |
+| `load_documents()` | Load ship logs, return `(texts, metadatas)` |
+| `build_vectorstore(texts, metadatas)` | Embed and store logs in ChromaDB |
+| `build_rag_chain(vectorstore)` | Create the LCEL RAG chain, return `(chain, retriever)` |
+| `ask(chain, retriever, question)` | Run a RAG query, return `(answer, retrieved_docs)` |
 
 ## Step-by-step
 
@@ -98,9 +100,13 @@ rag_chain = (
 
 ### 5. Implement `ask`
 
+Invoke the retriever separately to capture the source documents, then invoke the chain for the answer:
+
 ```python
-def ask(question: str) -> str:
-    return rag_chain.invoke(question)
+def ask(chain, retriever, question: str) -> tuple[str, list]:
+    docs = retriever.invoke(question)
+    answer = chain.invoke(question)
+    return answer, docs
 ```
 
 ### 6. Build the interactive loop
@@ -131,7 +137,7 @@ pytest test_start.py -v
 ```
 
 The tests check:
-- `ask` returns a non-empty string
+- `ask` returns a `(str, list)` tuple with a non-empty answer
 
 ## Stretch goals
 

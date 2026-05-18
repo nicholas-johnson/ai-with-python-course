@@ -80,8 +80,8 @@ python start.py
 ```
 
 Example commands:
-- `/debate Should we enter the uncharted nebula?` — run a standalone debate
-- `/vote What caused the power fluctuations?` — consensus vote across all specialists
+- `/debate Should we lift the quarantine on Deck 7?` — run a standalone debate
+- `/vote Should we hail the unknown vessel or raise shields?` — consensus vote across all specialists
 - `/mode debate` then ask a question — uses the full supervisor + debate pipeline
 - `/mode vote` then ask a question — uses consensus voting
 - `quit` — exit

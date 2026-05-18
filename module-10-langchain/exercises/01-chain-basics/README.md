@@ -84,11 +84,15 @@ Handle these commands:
 | any text | Classify the report, show the result |
 | `/stream` | Re-classify the last report with `.stream()` |
 | `/raw` | Show the raw model output (before parsing) |
+| `/batch` | Classify all `SAMPLE_REPORTS` in parallel with `chain.batch()` — shows timing |
+| `/compare` | Run last report through both `JsonOutputParser` and `StrOutputParser` side-by-side |
 | `quit` | Exit |
 
-### 5. Load sample reports
+`/batch` demonstrates that LCEL chains are concurrency-ready out of the box — all reports are classified in a single batched call. `/compare` shows composability: same prompt, same model, swap the parser and the output type changes.
 
-Load `data/ship_logs.json` from the project root and show a few example reports at startup so the learner can copy/paste them.
+### 5. Show sample reports
+
+Define a `SAMPLE_REPORTS` list with a few hardcoded example reports and display them at startup so the learner can copy/paste them into the prompt.
 
 ## Try it
 
@@ -110,6 +114,6 @@ The tests check:
 
 ## Stretch goals
 
-- Add a `StrOutputParser` chain and compare the two outputs side by side
 - Add a confidence score to the JSON schema
-- Try `chain.batch()` to classify multiple reports in parallel
+- Try `chain.abatch()` with a custom `max_concurrency` limit
+- Add a `/time` command that compares sequential `invoke()` in a loop vs `batch()`

@@ -103,7 +103,7 @@ def consensus_vote(question: str, client: OpenAI) -> dict:
     Returns {
         "responses": [{"department": str, "response": str}, ...],
         "winner": str,
-        "votes": {"navigation": int, "engineering": int, "science": int}
+        "votes": {"medical": int, "tactical": int, "comms": int}
     }
 
     Steps:

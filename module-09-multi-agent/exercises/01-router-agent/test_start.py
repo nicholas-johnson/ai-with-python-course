@@ -35,32 +35,32 @@ def _mock_client(content: str = "Mock response"):
 def test_classify_returns_valid_department():
     """classify_query returns one of the three valid departments."""
     mod = _import_start()
-    client = _mock_client(json.dumps({"department": "navigation"}))
-    result = mod.classify_query("What is our heading?", client)
+    client = _mock_client(json.dumps({"department": "tactical"}))
+    result = mod.classify_query("Raise shields!", client)
     assert result in mod.DEPARTMENTS
 
 
 def test_classify_defaults_on_bad_json():
-    """classify_query defaults to 'science' on unparseable JSON."""
+    """classify_query defaults to 'medical' on unparseable JSON."""
     mod = _import_start()
     client = _mock_client("not json at all")
     result = mod.classify_query("random query", client)
-    assert result == "science"
+    assert result == "medical"
 
 
 def test_classify_defaults_on_unknown_department():
-    """classify_query defaults to 'science' for unrecognised departments."""
+    """classify_query defaults to 'medical' for unrecognised departments."""
     mod = _import_start()
-    client = _mock_client(json.dumps({"department": "weapons"}))
-    result = mod.classify_query("fire torpedoes", client)
-    assert result == "science"
+    client = _mock_client(json.dumps({"department": "catering"}))
+    result = mod.classify_query("what's for dinner", client)
+    assert result == "medical"
 
 
 def test_classify_calls_openai():
     """classify_query calls the OpenAI client."""
     mod = _import_start()
-    client = _mock_client(json.dumps({"department": "engineering"}))
-    mod.classify_query("hull status?", client)
+    client = _mock_client(json.dumps({"department": "tactical"}))
+    mod.classify_query("shield status?", client)
     assert client.chat.completions.create.called
 
 
@@ -69,8 +69,8 @@ def test_classify_calls_openai():
 def test_specialist_returns_string():
     """specialist_agent returns a non-empty string."""
     mod = _import_start()
-    client = _mock_client("Engine room report: all systems nominal.")
-    result = mod.specialist_agent("engineering", "engine status?", client)
+    client = _mock_client("Shields holding at 94%, no incoming threats detected.")
+    result = mod.specialist_agent("tactical", "shield status?", client)
     assert isinstance(result, str)
     assert len(result) > 0
 
@@ -79,7 +79,7 @@ def test_specialist_calls_openai():
     """specialist_agent calls the OpenAI client."""
     mod = _import_start()
     client = _mock_client("Response")
-    mod.specialist_agent("navigation", "heading?", client)
+    mod.specialist_agent("comms", "any signals?", client)
     assert client.chat.completions.create.called
 
 
@@ -87,24 +87,24 @@ def test_specialist_uses_correct_prompt():
     """specialist_agent passes the department's system prompt."""
     mod = _import_start()
     client = _mock_client("Response")
-    mod.specialist_agent("engineering", "hull status?", client)
+    mod.specialist_agent("tactical", "shield status?", client)
 
     call_args = client.chat.completions.create.call_args
     messages = call_args.kwargs.get("messages", call_args[1].get("messages", []))
     system_msg = messages[0]["content"]
-    assert "Engineer" in system_msg
+    assert "Tactical" in system_msg
 
 
 def test_specialist_fallback_for_unknown_department():
-    """specialist_agent uses science prompt for unknown departments."""
+    """specialist_agent uses medical prompt for unknown departments."""
     mod = _import_start()
     client = _mock_client("Response")
-    mod.specialist_agent("weapons", "fire!", client)
+    mod.specialist_agent("catering", "what's for lunch?", client)
 
     call_args = client.chat.completions.create.call_args
     messages = call_args.kwargs.get("messages", call_args[1].get("messages", []))
     system_msg = messages[0]["content"]
-    assert "Science" in system_msg
+    assert "Medical" in system_msg
 
 
 # --- route_and_respond tests ---
@@ -112,23 +112,23 @@ def test_specialist_fallback_for_unknown_department():
 def test_route_and_respond_returns_dict():
     """route_and_respond returns a dict with department and response."""
     mod = _import_start()
-    client = _mock_client(json.dumps({"department": "navigation"}))
+    client = _mock_client(json.dumps({"department": "tactical"}))
 
     def side_effect(**kwargs):
         messages = kwargs.get("messages", [])
         if any("router" in m.get("content", "").lower() for m in messages):
             return MagicMock(
                 choices=[MagicMock(
-                    message=MagicMock(content=json.dumps({"department": "navigation"}))
+                    message=MagicMock(content=json.dumps({"department": "tactical"}))
                 )]
             )
         return MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Heading is 045."))]
+            choices=[MagicMock(message=MagicMock(content="Shields at full power."))]
         )
 
     client.chat.completions.create.side_effect = side_effect
 
-    result = mod.route_and_respond("What is our heading?", client)
+    result = mod.route_and_respond("Raise shields!", client)
     assert isinstance(result, dict)
     assert "department" in result
     assert "response" in result
@@ -147,15 +147,15 @@ def test_route_and_respond_calls_openai_twice():
         if call_count == 1:
             return MagicMock(
                 choices=[MagicMock(
-                    message=MagicMock(content=json.dumps({"department": "science"}))
+                    message=MagicMock(content=json.dumps({"department": "medical"}))
                 )]
             )
         return MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Anomaly detected."))]
+            choices=[MagicMock(message=MagicMock(content="Crew vitals are stable."))]
         )
 
     client = MagicMock()
     client.chat.completions.create.side_effect = side_effect
 
-    mod.route_and_respond("Analyse the nebula", client)
+    mod.route_and_respond("Crew health report", client)
     assert call_count >= 2
