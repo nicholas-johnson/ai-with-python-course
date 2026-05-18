@@ -213,27 +213,41 @@ class GuardedAgent:
         self.allow_list = allow_list
         self.rate_limiter = rate_limiter
         self.system_prompt = system_prompt
-        self.audit_log: list[AuditEntry] = []
+
+    @staticmethod
+    def _build_tool_error(tc_id: str, reason: str) -> dict:
+        """Build a tool-role message dict containing a JSON error.
+
+        Return format:
+            {"role": "tool", "tool_call_id": tc_id,
+             "content": '{"error": "<reason>"}'}
+        """
+        # TODO: implement
+        raise NotImplementedError
+
+    def _handle_tool_call(self, tc, messages) -> AuditEntry:
+        """Process one tool call: check allowlist, check rate limit, execute or deny.
+
+        Steps:
+        1. If the tool is not on the allow list → append _build_tool_error
+           and return an AuditEntry with allowed=False.
+        2. Else if the rate limiter denies → same pattern.
+        3. Otherwise execute via self.registry.execute(), append the
+           tool result message, and return an AuditEntry with allowed=True.
+        """
+        # TODO: implement
+        raise NotImplementedError
 
     def run(self, question: str, max_steps: int = 5) -> AgentResult:
         """
         Run the guarded agent loop.
 
-        Same structure as the agent loop from exercises 01/02, but wrap
-        each tool execution with allowlist + rate limit checks.
-
-        For blocked or rate-limited tools:
-        - Append a tool result message with a JSON error explanation
-          (e.g., {"error": "Tool not permitted: search_crew"})
-        - Log an AuditEntry with allowed=False
-        - Continue the loop so the model can see the error and recover
-
-        For allowed tools:
-        - Execute via self.registry.execute()
-        - Log an AuditEntry with allowed=True and the result
+        Uses _handle_tool_call for each tool call in the response.
+        Collects AuditEntry objects and tool names across iterations.
+        Returns an AgentResult when the model produces text or max_steps is hit.
         """
         # TODO: implement the guarded agent loop
-        pass
+        raise NotImplementedError
 
 
 # ---------------------------------------------------------------------------
@@ -241,8 +255,10 @@ class GuardedAgent:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     allow_list = AllowList(permitted={"get_crew_count", "get_ship_status"})
     rate_limiter = RateLimiter(max_calls=10, window_seconds=60.0)

@@ -17,7 +17,10 @@ import json
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 MODEL = "gpt-4o-mini"
 

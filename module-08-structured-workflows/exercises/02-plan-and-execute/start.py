@@ -4,10 +4,13 @@ Separate planning from execution: LLM plans, ReAct executes each step.
 """
 from __future__ import annotations
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from react_agent import run_react, TOOLS, print_trace
+
+load_dotenv()
 
 
 @dataclass

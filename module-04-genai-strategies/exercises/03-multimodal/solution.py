@@ -5,8 +5,11 @@ Exercise 3: Multimodal -- Vision and Audio -- SOLUTION
 import asyncio
 import io
 import json
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from mcp import ClientSession
@@ -14,6 +17,8 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 from openai import OpenAI
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
+
+load_dotenv()
 
 client = OpenAI()
 
@@ -53,7 +58,8 @@ class MCPConnection:
 
     async def connect(self):
         server_params = StdioServerParameters(
-            command="python", args=["solution_server.py"]
+            command=sys.executable,
+            args=[str(Path(__file__).parent / "solution_server.py")],
         )
         self._cm = stdio_client(server_params)
         self._read, self._write = await self._cm.__aenter__()
@@ -106,6 +112,63 @@ class VisionResponse(BaseModel):
     key_points: list[str]
 
 
+async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
+    """Execute MCP tool calls and return tool-result messages."""
+    results = []
+    for tc in tool_calls:
+        name = tc.function.name
+        args = json.loads(tc.function.arguments)
+        content = await session.call_tool(name, args)
+        results.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": content,
+        })
+    return results
+
+
+async def transcribe_audio(audio_bytes: bytes) -> str:
+    """Send audio bytes to OpenAI Whisper and return the transcript text."""
+    audio_file = io.BytesIO(audio_bytes)
+    audio_file.name = "audio.wav"
+    transcript = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file,
+    )
+    return transcript.text
+
+
+async def analyze_image(image_b64: str, prompt: str) -> dict:
+    """Send a base64 image to GPT-4o and return {description, key_points}."""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are an image analysis assistant. Respond with a JSON object "
+                    'containing "description" (string) and "key_points" (list of strings). '
+                    "Only output valid JSON, no markdown."
+                ),
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{image_b64}"
+                        },
+                    },
+                ],
+            },
+        ],
+        response_format={"type": "json_object"},
+    )
+    return json.loads(response.choices[0].message.content)
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -153,31 +216,22 @@ async def chat(req: ChatRequest):
                 )
 
                 for tc in assistant_msg.tool_calls:
-                    name = tc.function.name
-                    args = json.loads(tc.function.arguments)
-
                     yield {
                         "event": "tool_call",
-                        "data": json.dumps({"name": name, "arguments": args}),
+                        "data": json.dumps({"name": tc.function.name, "arguments": json.loads(tc.function.arguments)}),
                     }
                     await asyncio.sleep(0)
 
-                    result = await mcp_conn.call_tool(name, args)
+                tool_results = await execute_tool_calls(mcp_conn, assistant_msg.tool_calls)
 
+                for tc, result_msg in zip(assistant_msg.tool_calls, tool_results):
                     yield {
                         "event": "tool_result",
-                        "data": json.dumps({"name": name, "content": result}),
+                        "data": json.dumps({"name": tc.function.name, "content": result_msg["content"]}),
                     }
                     await asyncio.sleep(0)
 
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": result,
-                        }
-                    )
-
+                messages.extend(tool_results)
                 continue
 
             content = choice.message.content or ""
@@ -214,34 +268,7 @@ async def chat(req: ChatRequest):
 
 @app.post("/vision")
 async def vision(req: VisionRequest):
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are an image analysis assistant. Respond with a JSON object "
-                    'containing "description" (string) and "key_points" (list of strings). '
-                    "Only output valid JSON, no markdown."
-                ),
-            },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": req.prompt},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/png;base64,{req.image}"
-                        },
-                    },
-                ],
-            },
-        ],
-        response_format={"type": "json_object"},
-    )
-
-    result = json.loads(response.choices[0].message.content)
+    result = await analyze_image(req.image, req.prompt)
     return VisionResponse(
         description=result.get("description", ""),
         key_points=result.get("key_points", []),
@@ -251,12 +278,5 @@ async def vision(req: VisionRequest):
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
     audio_bytes = await file.read()
-    audio_file = io.BytesIO(audio_bytes)
-    audio_file.name = file.filename or "audio.wav"
-
-    transcript = client.audio.transcriptions.create(
-        model="whisper-1",
-        file=audio_file,
-    )
-
-    return {"transcript": transcript.text}
+    text = await transcribe_audio(audio_bytes)
+    return {"transcript": text}

@@ -1,6 +1,5 @@
 """Semantic cache — avoids redundant API calls for similar queries."""
 
-import time
 import numpy as np
 from openai import OpenAI
 from .config import EMBEDDING_MODEL

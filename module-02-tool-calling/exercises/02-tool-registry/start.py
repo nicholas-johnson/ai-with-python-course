@@ -8,7 +8,7 @@ You only need to implement the ToolRegistry class and register the tools.
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Callable
 
 # ---------------------------------------------------------------------------
 # Ship data (same as exercise 01)
@@ -167,8 +167,10 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     print("DSS Pathfinder Agent (with registry) ready. Type a question (or 'quit').\n")
 

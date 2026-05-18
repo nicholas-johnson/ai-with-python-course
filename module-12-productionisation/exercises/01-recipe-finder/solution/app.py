@@ -2,6 +2,7 @@
 
 import json
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,15 +14,6 @@ from .cache import SemanticCache
 from .guardrails import check_allergens, redact_pii
 from .vision import identify_ingredients
 from .tracing import TraceContext
-
-app = FastAPI(title="AI Recipe Finder")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 recipes: list[dict] = []
 collection = None
@@ -38,14 +30,25 @@ class PhotoRequest(BaseModel):
     dietary_filter: str | None = None
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global recipes, collection
     recipes_path = os.path.join(DATA_DIR, "recipes.json")
     with open(recipes_path) as f:
         recipes = json.load(f)
     collection, _ = build_index(recipes)
     print(f"Indexed {collection.count()} recipes.")
+    yield
+
+
+app = FastAPI(title="AI Recipe Finder", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/api/health")

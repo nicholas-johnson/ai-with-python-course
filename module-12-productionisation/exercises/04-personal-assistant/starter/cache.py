@@ -6,7 +6,6 @@ similar queries and return cached results instead of re-running the agent.
 
 import time
 
-import numpy as np
 from openai import OpenAI
 
 from .config import EMBEDDING_MODEL

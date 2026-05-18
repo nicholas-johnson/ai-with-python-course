@@ -6,12 +6,47 @@ and a combined pipeline with supervisor validation.
 Run:  python start.py
 """
 from __future__ import annotations
-import json
-from collections import Counter
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from agents import DEPARTMENTS, specialist_agent
 from supervisor import run_supervised_query
+
+load_dotenv()
+
+
+def _advocate_turn(
+    question: str,
+    advocate_history: list[dict],
+    last_skeptic_arg: str | None,
+    round_num: int,
+    client: OpenAI,
+) -> str:
+    """Run one advocate turn. Appends to advocate_history. Returns the argument.
+
+    - Round 1: prompt with the question itself
+    - Later rounds: prompt with the skeptic's last response
+    Then call the LLM, append the assistant reply, and return it.
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def _skeptic_turn(
+    question: str,
+    advocate_arg: str,
+    skeptic_history: list[dict],
+    round_num: int,
+    client: OpenAI,
+) -> str:
+    """Run one skeptic turn. Appends to skeptic_history. Returns the argument.
+
+    - Round 1: prompt with the question and the advocate's argument
+    - Later rounds: prompt with the advocate's latest response
+    Then call the LLM, append the assistant reply, and return it.
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
 
 
 def debate(question: str, client: OpenAI, rounds: int = 2) -> list[dict]:
@@ -21,19 +56,11 @@ def debate(question: str, client: OpenAI, rounds: int = 2) -> list[dict]:
         [{"round": 1, "advocate": str, "skeptic": str}, ...]
 
     Steps:
-        1. Set up message histories for advocate and skeptic with system prompts
-           - Advocate: argues FOR the proposed action/idea
-           - Skeptic: argues AGAINST, identifying risks and flaws
-        2. For each round:
-           a. Build the advocate's prompt (first round: the question;
-              later rounds: the skeptic's last response)
-           b. Call the LLM for the advocate and store the response
-           c. Build the skeptic's prompt (includes the advocate's argument)
-           d. Call the LLM for the skeptic and store the response
-           e. Append {"round": N, "advocate": str, "skeptic": str} to the log
-        3. Return the debate log
+        1. Set up advocate_history and skeptic_history with system prompts
+        2. For each round, call _advocate_turn then _skeptic_turn
+        3. Append {"round": N, "advocate": str, "skeptic": str} to the log
     """
-    # TODO: implement structured debate
+    # TODO: implement
     raise NotImplementedError("TODO")
 
 
@@ -51,7 +78,22 @@ def judge(
         4. Parse JSON response for "winner" and "reasoning"
         5. Default to "advocate" if parsing fails or winner is invalid
     """
-    # TODO: implement judge
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def _collect_department_votes(
+    question: str, responses: list[dict], client: OpenAI
+) -> dict[str, int]:
+    """Have each department vote on the best response. Returns vote tallies.
+
+    Steps:
+        1. Format all responses into a single text block
+        2. For each department, ask a voting agent (LLM with JSON mode)
+           which department gave the best answer
+        3. Tally valid votes and return {dept: count, ...}
+    """
+    # TODO: implement
     raise NotImplementedError("TODO")
 
 
@@ -65,15 +107,11 @@ def consensus_vote(question: str, client: OpenAI) -> dict:
     }
 
     Steps:
-        1. For each department in DEPARTMENTS, call specialist_agent
-           and collect responses as [{"department": str, "response": str}, ...]
-        2. Format all responses into a single text block
-        3. For each department, ask a voting agent (LLM with JSON mode)
-           which department gave the best answer
-        4. Tally the votes and find the winner (highest count)
-        5. Return the responses, winner, and vote counts
+        1. For each department, call specialist_agent and collect responses
+        2. Call _collect_department_votes to tally votes
+        3. Find the winner (highest vote count)
     """
-    # TODO: implement consensus voting
+    # TODO: implement
     raise NotImplementedError("TODO")
 
 
@@ -96,7 +134,21 @@ def multi_agent_answer(
         5. Call judge() to pick a winner
         6. Return all three results combined
     """
-    # TODO: implement multi-agent answer pipeline
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def handle_repl_command(user_input: str, mode: str, client: OpenAI) -> str:
+    """Process one REPL command or query. Returns the (possibly updated) mode.
+
+    Slash commands:
+        /mode <debate|vote|auto> — switch mode
+        /debate <question> — run a standalone debate + judge
+        /vote <question> — run a standalone consensus vote
+
+    Default (no slash): dispatch based on current mode.
+    """
+    # TODO: implement
     raise NotImplementedError("TODO")
 
 
@@ -122,69 +174,7 @@ def main():
             print("Goodbye!")
             break
 
-        if user_input.startswith("/mode"):
-            parts = user_input.split(maxsplit=1)
-            if len(parts) == 2 and parts[1] in ("debate", "vote", "auto"):
-                mode = parts[1]
-                print(f"[Mode set to: {mode}]\n")
-            else:
-                print("[Usage: /mode debate|vote|auto]\n")
-            continue
-
-        if user_input.startswith("/debate "):
-            question = user_input[8:].strip()
-            if not question:
-                print("[Provide a question to debate]\n")
-                continue
-            print("[Running debate...]")
-            log = debate(question, client, rounds=2)
-            for entry in log:
-                print(f"\n  Round {entry['round']}:")
-                print(f"    Advocate: {entry['advocate'][:120]}...")
-                print(f"    Skeptic:  {entry['skeptic'][:120]}...")
-            final = log[-1]
-            judgment = judge(question, final["advocate"], final["skeptic"], client)
-            print(f"\n  [Judge] Winner: {judgment['winner']}")
-            print(f"  Reasoning: {judgment['reasoning']}\n")
-            continue
-
-        if user_input.startswith("/vote "):
-            question = user_input[6:].strip()
-            if not question:
-                print("[Provide a question to vote on]\n")
-                continue
-            print("[Running consensus vote...]")
-            result = consensus_vote(question, client)
-            for entry in result["responses"]:
-                print(f"  [{entry['department']}]: {entry['response'][:100]}...")
-            print(f"\n  Votes: {result['votes']}")
-            print(f"  Winner: {result['winner']}\n")
-            continue
-
-        if mode == "debate":
-            print("[Running debate pipeline...]")
-            result = multi_agent_answer(user_input, client)
-            print(f"[Supervised answer from {result['supervised']['department']}]")
-            print(f"  {result['supervised']['response'][:150]}...")
-            print(f"[Debate judgment: {result['judgment']['winner']}]")
-            print(f"  {result['judgment']['reasoning']}\n")
-        elif mode == "vote":
-            print("[Running consensus vote...]")
-            result = consensus_vote(user_input, client)
-            winning_response = next(
-                r["response"]
-                for r in result["responses"]
-                if r["department"] == result["winner"]
-            )
-            print(f"[Winner: {result['winner']}] (votes: {result['votes']})")
-            print(f"Agent: {winning_response}\n")
-        else:
-            print("[Running full multi-agent pipeline...]")
-            result = multi_agent_answer(user_input, client)
-            print(f"[Supervised: {result['supervised']['department']}]")
-            print(f"  {result['supervised']['response'][:150]}...")
-            print(f"[Debate judgment: {result['judgment']['winner']}]")
-            print(f"  {result['judgment']['reasoning']}\n")
+        mode = handle_repl_command(user_input, mode, client)
 
 
 if __name__ == "__main__":

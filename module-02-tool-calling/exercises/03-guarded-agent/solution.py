@@ -188,7 +188,41 @@ class GuardedAgent:
         self.allow_list = allow_list
         self.rate_limiter = rate_limiter
         self.system_prompt = system_prompt
-        self.audit_log: list[AuditEntry] = []
+
+    @staticmethod
+    def _build_tool_error(tc_id: str, reason: str) -> dict:
+        return {
+            "role": "tool",
+            "tool_call_id": tc_id,
+            "content": json.dumps({"error": reason}),
+        }
+
+    def _handle_tool_call(self, tc, messages) -> AuditEntry:
+        name = tc.function.name
+        args = json.loads(tc.function.arguments)
+
+        if not self.allow_list.check(name):
+            msg = self._build_tool_error(tc.id, f"Tool not permitted: {name}")
+            messages.append(msg)
+            return AuditEntry(
+                timestamp=time.time(), tool_name=name, arguments=args,
+                allowed=False, result=msg["content"],
+            )
+
+        if not self.rate_limiter.allow():
+            msg = self._build_tool_error(tc.id, "Rate limit exceeded")
+            messages.append(msg)
+            return AuditEntry(
+                timestamp=time.time(), tool_name=name, arguments=args,
+                allowed=False, result=msg["content"],
+            )
+
+        result = self.registry.execute(name, args)
+        messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+        return AuditEntry(
+            timestamp=time.time(), tool_name=name, arguments=args,
+            allowed=True, result=result,
+        )
 
     def run(self, question: str, max_steps: int = 5) -> AgentResult:
         messages = [
@@ -211,52 +245,8 @@ class GuardedAgent:
             if message.tool_calls:
                 messages.append(message)
                 for tc in message.tool_calls:
-                    name = tc.function.name
-                    args = json.loads(tc.function.arguments)
-                    tool_calls_made.append(name)
-
-                    if not self.allow_list.check(name):
-                        error_msg = json.dumps({"error": f"Tool not permitted: {name}"})
-                        audit_log.append(AuditEntry(
-                            timestamp=time.time(),
-                            tool_name=name,
-                            arguments=args,
-                            allowed=False,
-                            result=error_msg,
-                        ))
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": error_msg,
-                        })
-                    elif not self.rate_limiter.allow():
-                        error_msg = json.dumps({"error": "Rate limit exceeded"})
-                        audit_log.append(AuditEntry(
-                            timestamp=time.time(),
-                            tool_name=name,
-                            arguments=args,
-                            allowed=False,
-                            result=error_msg,
-                        ))
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": error_msg,
-                        })
-                    else:
-                        result = self.registry.execute(name, args)
-                        audit_log.append(AuditEntry(
-                            timestamp=time.time(),
-                            tool_name=name,
-                            arguments=args,
-                            allowed=True,
-                            result=result,
-                        ))
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": result,
-                        })
+                    tool_calls_made.append(tc.function.name)
+                    audit_log.append(self._handle_tool_call(tc, messages))
             elif message.content:
                 return AgentResult(
                     final_answer=message.content,
@@ -280,8 +270,10 @@ class GuardedAgent:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     allow_list = AllowList(permitted={"get_crew_count", "get_ship_status"})
     rate_limiter = RateLimiter(max_calls=10, window_seconds=60.0)

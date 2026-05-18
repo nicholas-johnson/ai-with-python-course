@@ -1,8 +1,5 @@
 """FastAPI app — AI Recipe Finder with RAG, caching, guardrails, and tracing."""
 
-import json
-import os
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel

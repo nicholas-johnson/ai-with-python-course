@@ -12,19 +12,22 @@ Ships with the Exercise 1 solution. You need to:
 Run with:  uvicorn start:app --reload --port 8000
 """
 
+import asyncio
 import json
+import sys
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from mcp import ClientSession
+from mcp.client.stdio import StdioServerParameters, stdio_client
 from openai import OpenAI
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
-# TODO: import asyncio, mcp client modules
-
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
-)
+load_dotenv()
 
 client = OpenAI()
 
@@ -38,24 +41,47 @@ SYSTEM_MESSAGE = {
 }
 
 
+# TODO: Write a helper function mcp_to_openai_tools(mcp_tools)
+#   that converts MCP tool definitions to OpenAI function-calling format
+
+
+# TODO: Implement the MCPConnection class
+#   - connect(): launch MCP server via StdioServerParameters, initialize session
+#   - disconnect(): clean up session and client context managers
+#   - call_tool(name, arguments): call a tool and return the text result
+
+
+# TODO: Create the mcp_conn instance and a lifespan context manager
+#   that connects on startup and disconnects on shutdown
+
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+)
+
+
 class ChatRequest(BaseModel):
     messages: list[dict]
+
+
+async def execute_tool_calls(session, tool_calls) -> list[dict]:
+    """Execute MCP tool calls and return tool-result messages.
+
+    For each tool call:
+      1. Extract name and arguments
+      2. Call session.call_tool(name, args)
+      3. Build a {"role": "tool", "tool_call_id": ..., "content": ...} dict
+
+    Return the list of tool-result message dicts.
+    """
+    # TODO: implement
+    raise NotImplementedError
 
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
-
-
-# TODO: Add a lifespan context manager that:
-#   1. Connects to the MCP server (server.py) via stdio_client
-#   2. Discovers tools and stores them on app.state
-#   3. Yields
-#   4. Cleans up on shutdown
-
-
-# TODO: Write a helper function mcp_to_openai_tools(mcp_tools)
-#   that converts MCP tool definitions to OpenAI function-calling format
 
 
 # TODO: Add GET /tools endpoint that returns the tool list
@@ -66,14 +92,23 @@ async def chat(req: ChatRequest):
     async def generate():
         messages = [SYSTEM_MESSAGE] + req.messages
 
-        # TODO: Get tools from app.state (if available)
-        tools = []
+        # TODO: Get tools from mcp_conn (if available)
+        tools = None
+
+        # TODO: Implement the tool-calling loop:
+        #   1. Call the LLM with tools
+        #   2. If finish_reason == "tool_calls":
+        #      - Yield "tool_call" SSE events
+        #      - Use execute_tool_calls() to run them via MCP
+        #      - Yield "tool_result" SSE events
+        #      - Append results to messages and loop
+        #   3. Otherwise, stream the final text response
 
         stream = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
             stream=True,
-            tools=tools if tools else None,
+            tools=tools,
         )
 
         full_content = ""
@@ -85,14 +120,6 @@ async def chat(req: ChatRequest):
                     "event": "token",
                     "data": json.dumps({"token": delta.content}),
                 }
-
-        # TODO: Add tool-calling loop here
-        #   If the response contains tool_calls:
-        #     1. Yield "tool_call" SSE events
-        #     2. Execute tools via MCP session
-        #     3. Yield "tool_result" SSE events
-        #     4. Feed results back and call the LLM again
-        #     5. Repeat until the LLM returns text content
 
         yield {
             "event": "done",

@@ -5,6 +5,7 @@ Extend the memory store with automatic conversation summarisation.
 Run:  python solution.py
 """
 from __future__ import annotations
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from memory_store import (
@@ -13,6 +14,8 @@ from memory_store import (
     build_system_prompt,
     chat,
 )
+
+load_dotenv()
 
 
 def summarise_turns(turns: list[dict], client: OpenAI) -> str:
@@ -36,7 +39,7 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
             {"role": "user", "content": transcript},
         ],
     )
-    return response.choices[0].message.content
+    return response.choices[0].message.content or ""
 
 
 class SmartSessionMemory(SessionMemory):
@@ -53,26 +56,25 @@ class SmartSessionMemory(SessionMemory):
         self.client = client
         self.summary: str = ""
 
+    def _compress_oldest(self, n: int | None = None) -> str:
+        """Summarise the oldest n messages and replace them with a summary message."""
+        n = n or len(self.messages) // 2
+        old_turns = self.messages[:n]
+        summary_text = summarise_turns(old_turns, self.client)
+        self.summary = (
+            self.summary + "\n" + summary_text if self.summary else summary_text
+        )
+        self.messages = [
+            {"role": "system", "content": f"[Summary of earlier conversation] {summary_text}"}
+        ] + self.messages[n:]
+        return summary_text
+
     def add(self, message: dict) -> None:
         super().add(message)
-
         if len(self.messages) > self.summarise_threshold and self.client:
-            half = len(self.messages) // 2
-            old_turns = self.messages[:half]
-
-            summary_text = summarise_turns(old_turns, self.client)
-            self.summary = (
-                self.summary + "\n" + summary_text
-                if self.summary
-                else summary_text
-            )
-
-            summary_msg = {
-                "role": "system",
-                "content": f"[Summary of earlier conversation] {summary_text}",
-            }
-            self.messages = [summary_msg] + self.messages[half:]
-            print(f"  [Auto-summarised {len(old_turns)} older messages]")
+            n = len(self.messages) // 2
+            self._compress_oldest(n)
+            print(f"  [Auto-summarised {n} older messages]")
 
     def get_summary(self) -> str:
         """Return the accumulated conversation summary."""
@@ -121,21 +123,9 @@ def main():
             if len(session.messages) < 2:
                 print("[Not enough messages to summarise]\n")
                 continue
-            half = len(session.messages) // 2
-            old_turns = session.messages[:half]
-            summary_text = summarise_turns(old_turns, client)
-            session.summary = (
-                session.summary + "\n" + summary_text
-                if session.summary
-                else summary_text
-            )
-            session.messages = [
-                {
-                    "role": "system",
-                    "content": f"[Summary of earlier conversation] {summary_text}",
-                }
-            ] + session.messages[half:]
-            print(f"[Summarised {len(old_turns)} messages]\n")
+            n = len(session.messages) // 2
+            session._compress_oldest(n)
+            print(f"[Summarised {n} messages]\n")
             continue
 
         if user_input == "/memories":

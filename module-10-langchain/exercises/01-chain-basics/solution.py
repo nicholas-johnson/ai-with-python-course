@@ -5,9 +5,6 @@ Run:  python solution.py
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from dotenv import load_dotenv
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate

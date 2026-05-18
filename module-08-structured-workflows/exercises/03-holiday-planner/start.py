@@ -12,10 +12,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from dotenv import load_dotenv
 from openai import OpenAI
 
-from planner import generate_plan, execute_step, plan_and_execute, PlanStep
-from react_agent import run_react
+from planner import generate_plan, execute_step, PlanStep
+from react_agent import run_react, TOOLS, TOOL_SCHEMAS
+
+load_dotenv()
 
 app = FastAPI(title="Holiday Planner")
 
@@ -29,18 +32,51 @@ app.add_middleware(
 client = OpenAI()
 
 
+# --- MCP tool schemas (provided) ---
+_EXTRA_SCHEMAS = [
+    # TODO: Define OpenAI-format tool schemas for:
+    #   remember_preference, recall_preferences, search_flights, search_hotels
+    # Each needs: {"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}
+]
+
+
+def register_mcp_tools() -> None:
+    """Register MCP tool functions and schemas with the ReAct agent.
+
+    Steps:
+        1. Import tool functions from server.py (search_web, remember_preference, etc.)
+        2. Add each to the react_agent TOOLS dict
+        3. Merge _EXTRA_SCHEMAS into TOOL_SCHEMAS (skip duplicates)
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
 class ChatRequest(BaseModel):
     message: str
 
 
-# --- MCP tool imports ---
-# TODO: Import tool functions from server.py and register them
-# so the ReAct agent can use holiday-planning tools.
-#
-# from server import search_web, remember_preference, recall_preferences
-# from server import search_flights, search_hotels
-#
-# Then add them to the react_agent TOOLS dict and TOOL_SCHEMAS list.
+def execute_plan_steps(plan: list[PlanStep], results: list[dict], client: OpenAI):
+    """Execute each plan step via ReAct. Yields SSE event strings and appends to *results*.
+
+    For each step:
+        1. Set step.status = "running", yield a step_start event
+        2. Call execute_step(step, results, client)
+        3. On success: set status/result, append to results, yield step_done
+        4. On failure: set status/result, yield step_failed
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def summarize_results(message: str, results: list[dict], client: OpenAI) -> str:
+    """Compile step results into a final travel plan summary.
+
+    Combine all step results and ask the LLM to produce a well-organized
+    holiday plan with specific recommendations.
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
 
 
 @app.get("/health")
@@ -60,15 +96,12 @@ def create_plan(req: ChatRequest):
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    """Run plan-and-execute and stream results as SSE."""
-    # TODO: implement an SSE generator that:
-    # 1. Generates a plan and yields: data: {"type": "plan", "steps": [...]}
-    # 2. For each step, yields:
-    #    data: {"type": "step_start", "step": N, "description": "..."}
-    #    Then executes the step
-    #    data: {"type": "step_done", "step": N, "result": "..."}
-    # 3. Compiles final answer and yields:
-    #    data: {"type": "answer", "content": "..."}
-    #
-    # return StreamingResponse(sse_generator(), media_type="text/event-stream")
+    """Run plan-and-execute and stream results as SSE.
+
+    Build an sse_generator that:
+        1. Generates a plan and yields a plan event
+        2. Calls execute_plan_steps() and yields all step events
+        3. Calls summarize_results() and yields the final answer event
+    """
+    # TODO: implement
     raise NotImplementedError("TODO")

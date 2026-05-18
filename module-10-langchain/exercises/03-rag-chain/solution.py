@@ -101,64 +101,79 @@ def run_agent(query: str) -> str:
 
 # --- RAG chain (Exercise 03) ---
 
-logs = json.loads((PROJECT_ROOT / "data" / "ship_logs.json").read_text())
-texts = [log["content"] for log in logs]
-metadatas = [
-    {"source": log["id"], "author": log["author"], "category": log["category"]}
-    for log in logs
-]
-
-print("Building index...")
-vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings(), metadatas=metadatas)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
-print(f"Indexed {len(texts)} log entries.\n")
+def load_documents() -> tuple[list[str], list[dict]]:
+    """Load ship logs and return (texts, metadatas)."""
+    logs = json.loads((PROJECT_ROOT / "data" / "ship_logs.json").read_text())
+    texts = [log["content"] for log in logs]
+    metadatas = [
+        {"source": log["id"], "author": log["author"], "category": log["category"]}
+        for log in logs
+    ]
+    return texts, metadatas
 
 
-def format_docs(docs):
+def build_vectorstore(texts: list[str], metadatas: list[dict]) -> Chroma:
+    """Build a Chroma vectorstore from document texts and metadata."""
+    return Chroma.from_texts(texts, OpenAIEmbeddings(), metadatas=metadatas)
+
+
+def format_docs(docs) -> str:
     return "\n\n".join(
         f"[Source {i+1}: {doc.metadata.get('source', '?')}] {doc.page_content}"
         for i, doc in enumerate(docs)
     )
 
 
-rag_prompt = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        "You are the DSS Pathfinder knowledge assistant.\n"
-        "Answer using ONLY the sources below. Cite sources as [Source N].\n"
-        "If the sources don't contain the answer, say so.",
-    ),
-    ("human", "Sources:\n{context}\n\nQuestion: {question}"),
-])
+def build_rag_chain(vectorstore: Chroma):
+    """Create the LCEL RAG chain. Returns (chain, retriever)."""
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    | rag_prompt
-    | ChatOpenAI(model=MODEL, temperature=0)
-    | StrOutputParser()
-)
+    rag_prompt = ChatPromptTemplate.from_messages([
+        (
+            "system",
+            "You are the DSS Pathfinder knowledge assistant.\n"
+            "Answer using ONLY the sources below. Cite sources as [Source N].\n"
+            "If the sources don't contain the answer, say so.",
+        ),
+        ("human", "Sources:\n{context}\n\nQuestion: {question}"),
+    ])
 
-norag_model = ChatOpenAI(model=MODEL, temperature=0)
-last_docs: list = []
+    chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | rag_prompt
+        | ChatOpenAI(model=MODEL, temperature=0)
+        | StrOutputParser()
+    )
+    return chain, retriever
 
 
-def ask(question: str) -> str:
-    global last_docs
-    last_docs = retriever.invoke(question)
-    return rag_chain.invoke(question)
+def ask(chain, retriever, question: str) -> tuple[str, list]:
+    """Run a RAG query. Returns (answer, retrieved_docs)."""
+    docs = retriever.invoke(question)
+    answer = chain.invoke(question)
+    return answer, docs
 
 
 def ask_norag(question: str) -> str:
-    return norag_model.invoke([{"role": "user", "content": question}]).content
+    """Answer without RAG for comparison."""
+    model = ChatOpenAI(model=MODEL, temperature=0)
+    return model.invoke([{"role": "user", "content": question}]).content
 
 
 def main():
+    print("Building index...")
+    texts, metadatas = load_documents()
+    vectorstore = build_vectorstore(texts, metadatas)
+    chain, retriever = build_rag_chain(vectorstore)
+    print(f"Indexed {len(texts)} log entries.\n")
+
     print("=" * 60)
     print("  EXERCISE 03 — RAG CHAIN")
     print("=" * 60)
     print("\nCommands: /sources, /norag, /agent, quit\n")
 
     last_question = None
+    last_docs: list = []
 
     while True:
         try:
@@ -186,7 +201,8 @@ def main():
 
         last_question = user_input
         try:
-            print(f"\nRAG> {ask(user_input)}\n")
+            answer, last_docs = ask(chain, retriever, user_input)
+            print(f"\nRAG> {answer}\n")
         except Exception as e:
             print(f"\n  Error: {e}\n")
 

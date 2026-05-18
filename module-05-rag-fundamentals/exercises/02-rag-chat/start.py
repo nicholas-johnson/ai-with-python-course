@@ -11,7 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import chromadb
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()
@@ -108,6 +111,9 @@ def search(collection: chromadb.Collection, query: str, k: int = 5) -> list[dict
 #   Return a list of message dicts [{"role": ..., "content": ...}, ...]
 # ---------------------------------------------------------------------------
 
+def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
+    raise NotImplementedError("TODO: build system + user messages from query and passages")
+
 
 # ---------------------------------------------------------------------------
 # TODO: Implement rag_chat(query, collection, k) -> tuple[str, list[dict]]
@@ -117,24 +123,118 @@ def search(collection: chromadb.Collection, query: str, k: int = 5) -> list[dict
 #   4. Return (answer_text, passages)
 # ---------------------------------------------------------------------------
 
+def rag_chat(query: str, collection, k: int = 5) -> tuple[str, list[dict]]:
+    raise NotImplementedError("TODO: search, build prompt, call LLM, return answer + passages")
+
+
+# ---------------------------------------------------------------------------
+# Display and slash-command helpers (complete)
+# ---------------------------------------------------------------------------
+
+def display_sources(passages: list[dict], brief: bool = False):
+    for i, p in enumerate(passages, 1):
+        source = p["metadata"].get("source_id", "unknown")
+        if brief:
+            preview = p["text"][:80].replace("\n", " ")
+            print(f'    [{i}] {source}: "{preview}..."')
+        else:
+            print(f"\n  [Source {i}: {source}]")
+            print(f"  {p['text']}")
+
+
+def handle_sources_command(last_passages: list[dict] | None):
+    """Show full text of the passages retrieved in the last query."""
+    if last_passages:
+        print("\n  === Retrieved Sources ===")
+        display_sources(last_passages)
+        print()
+    else:
+        print("  No previous query. Ask a question first.")
+
+
+def handle_norag_command(client: OpenAI, last_query: str | None):
+    """Re-ask the last question without retrieval augmentation."""
+    if last_query:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": last_query}],
+        )
+        print(f"  (No RAG) {response.choices[0].message.content}\n")
+    else:
+        print("  No previous query. Ask a question first.")
+
+
+def handle_k_command(cmd_args: str) -> int:
+    """Parse and return a new retrieval-k value, or -1 on bad input."""
+    try:
+        new_k = int(cmd_args)
+        print(f"  Retrieval set to {new_k} chunks.\n")
+        return new_k
+    except ValueError:
+        print("  Usage: /k <number>")
+        return -1
+
+
+def handle_prompt_command(last_messages: list[dict] | None):
+    """Display the full grounded prompt sent to the LLM."""
+    if last_messages:
+        print("\n  === Grounded Prompt ===")
+        for msg in last_messages:
+            print(f"  [{msg['role']}]")
+            for line in msg["content"].split("\n"):
+                print(f"    {line}")
+        print()
+    else:
+        print("  No previous query. Ask a question first.")
+
 
 def main():
     print("Loading ship logs and building index...")
     logs = load_logs()
-    # TODO: Build the index
-    # collection = build_index(logs)
-    # print(f"RAG Chat ready. {collection.count()} chunks indexed.\n")
+    collection = build_index(logs)
+    print(f"RAG Chat ready. {collection.count()} chunks indexed.")
+    print("Ask a question, or type a command (/sources, /norag, /k <n>, /prompt), or 'quit'.\n")
 
-    # TODO: Interactive loop
-    #   Store last_query and last_passages for /sources, /norag, /prompt commands
-    #   - Plain text -> rag_chat(), print answer + brief source list
-    #   - /sources -> show full text of last_passages
-    #   - /norag -> re-ask last_query directly (no retrieval)
-    #   - /k <n> -> change retrieval count
-    #   - /prompt -> show the full grounded prompt
-    #   - quit -> break
+    k = 5
+    last_query = None
+    last_passages = None
+    last_messages = None
 
-    print("TODO: implement build_grounded_prompt and rag_chat, then uncomment the loop.")
+    while True:
+        try:
+            user_input = input("You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not user_input:
+            continue
+        if user_input.lower() == "quit":
+            break
+
+        if user_input == "/sources":
+            handle_sources_command(last_passages)
+            continue
+
+        if user_input == "/norag":
+            handle_norag_command(client, last_query)
+            continue
+
+        if user_input.startswith("/k "):
+            new_k = handle_k_command(user_input.split(" ", 1)[1])
+            if new_k > 0:
+                k = new_k
+            continue
+
+        if user_input == "/prompt":
+            handle_prompt_command(last_messages)
+            continue
+
+        last_query = user_input
+        answer, last_passages = rag_chat(user_input, collection, k)
+        last_messages = build_grounded_prompt(user_input, last_passages)
+        print(f"Agent: {answer}")
+        print("\n  Sources:")
+        display_sources(last_passages, brief=True)
+        print()
 
 
 if __name__ == "__main__":

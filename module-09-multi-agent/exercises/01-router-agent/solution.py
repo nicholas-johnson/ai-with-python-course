@@ -7,7 +7,10 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import json
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DEPARTMENTS = ["navigation", "engineering", "science"]
 
@@ -76,7 +79,7 @@ def specialist_agent(department: str, query: str, client: OpenAI) -> str:
             {"role": "user", "content": query},
         ],
     )
-    return response.choices[0].message.content
+    return response.choices[0].message.content or ""
 
 
 def route_and_respond(query: str, client: OpenAI) -> dict:

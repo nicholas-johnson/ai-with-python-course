@@ -11,7 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import chromadb
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()
@@ -137,6 +140,54 @@ def display_sources(passages: list[dict], brief: bool = False):
             print(f"  {p['text']}")
 
 
+# --- Slash-command handlers ---
+
+def handle_sources_command(last_passages: list[dict] | None):
+    """Show full text of the passages retrieved in the last query."""
+    if last_passages:
+        print("\n  === Retrieved Sources ===")
+        display_sources(last_passages)
+        print()
+    else:
+        print("  No previous query. Ask a question first.")
+
+
+def handle_norag_command(client: OpenAI, last_query: str | None):
+    """Re-ask the last question without retrieval augmentation."""
+    if last_query:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": last_query}],
+        )
+        print(f"  (No RAG) {response.choices[0].message.content}\n")
+    else:
+        print("  No previous query. Ask a question first.")
+
+
+def handle_k_command(cmd_args: str) -> int:
+    """Parse and return a new retrieval-k value, or -1 on bad input."""
+    try:
+        new_k = int(cmd_args)
+        print(f"  Retrieval set to {new_k} chunks.\n")
+        return new_k
+    except ValueError:
+        print("  Usage: /k <number>")
+        return -1
+
+
+def handle_prompt_command(last_messages: list[dict] | None):
+    """Display the full grounded prompt sent to the LLM."""
+    if last_messages:
+        print("\n  === Grounded Prompt ===")
+        for msg in last_messages:
+            print(f"  [{msg['role']}]")
+            for line in msg["content"].split("\n"):
+                print(f"    {line}")
+        print()
+    else:
+        print("  No previous query. Ask a question first.")
+
+
 def main():
     print("Loading ship logs and building index...")
     logs = load_logs()
@@ -160,49 +211,26 @@ def main():
             break
 
         if user_input == "/sources":
-            if last_passages:
-                print("\n  === Retrieved Sources ===")
-                display_sources(last_passages)
-                print()
-            else:
-                print("  No previous query. Ask a question first.")
+            handle_sources_command(last_passages)
             continue
 
         if user_input == "/norag":
-            if last_query:
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": last_query}],
-                )
-                print(f"  (No RAG) {response.choices[0].message.content}\n")
-            else:
-                print("  No previous query. Ask a question first.")
+            handle_norag_command(client, last_query)
             continue
 
         if user_input.startswith("/k "):
-            try:
-                k = int(user_input.split(" ", 1)[1])
-                print(f"  Retrieval set to {k} chunks.\n")
-            except ValueError:
-                print("  Usage: /k <number>")
+            new_k = handle_k_command(user_input.split(" ", 1)[1])
+            if new_k > 0:
+                k = new_k
             continue
 
         if user_input == "/prompt":
-            if last_messages:
-                print("\n  === Grounded Prompt ===")
-                for msg in last_messages:
-                    print(f"  [{msg['role']}]")
-                    for line in msg["content"].split("\n"):
-                        print(f"    {line}")
-                print()
-            else:
-                print("  No previous query. Ask a question first.")
+            handle_prompt_command(last_messages)
             continue
 
         last_query = user_input
-        last_passages = search(collection, user_input, k)
+        answer, last_passages = rag_chat(user_input, collection, k)
         last_messages = build_grounded_prompt(user_input, last_passages)
-        answer, _ = rag_chat(user_input, collection, k)
         print(f"Agent: {answer}")
         print("\n  Sources:")
         display_sources(last_passages, brief=True)

@@ -14,8 +14,11 @@ import sys
 from pathlib import Path
 
 import openai
+from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
+
+load_dotenv()
 
 SYSTEM_PROMPT = (
     "You are the DSS Pathfinder ship AI. Use the available tools to answer "
@@ -41,12 +44,53 @@ def mcp_to_openai_tools(mcp_tools: list) -> list[dict]:
     ]
 
 
+async def run_turn(
+    client: openai.OpenAI,
+    messages: list[dict],
+    session: ClientSession,
+    openai_tools: list[dict],
+    max_steps: int = 10,
+) -> str | None:
+    """Handle one LLM turn with tool execution until a final reply.
+
+    Returns the assistant's text reply, or None if max steps exceeded.
+    """
+    for _ in range(max_steps):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=openai_tools,
+        )
+        msg = response.choices[0].message
+
+        if msg.tool_calls:
+            messages.append(msg)
+            for tc in msg.tool_calls:
+                name = tc.function.name
+                args = json.loads(tc.function.arguments)
+                result = await session.call_tool(name, arguments=args)
+                text = result.content[0].text if result.content else ""
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc.id,
+                    "content": text,
+                })
+        elif msg.content:
+            messages.append(msg)
+            return msg.content
+        else:
+            return None
+
+    return None
+
+
 async def run_agent(
     session: ClientSession,
     client: openai.OpenAI,
     openai_tools: list[dict],
     max_steps: int = 10,
 ) -> None:
+    """Interactive REPL that dispatches each user message to run_turn."""
     messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     print("DSS Pathfinder MCP Agent ready. Type a question (or 'quit').\n")
@@ -57,34 +101,12 @@ async def run_agent(
             break
 
         messages.append({"role": "user", "content": user_input})
+        reply = await run_turn(client, messages, session, openai_tools, max_steps)
 
-        for _ in range(max_steps):
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                tools=openai_tools,
-            )
-            msg = response.choices[0].message
-
-            if msg.tool_calls:
-                messages.append(msg)
-                for tc in msg.tool_calls:
-                    name = tc.function.name
-                    args = json.loads(tc.function.arguments)
-                    result = await session.call_tool(name, arguments=args)
-                    text = result.content[0].text if result.content else ""
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tc.id,
-                        "content": text,
-                    })
-            elif msg.content:
-                messages.append(msg)
-                print(f"\nAgent: {msg.content}\n")
-                break
-            else:
-                print("\nAgent: (no response)\n")
-                break
+        if reply:
+            print(f"\nAgent: {reply}\n")
+        else:
+            print("\nAgent: (no response)\n")
 
 
 async def main() -> None:

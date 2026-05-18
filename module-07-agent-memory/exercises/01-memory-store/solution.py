@@ -8,8 +8,11 @@ Run:  python solution.py
 from __future__ import annotations
 import json, time
 from dataclasses import dataclass, field
+from dotenv import load_dotenv
 from openai import OpenAI
 from pathlib import Path
+
+load_dotenv()
 
 DATA_FILE = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 

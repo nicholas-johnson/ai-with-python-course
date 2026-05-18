@@ -4,7 +4,7 @@ Exercise 02 — Tool Registry (solution)
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Callable
 
 # ---------------------------------------------------------------------------
 # Ship data
@@ -186,8 +186,10 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     print("DSS Pathfinder Agent (with registry) ready. Type a question (or 'quit').\n")
     print(f"Registered tools: {', '.join(t['function']['name'] for t in registry.list_tools())}\n")

@@ -11,8 +11,11 @@ Requires: OPENAI_API_KEY environment variable.
 import json
 from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel, Field
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()

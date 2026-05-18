@@ -6,6 +6,7 @@ When the session buffer gets too long, older messages are compressed into a summ
 Run:  python start.py
 """
 from __future__ import annotations
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from memory_store import (
@@ -14,6 +15,8 @@ from memory_store import (
     build_system_prompt,
     chat,
 )
+
+load_dotenv()
 
 
 def summarise_turns(turns: list[dict], client: OpenAI) -> str:

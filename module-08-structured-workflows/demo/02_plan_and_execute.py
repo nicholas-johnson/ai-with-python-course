@@ -13,7 +13,10 @@ import json
 import re
 from dataclasses import dataclass, field
 import httpx
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 
 # ---------------------------------------------------------------------------

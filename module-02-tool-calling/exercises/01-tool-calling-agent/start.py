@@ -76,7 +76,9 @@ def search_crew(query: str) -> str:
     pass
 
 
-TOOL_HANDLERS: dict[str, callable] = {
+from collections.abc import Callable
+
+TOOL_HANDLERS: dict[str, Callable[..., str]] = {
     "get_crew_count": get_crew_count,
     "get_ship_status": get_ship_status,
     "search_crew": search_crew,
@@ -124,8 +126,10 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     print("DSS Pathfinder Agent ready. Type a question (or 'quit').\n")
 

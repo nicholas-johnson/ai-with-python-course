@@ -4,8 +4,11 @@ Exercise 2: Tool-Calling Chat API -- SOLUTION
 
 import asyncio
 import json
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mcp import ClientSession
@@ -13,6 +16,8 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 from openai import OpenAI
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
+
+load_dotenv()
 
 client = OpenAI()
 
@@ -52,7 +57,8 @@ class MCPConnection:
 
     async def connect(self):
         server_params = StdioServerParameters(
-            command="python", args=["solution_server.py"]
+            command=sys.executable,
+            args=[str(Path(__file__).parent / "solution_server.py")],
         )
         self._cm = stdio_client(server_params)
         self._read, self._write = await self._cm.__aenter__()
@@ -93,6 +99,21 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     messages: list[dict]
+
+
+async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
+    """Execute MCP tool calls and return tool-result messages."""
+    results = []
+    for tc in tool_calls:
+        name = tc.function.name
+        args = json.loads(tc.function.arguments)
+        content = await session.call_tool(name, args)
+        results.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": content,
+        })
+    return results
 
 
 @app.get("/health")
@@ -142,31 +163,22 @@ async def chat(req: ChatRequest):
                 )
 
                 for tc in assistant_msg.tool_calls:
-                    name = tc.function.name
-                    args = json.loads(tc.function.arguments)
-
                     yield {
                         "event": "tool_call",
-                        "data": json.dumps({"name": name, "arguments": args}),
+                        "data": json.dumps({"name": tc.function.name, "arguments": json.loads(tc.function.arguments)}),
                     }
                     await asyncio.sleep(0)
 
-                    result = await mcp_conn.call_tool(name, args)
+                tool_results = await execute_tool_calls(mcp_conn, assistant_msg.tool_calls)
 
+                for tc, result_msg in zip(assistant_msg.tool_calls, tool_results):
                     yield {
                         "event": "tool_result",
-                        "data": json.dumps({"name": name, "content": result}),
+                        "data": json.dumps({"name": tc.function.name, "content": result_msg["content"]}),
                     }
                     await asyncio.sleep(0)
 
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": result,
-                        }
-                    )
-
+                messages.extend(tool_results)
                 continue
 
             content = choice.message.content or ""

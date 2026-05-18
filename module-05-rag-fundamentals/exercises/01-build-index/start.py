@@ -7,12 +7,25 @@ Run:  python start.py
 """
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
-# TODO: import chromadb
-# TODO: import OpenAI from openai
+import chromadb
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+client = OpenAI()
+
+
+@dataclass
+class TextChunk:
+    text: str
+    source_id: str
+    chunk_index: int
+    metadata: dict
 
 
 def load_logs() -> list[dict]:
@@ -20,42 +33,89 @@ def load_logs() -> list[dict]:
     return json.loads(DATA_PATH.read_text())
 
 
-# TODO: Implement chunk_text(text, chunk_size, overlap) -> list[str]
-#   Split text into overlapping windows of chunk_size characters.
-#   Each window overlaps the previous by `overlap` characters.
-#   Return a list of strings.
+def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
+    """Split text into overlapping windows of chunk_size characters."""
+    raise NotImplementedError("TODO: split text into overlapping chunks")
 
 
-# TODO: Implement build_index(log_entries) -> chromadb.Collection
-#   1. Create a ChromaDB client and collection
-#   2. For each log entry, chunk the content
-#   3. Embed all chunks using OpenAI text-embedding-3-small
-#   4. Add to the collection with metadata (source_id, chunk_index, author, category)
-#   5. Return the collection
+def build_index(
+    log_entries: list[dict],
+    chunk_size: int = 500,
+    overlap: int = 50,
+    collection_name: str = "ship_logs",
+) -> chromadb.Collection:
+    """Chunk all logs, embed with OpenAI, and store in ChromaDB."""
+    raise NotImplementedError("TODO: chunk, embed, and store in ChromaDB")
 
 
-# TODO: Implement search(collection, query, k) -> list[dict]
-#   1. Query the collection with query_texts=[query], n_results=k
-#   2. Return a list of dicts with keys: id, text, source, distance, metadata
+def search(collection: chromadb.Collection, query: str, k: int = 5) -> list[dict]:
+    """Search the collection and return ranked results."""
+    raise NotImplementedError("TODO: embed query and search collection")
+
+
+def display_results(hits: list[dict]):
+    """Print search results in a readable format."""
+    for hit in hits:
+        source = hit["metadata"].get("source_id", "?")
+        score = 1 - hit["distance"]
+        preview = hit["text"][:120].replace("\n", " ")
+        print(f"  [{score:.2f}] {hit['id']} ({source}): \"{preview}...\"")
+
+
+def print_collection_stats(collection: chromadb.Collection):
+    """Display summary statistics for the indexed collection."""
+    raise NotImplementedError("TODO: print chunk count, avg length, source count")
+
+
+def show_chunk_by_id(collection: chromadb.Collection, chunk_id: str):
+    """Retrieve and display a single chunk by its ID."""
+    raise NotImplementedError("TODO: fetch chunk by ID and print metadata + text")
+
+
+def show_similar_chunks(collection: chromadb.Collection, chunk_id: str, k: int = 5):
+    """Find and display chunks similar to the given chunk."""
+    raise NotImplementedError("TODO: get chunk text, search for similar, display results")
 
 
 def main():
     print("Loading ship logs...")
     logs = load_logs()
-    print(f"Loaded {len(logs)} logs.")
+    print(f"Loaded {len(logs)} logs. Chunking and embedding...")
 
-    # TODO: Build the index
-    # collection = build_index(logs)
-    # print(f"Index ready. {collection.count()} chunks indexed.")
+    collection = build_index(logs)
+    print(f"Index ready. {collection.count()} chunks indexed.\n")
+    print("Type a query, or a command (/stats, /chunk <id>, /similar <id>), or 'quit'.\n")
 
-    # TODO: Interactive search loop
-    #   - Plain text -> search and display results
-    #   - /stats -> show collection.count() and source info
-    #   - /chunk <id> -> collection.get(ids=[id])
-    #   - /similar <id> -> get chunk text, then query with it
-    #   - quit -> break
+    while True:
+        try:
+            user_input = input("Search: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
 
-    print("TODO: implement build_index and search, then uncomment the loop.")
+        if not user_input:
+            continue
+
+        if user_input.lower() == "quit":
+            print("Goodbye!")
+            break
+
+        if user_input == "/stats":
+            print_collection_stats(collection)
+            continue
+
+        if user_input.startswith("/chunk "):
+            chunk_id = user_input.split(" ", 1)[1].strip()
+            show_chunk_by_id(collection, chunk_id)
+            continue
+
+        if user_input.startswith("/similar "):
+            chunk_id = user_input.split(" ", 1)[1].strip()
+            show_similar_chunks(collection, chunk_id)
+            continue
+
+        hits = search(collection, user_input)
+        display_results(hits)
+        print()
 
 
 if __name__ == "__main__":

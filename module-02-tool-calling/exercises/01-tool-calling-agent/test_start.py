@@ -187,8 +187,10 @@ class TestRunAgent:
 )
 class TestIntegration:
     def test_live_tool_call(self):
+        from dotenv import load_dotenv
         from openai import OpenAI
 
+        load_dotenv()
         client = OpenAI()
         result = run_agent(client, "How many crew are in the science department?")
 

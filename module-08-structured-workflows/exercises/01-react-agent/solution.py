@@ -8,7 +8,10 @@ Run:  python solution.py
 from __future__ import annotations
 import json
 import re
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 try:
     import httpx

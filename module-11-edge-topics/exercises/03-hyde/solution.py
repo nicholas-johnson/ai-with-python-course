@@ -26,7 +26,7 @@ def generate_hypothetical_document(client: OpenAI, query: str) -> str:
         }],
         temperature=0.7,
     )
-    return response.choices[0].message.content
+    return response.choices[0].message.content or ""
 
 
 def embed_text(client: OpenAI, text: str) -> list[float]:

@@ -13,16 +13,12 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_chroma import Chroma
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
-
-# TODO: Add RAG imports
-# from langchain_chroma import Chroma
-# from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.runnables import RunnablePassthrough
-# from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 load_dotenv()
 
@@ -112,34 +108,53 @@ def run_agent(query: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# TODO: Load ship logs and build the vectorstore
+# TODO: RAG chain functions
 # ---------------------------------------------------------------------------
 
-# logs = json.loads((PROJECT_ROOT / "data" / "ship_logs.json").read_text())
-# texts = [log["content"] for log in logs]
-# metadatas = [{"source": log["id"], "author": log["author"],
-#               "category": log["category"]} for log in logs]
-# vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings(), metadatas=metadatas)
-# retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+def load_documents() -> tuple[list[str], list[dict]]:
+    """Load ship logs from data/ship_logs.json. Returns (texts, metadatas).
+
+    Each metadata dict should have: source (log id), author, category.
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
 
 
-# ---------------------------------------------------------------------------
-# TODO: Build the RAG chain
-# ---------------------------------------------------------------------------
-
-# def format_docs(docs): ...
-# rag_prompt = ChatPromptTemplate.from_messages([...])
-# rag_chain = (
-#     {"context": retriever | format_docs, "question": RunnablePassthrough()}
-#     | rag_prompt
-#     | ChatOpenAI(model=MODEL, temperature=0)
-#     | StrOutputParser()
-# )
+def build_vectorstore(texts: list[str], metadatas: list[dict]) -> Chroma:
+    """Build a Chroma vectorstore from document texts and metadata."""
+    # TODO: implement using Chroma.from_texts with OpenAIEmbeddings
+    raise NotImplementedError("TODO")
 
 
-def ask(question: str) -> str:
-    """Answer a question using the RAG chain."""
-    raise NotImplementedError("TODO: implement using rag_chain.invoke()")
+def format_docs(docs) -> str:
+    """Format retrieved documents for the RAG prompt context."""
+    # TODO: implement — format as "[Source N: id] content"
+    raise NotImplementedError("TODO")
+
+
+def build_rag_chain(vectorstore: Chroma):
+    """Create the LCEL RAG chain. Returns (chain, retriever).
+
+    Steps:
+        1. Create a retriever from vectorstore (k=5)
+        2. Build a ChatPromptTemplate for RAG (cite sources)
+        3. Compose the LCEL chain: retriever | format | prompt | llm | parser
+        4. Return (chain, retriever)
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def ask(chain, retriever, question: str) -> tuple[str, list]:
+    """Run a RAG query. Returns (answer, retrieved_docs)."""
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def ask_norag(question: str) -> str:
+    """Answer without RAG for comparison."""
+    # TODO: implement
+    raise NotImplementedError("TODO")
 
 
 # ---------------------------------------------------------------------------
@@ -147,14 +162,20 @@ def ask(question: str) -> str:
 # ---------------------------------------------------------------------------
 
 def main():
+    print("Building index...")
+    texts, metadatas = load_documents()
+    vectorstore = build_vectorstore(texts, metadatas)
+    chain, retriever = build_rag_chain(vectorstore)
+    print(f"Indexed {len(texts)} log entries.\n")
+
     print("=" * 60)
     print("  EXERCISE 03 — RAG CHAIN")
     print("  Answer questions from the ship's knowledge base")
     print("=" * 60)
-
     print("\nCommands: /sources, /norag, /agent, quit\n")
 
     last_question = None
+    last_docs: list = []
 
     while True:
         try:
@@ -164,12 +185,25 @@ def main():
             break
         if not user_input or user_input.lower() == "quit":
             break
-
-        # TODO: handle /sources, /norag, /agent commands
+        if user_input == "/sources" and last_docs:
+            print("\nRetrieved sources:")
+            for i, doc in enumerate(last_docs, 1):
+                source = doc.metadata.get("source", "?")
+                author = doc.metadata.get("author", "?")
+                print(f"\n  [{i}] {source} ({author})")
+                print(f"      {doc.page_content[:120]}...")
+            print()
+            continue
+        if user_input == "/norag" and last_question:
+            print(f"\nNo-RAG> {ask_norag(last_question)}\n")
+            continue
+        if user_input == "/agent" and last_question:
+            print(f"\nAgent> {run_agent(last_question)}\n")
+            continue
 
         last_question = user_input
         try:
-            answer = ask(user_input)
+            answer, last_docs = ask(chain, retriever, user_input)
             print(f"\nRAG> {answer}\n")
         except Exception as e:
             print(f"\n  Error: {e}\n")

@@ -17,8 +17,11 @@ Requires:
 import json
 
 import chromadb
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from openai import OpenAI
+
+load_dotenv()
 
 CHROMA_HOST = "localhost"
 CHROMA_PORT = 8100

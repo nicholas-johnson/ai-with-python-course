@@ -45,9 +45,12 @@ def text_to_sql(client: OpenAI, question: str, schema: str) -> str:
         ],
         temperature=0,
     )
-    sql = response.choices[0].message.content.strip()
-    sql = sql.strip("```sql").strip("```").strip()
-    return sql
+    sql = (response.choices[0].message.content or "").strip()
+    if sql.startswith("```"):
+        sql = sql.split("\n", 1)[-1]
+    if sql.endswith("```"):
+        sql = sql[:-3]
+    return sql.strip()
 
 
 def safe_execute(db_path: str, sql: str) -> list[dict]:

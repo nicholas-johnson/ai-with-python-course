@@ -8,11 +8,6 @@ SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful and concise."
 MODEL = "gpt-4o-mini"
 
 
-def chat(client, messages: list[dict]) -> str:
-    response = client.chat.completions.create(model=MODEL, messages=messages)
-    return response.choices[0].message.content
-
-
 def stream_response(client, messages: list[dict]) -> str:
     response = client.chat.completions.create(
         model=MODEL, messages=messages, stream=True,
@@ -47,8 +42,10 @@ def main(client) -> None:
 
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     print("DSS Pathfinder AI (streaming) ready. Type a message (or 'quit').\n")
     main(client)

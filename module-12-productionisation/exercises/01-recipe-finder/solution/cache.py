@@ -23,7 +23,7 @@ class SemanticCache:
         a_arr, b_arr = np.array(a), np.array(b)
         return float(np.dot(a_arr, b_arr) / (np.linalg.norm(a_arr) * np.linalg.norm(b_arr)))
 
-    def get(self, query: str) -> dict | None:
+    def get(self, query: str) -> object | None:
         """Return cached result if a semantically similar query exists."""
         now = time.time()
         query_embedding = self._embed(query)
@@ -43,7 +43,7 @@ class SemanticCache:
             return best_match["result"]
         return None
 
-    def set(self, query: str, result: dict):
+    def set(self, query: str, result: object):
         """Store a query result in the cache."""
         embedding = self._embed(query)
         self.entries.append({

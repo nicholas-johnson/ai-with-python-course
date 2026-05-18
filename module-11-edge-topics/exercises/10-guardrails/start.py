@@ -1,8 +1,10 @@
 """
-Exercise 10 — Advanced Guardrails (Solution)
+Exercise 10 — Advanced Guardrails
 
 Chain content filtering, PII redaction, and schema validation
 into a defensive pipeline for LLM inputs and outputs.
+
+TODO: Implement each function below.
 """
 
 import re
@@ -26,32 +28,25 @@ PII_PATTERNS = {
 def check_content(text: str, blocked_patterns: list[str]) -> dict:
     """
     Check text against blocked regex patterns.
+    Returns {"passed": bool, "reason": str | None}.
     """
-    for pattern in blocked_patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            return {"passed": False, "reason": f"Matched blocked pattern: {pattern}"}
-    return {"passed": True, "reason": None}
+    raise NotImplementedError
 
 
 def redact_pii(text: str) -> str:
     """
-    Find and redact PII in text.
+    Find and redact PII in text using PII_PATTERNS.
+    Replace matches with [REDACTED_TYPE] tokens.
     """
-    for pii_type in ["ssn", "email", "phone"]:
-        pattern = PII_PATTERNS[pii_type]
-        text = re.sub(pattern, f"[REDACTED_{pii_type.upper()}]", text)
-    return text
+    raise NotImplementedError
 
 
 def validate_output(data: dict) -> dict:
     """
     Validate a dict against the SafeResponse Pydantic model.
+    Returns {"valid": bool, "data": dict | None, "errors": str | None}.
     """
-    try:
-        validated = SafeResponse(**data)
-        return {"valid": True, "data": validated.model_dump(), "errors": None}
-    except ValidationError as e:
-        return {"valid": False, "data": None, "errors": str(e)}
+    raise NotImplementedError
 
 
 def guardrail_pipeline(
@@ -59,19 +54,7 @@ def guardrail_pipeline(
     blocked_patterns: list[str],
 ) -> dict:
     """
-    Run the full guardrail pipeline: content check → PII redaction.
+    Run the full guardrail pipeline: content check -> PII redaction.
+    Returns {"passed": bool, "reason": str | None, "cleaned_text": str | None}.
     """
-    content_check = check_content(text, blocked_patterns)
-    if not content_check["passed"]:
-        return {
-            "passed": False,
-            "reason": content_check["reason"],
-            "cleaned_text": None,
-        }
-
-    cleaned = redact_pii(text)
-    return {
-        "passed": True,
-        "reason": None,
-        "cleaned_text": cleaned,
-    }
+    raise NotImplementedError

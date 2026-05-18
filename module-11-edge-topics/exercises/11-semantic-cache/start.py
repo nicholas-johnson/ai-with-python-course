@@ -5,8 +5,6 @@ Cache LLM responses by embedding similarity so paraphrased
 questions return cached answers without making new API calls.
 """
 
-import time
-import math
 from openai import OpenAI
 
 

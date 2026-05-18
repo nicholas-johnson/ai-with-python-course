@@ -7,11 +7,74 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import json
-from collections import Counter
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from agents import DEPARTMENTS, specialist_agent
 from supervisor import run_supervised_query
+
+load_dotenv()
+
+
+def _advocate_turn(
+    question: str,
+    advocate_history: list[dict],
+    last_skeptic_arg: str | None,
+    round_num: int,
+    client: OpenAI,
+) -> str:
+    """Run one advocate turn. Appends to advocate_history. Returns the argument."""
+    if round_num == 1:
+        advocate_history.append({"role": "user", "content": f"Argue FOR: {question}"})
+    else:
+        advocate_history.append({
+            "role": "user",
+            "content": (
+                f"The Skeptic responded: {last_skeptic_arg}\n\n"
+                "Continue your argument."
+            ),
+        })
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini", messages=advocate_history
+    )
+    arg = response.choices[0].message.content
+    advocate_history.append({"role": "assistant", "content": arg})
+    return arg
+
+
+def _skeptic_turn(
+    question: str,
+    advocate_arg: str,
+    skeptic_history: list[dict],
+    round_num: int,
+    client: OpenAI,
+) -> str:
+    """Run one skeptic turn. Appends to skeptic_history. Returns the argument."""
+    if round_num == 1:
+        skeptic_history.append({
+            "role": "user",
+            "content": (
+                f"The question is: {question}\n\n"
+                f"The Advocate argues: {advocate_arg}\n\n"
+                "Argue AGAINST this position."
+            ),
+        })
+    else:
+        skeptic_history.append({
+            "role": "user",
+            "content": (
+                f"The Advocate responded: {advocate_arg}\n\n"
+                "Continue your counter-argument."
+            ),
+        })
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini", messages=skeptic_history
+    )
+    arg = response.choices[0].message.content
+    skeptic_history.append({"role": "assistant", "content": arg})
+    return arg
 
 
 def debate(question: str, client: OpenAI, rounds: int = 2) -> list[dict]:
@@ -41,61 +104,13 @@ def debate(question: str, client: OpenAI, rounds: int = 2) -> list[dict]:
         },
     ]
 
-    debate_log = []
+    debate_log: list[dict] = []
 
     for r in range(1, rounds + 1):
-        if r == 1:
-            advocate_history.append(
-                {"role": "user", "content": f"Argue FOR: {question}"}
-            )
-        else:
-            advocate_history.append(
-                {
-                    "role": "user",
-                    "content": (
-                        f"The Skeptic responded: {debate_log[-1]['skeptic']}\n\n"
-                        "Continue your argument."
-                    ),
-                }
-            )
-
-        adv_response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=advocate_history
-        )
-        advocate_arg = adv_response.choices[0].message.content
-        advocate_history.append({"role": "assistant", "content": advocate_arg})
-
-        if r == 1:
-            skeptic_history.append(
-                {
-                    "role": "user",
-                    "content": (
-                        f"The question is: {question}\n\n"
-                        f"The Advocate argues: {advocate_arg}\n\n"
-                        "Argue AGAINST this position."
-                    ),
-                }
-            )
-        else:
-            skeptic_history.append(
-                {
-                    "role": "user",
-                    "content": (
-                        f"The Advocate responded: {advocate_arg}\n\n"
-                        "Continue your counter-argument."
-                    ),
-                }
-            )
-
-        skp_response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=skeptic_history
-        )
-        skeptic_arg = skp_response.choices[0].message.content
-        skeptic_history.append({"role": "assistant", "content": skeptic_arg})
-
-        debate_log.append(
-            {"round": r, "advocate": advocate_arg, "skeptic": skeptic_arg}
-        )
+        last_skeptic = debate_log[-1]["skeptic"] if debate_log else None
+        adv_arg = _advocate_turn(question, advocate_history, last_skeptic, r, client)
+        skp_arg = _skeptic_turn(question, adv_arg, skeptic_history, r, client)
+        debate_log.append({"round": r, "advocate": adv_arg, "skeptic": skp_arg})
 
     return debate_log
 
@@ -141,28 +156,15 @@ def judge(
         return {"winner": "advocate", "reasoning": "Unable to parse judgment."}
 
 
-def consensus_vote(question: str, client: OpenAI) -> dict:
-    """Ask each specialist the same question and pick a winner by majority vote.
-
-    Returns {
-        "responses": [{"department": str, "response": str}, ...],
-        "winner": str,
-        "votes": {"navigation": int, "engineering": int, "science": int}
-    }
-    """
-    responses = []
-    for dept in DEPARTMENTS:
-        answer = specialist_agent(dept, question, client)
-        responses.append({"department": dept, "response": answer})
-
-    vote_prompt_responses = []
-    for entry in responses:
-        vote_prompt_responses.append(
-            f"- {entry['department']}: {entry['response']}"
-        )
-    all_responses_text = "\n".join(vote_prompt_responses)
-
+def _collect_department_votes(
+    question: str, responses: list[dict], client: OpenAI
+) -> dict[str, int]:
+    """Have each department vote on the best response. Returns vote tallies."""
+    formatted = "\n".join(
+        f"- {entry['department']}: {entry['response']}" for entry in responses
+    )
     votes: dict[str, int] = {dept: 0 for dept in DEPARTMENTS}
+
     for dept in DEPARTMENTS:
         vote_result = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -180,7 +182,7 @@ def consensus_vote(question: str, client: OpenAI) -> dict:
                 {
                     "role": "user",
                     "content": (
-                        f"Question: {question}\n\nResponses:\n{all_responses_text}\n\n"
+                        f"Question: {question}\n\nResponses:\n{formatted}\n\n"
                         "Which department gave the best answer?"
                     ),
                 },
@@ -194,6 +196,24 @@ def consensus_vote(question: str, client: OpenAI) -> dict:
         except (json.JSONDecodeError, AttributeError):
             pass
 
+    return votes
+
+
+def consensus_vote(question: str, client: OpenAI) -> dict:
+    """Ask each specialist the same question and pick a winner by majority vote.
+
+    Returns {
+        "responses": [{"department": str, "response": str}, ...],
+        "winner": str,
+        "votes": {"navigation": int, "engineering": int, "science": int}
+    }
+    """
+    responses = []
+    for dept in DEPARTMENTS:
+        answer = specialist_agent(dept, question, client)
+        responses.append({"department": dept, "response": answer})
+
+    votes = _collect_department_votes(question, responses, client)
     winner = max(votes, key=lambda d: votes[d])
     return {"responses": responses, "winner": winner, "votes": votes}
 
@@ -202,11 +222,6 @@ def multi_agent_answer(
     query: str, client: OpenAI, max_revisions: int = 2
 ) -> dict:
     """Combine the supervisor pipeline with debate for validation.
-
-    Steps:
-        1. Run the supervised query (classify, specialist, critic loop)
-        2. Debate the supervisor's answer (advocate defends, skeptic challenges)
-        3. Judge picks a winner
 
     Returns {
         "supervised": dict (from run_supervised_query),
@@ -233,6 +248,75 @@ def multi_agent_answer(
     }
 
 
+def handle_repl_command(user_input: str, mode: str, client: OpenAI) -> str:
+    """Process one REPL command or query. Returns the (possibly updated) mode."""
+    if user_input.startswith("/mode"):
+        parts = user_input.split(maxsplit=1)
+        if len(parts) == 2 and parts[1] in ("debate", "vote", "auto"):
+            mode = parts[1]
+            print(f"[Mode set to: {mode}]\n")
+        else:
+            print("[Usage: /mode debate|vote|auto]\n")
+        return mode
+
+    if user_input.startswith("/debate "):
+        question = user_input[8:].strip()
+        if not question:
+            print("[Provide a question to debate]\n")
+            return mode
+        print("[Running debate...]")
+        log = debate(question, client, rounds=2)
+        for entry in log:
+            print(f"\n  Round {entry['round']}:")
+            print(f"    Advocate: {entry['advocate'][:120]}...")
+            print(f"    Skeptic:  {entry['skeptic'][:120]}...")
+        final = log[-1]
+        judgment = judge(question, final["advocate"], final["skeptic"], client)
+        print(f"\n  [Judge] Winner: {judgment['winner']}")
+        print(f"  Reasoning: {judgment['reasoning']}\n")
+        return mode
+
+    if user_input.startswith("/vote "):
+        question = user_input[6:].strip()
+        if not question:
+            print("[Provide a question to vote on]\n")
+            return mode
+        print("[Running consensus vote...]")
+        result = consensus_vote(question, client)
+        for entry in result["responses"]:
+            print(f"  [{entry['department']}]: {entry['response'][:100]}...")
+        print(f"\n  Votes: {result['votes']}")
+        print(f"  Winner: {result['winner']}\n")
+        return mode
+
+    if mode == "debate":
+        print("[Running debate pipeline...]")
+        result = multi_agent_answer(user_input, client)
+        print(f"[Supervised answer from {result['supervised']['department']}]")
+        print(f"  {result['supervised']['response'][:150]}...")
+        print(f"[Debate judgment: {result['judgment']['winner']}]")
+        print(f"  {result['judgment']['reasoning']}\n")
+    elif mode == "vote":
+        print("[Running consensus vote...]")
+        result = consensus_vote(user_input, client)
+        winning_response = next(
+            r["response"]
+            for r in result["responses"]
+            if r["department"] == result["winner"]
+        )
+        print(f"[Winner: {result['winner']}] (votes: {result['votes']})")
+        print(f"Agent: {winning_response}\n")
+    else:
+        print("[Running full multi-agent pipeline...]")
+        result = multi_agent_answer(user_input, client)
+        print(f"[Supervised: {result['supervised']['department']}]")
+        print(f"  {result['supervised']['response'][:150]}...")
+        print(f"[Debate judgment: {result['judgment']['winner']}]")
+        print(f"  {result['judgment']['reasoning']}\n")
+
+    return mode
+
+
 def main():
     client = OpenAI()
     mode = "auto"
@@ -255,69 +339,7 @@ def main():
             print("Goodbye!")
             break
 
-        if user_input.startswith("/mode"):
-            parts = user_input.split(maxsplit=1)
-            if len(parts) == 2 and parts[1] in ("debate", "vote", "auto"):
-                mode = parts[1]
-                print(f"[Mode set to: {mode}]\n")
-            else:
-                print("[Usage: /mode debate|vote|auto]\n")
-            continue
-
-        if user_input.startswith("/debate "):
-            question = user_input[8:].strip()
-            if not question:
-                print("[Provide a question to debate]\n")
-                continue
-            print("[Running debate...]")
-            log = debate(question, client, rounds=2)
-            for entry in log:
-                print(f"\n  Round {entry['round']}:")
-                print(f"    Advocate: {entry['advocate'][:120]}...")
-                print(f"    Skeptic:  {entry['skeptic'][:120]}...")
-            final = log[-1]
-            judgment = judge(question, final["advocate"], final["skeptic"], client)
-            print(f"\n  [Judge] Winner: {judgment['winner']}")
-            print(f"  Reasoning: {judgment['reasoning']}\n")
-            continue
-
-        if user_input.startswith("/vote "):
-            question = user_input[6:].strip()
-            if not question:
-                print("[Provide a question to vote on]\n")
-                continue
-            print("[Running consensus vote...]")
-            result = consensus_vote(question, client)
-            for entry in result["responses"]:
-                print(f"  [{entry['department']}]: {entry['response'][:100]}...")
-            print(f"\n  Votes: {result['votes']}")
-            print(f"  Winner: {result['winner']}\n")
-            continue
-
-        if mode == "debate":
-            print("[Running debate pipeline...]")
-            result = multi_agent_answer(user_input, client)
-            print(f"[Supervised answer from {result['supervised']['department']}]")
-            print(f"  {result['supervised']['response'][:150]}...")
-            print(f"[Debate judgment: {result['judgment']['winner']}]")
-            print(f"  {result['judgment']['reasoning']}\n")
-        elif mode == "vote":
-            print("[Running consensus vote...]")
-            result = consensus_vote(user_input, client)
-            winning_response = next(
-                r["response"]
-                for r in result["responses"]
-                if r["department"] == result["winner"]
-            )
-            print(f"[Winner: {result['winner']}] (votes: {result['votes']})")
-            print(f"Agent: {winning_response}\n")
-        else:
-            print("[Running full multi-agent pipeline...]")
-            result = multi_agent_answer(user_input, client)
-            print(f"[Supervised: {result['supervised']['department']}]")
-            print(f"  {result['supervised']['response'][:150]}...")
-            print(f"[Debate judgment: {result['judgment']['winner']}]")
-            print(f"  {result['judgment']['reasoning']}\n")
+        mode = handle_repl_command(user_input, mode, client)
 
 
 if __name__ == "__main__":

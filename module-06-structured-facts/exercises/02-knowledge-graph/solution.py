@@ -7,9 +7,12 @@ Run:  python solution.py
 """
 
 import networkx as nx
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from fact_extractor import Fact, load_logs, extract_facts, validate_facts
+
+load_dotenv()
 
 client = OpenAI()
 
@@ -32,7 +35,7 @@ class KnowledgeGraph:
             source_text=fact.source_text,
         )
 
-    def neighbours(self, entity: str) -> list[tuple]:
+    def neighbours(self, entity: str) -> list[tuple[str, str, str, float]]:
         """Return all edges connected to the entity (incoming + outgoing)."""
         edges = []
         if entity in self.graph:
@@ -49,7 +52,7 @@ class KnowledgeGraph:
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return None
 
-    def find_connections(self, entity: str, max_hops: int = 2) -> list[tuple]:
+    def find_connections(self, entity: str, max_hops: int = 2) -> list[tuple[str, str, str, float]]:
         """BFS from entity, return all edges within max_hops."""
         if entity not in self.graph:
             return []
@@ -98,10 +101,9 @@ def display_neighbours(kg: KnowledgeGraph, entity: str):
             print(f"    <--[{relation}]-- {source}  ({confidence:.2f})")
 
 
-def main():
-    print("Loading logs and extracting facts...")
+def ingest_facts_from_logs(client: OpenAI) -> KnowledgeGraph:
+    """Load all ship logs, extract and validate facts, build a knowledge graph."""
     logs = load_logs()
-
     all_facts = []
     for log in logs:
         facts, _ = extract_facts(log["content"], client)
@@ -115,6 +117,56 @@ def main():
     n_nodes = kg.graph.number_of_nodes()
     n_edges = kg.graph.number_of_edges()
     print(f"Graph ready: {n_nodes} entities, {n_edges} relationships.\n")
+    return kg
+
+
+def handle_repl_command(kg: KnowledgeGraph, cmd: str, args: str) -> bool:
+    """Dispatch a slash command. Returns True if the command was handled."""
+    if cmd == "/stats":
+        n_nodes = kg.graph.number_of_nodes()
+        n_edges = kg.graph.number_of_edges()
+        density = nx.density(kg.graph)
+        print(f"  Entities: {n_nodes} | Relationships: {n_edges} | Density: {density:.4f}")
+        return True
+
+    if cmd == "/entities":
+        nodes = sorted(kg.graph.nodes())
+        for node in nodes:
+            degree = kg.graph.degree(node)
+            print(f"  {node} ({degree} connections)")
+        return True
+
+    if cmd == "/path":
+        parts = args.split("->")
+        if len(parts) != 2:
+            print("  Usage: /path <from> -> <to>")
+            return True
+        start = parts[0].strip()
+        end = parts[1].strip()
+        path = kg.find_path(start, end)
+        if path:
+            print(f"  {' -> '.join(path)} ({len(path) - 1} hops)")
+        else:
+            print(f"  No path found between '{start}' and '{end}'.")
+        return True
+
+    if cmd == "/related":
+        entity = args.strip()
+        edges = kg.find_connections(entity, max_hops=2)
+        if edges:
+            print(f"  Connections within 2 hops of '{entity}':")
+            for source, target, relation, confidence in edges:
+                print(f"    {source} --[{relation}]--> {target}  ({confidence:.2f})")
+        else:
+            print(f"  '{entity}' not found or has no connections.")
+        return True
+
+    return False
+
+
+def main():
+    print("Loading logs and extracting facts...")
+    kg = ingest_facts_from_logs(client)
     print("Enter an entity name, a command, or 'quit'.\n")
 
     while True:
@@ -130,41 +182,11 @@ def main():
             print("Goodbye!")
             break
 
-        if user_input == "/stats":
-            density = nx.density(kg.graph)
-            print(f"  Entities: {n_nodes} | Relationships: {n_edges} | Density: {density:.4f}")
-            continue
+        parts = user_input.split(" ", 1)
+        cmd = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
 
-        if user_input == "/entities":
-            nodes = sorted(kg.graph.nodes())
-            for node in nodes:
-                degree = kg.graph.degree(node)
-                print(f"  {node} ({degree} connections)")
-            continue
-
-        if user_input.startswith("/path "):
-            parts = user_input[6:].split("->")
-            if len(parts) != 2:
-                print("  Usage: /path <from> -> <to>")
-                continue
-            start = parts[0].strip()
-            end = parts[1].strip()
-            path = kg.find_path(start, end)
-            if path:
-                print(f"  {' -> '.join(path)} ({len(path) - 1} hops)")
-            else:
-                print(f"  No path found between '{start}' and '{end}'.")
-            continue
-
-        if user_input.startswith("/related "):
-            entity = user_input[9:].strip()
-            edges = kg.find_connections(entity, max_hops=2)
-            if edges:
-                print(f"  Connections within 2 hops of '{entity}':")
-                for source, target, relation, confidence in edges:
-                    print(f"    {source} --[{relation}]--> {target}  ({confidence:.2f})")
-            else:
-                print(f"  '{entity}' not found or has no connections.")
+        if cmd.startswith("/") and handle_repl_command(kg, cmd, args):
             continue
 
         display_neighbours(kg, user_input)

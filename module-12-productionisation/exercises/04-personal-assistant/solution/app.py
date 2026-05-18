@@ -11,13 +11,12 @@ from sse_starlette.sse import EventSourceResponse
 from .agent import run_assistant, run_assistant_stream
 from .cache import SemanticCache
 from .config import DATA_DIR
-from .guardrails import TokenBudget, redact_pii
+from .guardrails import redact_pii
 from .rag import build_notes_index
 from .tracing import TraceContext
 
 notes_collection = None
 semantic_cache = SemanticCache()
-token_budget = TokenBudget()
 
 
 def _load_json(filename: str) -> list | dict:

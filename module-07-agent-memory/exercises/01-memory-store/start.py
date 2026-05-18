@@ -6,12 +6,12 @@ then wire them into an interactive chat agent.
 Run:  python start.py
 """
 from __future__ import annotations
-import json, time
+import time
 from dataclasses import dataclass, field
+from dotenv import load_dotenv
 from openai import OpenAI
-from pathlib import Path
 
-DATA_FILE = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+load_dotenv()
 
 
 @dataclass

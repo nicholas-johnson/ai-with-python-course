@@ -11,7 +11,10 @@ from __future__ import annotations
 import json
 import re
 import httpx
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 
 # ---------------------------------------------------------------------------

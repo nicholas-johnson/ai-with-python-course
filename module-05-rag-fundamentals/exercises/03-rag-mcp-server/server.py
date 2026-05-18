@@ -11,8 +11,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import chromadb
+from dotenv import load_dotenv
 from openai import OpenAI
 from mcp.server.fastmcp import FastMCP
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()

@@ -93,8 +93,10 @@ class TestMainFlow:
 )
 class TestIntegration:
     def test_live_chat(self):
+        from dotenv import load_dotenv
         from openai import OpenAI
 
+        load_dotenv()
         client = OpenAI()
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},

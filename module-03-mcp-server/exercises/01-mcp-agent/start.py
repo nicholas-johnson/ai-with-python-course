@@ -8,13 +8,15 @@ Run:  python start.py
 from __future__ import annotations
 
 import asyncio
-import json
 import sys
 from pathlib import Path
 
 import openai
+from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
+
+load_dotenv()
 
 SYSTEM_PROMPT = (
     "You are the DSS Pathfinder ship AI. Use the available tools to answer "
@@ -38,7 +40,32 @@ def mcp_to_openai_tools(mcp_tools: list) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# 2. Agent loop — ask LLM, call tools via MCP, repeat
+# 2. Single turn — one LLM call + tool execution loop
+# ---------------------------------------------------------------------------
+
+async def run_turn(
+    client: openai.OpenAI,
+    messages: list[dict],
+    session: ClientSession,
+    openai_tools: list[dict],
+    max_steps: int = 10,
+) -> str | None:
+    """Handle one LLM turn with tool execution until a final reply.
+
+    Returns the assistant's text reply, or None if max steps exceeded.
+
+    For up to max_steps:
+        1. Call client.chat.completions.create(...) with messages and openai_tools
+        2. If message.tool_calls: execute each via session.call_tool(), append results
+        3. Else if message.content: append and return it
+        4. Else: return None
+    """
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+# ---------------------------------------------------------------------------
+# 3. Agent REPL — read input, dispatch to run_turn
 # ---------------------------------------------------------------------------
 
 async def run_agent(
@@ -47,16 +74,7 @@ async def run_agent(
     openai_tools: list[dict],
     max_steps: int = 10,
 ) -> None:
-    """Interactive console agent loop.
-
-    For each user message:
-    1. Send messages + tools to OpenAI.
-    2. If the response has tool_calls:
-       - For each tool call, use `await session.call_tool(name, arguments=args)`
-       - The result has .content — a list of content blocks. Extract the text.
-       - Append the tool result to messages and loop.
-    3. If the response has content (no tool calls), print it and wait for next input.
-    """
+    """Interactive REPL that dispatches each user message to run_turn."""
     messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     print("DSS Pathfinder MCP Agent ready. Type a question (or 'quit').\n")
@@ -67,17 +85,16 @@ async def run_agent(
             break
 
         messages.append({"role": "user", "content": user_input})
+        reply = await run_turn(client, messages, session, openai_tools, max_steps)
 
-        # TODO: implement the tool-calling loop
-        # For up to max_steps:
-        #   1. Call client.chat.completions.create(...) with messages and openai_tools
-        #   2. If message.tool_calls: execute each via session.call_tool(), append results
-        #   3. Else if message.content: print and break
-        raise NotImplementedError("TODO")
+        if reply:
+            print(f"\nAgent: {reply}\n")
+        else:
+            print("\nAgent: (no response)\n")
 
 
 # ---------------------------------------------------------------------------
-# 3. Main — connect to server and run agent
+# 4. Main — connect to server and run agent
 # ---------------------------------------------------------------------------
 
 async def main() -> None:

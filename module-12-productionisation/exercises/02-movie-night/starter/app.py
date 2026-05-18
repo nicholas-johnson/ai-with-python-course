@@ -1,7 +1,5 @@
 """FastAPI backend for AI Movie Night — mood-based recommendations + text-to-SQL."""
 
-import json
-import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException

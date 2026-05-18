@@ -19,9 +19,12 @@ import json
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+load_dotenv()
 
 SERVER_SCRIPT = str(Path(__file__).parent / "server.py")
 MODEL = "gpt-4o-mini"

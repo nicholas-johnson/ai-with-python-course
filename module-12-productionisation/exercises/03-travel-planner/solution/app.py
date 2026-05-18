@@ -2,6 +2,7 @@
 
 import json
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,14 +14,6 @@ from .agent import plan_trip
 from .tools import get_weather
 from .guardrails import validate_budget, check_safety
 from .tracing import TraceContext
-
-app = FastAPI(title="AI Travel Planner")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 destinations: list[dict] = []
 collection = None
@@ -37,13 +30,23 @@ class SearchRequest(BaseModel):
     query: str
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global destinations, collection
     data_path = os.path.join(DATA_DIR, "destinations.json")
     with open(data_path) as f:
         destinations = json.load(f)
     collection = build_index(destinations)
+    yield
+
+
+app = FastAPI(title="AI Travel Planner", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/api/health")

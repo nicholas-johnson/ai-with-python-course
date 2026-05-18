@@ -5,11 +5,6 @@ Use web search as a fallback retrieval source when internal
 search results are insufficient.
 """
 
-import re
-from urllib.parse import quote_plus
-import httpx
-
-
 def web_search(query: str, max_results: int = 5) -> list[dict]:
     """
     Search DuckDuckGo and return parsed results.

@@ -19,7 +19,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import chromadb
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "ship_logs.json"
 CHROMA_HOST = "localhost"

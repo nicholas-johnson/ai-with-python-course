@@ -12,7 +12,10 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass, field
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 
 # ---------------------------------------------------------------------------

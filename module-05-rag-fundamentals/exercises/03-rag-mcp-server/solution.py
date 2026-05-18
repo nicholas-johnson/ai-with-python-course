@@ -9,32 +9,61 @@ Run:  python solution.py
 import asyncio
 import json
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+load_dotenv()
 
 SERVER_SCRIPT = "solution_server.py"
 
 
 def mcp_to_openai_tools(mcp_tools) -> list[dict]:
     """Convert MCP tool definitions to OpenAI function-calling format."""
-    openai_tools = []
-    for tool in mcp_tools:
-        openai_tools.append(
-            {
-                "type": "function",
-                "function": {
-                    "name": tool.name,
-                    "description": tool.description or "",
-                    "parameters": tool.inputSchema,
-                },
-            }
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": tool.name,
+                "description": tool.description or "",
+                "parameters": tool.inputSchema,
+            },
+        }
+        for tool in mcp_tools
+    ]
+
+
+async def run_turn(client, messages, session, openai_tools, max_steps: int = 10) -> str:
+    """Execute one conversational turn: call the LLM, handle tool calls, return final text."""
+    for _ in range(max_steps):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, tools=openai_tools,
         )
-    return openai_tools
+        choice = response.choices[0]
+
+        if choice.finish_reason != "tool_calls":
+            answer = choice.message.content or ""
+            messages.append({"role": "assistant", "content": answer})
+            return answer
+
+        messages.append(choice.message)
+        for tc in choice.message.tool_calls:
+            fn_name = tc.function.name
+            fn_args = json.loads(tc.function.arguments)
+            print(f"  [tool_call] {fn_name}({json.dumps(fn_args)})")
+
+            result = await session.call_tool(fn_name, fn_args)
+            result_text = result.content[0].text if result.content else "No result"
+            print(f"  [tool_result] {result_text[:150].replace(chr(10), ' ')}...")
+
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": result_text})
+
+    return "(max tool steps reached)"
 
 
 async def agent_loop(session, openai_tools, mcp_tools_map):
-    """Interactive agent loop with tool calling."""
+    """Interactive REPL: read user input, dispatch to run_turn."""
     client = OpenAI()
     messages = [
         {
@@ -54,66 +83,27 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
             user_input = input("You: ").strip()
         except (EOFError, KeyboardInterrupt):
             break
-
         if not user_input:
             continue
-
         if user_input.lower() == "quit":
             print("Goodbye!")
             break
-
         if user_input == "/tools":
             for name, tool in mcp_tools_map.items():
-                desc = tool.description or "No description"
-                print(f"  - {name}: {desc}")
+                print(f"  - {name}: {tool.description or 'No description'}")
             continue
 
         messages.append({"role": "user", "content": user_input})
-
-        while True:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                tools=openai_tools,
-            )
-            choice = response.choices[0]
-
-            if choice.finish_reason == "tool_calls":
-                for tc in choice.message.tool_calls:
-                    fn_name = tc.function.name
-                    fn_args = json.loads(tc.function.arguments)
-                    print(f"  [tool_call] {fn_name}({json.dumps(fn_args)})")
-
-                    result = await session.call_tool(fn_name, fn_args)
-                    result_text = result.content[0].text if result.content else "No result"
-                    preview = result_text[:150].replace("\n", " ")
-                    print(f"  [tool_result] {preview}...")
-
-                    messages.append(choice.message)
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": result_text,
-                        }
-                    )
-            else:
-                answer = choice.message.content
-                messages.append({"role": "assistant", "content": answer})
-                print(f"Agent: {answer}\n")
-                break
+        answer = await run_turn(client, messages, session, openai_tools)
+        print(f"Agent: {answer}\n")
 
 
 async def async_main():
-    server_params = StdioServerParameters(
-        command="python",
-        args=[SERVER_SCRIPT],
-    )
+    server_params = StdioServerParameters(command="python", args=[SERVER_SCRIPT])
 
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-
             tools_result = await session.list_tools()
             mcp_tools = tools_result.tools
             openai_tools = mcp_to_openai_tools(mcp_tools)

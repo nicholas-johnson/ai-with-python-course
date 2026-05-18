@@ -37,8 +37,10 @@ def main(client) -> None:
 
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     from openai import OpenAI
 
+    load_dotenv()
     client = OpenAI()
     print("DSS Pathfinder AI ready. Type a message (or 'quit').\n")
     main(client)

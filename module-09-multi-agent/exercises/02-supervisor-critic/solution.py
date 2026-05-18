@@ -7,9 +7,12 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import json
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from agents import classify_query, specialist_agent, DEPARTMENTS, SPECIALIST_PROMPTS
+
+load_dotenv()
 
 
 CRITIC_PROMPT = (
@@ -96,7 +99,7 @@ class SupervisorAgent:
                 },
             ],
         )
-        return result.choices[0].message.content
+        return result.choices[0].message.content or ""
 
 
 def run_supervised_query(query: str, client: OpenAI, max_revisions: int = 2) -> dict:

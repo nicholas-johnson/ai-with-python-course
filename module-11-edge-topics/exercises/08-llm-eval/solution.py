@@ -37,8 +37,12 @@ def llm_judge(
         }],
         temperature=0,
     )
-    text = response.choices[0].message.content.strip()
-    text = text.strip("```json").strip("```").strip()
+    text = (response.choices[0].message.content or "").strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[-1]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
     try:
         result = json.loads(text)
     except json.JSONDecodeError:

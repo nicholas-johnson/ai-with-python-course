@@ -191,6 +191,9 @@ def demo_guardrails(client: OpenAI):
 
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+
     client = OpenAI()
 
     demo_model_selection(client)

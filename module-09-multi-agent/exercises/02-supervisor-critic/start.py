@@ -6,10 +6,12 @@ The critic validates each response before it reaches the user.
 Run:  python start.py
 """
 from __future__ import annotations
-import json
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from agents import classify_query, specialist_agent, DEPARTMENTS, SPECIALIST_PROMPTS
+
+load_dotenv()
 
 
 CRITIC_PROMPT = (

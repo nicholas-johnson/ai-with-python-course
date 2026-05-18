@@ -1,8 +1,6 @@
 """RAG pipeline — indexing, hybrid search, and reranking."""
 
 import json
-import math
-from collections import defaultdict
 
 import chromadb
 from openai import OpenAI

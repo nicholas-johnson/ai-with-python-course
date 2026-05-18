@@ -11,7 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import chromadb
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()
@@ -52,7 +55,7 @@ def build_index(
 
     try:
         chroma.delete_collection(collection_name)
-    except Exception:
+    except ValueError:
         pass
     collection = chroma.create_collection(collection_name)
 
@@ -140,6 +143,44 @@ def display_results(hits: list[dict]):
         print(f"  [{score:.2f}] {hit['id']} ({source}): \"{preview}...\"")
 
 
+def print_collection_stats(collection: chromadb.Collection):
+    """Display summary statistics for the indexed collection."""
+    count = collection.count()
+    all_meta = collection.get()["metadatas"]
+    sources = {m["source_id"] for m in all_meta}
+    avg_len = sum(len(d) for d in collection.get()["documents"]) / max(count, 1)
+    print(f"  Collection: ship_logs | {count} chunks | avg {avg_len:.0f} chars | {len(sources)} source logs")
+
+
+def show_chunk_by_id(collection: chromadb.Collection, chunk_id: str):
+    """Retrieve and display a single chunk by its ID."""
+    try:
+        result = collection.get(ids=[chunk_id])
+        if result["documents"]:
+            meta = result["metadatas"][0]
+            print(f"  Source: {meta.get('source_id', '?')} | Index: {meta.get('chunk_index', '?')}")
+            print(f"  Author: {meta.get('author', '?')} | Category: {meta.get('category', '?')}")
+            print(f"  \"{result['documents'][0]}\"")
+        else:
+            print(f"  Chunk '{chunk_id}' not found.")
+    except Exception as e:
+        print(f"  Error: {e}")
+
+
+def show_similar_chunks(collection: chromadb.Collection, chunk_id: str, k: int = 5):
+    """Find and display chunks similar to the given chunk."""
+    try:
+        result = collection.get(ids=[chunk_id])
+        if result["documents"]:
+            hits = search(collection, result["documents"][0], k=k)
+            filtered = [h for h in hits if h["id"] != chunk_id]
+            display_results(filtered)
+        else:
+            print(f"  Chunk '{chunk_id}' not found.")
+    except Exception as e:
+        print(f"  Error: {e}")
+
+
 def main():
     print("Loading ship logs...")
     logs = load_logs()
@@ -148,8 +189,6 @@ def main():
     collection = build_index(logs)
     print(f"Index ready. {collection.count()} chunks indexed.\n")
     print("Type a query, or a command (/stats, /chunk <id>, /similar <id>), or 'quit'.\n")
-
-    last_query = None
 
     while True:
         try:
@@ -165,43 +204,19 @@ def main():
             break
 
         if user_input == "/stats":
-            count = collection.count()
-            all_meta = collection.get()["metadatas"]
-            sources = {m["source_id"] for m in all_meta}
-            avg_len = sum(len(d) for d in collection.get()["documents"]) / max(count, 1)
-            print(f"  Collection: ship_logs | {count} chunks | avg {avg_len:.0f} chars | {len(sources)} source logs")
+            print_collection_stats(collection)
             continue
 
         if user_input.startswith("/chunk "):
             chunk_id = user_input.split(" ", 1)[1].strip()
-            try:
-                result = collection.get(ids=[chunk_id])
-                if result["documents"]:
-                    meta = result["metadatas"][0]
-                    print(f"  Source: {meta.get('source_id', '?')} | Index: {meta.get('chunk_index', '?')}")
-                    print(f"  Author: {meta.get('author', '?')} | Category: {meta.get('category', '?')}")
-                    print(f"  \"{result['documents'][0]}\"")
-                else:
-                    print(f"  Chunk '{chunk_id}' not found.")
-            except Exception as e:
-                print(f"  Error: {e}")
+            show_chunk_by_id(collection, chunk_id)
             continue
 
         if user_input.startswith("/similar "):
             chunk_id = user_input.split(" ", 1)[1].strip()
-            try:
-                result = collection.get(ids=[chunk_id])
-                if result["documents"]:
-                    hits = search(collection, result["documents"][0], k=5)
-                    filtered = [h for h in hits if h["id"] != chunk_id]
-                    display_results(filtered)
-                else:
-                    print(f"  Chunk '{chunk_id}' not found.")
-            except Exception as e:
-                print(f"  Error: {e}")
+            show_similar_chunks(collection, chunk_id)
             continue
 
-        last_query = user_input
         hits = search(collection, user_input)
         display_results(hits)
         print()

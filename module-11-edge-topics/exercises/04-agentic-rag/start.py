@@ -5,7 +5,6 @@ The agent decides whether to retrieve, what to search for,
 and when it has enough information to answer.
 """
 
-import json
 from openai import OpenAI
 
 

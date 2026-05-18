@@ -5,7 +5,6 @@ Evaluate RAG answers using an LLM judge that scores
 correctness, completeness, and relevance.
 """
 
-import json
 from openai import OpenAI
 
 

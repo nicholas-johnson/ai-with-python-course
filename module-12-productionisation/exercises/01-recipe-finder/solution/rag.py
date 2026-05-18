@@ -1,7 +1,6 @@
 """RAG pipeline — indexing, hybrid search, and reranking."""
 
 import json
-import math
 from collections import defaultdict
 
 import chromadb
@@ -17,7 +16,7 @@ def build_index(recipes: list[dict]) -> tuple[chromadb.Collection, chromadb.Clie
     chroma = chromadb.Client()
     try:
         chroma.delete_collection("recipes")
-    except Exception:
+    except ValueError:
         pass
     collection = chroma.create_collection("recipes")
 
@@ -152,10 +151,12 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
     )
 
     try:
-        raw = response.choices[0].message.content.strip()
-        raw = raw.strip("`").strip()
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
+        raw = (response.choices[0].message.content or "").strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1]
+        if raw.endswith("```"):
+            raw = raw[:-3]
+        raw = raw.strip()
         ranking = json.loads(raw)
         reranked = []
         for idx in ranking[:top_k]:

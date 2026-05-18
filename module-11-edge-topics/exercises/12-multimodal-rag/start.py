@@ -6,7 +6,6 @@ by describing images with a vision model before embedding.
 """
 
 import math
-import base64
 from openai import OpenAI
 
 

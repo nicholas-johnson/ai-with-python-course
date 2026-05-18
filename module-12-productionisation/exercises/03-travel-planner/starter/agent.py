@@ -8,7 +8,6 @@ import chromadb
 from .config import OPENAI_MODEL
 from .tools import get_weather, estimate_budget, estimate_travel_time
 from .rag import search_attractions
-from .tracing import TraceContext
 
 client = OpenAI()
 

@@ -195,8 +195,10 @@ class TestGuardedAgent:
 )
 class TestIntegration:
     def test_guarded_agent_blocks_search_crew(self):
+        from dotenv import load_dotenv
         from openai import OpenAI
 
+        load_dotenv()
         client = OpenAI()
         al = AllowList(permitted={"get_crew_count", "get_ship_status"})
         rl = RateLimiter(max_calls=10, window_seconds=60.0)

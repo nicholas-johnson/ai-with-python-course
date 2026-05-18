@@ -10,7 +10,10 @@ Run:  python module-09-multi-agent/demo/demo.py
 from __future__ import annotations
 
 import json
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 MODEL = "gpt-4o-mini"
 

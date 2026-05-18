@@ -2,7 +2,10 @@
 Exercise 03 — Prompt Engineering (solution)
 """
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 MODEL = "gpt-4o-mini"
 
@@ -150,7 +153,7 @@ def main() -> None:
     print("\nChallenges to complete:")
     for name in CHALLENGES:
         print(f"  {name}")
-    print(f"\nType a name to select it, then enter messages. Type 'quit' to exit.\n")
+    print("\nType a name to select it, then enter messages. Type 'quit' to exit.\n")
 
     current_prompt = None
     current_name = None

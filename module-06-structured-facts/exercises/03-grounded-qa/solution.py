@@ -9,10 +9,13 @@ Run:  python solution.py
 import json
 from dataclasses import dataclass, field
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from fact_extractor import load_logs, extract_facts, validate_facts
 from graph_builder import build_graph, KnowledgeGraph
+
+load_dotenv()
 
 client = OpenAI()
 
@@ -167,17 +170,62 @@ def display_evidence(evidence: list[dict], brief: bool = False):
             print(f"  Confidence: {e['confidence']:.2f}")
 
 
-def main():
-    print("Loading logs, extracting facts, and building graph...")
+def build_graph_from_logs(client: OpenAI) -> KnowledgeGraph:
+    """Load all ship logs, extract facts, validate, and build a knowledge graph."""
     logs = load_logs()
-
     all_facts = []
     for log in logs:
         facts, _ = extract_facts(log["content"], client)
         validated = validate_facts(facts)
         all_facts.extend(validated)
+    return build_graph(all_facts)
 
-    graph = build_graph(all_facts)
+
+def handle_repl_command(
+    graph: KnowledgeGraph,
+    client: OpenAI,
+    cmd: str,
+    args: str,
+    last_question: str | None = None,
+    last_evidence: list[dict] | None = None,
+) -> int | None:
+    """Dispatch a slash command. Returns new max_hops for /hops, else None."""
+    if cmd == "/evidence":
+        if last_evidence:
+            print("\n  === Retrieved Evidence ===")
+            display_evidence(last_evidence, brief=False)
+            print()
+        else:
+            print("  No previous query. Ask a question first.")
+        return None
+
+    if cmd == "/nograph":
+        if last_question:
+            print("  (Without graph)")
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": last_question}],
+            )
+            print(f"  {response.choices[0].message.content}\n")
+        else:
+            print("  No previous query. Ask a question first.")
+        return None
+
+    if cmd == "/hops":
+        try:
+            new_hops = int(args)
+            print(f"  Traversal depth set to {new_hops} hops.\n")
+            return new_hops
+        except ValueError:
+            print("  Usage: /hops <number>")
+        return None
+
+    return None
+
+
+def main():
+    print("Loading logs, extracting facts, and building graph...")
+    graph = build_graph_from_logs(client)
     n_nodes = graph.graph.number_of_nodes()
     n_edges = graph.graph.number_of_edges()
     print(f"Graph ready: {n_nodes} entities, {n_edges} relationships.")
@@ -200,33 +248,17 @@ def main():
             print("Goodbye!")
             break
 
-        if user_input == "/evidence":
-            if last_evidence:
-                print("\n  === Retrieved Evidence ===")
-                display_evidence(last_evidence, brief=False)
-                print()
-            else:
-                print("  No previous query. Ask a question first.")
-            continue
+        parts = user_input.split(" ", 1)
+        cmd = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
 
-        if user_input == "/nograph":
-            if last_question:
-                print("  (Without graph)")
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": last_question}],
-                )
-                print(f"  {response.choices[0].message.content}\n")
-            else:
-                print("  No previous query. Ask a question first.")
-            continue
-
-        if user_input.startswith("/hops "):
-            try:
-                max_hops = int(user_input.split(" ", 1)[1])
-                print(f"  Traversal depth set to {max_hops} hops.\n")
-            except ValueError:
-                print("  Usage: /hops <number>")
+        if cmd.startswith("/"):
+            result = handle_repl_command(
+                graph, client, cmd, args,
+                last_question=last_question, last_evidence=last_evidence,
+            )
+            if cmd == "/hops" and result is not None:
+                max_hops = result
             continue
 
         last_question = user_input

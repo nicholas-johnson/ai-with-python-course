@@ -6,8 +6,10 @@ user queries to the right specialist using LLM-based classification.
 Run:  python start.py
 """
 from __future__ import annotations
-import json
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DEPARTMENTS = ["navigation", "engineering", "science"]
 

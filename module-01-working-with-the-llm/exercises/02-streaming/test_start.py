@@ -95,8 +95,10 @@ class TestStreamResponse:
 )
 class TestIntegration:
     def test_live_streaming(self, capsys):
+        from dotenv import load_dotenv
         from openai import OpenAI
 
+        load_dotenv()
         client = OpenAI()
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},

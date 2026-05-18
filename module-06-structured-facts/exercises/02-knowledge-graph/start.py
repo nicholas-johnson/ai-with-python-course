@@ -7,11 +7,14 @@ Run:  python start.py
 """
 
 import networkx as nx
+from dotenv import load_dotenv
+from openai import OpenAI
 
-from fact_extractor import Fact
+from fact_extractor import Fact, load_logs, extract_facts, validate_facts
 
-# TODO: import load_logs, extract_facts, validate_facts from fact_extractor
-# TODO: import OpenAI from openai
+load_dotenv()
+
+client = OpenAI()
 
 
 class KnowledgeGraph:
@@ -20,40 +23,79 @@ class KnowledgeGraph:
     def __init__(self):
         self.graph = nx.DiGraph()
 
-    # TODO: Implement add_fact(fact: Fact)
-    #   Add subject and object as nodes (with metadata if available).
-    #   Add an edge from subject to object with the predicate as the relation
-    #   and confidence as a weight.
+    def add_fact(self, fact: Fact):
+        """Add a fact as nodes + edge in the graph."""
+        raise NotImplementedError("TODO: add subject/object as nodes and predicate as edge")
 
-    # TODO: Implement neighbours(entity: str) -> list[tuple]
-    #   Return all edges connected to the entity (both incoming and outgoing).
-    #   Each tuple: (source, target, relation, confidence)
+    def neighbours(self, entity: str) -> list[tuple]:
+        """Return all edges connected to the entity (incoming + outgoing)."""
+        raise NotImplementedError("TODO: return (source, target, relation, confidence) tuples")
 
-    # TODO: Implement find_path(start: str, end: str) -> list[str] | None
-    #   Return the shortest path between two entities, or None if no path exists.
+    def find_path(self, start: str, end: str) -> list[str] | None:
+        """Find shortest path between two entities."""
+        raise NotImplementedError("TODO: use nx.shortest_path")
 
-    # TODO: Implement find_connections(entity: str, max_hops: int = 2) -> list[tuple]
-    #   BFS from the entity, return all edges within max_hops.
+    def find_connections(self, entity: str, max_hops: int = 2) -> list[tuple]:
+        """BFS from entity, return all edges within max_hops."""
+        raise NotImplementedError("TODO: BFS returning (source, target, relation, confidence) tuples")
 
 
-# TODO: Implement build_graph(facts: list[Fact]) -> KnowledgeGraph
-#   Create a KnowledgeGraph, call add_fact for each fact, return the graph.
+def build_graph(facts: list[Fact]) -> KnowledgeGraph:
+    """Build a knowledge graph from a list of Facts."""
+    raise NotImplementedError("TODO: create KnowledgeGraph, add each fact, return it")
+
+
+def display_neighbours(kg: KnowledgeGraph, entity: str):
+    """Print all connections for an entity."""
+    edges = kg.neighbours(entity)
+    if not edges:
+        print(f"  '{entity}' not found in graph.")
+        return
+    print(f"  {entity}:")
+    for source, target, relation, confidence in edges:
+        if source == entity:
+            print(f"    --[{relation}]--> {target}  ({confidence:.2f})")
+        else:
+            print(f"    <--[{relation}]-- {source}  ({confidence:.2f})")
+
+
+def ingest_facts_from_logs(client: OpenAI) -> KnowledgeGraph:
+    """Load all ship logs, extract and validate facts, build a knowledge graph."""
+    raise NotImplementedError("TODO: load logs, extract/validate facts, build and return graph")
+
+
+def handle_repl_command(kg: KnowledgeGraph, cmd: str, args: str) -> bool:
+    """Dispatch a slash command. Returns True if the command was handled."""
+    raise NotImplementedError("TODO: handle /stats, /entities, /path, /related commands")
 
 
 def main():
     print("Loading logs and extracting facts...")
+    kg = ingest_facts_from_logs(client)
+    print("Enter an entity name, a command, or 'quit'.\n")
 
-    # TODO: Load logs, extract and validate facts from all logs
-    # TODO: Build the graph
-    # TODO: Interactive loop:
-    #   - entity name -> show neighbours
-    #   - /path <from> -> <to> -> find_path
-    #   - /stats -> node count, edge count, density
-    #   - /entities -> list all nodes
-    #   - /related <entity> -> find_connections with max_hops=2
-    #   - quit -> break
+    while True:
+        try:
+            user_input = input("> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
 
-    print("TODO: implement KnowledgeGraph and build_graph, then uncomment the loop.")
+        if not user_input:
+            continue
+
+        if user_input.lower() == "quit":
+            print("Goodbye!")
+            break
+
+        parts = user_input.split(" ", 1)
+        cmd = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
+
+        if cmd.startswith("/") and handle_repl_command(kg, cmd, args):
+            continue
+
+        display_neighbours(kg, user_input)
+        print()
 
 
 if __name__ == "__main__":

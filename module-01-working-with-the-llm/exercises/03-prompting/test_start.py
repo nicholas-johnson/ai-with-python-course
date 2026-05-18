@@ -98,7 +98,10 @@ class TestRunPrompt:
 class TestIntegration:
     @pytest.fixture(scope="class")
     def client(self):
+        from dotenv import load_dotenv
         from openai import OpenAI
+
+        load_dotenv()
         return OpenAI()
 
     def test_pirate_prompt(self, client):

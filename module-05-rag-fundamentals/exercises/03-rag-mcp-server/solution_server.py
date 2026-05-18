@@ -11,8 +11,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import chromadb
+from dotenv import load_dotenv
 from openai import OpenAI
 from mcp.server.fastmcp import FastMCP
+
+load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()
@@ -52,7 +55,7 @@ def build_index(
     chroma = chromadb.Client()
     try:
         chroma.delete_collection(collection_name)
-    except Exception:
+    except ValueError:
         pass
     collection = chroma.create_collection(collection_name)
 
@@ -128,12 +131,19 @@ def rag_chat(query: str, collection_ref, k: int = 5) -> tuple[str, list[dict]]:
     return response.choices[0].message.content, passages
 
 
-# --- Build index at startup ---
+# --- Lazy index init ---
 
-print("RAG Server: loading logs and building index...", flush=True)
-logs = load_logs()
-collection = build_index(logs)
-print(f"RAG Server: index ready ({collection.count()} chunks)", flush=True)
+_collection = None
+
+
+def _get_collection() -> chromadb.Collection:
+    global _collection
+    if _collection is None:
+        print("RAG Server: loading logs and building index...", flush=True)
+        logs = load_logs()
+        _collection = build_index(logs)
+        print(f"RAG Server: index ready ({_collection.count()} chunks)", flush=True)
+    return _collection
 
 
 # --- MCP tools ---
@@ -141,7 +151,7 @@ print(f"RAG Server: index ready ({collection.count()} chunks)", flush=True)
 @mcp.tool()
 def search_docs(query: str, k: int = 5) -> str:
     """Search the document index for relevant passages."""
-    hits = search(collection, query, k)
+    hits = search(_get_collection(), query, k)
     lines = []
     for hit in hits:
         source = hit["metadata"].get("source_id", "?")
@@ -155,7 +165,7 @@ def search_docs(query: str, k: int = 5) -> str:
 def get_chunk(chunk_id: str) -> str:
     """Retrieve the full text of a specific chunk by ID."""
     try:
-        result = collection.get(ids=[chunk_id])
+        result = _get_collection().get(ids=[chunk_id])
         if result["documents"]:
             meta = result["metadatas"][0]
             return json.dumps({
@@ -174,7 +184,7 @@ def get_chunk(chunk_id: str) -> str:
 @mcp.tool()
 def ask_docs(question: str) -> str:
     """Ask a question and get a RAG-generated answer with citations."""
-    answer, passages = rag_chat(question, collection)
+    answer, passages = rag_chat(question, _get_collection())
     source_lines = []
     for i, p in enumerate(passages, 1):
         source = p["metadata"].get("source_id", "unknown")
@@ -187,7 +197,7 @@ def ask_docs(question: str) -> str:
 @mcp.tool()
 def list_sources() -> str:
     """List all source document IDs in the index."""
-    all_meta = collection.get()["metadatas"]
+    all_meta = _get_collection().get()["metadatas"]
     source_ids = sorted({m["source_id"] for m in all_meta})
     return "\n".join(f"- {sid}" for sid in source_ids)
 

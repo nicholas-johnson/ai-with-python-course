@@ -7,10 +7,13 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from react_agent import run_react, TOOLS, print_trace
+
+load_dotenv()
 
 
 @dataclass
@@ -54,7 +57,7 @@ def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
         ],
     )
 
-    raw = response.choices[0].message.content
+    raw = response.choices[0].message.content or "{}"
     data = json.loads(raw)
     steps_data = data.get("steps", [])
 
@@ -117,7 +120,7 @@ def revise_plan(
         ],
     )
 
-    raw = response.choices[0].message.content
+    raw = response.choices[0].message.content or "{}"
     data = json.loads(raw)
     steps_data = data.get("steps", [])
 

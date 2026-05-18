@@ -21,13 +21,13 @@ BUDGET_RATES = {
 def get_weather(city: str) -> dict:
     """Return mock weather data for a city."""
     seed = sum(ord(c) for c in city.lower())
-    random.seed(seed)
-    pattern = random.choice(list(WEATHER_DATA.keys()))
+    rng = random.Random(seed)
+    pattern = rng.choice(list(WEATHER_DATA.keys()))
     data = WEATHER_DATA[pattern].copy()
     data["city"] = city
-    data["temp_c"] += random.randint(-3, 3)
+    data["temp_c"] += rng.randint(-3, 3)
     data["forecast"] = [
-        random.choice(["Sunny", "Partly cloudy", "Light rain", "Clear"])
+        rng.choice(["Sunny", "Partly cloudy", "Light rain", "Clear"])
         for _ in range(5)
     ]
     return data
@@ -54,8 +54,8 @@ def estimate_budget(activities: list[str], budget_level: str) -> dict:
 def estimate_travel_time(from_loc: str, to_loc: str) -> dict:
     """Return mock travel time between two locations."""
     seed = sum(ord(c) for c in (from_loc + to_loc).lower())
-    random.seed(seed)
-    minutes = random.randint(10, 90)
+    rng = random.Random(seed)
+    minutes = rng.randint(10, 90)
     return {
         "from": from_loc,
         "to": to_loc,
