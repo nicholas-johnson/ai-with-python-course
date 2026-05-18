@@ -1,5 +1,5 @@
 """
-Exercise 3: Multimodal -- Vision and Audio -- SOLUTION
+Exercise 2: Multimodal -- Vision and Audio -- SOLUTION
 """
 
 import asyncio
@@ -59,7 +59,7 @@ class MCPConnection:
     async def connect(self):
         server_params = StdioServerParameters(
             command=sys.executable,
-            args=[str(Path(__file__).parent / "solution_server.py")],
+            args=[str(Path(__file__).parent / "server.py")],
         )
         self._cm = stdio_client(server_params)
         self._read, self._write = await self._cm.__aenter__()

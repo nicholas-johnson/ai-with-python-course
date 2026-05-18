@@ -15,14 +15,13 @@
 
 ## The project
 
-Delegates build the backend for an **AI Research Assistant** across three chained exercises. A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Each exercise adds a new capability -- the frontend progressively lights up as endpoints come online.
+Delegates build the backend for an **AI Research Assistant** across two chained exercises. A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Each exercise adds a new capability -- the frontend progressively lights up as endpoints come online.
 
 ```
-frontend/          <- Provided. pnpm dev to start.
+frontend/              <- Provided. pnpm dev to start.
 exercises/
-  01-chat-api/     <- Streaming chat API
-  02-tool-chat/    <- MCP server + tool-calling loop
-  03-multimodal/   <- Vision + audio endpoints
+  01-research-chat/    <- Streaming chat with MCP tools (server provided)
+  02-multimodal/       <- Vision + audio endpoints
 ```
 
 ---
@@ -134,17 +133,16 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 python module-04-genai-strategies/demo/demo.py
 ```
 
-Walks through both topics interactively — press Enter between sections:
-1. **Model selection** — same task on GPT-4o vs GPT-4o-mini, comparing latency, tokens, and quality
-2. **Guardrails** — Pydantic schema validation, content filtering, confidence gating — 4 test cases then a live LLM response
+A quick multimodal demo — press Enter between sections:
+1. **Vision** — sends a sample image to GPT-4o and prints the structured analysis
+2. **Audio** — sends a sample WAV to Whisper and prints the transcript
 
 ## Exercises
 
 | # | Folder | What you build |
 |---|--------|---------------|
-| 1 | [`exercises/01-chat-api`](exercises/01-chat-api/) | **Streaming Chat** — FastAPI with SSE streaming `/chat` and `/health` endpoints. |
-| 2 | [`exercises/02-tool-chat`](exercises/02-tool-chat/) | **MCP Research Tools** — Build an MCP server with web fetch + notes, extend chat with a tool-calling loop. |
-| 3 | [`exercises/03-multimodal`](exercises/03-multimodal/) | **Vision & Audio** — Add `/vision` (GPT-4o image analysis) and `/transcribe` (Whisper) endpoints. |
+| 1 | [`exercises/01-research-chat`](exercises/01-research-chat/) | **Research Chat** — Streaming chat with MCP tool calling (server provided). Wire up SSE streaming, tool discovery, and the tool-calling loop. |
+| 2 | [`exercises/02-multimodal`](exercises/02-multimodal/) | **Vision & Audio** — Add `/vision` (GPT-4o image analysis) and `/transcribe` (Whisper) endpoints. |
 
 ### Frontend
 

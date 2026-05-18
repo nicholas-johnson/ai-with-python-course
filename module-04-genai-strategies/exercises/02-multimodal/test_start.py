@@ -1,4 +1,4 @@
-"""Tests for Exercise 3: Multimodal"""
+"""Tests for Exercise 2: Multimodal"""
 
 import base64
 import importlib

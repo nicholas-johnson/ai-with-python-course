@@ -81,6 +81,7 @@ import {
   PenTool,
   Image,
   List,
+  Wifi,
 } from "lucide-react";
 
 // Map icon names to Lucide components
@@ -160,6 +161,7 @@ const iconMap = {
   "check-square": CheckSquare,
 
   // Communication
+  wifi: Wifi,
   "message-square": MessageSquare,
   globe: Globe,
   world: Globe,

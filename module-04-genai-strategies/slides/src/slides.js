@@ -15,7 +15,7 @@ export const slides = [
       points: [
         'Build a **Research Assistant** web app — streaming chat, tool use, vision, and audio.',
         'Model selection: choosing the right model for **quality, cost, and latency**.',
-        'Multimodal: **vision**/image analysis, **speech-to-text** (Whisper), text-to-speech.',
+        'Multimodal: **vision**/image analysis, **speech-to-text** (Whisper).',
         'Guardrails: schema validation, content filters, and **confidence thresholds**.',
       ],
     },
@@ -35,7 +35,7 @@ export const slides = [
     },
   },
 
-  // ---- Section: Model selection + tokens ----
+  // ---- Section A: Model selection + tokens ----
   {
     type: 'title',
     content: {
@@ -83,23 +83,81 @@ def enforce_budget(messages, max_tokens):
       ],
     },
   },
-  // ---- Demo: Model selection ----
+
+  // ---- Section B: AI in the browser ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Model selection',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
-      icon: 'rocket',
+      title: 'AI in the browser',
+      subtitle: 'SSE streaming and MCP tool integration',
+      icon: 'globe',
     },
   },
 
-  // ---- Section: Multimodal + guardrails ----
+  {
+    type: 'standard',
+    content: {
+      title: 'Server-Sent Events (SSE)',
+      icon: 'wifi',
+      points: [
+        '**One-way channel** from server to client over plain HTTP — no WebSocket handshake needed.',
+        'Perfect for LLM streaming: each token arrives as it is generated.',
+        'FastAPI + `sse-starlette`: wrap an **async generator** in `EventSourceResponse`.',
+        'Four event types: `token` (incremental text), `tool_call`, `tool_result`, `done` (final message).',
+        'The browser reads events with `EventSource` or a `fetch` + `ReadableStream`.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'SSE streaming pattern',
+      code: `@app.post("/chat")
+async def chat(req: ChatRequest):
+    async def generate():
+        stream = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, stream=True
+        )
+        full = ""
+        for chunk in stream:
+            token = chunk.choices[0].delta.content
+            if token:
+                full += token
+                yield {"event": "token",
+                       "data": json.dumps({"token": token})}
+
+        yield {"event": "done",
+               "data": json.dumps({"role": "assistant", "content": full})}
+
+    return EventSourceResponse(generate())`,
+      highlights: [
+        'The async generator yields dicts with "event" and "data" keys',
+        'EventSourceResponse handles the SSE wire format automatically',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'MCP tools in a web API',
+      icon: 'server',
+      points: [
+        '**Lifespan**: on startup, spawn the MCP server as a subprocess and connect via stdio.',
+        '**Discovery**: call `session.list_tools()` and convert schemas to OpenAI function-calling format.',
+        '**Tool-calling loop**: LLM returns `tool_calls` → execute via MCP → feed results back → repeat.',
+        'Stream **tool_call** and **tool_result** SSE events so the frontend can show progress.',
+        'On shutdown, clean up the MCP session and subprocess.',
+      ],
+    },
+  },
+
+  // ---- Section C: Multimodal ----
   {
     type: 'title',
     content: {
-      title: 'Multimodal + guardrails',
-      subtitle: 'Vision, audio, and defence in depth',
-      icon: 'shield',
+      title: 'Multimodal — see and hear',
+      subtitle: 'Vision with GPT-4o and audio with Whisper',
+      icon: 'image',
     },
   },
 
@@ -109,10 +167,10 @@ def enforce_budget(messages, max_tokens):
       title: 'Multimodal inputs',
       icon: 'image',
       points: [
-        '**Vision**: send images as base64 or URL in user messages.',
+        '**Vision**: send images as base64 data URIs or public URLs in user messages.',
         '**Audio input**: Whisper API transcribes speech to text.',
-        '**Audio output**: TTS API generates spoken responses.',
-        'Same message format — just different content types.',
+        'Same chat completions API — content is just a **list of parts** instead of a string.',
+        'Use `response_format: {"type": "json_object"}` to get structured vision output.',
       ],
     },
   },
@@ -138,6 +196,37 @@ def enforce_budget(messages, max_tokens):
       ],
     },
   },
+  {
+    type: 'code',
+    content: {
+      title: 'Audio — Whisper transcription',
+      code: `import io
+
+audio_file = io.BytesIO(audio_bytes)
+audio_file.name = "recording.wav"
+
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file,
+)
+print(transcript.text)  # "Hello, this is a voice memo about..."`,
+      highlights: [
+        'Whisper accepts file-like objects — wrap raw bytes in BytesIO',
+        'Set .name so the API knows the audio format',
+      ],
+    },
+  },
+
+  // ---- Section D: Guardrails ----
+  {
+    type: 'title',
+    content: {
+      title: 'Guardrails — defence in depth',
+      subtitle: 'Schema validation, content filters, confidence gates',
+      icon: 'shield',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -202,17 +291,18 @@ def enforce_budget(messages, max_tokens):
       },
     },
   },
-  // ---- Demo: Guardrails ----
+
+  // ---- Demo ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Guardrails',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      title: 'Demo — Multimodal',
+      subtitle: 'Switch to terminal: python demo/demo.py',
       icon: 'rocket',
     },
   },
 
-  // ---- Section: Wrap-up ----
+  // ---- Wrap-up ----
   {
     type: 'title',
     content: {
@@ -245,9 +335,8 @@ def enforce_budget(messages, max_tokens):
     content: {
       title: 'Exercises — Build the Research Assistant',
       points: [
-        '01 — Streaming chat API: FastAPI with SSE streaming endpoints',
-        '02 — MCP research tools: web fetch + notes with a tool-calling loop',
-        '03 — Multimodal: vision (GPT-4o image analysis) and audio (Whisper)',
+        '01 — Research chat: streaming chat with MCP tool calling (server provided)',
+        '02 — Multimodal: add vision (GPT-4o image analysis) and audio (Whisper)',
       ],
     },
   },

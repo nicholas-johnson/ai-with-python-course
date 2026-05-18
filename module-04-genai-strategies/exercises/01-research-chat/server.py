@@ -14,10 +14,13 @@ NOTES_DIR = Path(__file__).parent / "notes"
 NOTES_DIR.mkdir(exist_ok=True)
 
 
+HEADERS = {"User-Agent": "ResearchAssistant/1.0 (educational project)"}
+
+
 @mcp.tool()
 async def fetch_url(url: str) -> str:
     """Fetch a web page and return its text content (HTML stripped)."""
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(headers=HEADERS) as client:
         resp = await client.get(url, follow_redirects=True, timeout=15)
         resp.raise_for_status()
     text = re.sub(r"<[^>]+>", " ", resp.text)

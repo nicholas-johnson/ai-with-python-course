@@ -1,15 +1,24 @@
 """
-Exercise 2: Tool-Calling Chat API -- SOLUTION
+Exercise 2: Multimodal -- Vision and Audio
+============================================
+Extend the Research Assistant with two new endpoints:
+  POST /vision     -> analyse an image with GPT-4o
+  POST /transcribe -> transcribe audio with Whisper
+
+Ships with the Exercise 1 solution (chat + MCP tools).
+
+Run with:  uvicorn start:app --reload --port 8000
 """
 
 import asyncio
+import io
 import json
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -58,7 +67,7 @@ class MCPConnection:
     async def connect(self):
         server_params = StdioServerParameters(
             command=sys.executable,
-            args=[str(Path(__file__).parent / "solution_server.py")],
+            args=[str(Path(__file__).parent / "server.py")],
         )
         self._cm = stdio_client(server_params)
         self._read, self._write = await self._cm.__aenter__()
@@ -101,6 +110,16 @@ class ChatRequest(BaseModel):
     messages: list[dict]
 
 
+class VisionRequest(BaseModel):
+    image: str
+    prompt: str = "Describe and analyse this image in detail."
+
+
+class VisionResponse(BaseModel):
+    description: str
+    key_points: list[str]
+
+
 async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
     """Execute MCP tool calls and return tool-result messages."""
     results = []
@@ -114,6 +133,38 @@ async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
             "content": content,
         })
     return results
+
+
+# -- TODO: Implement these two functions --
+
+
+async def transcribe_audio(audio_bytes: bytes) -> str:
+    """Send audio bytes to OpenAI Whisper and return the transcript text.
+
+    Steps:
+      1. Wrap audio_bytes in an io.BytesIO with a .name attribute
+      2. Call client.audio.transcriptions.create(model="whisper-1", file=...)
+      3. Return transcript.text
+    """
+    # TODO: implement
+    raise NotImplementedError
+
+
+async def analyze_image(image_b64: str, prompt: str) -> dict:
+    """Send a base64 image to GPT-4o and return {description, key_points}.
+
+    Steps:
+      1. Build messages with a system prompt requesting JSON output
+         with "description" (str) and "key_points" (list[str])
+      2. Include the image as a data URL: data:image/png;base64,{image_b64}
+      3. Call client.chat.completions.create with response_format={"type": "json_object"}
+      4. Parse and return the JSON dict
+    """
+    # TODO: implement
+    raise NotImplementedError
+
+
+# -- Provided endpoints (from Exercise 2 solution) --
 
 
 @app.get("/health")
@@ -211,3 +262,18 @@ async def chat(req: ChatRequest):
             break
 
     return EventSourceResponse(generate())
+
+
+# -- TODO: Add these two new endpoints --
+
+
+# TODO: POST /vision
+#   1. Accept VisionRequest (image as base64, prompt)
+#   2. Call analyze_image(req.image, req.prompt)
+#   3. Return VisionResponse
+
+
+# TODO: POST /transcribe
+#   1. Accept an audio file upload (UploadFile)
+#   2. Read the bytes, call transcribe_audio(audio_bytes)
+#   3. Return {"transcript": "..."}
