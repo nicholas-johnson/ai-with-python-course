@@ -91,7 +91,7 @@ cd module-05-rag-fundamentals/exercises/02-rag-chat
 python start.py
 ```
 
-Ask questions about the ship logs: crew activities, engineering issues, mission details. Use `/norag` to compare RAG vs raw LLM answers.
+Ask questions about the scout logs: alien signals, first contact protocol, crew activities, xenolinguistics. Use `/norag` to compare RAG vs raw LLM answers.
 
 ## Tests
 

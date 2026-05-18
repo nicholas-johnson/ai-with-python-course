@@ -1,0 +1,162 @@
+[
+  {
+    "id": "SCOUT-001",
+    "timestamp": "2351-07-12T06:00:00Z",
+    "author": "Captain Ryn Asha",
+    "category": "command",
+    "content": "Mission Vela Recon launched at 0600. ISS Horizon cleared the frontier beacon and is now in open space beyond the Orion Arm. All eight crew accounted for and stations green. Our objective: full spectral survey of the Vela-9 system, flagged by long-range probes as having unusual electromagnetic signatures. Transit time estimated at 14 days at cruise warp.",
+    "tags": ["mission-start", "vela-9", "navigation"]
+  },
+  {
+    "id": "SCOUT-002",
+    "timestamp": "2351-07-12T09:30:00Z",
+    "author": "Engineer Tomasz Volkov",
+    "category": "engineering",
+    "content": "Post-departure diagnostics complete. Warp field geometry nominal. Fuel reserves at 98% — well within margin for a 30-day extended mission. Ran calibration on the long-range antenna array. Forward deflector drawing 3% above baseline; I suspect minor particulate buildup from the nebula we transited. Scheduling an EVA scrub at the next maintenance window.",
+    "tags": ["diagnostics", "warp-field", "maintenance"]
+  },
+  {
+    "id": "SCOUT-003",
+    "timestamp": "2351-07-14T11:00:00Z",
+    "author": "Lt. Sera Okafor",
+    "category": "science",
+    "content": "Passive sensors are picking up a faint, repeating signal at 1420 MHz — the hydrogen line. Origin bearing is consistent with Vela-9. The pattern is not natural: a sequence of prime numbers (2, 3, 5, 7, 11, 13) repeating every 47 seconds. This is textbook artificial signature. Confidence level: high. Recommending immediate reclassification of this mission under First Contact Protocol.",
+    "tags": ["signal", "hydrogen-line", "prime-sequence", "first-contact"]
+  },
+  {
+    "id": "SCOUT-004",
+    "timestamp": "2351-07-14T13:45:00Z",
+    "author": "Captain Ryn Asha",
+    "category": "command",
+    "content": "Emergency briefing held. Lt. Okafor's findings confirmed by independent analysis from Comms Officer Darian. I am formally activating First Contact Protocol as of 1345 hours. All communications with Command are now encrypted and priority-flagged. Crew reminded of non-interference directives. We proceed to Vela-9 but will hold at the system boundary until further analysis.",
+    "tags": ["first-contact", "protocol", "briefing", "command-decision"]
+  },
+  {
+    "id": "SCOUT-005",
+    "timestamp": "2351-07-15T08:20:00Z",
+    "author": "Comms Officer Alek Darian",
+    "category": "communications",
+    "content": "Signal analysis update. The 1420 MHz broadcast originates from the fourth body in the Vela-9 system — a large moon orbiting a gas giant. Signal strength suggests a surface-based transmitter, not orbital. I've isolated three distinct layers in the transmission: the prime sequence carrier, a modulated data stream underneath, and periodic bursts that may be timestamps. Dr. Hadid is working on the data layer.",
+    "tags": ["signal-analysis", "vela-9-iv", "transmission-layers"]
+  },
+  {
+    "id": "SCOUT-006",
+    "timestamp": "2351-07-16T10:00:00Z",
+    "author": "Dr. Noor Hadid",
+    "category": "science",
+    "content": "Breakthrough on the data layer. The modulated stream uses a base-8 encoding — consistent with a species that counts in octal. I've decoded what appears to be a simple pictographic dictionary: mathematical constants, followed by diagrams of atomic structures (hydrogen, helium, carbon). This is a greeting package. Someone is teaching us their language, step by step. The pedagogical structure is unmistakable.",
+    "tags": ["xenolinguistics", "decoding", "octal", "greeting-package"]
+  },
+  {
+    "id": "SCOUT-007",
+    "timestamp": "2351-07-17T14:30:00Z",
+    "author": "Pilot Jin Sato",
+    "category": "navigation",
+    "content": "Dropping from warp at the Vela-9 system boundary. Approach vector plotted to hold station 0.2 AU from the fourth moon — close enough for high-resolution scans but outside what we estimate to be their near-space zone. Maintaining minimal electromagnetic emissions per Protocol. Passive scans only until the Captain authorizes active sensors.",
+    "tags": ["arrival", "vela-9", "approach", "passive-only"]
+  },
+  {
+    "id": "SCOUT-008",
+    "timestamp": "2351-07-17T16:45:00Z",
+    "author": "Security Chief Mara Duval",
+    "category": "security",
+    "content": "Threat assessment for Vela-9 system entry. No detected weapons signatures, no orbital defense platforms, no drive signatures from other vessels. The moon shows no industrial-scale energy output beyond the transmitter site. Preliminary assessment: pre-spaceflight or early-spaceflight civilisation. Threat level: minimal. Recommending continued passive posture.",
+    "tags": ["threat-assessment", "security", "passive-posture"]
+  },
+  {
+    "id": "SCOUT-009",
+    "timestamp": "2351-07-18T07:00:00Z",
+    "author": "Lt. Sera Okafor",
+    "category": "science",
+    "content": "High-resolution passive scan of Vela-9 IV complete. The moon has a nitrogen-oxygen atmosphere at 0.85 bar — breathable with supplemental oxygen. Surface temperature averages 12°C. The transmitter is located on a plateau in the northern hemisphere, surrounded by geometric structures visible at 10-metre resolution. These are buildings. Arranged in concentric rings around the transmitter tower.",
+    "tags": ["surface-scan", "atmosphere", "structures", "transmitter-site"]
+  },
+  {
+    "id": "SCOUT-010",
+    "timestamp": "2351-07-18T11:30:00Z",
+    "author": "Dr. Noor Hadid",
+    "category": "science",
+    "content": "Further decoding progress. After the element diagrams, the signal shifts to biological information — what appears to be their own biochemistry. Carbon-based, DNA-equivalent using six nucleotides instead of four. They have included diagrams of their body plan: bilateral symmetry, eight limbs (hence octal counting), approximately 1.4 metres tall. They are showing us who they are.",
+    "tags": ["xenolinguistics", "biology", "body-plan", "decoding"]
+  },
+  {
+    "id": "SCOUT-011",
+    "timestamp": "2351-07-19T09:15:00Z",
+    "author": "Medic Ines Reyes",
+    "category": "medical",
+    "content": "Crew stress assessment following first contact activation. All crew within acceptable parameters, though cortisol levels are elevated across the board — expected given the circumstances. Dr. Hadid showing signs of sleep deprivation from continuous decoding work. I've recommended a mandatory 8-hour rest cycle and she's agreed. Pilot Sato reports mild headaches consistent with extended warp travel; cleared with standard analgesics.",
+    "tags": ["crew-health", "stress-assessment", "sleep"]
+  },
+  {
+    "id": "SCOUT-012",
+    "timestamp": "2351-07-19T15:00:00Z",
+    "author": "Captain Ryn Asha",
+    "category": "command",
+    "content": "Command has confirmed receipt of our first contact report and authorised Phase 2: active observation. We are cleared to use active sensors on the moon, but not to transmit any signal toward the surface. I've also requested a xenobiology specialist via long-range shuttle — ETA 9 days. In the meantime, our priority is completing the signal decode and mapping the settlement from orbit.",
+    "tags": ["command-authorisation", "phase-2", "active-observation"]
+  },
+  {
+    "id": "SCOUT-013",
+    "timestamp": "2351-07-20T08:00:00Z",
+    "author": "Comms Officer Alek Darian",
+    "category": "communications",
+    "content": "Active sensor sweep of the transmitter site reveals something unexpected: the signal is not continuous from a single source. There are actually 12 transmitters arranged in a phased array, synchronized to within nanoseconds. This level of precision implies computational technology far beyond what the settlement structures suggest. Either they have hidden infrastructure, or someone else built the transmitter for them.",
+    "tags": ["active-scan", "phased-array", "technology-mismatch"]
+  },
+  {
+    "id": "SCOUT-014",
+    "timestamp": "2351-07-20T14:20:00Z",
+    "author": "Engineer Tomasz Volkov",
+    "category": "engineering",
+    "content": "Interesting finding from the sensor data. The phased array transmitter draws power from a geothermal tap — I can see the thermal plume. But the efficiency is extraordinary: estimated conversion rate above 90%. Our best geothermal systems achieve 40%. Additionally, the cabling between transmitters shows no resistive loss in thermal imaging. Room-temperature superconductors? This technology is centuries ahead of the settlement architecture.",
+    "tags": ["geothermal", "superconductor", "technology-analysis"]
+  },
+  {
+    "id": "SCOUT-015",
+    "timestamp": "2351-07-21T10:45:00Z",
+    "author": "Dr. Noor Hadid",
+    "category": "science",
+    "content": "The final section of the signal is the most remarkable. After teaching us their chemistry, biology, and mathematics, they transmit what I can only describe as an invitation. A coordinate set (in their mathematical notation, which I can now read) pointing to a flat area 2 km north of the settlement. And a repeating glyph that, cross-referenced with their pictographic dictionary, translates roughly to 'come/approach/welcome'. They know we are here.",
+    "tags": ["invitation", "decoding-complete", "coordinates", "awareness"]
+  },
+  {
+    "id": "SCOUT-016",
+    "timestamp": "2351-07-21T12:00:00Z",
+    "author": "Security Chief Mara Duval",
+    "category": "security",
+    "content": "If they know we are here, our passive posture is moot. I've run the designated landing coordinates through terrain analysis: flat basalt plain, no structures, clear sightlines for 3 km in every direction. It is an ideal meeting ground — open, non-threatening, easy to evacuate. Either they understand our psychology remarkably well, or open spaces are universally preferred for first meetings. Updating threat assessment: unchanged at minimal, but recommending full EVA armour for any landing party.",
+    "tags": ["landing-site", "terrain-analysis", "security-recommendation"]
+  },
+  {
+    "id": "SCOUT-017",
+    "timestamp": "2351-07-21T18:30:00Z",
+    "author": "Captain Ryn Asha",
+    "category": "command",
+    "content": "Emergency conference with Command via priority channel. They are aware of the invitation. After three hours of debate, authorisation granted for Phase 3: direct contact. Landing party of four authorised — myself, Dr. Hadid, Security Chief Duval, and Medic Reyes. We descend at 0800 tomorrow. Lt. Okafor retains command of the Horizon. I have never written a log entry like this before. We are about to meet another intelligence.",
+    "tags": ["phase-3", "landing-party", "direct-contact", "authorisation"]
+  },
+  {
+    "id": "SCOUT-018",
+    "timestamp": "2351-07-22T06:00:00Z",
+    "author": "Pilot Jin Sato",
+    "category": "navigation",
+    "content": "Shuttle prepped for descent. Flight plan filed: orbital insertion over the northern hemisphere, then a slow atmospheric entry with transponder active on the hydrogen line frequency — Dr. Hadid's idea, so they can track us on their own equipment. Landing at designated coordinates. I will hold the shuttle on hot standby with engines at idle for immediate departure if needed. Estimated flight time: 45 minutes surface to orbit.",
+    "tags": ["shuttle-prep", "descent-plan", "transponder"]
+  },
+  {
+    "id": "SCOUT-019",
+    "timestamp": "2351-07-22T09:15:00Z",
+    "author": "Dr. Noor Hadid",
+    "category": "science",
+    "content": "Surface report. We landed at 0847 local. The basalt plain is as flat as scans suggested. Gravity is 0.7g — noticeably lighter. Air is thin but breathable with supplemental O2. At 0900, three figures emerged from the tree line to the south. Eight-limbed, approximately 1.4 metres, moving in a coordinated gait. They stopped 50 metres from our position and placed objects on the ground — the same geometric shapes from their signal dictionary. They are continuing the lesson. Face to face.",
+    "tags": ["surface-contact", "first-meeting", "geometric-shapes", "communication"]
+  },
+  {
+    "id": "SCOUT-020",
+    "timestamp": "2351-07-22T14:00:00Z",
+    "author": "Captain Ryn Asha",
+    "category": "command",
+    "content": "First contact day one complete. Five hours of exchange on the plain. They are patient, methodical teachers. We established mutual counting, basic geometry, and exchanged material samples. No hostility, no sudden movements. Dr. Hadid believes their octosymmetric gestures convey emotional state — she identified what she calls 'curiosity' and 'satisfaction'. We returned to the shuttle at 1330. Tomorrow we go back. I am formally recommending Vela-9 IV for permanent diplomatic mission status.",
+    "tags": ["first-contact-summary", "diplomatic-recommendation", "communication-progress"]
+  }
+]

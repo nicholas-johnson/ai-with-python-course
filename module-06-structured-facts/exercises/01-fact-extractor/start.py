@@ -1,7 +1,7 @@
 """
 Exercise 1: Fact Extractor
 ============================
-Extract structured facts from ship logs using OpenAI and Pydantic.
+Extract structured facts from salvage logs using OpenAI and Pydantic.
 
 Run:  python start.py
 """
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 # TODO: import OpenAI from openai
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "derelict_logs.json"
 
 
 class Fact(BaseModel):
@@ -25,7 +25,7 @@ class Fact(BaseModel):
 
 
 def load_logs() -> list[dict]:
-    """Load ship logs from the data directory."""
+    """Load salvage logs from the data directory."""
     return json.loads(DATA_PATH.read_text())
 
 
@@ -44,7 +44,7 @@ def load_logs() -> list[dict]:
 
 
 def main():
-    print("Loading ship logs...")
+    print("Loading salvage logs...")
     logs = load_logs()
     logs_by_id = {log["id"]: log for log in logs}
     print(f"Loaded {len(logs)} logs.\n")
@@ -53,7 +53,7 @@ def main():
     # client = OpenAI()
 
     # TODO: Interactive loop
-    #   - Log ID (e.g. LOG-001) -> extract_facts from that log, display results
+    #   - Log ID (e.g. SAL-001) -> extract_facts from that log, display results
     #   - /all -> extract from all logs, show summary
     #   - /validate -> show validated facts from last extraction
     #   - /json -> show raw JSON from last LLM response

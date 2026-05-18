@@ -4,9 +4,9 @@
 
 A **knowledge graph** represents information as entities (nodes) and relationships (edges). Unlike a flat list of facts, a graph lets you traverse connections:
 
-- "Who repaired the thruster?" -- follow edges from "thruster" to find crew members
-- "What systems did Vasquez work on?" -- follow edges from "Vasquez" to find systems
-- "What connects the ion storm to the reactor?" -- find a path through the graph
+- "Who was exposed to Specimen Theta?" -- follow edges from "Specimen Theta" to find crew members
+- "What did Engineer Marquez assess?" -- follow edges from "Juno Marquez" to find systems
+- "What connects the containment breach to the emergency jump?" -- find a path through the graph
 
 **networkx** is Python's standard graph library:
 
@@ -14,21 +14,21 @@ A **knowledge graph** represents information as entities (nodes) and relationshi
 import networkx as nx
 
 G = nx.DiGraph()
-G.add_node("Vasquez", type="crew")
-G.add_edge("Vasquez", "port thruster", relation="repaired", confidence=0.95)
+G.add_node("Juno Marquez", type="crew")
+G.add_edge("Juno Marquez", "Meridian reactor", relation="assessed", confidence=0.95)
 
 # Find neighbours
-list(G.successors("Vasquez"))  # ["port thruster"]
+list(G.successors("Juno Marquez"))  # ["Meridian reactor"]
 
 # Find shortest path
-nx.shortest_path(G, "Vasquez", "cargo bay 2")
+nx.shortest_path(G, "Specimen Theta", "emergency jump")
 ```
 
 In this exercise you'll turn the facts from Exercise 1 into a traversable graph.
 
 ## What you build
 
-A console app in **`start.py`** that extracts facts from all ship logs, builds a networkx knowledge graph, and lets you explore it interactively.
+A console app in **`start.py`** that extracts facts from all salvage mission logs, builds a networkx knowledge graph, and lets you explore it interactively.
 
 The Exercise 1 solution is provided as `fact_extractor.py`.
 
@@ -80,7 +80,7 @@ cd module-06-structured-facts/exercises/02-knowledge-graph
 python start.py
 ```
 
-Try querying crew members, ship systems, and locations. Use `/path` to find unexpected connections between entities.
+Try querying crew members (Juno Marquez, Dr. Idris Kone), systems (Meridian reactor, containment field), and events (containment breach, emergency jump). Use `/path` to trace the chain of events that led to the Meridian's silence.
 
 ## Tests
 

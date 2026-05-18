@@ -1,7 +1,7 @@
 """
 Exercise 1 -- Solution
 ========================
-Extract structured facts from ship logs using OpenAI and Pydantic.
+Extract structured facts from salvage logs using OpenAI and Pydantic.
 
 Run:  python solution.py
 """
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "derelict_logs.json"
 client = OpenAI()
 
 
@@ -28,7 +28,7 @@ class Fact(BaseModel):
 
 
 def load_logs() -> list[dict]:
-    """Load ship logs from the data directory."""
+    """Load salvage logs from the data directory."""
     return json.loads(DATA_PATH.read_text())
 
 
@@ -91,11 +91,11 @@ def display_facts(facts: list[Fact]):
 
 
 def main():
-    print("Loading ship logs...")
+    print("Loading salvage logs...")
     logs = load_logs()
     logs_by_id = {log["id"]: log for log in logs}
     print(f"Loaded {len(logs)} logs.")
-    print("Enter a log ID (e.g. LOG-001), a command, or 'quit'.\n")
+    print("Enter a log ID (e.g. SAL-001), a command, or 'quit'.\n")
 
     last_facts: list[Fact] = []
     last_raw_json: str = ""
@@ -160,7 +160,7 @@ def main():
             print()
         else:
             print(f"  Unknown command or log ID: {user_input}")
-            print("  Enter a log ID (e.g. LOG-001), /all, /validate, /json, /schema, or quit.")
+            print("  Enter a log ID (e.g. SAL-001), /all, /validate, /json, /schema, or quit.")
 
 
 if __name__ == "__main__":

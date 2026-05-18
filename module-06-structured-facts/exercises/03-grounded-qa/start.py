@@ -96,7 +96,7 @@ def display_evidence(evidence: list[dict], brief: bool = False):
 
 
 def build_graph_from_logs(client: OpenAI) -> KnowledgeGraph:
-    """Load all ship logs, extract facts, validate, and build a knowledge graph."""
+    """Load all salvage logs, extract facts, validate, and build a knowledge graph."""
     logs = load_logs()
     all_facts = []
     for log in logs:

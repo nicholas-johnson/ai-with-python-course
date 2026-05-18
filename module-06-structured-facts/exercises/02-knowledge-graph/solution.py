@@ -102,7 +102,7 @@ def display_neighbours(kg: KnowledgeGraph, entity: str):
 
 
 def ingest_facts_from_logs(client: OpenAI) -> KnowledgeGraph:
-    """Load all ship logs, extract and validate facts, build a knowledge graph."""
+    """Load all salvage logs, extract and validate facts, build a knowledge graph."""
     logs = load_logs()
     all_facts = []
     for log in logs:

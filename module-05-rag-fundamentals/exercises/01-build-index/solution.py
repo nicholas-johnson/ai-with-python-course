@@ -1,7 +1,7 @@
 """
 Exercise 1 -- Solution
 ========================
-Load ship logs, chunk, embed into ChromaDB, and search interactively.
+Load scout logs, chunk, embed into ChromaDB, and search interactively.
 
 Run:  python solution.py
 """
@@ -16,7 +16,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "scout_logs.json"
 client = OpenAI()
 
 
@@ -29,7 +29,7 @@ class TextChunk:
 
 
 def load_logs() -> list[dict]:
-    """Load ship logs from the data directory."""
+    """Load scout logs from the data directory."""
     return json.loads(DATA_PATH.read_text())
 
 
@@ -48,7 +48,7 @@ def build_index(
     log_entries: list[dict],
     chunk_size: int = 500,
     overlap: int = 50,
-    collection_name: str = "ship_logs",
+    collection_name: str = "scout_logs",
 ) -> chromadb.Collection:
     """Chunk all logs, embed with OpenAI, and store in ChromaDB."""
     chroma = chromadb.Client()
@@ -149,7 +149,7 @@ def print_collection_stats(collection: chromadb.Collection):
     all_meta = collection.get()["metadatas"]
     sources = {m["source_id"] for m in all_meta}
     avg_len = sum(len(d) for d in collection.get()["documents"]) / max(count, 1)
-    print(f"  Collection: ship_logs | {count} chunks | avg {avg_len:.0f} chars | {len(sources)} source logs")
+    print(f"  Collection: scout_logs | {count} chunks | avg {avg_len:.0f} chars | {len(sources)} source logs")
 
 
 def show_chunk_by_id(collection: chromadb.Collection, chunk_id: str):
@@ -182,7 +182,7 @@ def show_similar_chunks(collection: chromadb.Collection, chunk_id: str, k: int =
 
 
 def main():
-    print("Loading ship logs...")
+    print("Loading scout logs...")
     logs = load_logs()
     print(f"Loaded {len(logs)} logs. Chunking and embedding...")
 

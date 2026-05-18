@@ -9,8 +9,16 @@ This is the same architecture pattern you used for the RAG MCP server -- your me
 The architecture:
 
 ```
-User → Agent (OpenAI tool-calling) → MCP Client → MCP Server → Memory System
+Patron → BARKEEP Agent (OpenAI tool-calling) → MCP Client → MCP Server → Memory System
 ```
+
+## The scenario
+
+The Nebula's Edge is expanding. Management wants BARKEEP's memory to be a shared service -- other station systems (the concierge desk, the loyalty programme, the kitchen) should be able to remember things about patrons too. So you're extracting memory into an MCP server that any agent can connect to.
+
+BARKEEP still chats with patrons directly, but now its memory lives behind MCP tools. If the kitchen agent needs to know "Chief Tanaka is allergic to synthcitrus", it calls the same `recall` tool.
+
+## MCP tools
 
 The MCP server exposes five tools:
 
@@ -42,14 +50,14 @@ from mcp.server.fastmcp import FastMCP
 from memory_store import LongTermMemory
 from summary import SmartSessionMemory
 
-mcp = FastMCP("Memory Server")
+mcp = FastMCP("Cantina Memory")
 
 long_term = LongTermMemory()
 session = SmartSessionMemory(...)
 
 @mcp.tool()
 def remember(key: str, value: str) -> str:
-    """Store a fact in long-term memory."""
+    """Store a fact about a patron in long-term memory."""
     long_term.remember(key, value)
     return f"Remembered: {key} = {value}"
 ```
@@ -94,7 +102,7 @@ The agent should:
 
 | Command | Action |
 |---|---|
-| any text | Chat with the agent (tool calls print inline) |
+| any text | Chat with BARKEEP (tool calls print inline) |
 | `/tools` | List discovered MCP tools with descriptions |
 | `quit` | Exit |
 
@@ -105,7 +113,7 @@ cd module-07-agent-memory/exercises/03-memory-server
 python start.py
 ```
 
-Chat with the agent and share facts about yourself. The agent will use the `remember` tool to store them. Ask "what do you know about me?" and watch it call `recall`. Use `/tools` to see the available memory tools.
+Chat with BARKEEP and share your drink order, your name, or a secret. The agent will use the `remember` tool to store them. Ask "what's my usual?" and watch it call `recall`. Use `/tools` to see the available memory tools.
 
 ## Tests
 
@@ -121,5 +129,5 @@ The tests check:
 ## Stretch goals
 
 - Add a `decay` tool that applies importance decay
-- Add an `import_memories` tool that loads memories from a JSON file
+- Add an `import_memories` tool that loads patron data from a JSON file
 - Expose the server over HTTP instead of stdio

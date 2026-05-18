@@ -70,7 +70,7 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
             "role": "system",
             "content": (
                 "You are a research assistant with access to a document search system. "
-                "Use the available tools to find and retrieve information from ship logs. "
+                "Use the available tools to find and retrieve information from scout logs. "
                 "Always cite your sources."
             ),
         }

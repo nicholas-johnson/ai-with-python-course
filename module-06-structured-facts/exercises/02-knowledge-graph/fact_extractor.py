@@ -9,7 +9,7 @@ from pathlib import Path
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "derelict_logs.json"
 
 
 class Fact(BaseModel):
@@ -21,7 +21,7 @@ class Fact(BaseModel):
 
 
 def load_logs() -> list[dict]:
-    """Load ship logs from the data directory."""
+    """Load salvage logs from the data directory."""
     return json.loads(DATA_PATH.read_text())
 
 

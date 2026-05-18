@@ -6,9 +6,6 @@ from __future__ import annotations
 import json, time
 from dataclasses import dataclass, field
 from openai import OpenAI
-from pathlib import Path
-
-DATA_FILE = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
 
 
 @dataclass
@@ -89,16 +86,17 @@ def build_system_prompt(long_term: LongTermMemory) -> str:
         for key, entry in memories[:10]:
             lines.append(f"- {key}: {entry.value} (importance: {entry.importance:.2f})")
         memory_block = (
-            "\n\nYou have the following long-term memories about the user "
-            "and past conversations:\n" + "\n".join(lines)
+            "\n\nYou remember the following about your patrons and "
+            "past conversations:\n" + "\n".join(lines)
         )
 
     return (
-        "You are a helpful assistant with memory capabilities. "
-        "You remember facts from previous conversations and use them "
-        "to provide personalised responses. "
-        "When the user shares personal preferences, facts, or important "
-        "information, acknowledge that you'll remember it."
+        "You are BARKEEP, the AI bartender at The Nebula's Edge cantina "
+        "on Relay Station Omicron. You remember every patron's drink order, "
+        "dietary restrictions, preferences, and stories. You're warm, "
+        "slightly wry, and take pride in never forgetting a regular. "
+        "When a patron shares something personal, you note it -- a good "
+        "bartender always remembers."
         + memory_block
     )
 

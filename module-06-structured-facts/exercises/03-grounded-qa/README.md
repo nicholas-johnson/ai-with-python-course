@@ -10,15 +10,15 @@ The flow:
 Question → Extract entities → Traverse graph → Build grounded prompt → Generate cited answer
 ```
 
-Unlike RAG (which matches by embedding similarity), graph-grounded QA follows **relationships**. "What did Vasquez work on?" traverses edges from the Vasquez node rather than hoping for a text match. This is complementary to vector search -- graphs are better for relational questions, vectors are better for semantic similarity.
+Unlike RAG (which matches by embedding similarity), graph-grounded QA follows **relationships**. "What caused the Meridian to go silent?" traverses edges from the Meridian through containment breach, crew exposure, and emergency jump rather than hoping for a text match. This is complementary to vector search -- graphs are better for relational questions, vectors are better for semantic similarity.
 
 The grounded prompt includes the evidence as numbered facts:
 
 ```
-[Fact 1] Vasquez --repaired--> port thruster array (confidence: 0.95)
-[Fact 2] Vasquez --inspected--> warp core (confidence: 0.88)
+[Fact 1] Specimen Theta --caused--> containment breach (confidence: 0.95)
+[Fact 2] containment breach --exposed--> Dr. Oshiro (confidence: 0.92)
 
-Question: What did Vasquez work on?
+Question: What caused the crew to evacuate?
 ```
 
 ## What you build
@@ -84,7 +84,7 @@ cd module-06-structured-facts/exercises/03-grounded-qa
 python start.py
 ```
 
-Try asking about crew members, ship systems, and events. Use `/nograph` to see how the answer quality drops without evidence.
+Try asking about the Meridian's crew, what happened to Specimen Theta, or why the distress beacon failed. Use `/nograph` to see how the answer quality drops without evidence.
 
 ## Tests
 

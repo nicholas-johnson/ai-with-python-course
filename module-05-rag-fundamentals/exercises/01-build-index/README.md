@@ -41,7 +41,7 @@ results = collection.query(query_texts=["search query"], n_results=5)
 
 ## What you build
 
-A console app in **`start.py`** that loads ship logs, chunks them, embeds them into ChromaDB, and provides an interactive search REPL.
+A console app in **`start.py`** that loads scout logs, chunks them, embeds them into ChromaDB, and provides an interactive search REPL.
 
 **Key functions:**
 
@@ -53,9 +53,9 @@ A console app in **`start.py`** that loads ship logs, chunks them, embeds them i
 
 ## Step-by-step
 
-### 1. Load the ship logs
+### 1. Load the scout logs
 
-Load `data/ship_logs.json` from the project root. Each entry has `id`, `content`, `author`, `category`, and `tags`.
+Load `data/scout_logs.json` from the project root. Each entry has `id`, `content`, `author`, `category`, and `tags`.
 
 ### 2. Implement `chunk_text`
 
@@ -101,7 +101,7 @@ cd module-05-rag-fundamentals/exercises/01-build-index
 python start.py
 ```
 
-Try searching for topics from the ship logs -- crew members, missions, engineering issues, sensor readings.
+Try searching for topics from the scout logs -- crew members, alien signals, first contact protocol, sensor readings.
 
 ## Tests
 

@@ -16,7 +16,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "scout_logs.json"
 client = OpenAI()
 
 
@@ -50,7 +50,7 @@ def build_index(
     log_entries: list[dict],
     chunk_size: int = 500,
     overlap: int = 50,
-    collection_name: str = "ship_logs",
+    collection_name: str = "scout_logs",
 ) -> chromadb.Collection:
     chroma = chromadb.Client()
     try:
@@ -189,7 +189,7 @@ def handle_prompt_command(last_messages: list[dict] | None):
 
 
 def main():
-    print("Loading ship logs and building index...")
+    print("Loading scout logs and building index...")
     logs = load_logs()
     collection = build_index(logs)
     print(f"RAG Chat ready. {collection.count()} chunks indexed.")

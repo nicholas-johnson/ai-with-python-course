@@ -23,7 +23,7 @@ The extraction prompt instructs the LLM to return JSON matching the schema. Pyda
 
 ## What you build
 
-A console app in **`start.py`** that loads ship logs, extracts structured facts using OpenAI, and lets you explore the results interactively.
+A console app in **`start.py`** that loads salvage mission logs from the derelict *Meridian*, extracts structured facts using OpenAI, and lets you explore the results interactively.
 
 **Key functions:**
 
@@ -34,9 +34,9 @@ A console app in **`start.py`** that loads ship logs, extracts structured facts 
 
 ## Step-by-step
 
-### 1. Load the ship logs
+### 1. Load the salvage logs
 
-Load `data/ship_logs.json` from the project root. Each entry has `id`, `content`, `author`, `category`.
+Load `data/derelict_logs.json` from the project root. Each entry has `id`, `content`, `author`, `category`. The logs document a salvage team investigating the derelict research ship *Meridian*, found adrift in the Tethys Nebula.
 
 ### 2. Define the `Fact` model
 
@@ -68,7 +68,7 @@ Filter facts below the confidence threshold (default 0.7). Deduplicate by `(subj
 
 | Command | Action |
 |---|---|
-| any log ID (e.g. `LOG-001`) | Extract facts from that log |
+| any log ID (e.g. `SAL-001`) | Extract facts from that log |
 | `/all` | Extract from all logs, show summary |
 | `/validate` | Show only validated facts from the last extraction |
 | `/json` | Show raw JSON from the last LLM response |
@@ -82,7 +82,7 @@ cd module-06-structured-facts/exercises/01-fact-extractor
 python start.py
 ```
 
-Try extracting from different log IDs. Compare the raw JSON with the validated facts. Notice how confidence varies by claim type.
+Try extracting from different log IDs (SAL-001 through SAL-025). Compare the raw JSON with the validated facts. Notice how confidence varies by claim type — engineering measurements tend to score higher than speculative entries.
 
 ## Tests
 

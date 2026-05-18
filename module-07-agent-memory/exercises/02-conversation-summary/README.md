@@ -8,7 +8,7 @@ The pattern works like this:
 
 ```
 [system prompt]
-[summary of turns 1-20]     ← compressed into one message
+[summary of turns 1-20]     <- compressed into one message
 [turn 21: user message]
 [turn 22: assistant reply]
 ...
@@ -31,6 +31,12 @@ def summarise_turns(turns, client):
     )
     return response.choices[0].message.content
 ```
+
+## The scenario
+
+It's a busy night at **The Nebula's Edge**. Patrons come in, sit at the bar, and talk for hours -- stories about close calls in the asteroid belt, complaints about station management, gossip about who's docking tomorrow. BARKEEP listens to all of it.
+
+But a conversation that stretches across 30+ exchanges won't fit in the context window. BARKEEP needs to compress the early part of the evening into a summary while keeping the last few exchanges verbatim -- because the patron just ordered another round and you need to remember what they're drinking *right now*.
 
 ## What you build
 
@@ -78,7 +84,7 @@ The interactive loop uses `SmartSessionMemory` instead of `SessionMemory`, plus 
 
 | Command | Action |
 |---|---|
-| any text | Chat with the agent (summarisation happens automatically) |
+| any text | Chat with BARKEEP (summarisation happens automatically) |
 | `/summary` | Show the current accumulated summary |
 | `/turns` | Show how many messages are in the session buffer |
 | `/force-summarise` | Manually trigger summarisation of the current buffer |
@@ -92,7 +98,7 @@ cd module-07-agent-memory/exercises/02-conversation-summary
 python start.py
 ```
 
-Have a long conversation (10+ exchanges). Watch the `/turns` count -- when it hits the threshold, summarisation triggers automatically. Use `/summary` to see the compressed history. Use `/force-summarise` to trigger it manually.
+Have a long conversation (10+ exchanges) -- tell BARKEEP stories, order drinks, ask about the station. Watch the `/turns` count -- when it hits the threshold, summarisation triggers automatically. Use `/summary` to see the compressed history. Use `/force-summarise` to trigger it manually.
 
 ## Tests
 

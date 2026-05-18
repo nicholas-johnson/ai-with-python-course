@@ -1,0 +1,202 @@
+[
+  {
+    "id": "SAL-001",
+    "timestamp": "2351-09-03T06:00:00Z",
+    "author": "Captain Rho Tanaka",
+    "category": "command",
+    "content": "Salvage operation on the Meridian begins at 0600 hours. The ship was found adrift in the Tethys Nebula after 8 months of silence. Hull appears intact from port side. Docking clamps engaged on airlock 2. Atmosphere readings show breathable air at 78% nitrogen, 21% oxygen — life support is still partially functional.",
+    "tags": ["mission-start", "meridian", "tethys-nebula"]
+  },
+  {
+    "id": "SAL-002",
+    "timestamp": "2351-09-03T06:45:00Z",
+    "author": "Security Chief Nadia Volkov",
+    "category": "security",
+    "content": "Boarding team Alpha entered through airlock 2 at 0640. Emergency lighting active on decks 1 through 4. No crew detected on motion sensors. Found the main corridor on deck 2 barricaded with cargo crates — deliberate obstruction, not debris. Scorch marks on the bulkhead near junction 2-7 suggest energy weapon discharge.",
+    "tags": ["boarding", "security", "deck-2"]
+  },
+  {
+    "id": "SAL-003",
+    "timestamp": "2351-09-03T07:30:00Z",
+    "author": "Engineer Juno Marquez",
+    "category": "engineering",
+    "content": "Meridian's reactor is running at 12% output — barely enough for emergency systems. Fuel rods are 94% depleted. Coolant loop 3 has a fracture causing a slow leak; containment is holding but reservoir is at 15% capacity. Estimate 6 days before total coolant loss and automatic shutdown.",
+    "tags": ["reactor", "engineering", "critical"]
+  },
+  {
+    "id": "SAL-004",
+    "timestamp": "2351-09-03T08:15:00Z",
+    "author": "Science Officer Dr. Idris Kone",
+    "category": "science",
+    "content": "Accessed the Meridian's science lab on deck 5. The biolab containment field on deck 7 is active and drawing 40% of remaining reactor power. Whatever is being contained, the Meridian's crew prioritised it over life support for the rest of the ship. Found research notes referencing 'Specimen Theta' — a crystalline organism recovered from asteroid KT-7741.",
+    "tags": ["biolab", "containment", "specimen-theta"]
+  },
+  {
+    "id": "SAL-005",
+    "timestamp": "2351-09-03T09:00:00Z",
+    "author": "Medic Soren Halvorsen",
+    "category": "medical",
+    "content": "Medical bay on deck 3 shows signs of heavy use. Found 9 used trauma kits and blood residue on 3 surgical beds. Toxicology scanner left running — last analysis dated 2351-01-14 shows elevated crystalline particulates in blood samples from crew member Dr. Yuki Oshiro. Concentration was 340 ppm, well above the 50 ppm safety threshold.",
+    "tags": ["medical", "trauma", "toxicology"]
+  },
+  {
+    "id": "SAL-006",
+    "timestamp": "2351-09-03T10:30:00Z",
+    "author": "Captain Rho Tanaka",
+    "category": "command",
+    "content": "Located the Meridian bridge on deck 1. Captain's chair console shows the last command entered was an emergency beacon activation on stardate 2351-01-15 at 0347 hours. However, our long-range scans never detected a beacon signal. The antenna array on the dorsal hull has been physically severed — clean cut, not impact damage. Someone disabled the distress beacon deliberately.",
+    "tags": ["bridge", "beacon", "sabotage"]
+  },
+  {
+    "id": "SAL-007",
+    "timestamp": "2351-09-03T11:00:00Z",
+    "author": "Engineer Juno Marquez",
+    "category": "engineering",
+    "content": "Nav computer hard drives are intact but encrypted with a non-standard cipher. Downloaded 3 encrypted data cores to portable storage for analysis aboard the Vanguard. Also found that the Meridian's FTL drive coils are burnt out — catastrophic overload pattern consistent with an emergency jump without proper calculations. They jumped blind.",
+    "tags": ["nav-computer", "data-cores", "ftl-drive"]
+  },
+  {
+    "id": "SAL-008",
+    "timestamp": "2351-09-03T12:00:00Z",
+    "author": "Security Chief Nadia Volkov",
+    "category": "security",
+    "content": "Cleared decks 5 and 6. Found personal quarters of the Meridian's crew — 14 bunks total. 8 bunks show signs of hasty departure: drawers open, personal items scattered. 6 bunks are neatly made, belongings packed. This matches a partial evacuation — some crew left in escape pods while others chose to stay.",
+    "tags": ["crew-quarters", "evacuation", "deck-6"]
+  },
+  {
+    "id": "SAL-009",
+    "timestamp": "2351-09-03T13:15:00Z",
+    "author": "Science Officer Dr. Idris Kone",
+    "category": "science",
+    "content": "Approached biolab deck 7 quarantine zone. External sensors show atmosphere inside is 31 degrees Celsius with humidity at 89% — tropical conditions unlike the rest of the ship at 14 degrees. Crystalline growth visible through the viewport, covering approximately 60% of the lab surfaces. The containment field boundary shows no breaches. Specimen Theta has been growing unchecked for months.",
+    "tags": ["biolab", "specimen-theta", "quarantine", "deck-7"]
+  },
+  {
+    "id": "SAL-010",
+    "timestamp": "2351-09-03T14:00:00Z",
+    "author": "Medic Soren Halvorsen",
+    "category": "medical",
+    "content": "Found Dr. Yuki Oshiro's personal medical log in the lab adjacent to the biolab. Her final entry dated 2351-01-12 states that Specimen Theta emits crystalline spores when exposed to temperatures above 25 degrees. Three researchers — Dr. Oshiro, Dr. Pavel Renko, and technician Asa Lund — were exposed during a containment breach on 2351-01-08. Spore inhalation caused progressive neural crystallisation.",
+    "tags": ["specimen-theta", "spores", "exposure", "medical-log"]
+  },
+  {
+    "id": "SAL-011",
+    "timestamp": "2351-09-03T14:45:00Z",
+    "author": "Captain Rho Tanaka",
+    "category": "command",
+    "content": "Recovered the Meridian Captain Vasquez's command log. Key entry from 2351-01-13: 'Containment breach in biolab resulted in 3 crew exposure to crystalline spores. Dr. Oshiro reports the condition is progressive and irreversible. I am ordering immediate evacuation of non-essential crew via escape pods. Research team will remain to maintain containment and attempt a cure.'",
+    "tags": ["command-log", "captain-vasquez", "evacuation-order"]
+  },
+  {
+    "id": "SAL-012",
+    "timestamp": "2351-09-03T15:30:00Z",
+    "author": "Engineer Juno Marquez",
+    "category": "engineering",
+    "content": "Cargo hold 3 on deck 4 contains the Meridian's escape pod launch records. 2 of 4 pods were launched on 2351-01-13 at 1400 hours carrying 8 crew members. Pod telemetry shows course for Waystation Callisto, 14 light-years distant. The remaining 6 crew — Captain Vasquez, Dr. Oshiro, Dr. Renko, Asa Lund, Engineer Obi Nwosu, and Security Officer Tam Reeves — stayed aboard.",
+    "tags": ["escape-pods", "cargo-hold", "evacuation"]
+  },
+  {
+    "id": "SAL-013",
+    "timestamp": "2351-09-03T16:00:00Z",
+    "author": "Security Chief Nadia Volkov",
+    "category": "security",
+    "content": "Found Security Officer Tam Reeves' duty log in the deck 2 security office. Final entry 2351-01-15 at 0200: 'Dr. Renko's condition deteriorating rapidly. Crystalline growths visible on his hands and neck. He became erratic at 0130, attempted to disable the biolab containment field. I was forced to restrain him. Captain Vasquez ordered deck 7 sealed permanently.'",
+    "tags": ["security-log", "tam-reeves", "renko", "containment"]
+  },
+  {
+    "id": "SAL-014",
+    "timestamp": "2351-09-03T16:45:00Z",
+    "author": "Science Officer Dr. Idris Kone",
+    "category": "science",
+    "content": "Analysed a crystalline sample scraped from the deck 7 viewport exterior. Composition is silicon-carbon lattice with embedded iron nanoparticles — unlike any known mineral. Growth rate estimated at 2.3 centimetres per day in current conditions. At this rate, Specimen Theta will breach the containment field boundary within 45 days as the crystal physically displaces the field emitters.",
+    "tags": ["specimen-theta", "analysis", "growth-rate", "containment-risk"]
+  },
+  {
+    "id": "SAL-015",
+    "timestamp": "2351-09-03T17:30:00Z",
+    "author": "Medic Soren Halvorsen",
+    "category": "medical",
+    "content": "Located one deceased crew member in the medical bay cold storage — identified as Asa Lund, technician, age 29. Cause of death: systemic organ failure due to advanced neural crystallisation. Time of death estimated 2351-01-16 based on decomposition state and ship logs. Crystalline structures visible in cranial tissue through intact skin. This confirms spore exposure is lethal.",
+    "tags": ["deceased", "asa-lund", "neural-crystallisation", "medical"]
+  },
+  {
+    "id": "SAL-016",
+    "timestamp": "2351-09-03T18:00:00Z",
+    "author": "Captain Rho Tanaka",
+    "category": "command",
+    "content": "Vanguard crew briefing at 1800. Summary of findings: the Meridian's research team recovered a crystalline organism from asteroid KT-7741. A containment breach on 2351-01-08 exposed 3 crew to spores. The condition proved fatal. Captain Vasquez ordered partial evacuation, then the remaining crew attempted an emergency FTL jump — presumably to reach medical facilities faster. The jump burned out the drive and left them stranded in the Tethys Nebula.",
+    "tags": ["briefing", "summary", "timeline"]
+  },
+  {
+    "id": "SAL-017",
+    "timestamp": "2351-09-03T19:00:00Z",
+    "author": "Engineer Juno Marquez",
+    "category": "engineering",
+    "content": "Decrypted the first data core using the Vanguard's quantum processor. Contains the Meridian's full sensor logs from the KT-7741 survey. The asteroid had an internal temperature of 280 degrees Celsius — unusual for a body that size in this region. Specimen Theta was extracted from a cavity 200 metres below the surface. Transport container maintained at 5 degrees to keep the organism dormant during transit.",
+    "tags": ["data-core", "asteroid-kt-7741", "sensor-logs"]
+  },
+  {
+    "id": "SAL-018",
+    "timestamp": "2351-09-03T20:00:00Z",
+    "author": "Science Officer Dr. Idris Kone",
+    "category": "science",
+    "content": "Cross-referencing Dr. Oshiro's notes with the sensor data: Specimen Theta is dormant below 20 degrees Celsius and active above 25 degrees. The containment breach occurred when the biolab climate system malfunctioned, spiking internal temperature to 34 degrees for 47 minutes. This triggered sporulation. The Meridian's repair log shows Engineer Nwosu fixed the climate system 3 hours later, but the damage was done.",
+    "tags": ["temperature-threshold", "containment-breach", "climate-malfunction"]
+  },
+  {
+    "id": "SAL-019",
+    "timestamp": "2351-09-03T21:00:00Z",
+    "author": "Security Chief Nadia Volkov",
+    "category": "security",
+    "content": "Final sweep of deck 1. Found Captain Vasquez's personal log tablet wedged behind the helm console. Last entry 2351-01-15 at 0330: 'Renko broke free and severed the beacon antenna before Reeves could stop him. The crystallisation is affecting his cognition. Oshiro says she has days at most. I am initiating emergency jump to Theta Persei medical station. If we don't make it, whoever finds this ship — do not open deck 7.'",
+    "tags": ["personal-log", "vasquez", "beacon-sabotage", "renko"]
+  },
+  {
+    "id": "SAL-020",
+    "timestamp": "2351-09-03T22:00:00Z",
+    "author": "Medic Soren Halvorsen",
+    "category": "medical",
+    "content": "No other remains found aboard. With Asa Lund deceased on 2351-01-16 and the emergency jump occurring on 2351-01-15, the remaining 5 crew — Vasquez, Oshiro, Renko, Nwosu, and Reeves — were alive at the time of the jump. Given that 3 were infected and deteriorating, and the ship has been adrift for 8 months with no further log entries, their fate remains unknown. Possibly abandoned ship in the remaining 2 escape pods.",
+    "tags": ["crew-status", "missing", "timeline"]
+  },
+  {
+    "id": "SAL-021",
+    "timestamp": "2351-09-04T07:00:00Z",
+    "author": "Captain Rho Tanaka",
+    "category": "command",
+    "content": "Day 2 of salvage operation. Priority tasks: Engineer Marquez to assess if Meridian's reactor can be stabilised for towing. Dr. Kone to determine if Specimen Theta containment can hold during transit to Waystation Callisto. Volkov to verify no biohazard risk outside the deck 7 quarantine zone. I have notified Fleet Command of our findings and requested a biohazard response team.",
+    "tags": ["day-2", "priorities", "fleet-command"]
+  },
+  {
+    "id": "SAL-022",
+    "timestamp": "2351-09-04T09:30:00Z",
+    "author": "Engineer Juno Marquez",
+    "category": "engineering",
+    "content": "Reactor stabilisation assessment: replacing coolant loop 3 from Vanguard spares would restore cooling capacity. Fuel rod replacement not possible in the field — but at 12% output the existing rods can sustain emergency systems for approximately 30 more days. Recommend towing the Meridian rather than attempting reactor restart. Tow cable attachment points on the ventral hull are undamaged.",
+    "tags": ["reactor", "towing", "assessment"]
+  },
+  {
+    "id": "SAL-023",
+    "timestamp": "2351-09-04T11:00:00Z",
+    "author": "Science Officer Dr. Idris Kone",
+    "category": "science",
+    "content": "Containment field integrity is at 87% — well above the 60% failure threshold. However, the crystalline growth is physically approaching the field emitter on the north wall of the biolab. At current growth rate of 2.3 cm per day, contact with the emitter will occur in approximately 38 days. Once the emitter is displaced, field integrity will drop below 60% within hours. We have a 38-day window to resolve this.",
+    "tags": ["containment", "timeline", "field-integrity"]
+  },
+  {
+    "id": "SAL-024",
+    "timestamp": "2351-09-04T13:00:00Z",
+    "author": "Security Chief Nadia Volkov",
+    "category": "security",
+    "content": "Biohazard sweep complete. Air sampling on all decks outside the quarantine zone shows zero crystalline particulates. The quarantine seal installed by the Meridian crew on deck 7 access points is effective. Temperature readings on decks 1-6 remain at 14 degrees — well below Specimen Theta's 20-degree activation threshold. No biohazard risk to the salvage team as long as the quarantine seal holds and temperature stays below 20 degrees.",
+    "tags": ["biohazard-clear", "temperature", "quarantine-seal"]
+  },
+  {
+    "id": "SAL-025",
+    "timestamp": "2351-09-04T15:00:00Z",
+    "author": "Captain Rho Tanaka",
+    "category": "command",
+    "content": "Fleet Command has dispatched the biohazard vessel Pandora from Waystation Callisto — ETA 12 days. Orders are to maintain quarantine, stabilise the Meridian for towing, and preserve all evidence. The 2 escape pods launched on 2351-01-13 never arrived at Waystation Callisto — Fleet Command is initiating a search along the projected flight path. Marking salvage operation status as Phase 1 complete. All crew return to Vanguard by 1800.",
+    "tags": ["fleet-command", "pandora", "escape-pods-missing", "phase-1-complete"]
+  }
+]

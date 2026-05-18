@@ -17,7 +17,7 @@ from mcp.server.fastmcp import FastMCP
 
 load_dotenv()
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "scout_logs.json"
 client = OpenAI()
 mcp = FastMCP("RAG Server")
 
@@ -52,7 +52,7 @@ def build_index(
     log_entries: list[dict],
     chunk_size: int = 500,
     overlap: int = 50,
-    collection_name: str = "ship_logs",
+    collection_name: str = "scout_logs",
 ) -> chromadb.Collection:
     chroma = chromadb.Client()
     try:

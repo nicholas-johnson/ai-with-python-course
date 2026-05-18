@@ -30,6 +30,15 @@ class MemoryEntry:
 
 The agent uses long-term memory by injecting relevant facts into the system prompt. It can also **auto-detect** memorable facts from conversation and store them.
 
+## The scenario
+
+You're building **BARKEEP** -- the AI bartender at **The Nebula's Edge**, a cantina on Relay Station Omicron. A good bartender remembers every regular's order, their dietary restrictions, and the stories they share over drinks. Memory is the entire premise: "the usual" only works if you remember what "the usual" is.
+
+- **Session memory** keeps track of the current evening's conversation -- who ordered what, what stories were told.
+- **Long-term memory** remembers facts across visits: "Zara always orders a Comet Tail with extra fizz", "Chief Tanaka is allergic to synthcitrus", "Marek still owes 12 credits on his tab."
+- **Decay** ensures old drink specials and temporary crew postings fade in relevance.
+- **Forget** handles privacy: when a patron says "forget I mentioned the cargo in bay 4", the bartender complies.
+
 ## What you build
 
 A console app in **`start.py`** that implements both memory types and wires them into an interactive chat agent powered by OpenAI.
@@ -41,7 +50,7 @@ A console app in **`start.py`** that implements both memory types and wires them
 | `SessionMemory` | Capped message buffer with `add` and `get_messages` |
 | `LongTermMemory` | Key-value store with `remember`, `recall`, `forget`, `tick_decay` |
 | `MemoryEntry` | Dataclass holding value, importance, timestamp, forgotten flag |
-| `build_system_prompt` | Injects long-term memories into the system prompt |
+| `build_system_prompt` | Injects long-term memories into the BARKEEP system prompt |
 | `chat` | Orchestrates session + long-term memory with OpenAI calls |
 
 ## Step-by-step
@@ -65,7 +74,7 @@ A dictionary-backed store where keys are topic labels and values are `MemoryEntr
 
 ### 3. Implement `build_system_prompt`
 
-Build a system prompt string that includes the top long-term memories. Call `long_term.recall()` to get active memories, then format them into the prompt so the LLM is aware of stored facts.
+Build a system prompt string that includes the BARKEEP persona and the top long-term memories. Call `long_term.recall()` to get active memories, then format them into the prompt so the LLM knows what it remembers about each patron.
 
 ### 4. Implement `chat`
 
@@ -85,7 +94,7 @@ The `main()` function and command handling are already provided. Once you implem
 
 | Command | Action |
 |---|---|
-| any text | Chat with the agent |
+| any text | Chat with BARKEEP |
 | `/memories` | Show all long-term memories with importance scores |
 | `/decay` | Apply one tick of decay to all memories |
 | `/forget <key>` | Forget a specific memory by key |
@@ -99,7 +108,7 @@ cd module-07-agent-memory/exercises/01-memory-store
 python start.py
 ```
 
-Chat with the agent and tell it facts about yourself. Use `/memories` to see what it stored. Apply `/decay` a few times and watch importance scores drop. Use `/forget` to remove specific memories.
+Chat with BARKEEP and tell it your drink order, your name, or a secret. Use `/memories` to see what it stored. Apply `/decay` a few times and watch importance scores drop. Use `/forget` to ask it to forget something specific.
 
 ## Tests
 
@@ -116,5 +125,5 @@ The tests check:
 ## Stretch goals
 
 - Add a `/save` and `/load` command that persists long-term memory to a JSON file
-- Implement importance boosting: if the agent remembers something that already exists, increase its importance instead of overwriting
+- Implement importance boosting: if a patron re-mentions a fact, increase its importance instead of overwriting
 - Add semantic recall using embeddings instead of prefix matching

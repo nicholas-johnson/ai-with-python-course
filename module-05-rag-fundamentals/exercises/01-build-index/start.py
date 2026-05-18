@@ -1,7 +1,7 @@
 """
 Exercise 1: Build the Index
 =============================
-Load ship logs, chunk them, embed into ChromaDB, and search interactively.
+Load scout logs, chunk them, embed into ChromaDB, and search interactively.
 
 Run:  python start.py
 """
@@ -16,7 +16,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ship_logs.json"
+DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "scout_logs.json"
 client = OpenAI()
 
 
@@ -29,7 +29,7 @@ class TextChunk:
 
 
 def load_logs() -> list[dict]:
-    """Load ship logs from the data directory."""
+    """Load scout logs from the data directory."""
     return json.loads(DATA_PATH.read_text())
 
 
@@ -42,7 +42,7 @@ def build_index(
     log_entries: list[dict],
     chunk_size: int = 500,
     overlap: int = 50,
-    collection_name: str = "ship_logs",
+    collection_name: str = "scout_logs",
 ) -> chromadb.Collection:
     """Chunk all logs, embed with OpenAI, and store in ChromaDB."""
     raise NotImplementedError("TODO: chunk, embed, and store in ChromaDB")
@@ -78,7 +78,7 @@ def show_similar_chunks(collection: chromadb.Collection, chunk_id: str, k: int =
 
 
 def main():
-    print("Loading ship logs...")
+    print("Loading scout logs...")
     logs = load_logs()
     print(f"Loaded {len(logs)} logs. Chunking and embedding...")
 

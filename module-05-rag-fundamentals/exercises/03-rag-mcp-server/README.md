@@ -104,7 +104,7 @@ cd module-05-rag-fundamentals/exercises/03-rag-mcp-server
 python start.py
 ```
 
-Ask questions about the ship logs. Watch the agent discover and call the RAG tools. Try asking it to search for specific topics, then dig into individual chunks.
+Ask questions about the scout logs. Watch the agent discover and call the RAG tools. Try asking it to search for specific topics, then dig into individual chunks.
 
 ## Tests
 
