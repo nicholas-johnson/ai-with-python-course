@@ -221,9 +221,9 @@ server.run()  # stdio transport`,
     content: {
       title: 'Exercises',
       points: [
-        '01 — MCP agent: build a FastMCP server and wire it to a console agent',
-        '02 — Data tools: query crew, logs, sensors, and missions from JSON data',
-        '03 — Live tools: fetch web pages and manage notes on disk',
+        '01 — Local server: build a stdio MCP server for power grid management',
+        '02 — HTTP server: build an HTTP MCP server for the science lab',
+        '03 — Ship docs: build an MCP server that serves markdown documentation as resources',
       ],
     },
   },
