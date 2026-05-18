@@ -1,101 +1,102 @@
-# Exercise 02 -- Tool Registry
+# Exercise 02 -- Auto-Schema Tool Registry
 
-> Replace hand-written JSON schemas with a decorator-based tool registry that auto-generates the OpenAI tool list, routes calls, and handles errors.
+> Build a tool registry that auto-generates OpenAI-compatible JSON schemas from Python type hints, then wire it into a planetary exploration agent.
 
 ## Recap
 
-In Exercise 01 you defined tools as raw JSON dicts and routed calls with a manual `TOOL_HANDLERS` dictionary. That works, but it is tedious and error-prone -- the schema and the handler are in different places, so they can drift out of sync.
+In Exercise 01 you defined tools as raw JSON dicts and routed calls with a manual `TOOL_HANDLERS` dictionary. That works, but keeping the JSON schema in sync with the Python function signature is tedious and error-prone.
 
-A **tool registry** solves this by keeping the schema next to the handler using a **decorator**:
+Production frameworks solve this with **introspection** -- they look at the function's type hints and build the schema automatically. In this exercise you will build a registry that does the same thing.
+
+Instead of this (from the demo):
 
 ```python
-registry = ToolRegistry()
-
-@registry.register("ship_status", "Get current status of a ship system", {
+@registry.register("scan_planet", "Scan a planet", {
     "type": "object",
-    "properties": {"system": {"type": "string"}},
-    "required": ["system"],
+    "properties": {"planet_id": {"type": "string"}},
+    "required": ["planet_id"],
 })
-def ship_status(system: str) -> str:
-    return json.dumps({"system": system, "status": "online"})
+def scan_planet(planet_id: str) -> str: ...
 ```
 
-The decorator stores the function alongside its metadata. The registry then provides two methods:
+You will write this:
 
-- **`list_tools()`** -- returns the full OpenAI-compatible tool list, ready to pass to the API.
-- **`execute(name, arguments)`** -- looks up the tool, calls the handler with `**arguments`, catches exceptions, and returns a string result.
+```python
+@registry.register("Scan a planet by its catalog ID")
+def scan_planet(planet_id: str) -> str: ...
+```
 
-This pattern is how production agent frameworks work. The registry is the single source of truth for what the agent can do.
+The registry reads `inspect.signature(fn)` to discover parameter names and types, then maps them to JSON Schema types using a simple lookup:
 
-This exercise builds on Exercise 01. The agent loop and ship data are provided from the Exercise 01 solution. You only need to implement the `ToolRegistry` class and register the tools.
+| Python type | JSON Schema type |
+|-------------|-----------------|
+| `str`       | `"string"`      |
+| `int`       | `"integer"`     |
+| `float`     | `"number"`      |
+| `bool`      | `"boolean"`     |
+
+Parameters without a default value are marked as `"required"`.
 
 ## What you build
 
-- **`ToolRegistry`** class with `register()`, `list_tools()`, and `execute()`.
-- Three tool registrations using the `@registry.register(...)` decorator.
+- **`ToolRegistry`** class with `register(description)`, `list_tools()`, and `execute()`.
+- Three planetary exploration tools registered with `@registry.register(...)`.
 
 The agent loop in `run_agent()` is already provided and uses `registry.list_tools()` and `registry.execute()`.
 
 ## Step-by-step
 
-### 1. Implement `register(name, description, parameters)` -- the decorator
+### 1. Implement `register(description)` -- the auto-schema decorator
 
-This method should return a **decorator function** that:
+This method takes only a description string and returns a decorator. Inside the decorator:
 
-1. Stores the tool info in `self._tools[name]` -- save the name, description, parameters, and the handler function.
-2. Returns the original function unchanged (so it can still be called directly).
-
-The pattern:
+1. Call `inspect.signature(fn)` to get the function's parameters.
+2. For each parameter, look up `param.annotation` in `TYPE_MAP` to get the JSON Schema type.
+3. Parameters where `param.default is inspect.Parameter.empty` are required.
+4. Store the tool in `self._tools[fn.__name__]` with the name, description, auto-generated schema, and handler.
+5. Return `fn` unchanged.
 
 ```python
-def register(self, name, description, parameters):
+def register(self, description: str):
     def decorator(fn):
-        self._tools[name] = {
-            "name": name,
-            "description": description,
-            "parameters": parameters,
-            "handler": fn,
-        }
+        sig = inspect.signature(fn)
+        properties = {}
+        required = []
+        for param_name, param in sig.parameters.items():
+            json_type = TYPE_MAP.get(param.annotation, "string")
+            properties[param_name] = {"type": json_type}
+            if param.default is inspect.Parameter.empty:
+                required.append(param_name)
+        self._tools[fn.__name__] = { ... }
         return fn
     return decorator
 ```
 
-The tests check that after registering, `self._tools` contains the tool.
-
 ### 2. Implement `list_tools() -> list[dict]`
 
-Build and return a list in OpenAI format by iterating over `self._tools.values()`:
+Same as the demo -- iterate `self._tools.values()` and build the OpenAI format:
 
 ```python
-[
-    {
-        "type": "function",
-        "function": {
-            "name": t["name"],
-            "description": t["description"],
-            "parameters": t["parameters"],
-        },
-    }
-    for t in self._tools.values()
-]
+[{"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}]
 ```
-
-The tests check that the returned list has the right length and correct structure.
 
 ### 3. Implement `execute(name, arguments) -> str`
 
-Look up the tool and call its handler:
+Same error-handling pattern as the demo:
 
-1. If `name` is not in `self._tools`, return `json.dumps({"error": f"Unknown tool: {name}"})`.
-2. Otherwise, call `self._tools[name]["handler"](**arguments)`.
-3. If the handler returns a string, return it directly. Otherwise, `json.dumps()` the result.
-4. Wrap the call in a `try/except` -- if the handler raises, return `json.dumps({"error": f"Tool error: {exc}"})`.
+1. Unknown tool -> return `{"error": "Unknown tool: <name>"}`.
+2. Call `handler(**arguments)`. If the result is a string, return it; otherwise `json.dumps()` it.
+3. Wrap in `try/except` -- if the handler raises, return `{"error": "Tool error: <message>"}`.
 
-The tests check the happy path, unknown-tool error, and exception handling.
+### 4. Register the three planetary tools
 
-### 4. Register the three tools
+Use `@registry.register(description)` to register:
 
-Use `@registry.register(...)` to register `get_crew_count`, `get_ship_status`, and `search_crew`. The implementations are the same as Exercise 01 -- look up data from `CREW_DATA` and `SHIP_SYSTEMS` and return JSON strings. The example in the comments shows the decorator syntax.
+- **`scan_planet(planet_id: str)`** -- look up the planet in `PLANET_DB`, return its data as JSON.
+- **`check_habitability(atmosphere: str, gravity: float)`** -- score habitability based on atmosphere type and gravity range.
+- **`log_discovery(planet_id: str, summary: str)`** -- append an entry to `MISSION_LOG`.
+
+The tool implementations are described in the comments in `start.py`.
 
 ## Try it
 
@@ -103,21 +104,19 @@ Use `@registry.register(...)` to register `get_crew_count`, `get_ship_status`, a
 python start.py
 ```
 
-The agent behaves identically to Exercise 01, but the code is cleaner. On startup it prints the registered tool names -- if you see "WARNING: No tools registered!" you need to implement the decorator and registrations first.
+The agent uses your registry to explore planets. Try these:
 
-Try the same questions:
-
-- `"How many crew in engineering?"` -- should call `get_crew_count`.
-- `"What's the sensor status?"` -- should call `get_ship_status`.
-- `"Find Captain Voss"` -- should call `search_crew`.
+- `"Scan planet KEP-442b"` -- should call `scan_planet`.
+- `"Is TRAP-1e habitable?"` -- should call `scan_planet`, then `check_habitability`.
+- `"Log that PROX-b has high radiation"` -- should call `log_discovery`.
 
 ## Tests
 
 ```bash
-pytest module-02-tool-calling/exercises/02-tool-registry/test_start.py -v
+pytest test_start.py -v
 ```
 
 ## Stretch goals
 
-1. Add a `list_tool_names()` method that returns just the tool names as a list of strings.
-2. Add argument validation in `execute()` -- check that required fields from the schema are present before calling the handler.
+1. Add support for `list[str]` parameters (map to `{"type": "array", "items": {"type": "string"}}`).
+2. Use `Annotated[str, "Planet catalog ID"]` to pull per-parameter descriptions into the schema.

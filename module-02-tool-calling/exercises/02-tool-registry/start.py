@@ -1,81 +1,105 @@
 """
-Exercise 02 — Tool Registry
-Build a ToolRegistry class and wire it into the agent loop from Exercise 01.
+Exercise 02 — Auto-Schema Tool Registry
+Build a ToolRegistry that auto-generates OpenAI-compatible JSON schemas from
+Python type hints, then wire it into a planetary exploration agent.
 
-The agent loop and ship data are provided (from Exercise 01's solution).
-You only need to implement the ToolRegistry class and register the tools.
+The agent loop and planet data are provided.
+You need to implement the ToolRegistry class and register the tools.
 """
 
+import inspect
 import json
 from dataclasses import dataclass, field
 from typing import Callable
 
 # ---------------------------------------------------------------------------
-# Ship data (same as exercise 01)
+# Type mapping: Python types → JSON Schema types (provided for you)
 # ---------------------------------------------------------------------------
 
-CREW_DATA = {
-    "command": [{"name": "Commander Elara Voss", "role": "Captain"}],
-    "science": [
-        {"name": "Dr. Jian Chen", "role": "Chief Science Officer"},
-        {"name": "Ensign Dax Morel", "role": "Xenobiologist"},
-        {"name": "Lt. Priya Sharma", "role": "Astrophysicist"},
-    ],
-    "engineering": [
-        {"name": "Chief Engineer Mira Chen", "role": "Lead Engineer"},
-        {"name": "Specialist Bodhi Kwan", "role": "Systems Tech"},
-    ],
-    "medical": [{"name": "Dr. Amara Osei", "role": "Chief Medical Officer"}],
+TYPE_MAP: dict[type, str] = {
+    str: "string",
+    int: "integer",
+    float: "number",
+    bool: "boolean",
 }
 
-SHIP_SYSTEMS = {
-    "warp": {"system": "warp", "status": "online", "efficiency": 0.97},
-    "shields": {"system": "shields", "status": "online", "efficiency": 0.85},
-    "sensors": {"system": "sensors", "status": "degraded", "efficiency": 0.62},
-    "life_support": {"system": "life_support", "status": "online", "efficiency": 0.99},
+# ---------------------------------------------------------------------------
+# Planetary data
+# ---------------------------------------------------------------------------
+
+PLANET_DB = {
+    "KEP-442b": {
+        "name": "KEP-442b",
+        "atmosphere": "nitrogen-oxygen",
+        "gravity": 1.3,
+        "hazards": ["seismic activity"],
+        "distance_ly": 1206,
+    },
+    "PROX-b": {
+        "name": "PROX-b",
+        "atmosphere": "carbon-dioxide",
+        "gravity": 1.1,
+        "hazards": ["radiation"],
+        "distance_ly": 4.2,
+    },
+    "TRAP-1e": {
+        "name": "TRAP-1e",
+        "atmosphere": "nitrogen-oxygen",
+        "gravity": 0.9,
+        "hazards": [],
+        "distance_ly": 39,
+    },
 }
+
+MISSION_LOG: list[dict] = []
 
 
 # ---------------------------------------------------------------------------
 # ToolRegistry — YOUR CODE HERE
 # ---------------------------------------------------------------------------
 
+
 class ToolRegistry:
     def __init__(self):
         self._tools: dict[str, dict] = {}
 
-    def register(self, name: str, description: str, parameters: dict):
-        """
-        Decorator that registers a function as a tool.
+    def register(self, description: str):
+        """Decorator that registers a function as a tool.
 
-        Store the handler function alongside its schema so that:
-        - list_tools() can build the OpenAI format
-        - execute() can route calls to the right function
+        Unlike the demo's registry (which takes name + description + a hand-written
+        JSON schema), this one only takes a description.  Everything else is
+        inferred automatically:
 
-        Usage:
-            @registry.register("tool_name", "description", {"type": "object", ...})
-            def tool_name(arg: str) -> str:
-                ...
+        - The **tool name** comes from fn.__name__.
+        - The **JSON schema** is built by inspecting the function signature.
+
+        Hint: use inspect.signature(fn) to iterate over parameters.  Each
+        parameter has a .name and .annotation (the type hint).  Use TYPE_MAP
+        to convert Python types to JSON Schema types.  Parameters without a
+        default value are "required".
         """
-        # TODO: return a decorator that stores the tool and returns the function unchanged
+        # TODO: return a decorator that:
+        #   1. Calls inspect.signature(fn) to get the parameter list
+        #   2. Builds {"type": "object", "properties": {...}, "required": [...]}
+        #   3. Stores the tool in self._tools[fn.__name__]
+        #   4. Returns fn unchanged
         pass
 
     def list_tools(self) -> list[dict]:
-        """
-        Return tools in OpenAI-compatible format:
+        """Return tools in OpenAI-compatible format:
+
         [{"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}]
         """
         # TODO: build and return the tool list from self._tools
         pass
 
     def execute(self, name: str, arguments: dict) -> str:
-        """
-        Look up the tool by name and call its handler with the arguments.
-        Return the result as a string.
+        """Look up the tool by name and call its handler with the arguments.
 
         Error handling:
         - Unknown tool: return JSON {"error": "Unknown tool: <name>"}
         - Handler raises: return JSON {"error": "Tool error: <message>"}
+        - If the handler returns a non-string, json.dumps() it.
         """
         # TODO: implement routing with error handling
         pass
@@ -87,24 +111,27 @@ class ToolRegistry:
 
 registry = ToolRegistry()
 
-# TODO: use @registry.register(...) to register these three tools:
-#   get_crew_count  — takes department, returns JSON with count
-#   get_ship_status — takes system, returns JSON with status
-#   search_crew     — takes query, returns JSON array of matches
+# TODO: Register three tools using @registry.register(description):
 #
-# Example:
-#   @registry.register("get_crew_count", "Get crew count for a department", {
-#       "type": "object",
-#       "properties": {"department": {"type": "string"}},
-#       "required": ["department"],
-#   })
-#   def get_crew_count(department: str) -> str:
-#       ...
+#   scan_planet(planet_id: str) -> str
+#       Look up planet_id in PLANET_DB.  Return the planet dict as JSON,
+#       or {"error": "Unknown planet: <id>"} if not found.
+#
+#   check_habitability(atmosphere: str, gravity: float) -> str
+#       Score habitability:
+#         +50 for "nitrogen-oxygen" atmosphere, +20 for "nitrogen-argon"
+#         +50 for gravity in [0.8, 1.2], +25 for gravity in [0.5, 1.5]
+#       Return {"atmosphere": ..., "gravity": ..., "habitability_score": ...}
+#
+#   log_discovery(planet_id: str, summary: str) -> str
+#       Append {"planet_id": ..., "summary": ...} to MISSION_LOG.
+#       Return {"status": "logged", "entry": ...}
 
 
 # ---------------------------------------------------------------------------
-# Agent result + loop (from Exercise 01 — already implemented)
+# Agent result + loop (provided — uses your registry)
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class AgentResult:
@@ -113,11 +140,14 @@ class AgentResult:
     steps: int = 0
 
 
-SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Use your tools to answer crew and ship queries. Be concise."
+SYSTEM_PROMPT = (
+    "You are the DSS Pathfinder exploration AI. Use your tools to scan planets, "
+    "assess habitability, and log discoveries. Be concise."
+)
 
 
 def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
-    """Agent loop that uses the ToolRegistry instead of raw dicts."""
+    """Agent loop that uses the ToolRegistry."""
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question},
@@ -172,7 +202,7 @@ if __name__ == "__main__":
 
     load_dotenv()
     client = OpenAI()
-    print("DSS Pathfinder Agent (with registry) ready. Type a question (or 'quit').\n")
+    print("DSS Pathfinder Exploration Agent (with auto-schema registry) ready. Type a question (or 'quit').\n")
 
     registered = registry.list_tools()
     if not registered:

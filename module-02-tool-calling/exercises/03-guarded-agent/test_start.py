@@ -84,7 +84,7 @@ def _make_response(content=None, tool_calls=None):
 
 class TestGuardedAgent:
     def _make_agent(self, client, permitted=None, max_calls=10):
-        al = AllowList(permitted=permitted or {"get_crew_count", "get_ship_status"})
+        al = AllowList(permitted=permitted or {"scan_planet", "check_habitability"})
         rl = RateLimiter(max_calls=max_calls, window_seconds=60.0)
         return GuardedAgent(client, registry, al, rl)
 
@@ -92,15 +92,15 @@ class TestGuardedAgent:
         client = MagicMock()
         client.chat.completions.create.side_effect = [
             _make_response(tool_calls=[
-                _make_tool_call("c1", "get_crew_count", {"department": "science"}),
+                _make_tool_call("c1", "scan_planet", {"planet_id": "TRAP-1e"}),
             ]),
-            _make_response(content="3 in science."),
+            _make_response(content="TRAP-1e has a nitrogen-oxygen atmosphere."),
         ]
         agent = self._make_agent(client)
-        result = agent.run("How many in science?")
+        result = agent.run("Scan TRAP-1e")
 
-        assert result.final_answer == "3 in science."
-        assert "get_crew_count" in result.tool_calls_made
+        assert result.final_answer == "TRAP-1e has a nitrogen-oxygen atmosphere."
+        assert "scan_planet" in result.tool_calls_made
         assert len(result.audit_log) == 1
         assert result.audit_log[0].allowed is True
 
@@ -108,12 +108,12 @@ class TestGuardedAgent:
         client = MagicMock()
         client.chat.completions.create.side_effect = [
             _make_response(tool_calls=[
-                _make_tool_call("c1", "search_crew", {"query": "Voss"}),
+                _make_tool_call("c1", "log_discovery", {"planet_id": "TRAP-1e", "summary": "test"}),
             ]),
-            _make_response(content="I cannot search crew — that tool is restricted."),
+            _make_response(content="I cannot log discoveries — that tool is restricted."),
         ]
-        agent = self._make_agent(client, permitted={"get_crew_count"})
-        result = agent.run("Find Voss")
+        agent = self._make_agent(client, permitted={"scan_planet"})
+        result = agent.run("Log a discovery about TRAP-1e")
 
         assert result.final_answer is not None
         assert len(result.audit_log) == 1
@@ -130,15 +130,15 @@ class TestGuardedAgent:
         client = MagicMock()
         client.chat.completions.create.side_effect = [
             _make_response(tool_calls=[
-                _make_tool_call("c1", "get_crew_count", {"department": "science"}),
+                _make_tool_call("c1", "scan_planet", {"planet_id": "TRAP-1e"}),
             ]),
             _make_response(tool_calls=[
-                _make_tool_call("c2", "get_crew_count", {"department": "engineering"}),
+                _make_tool_call("c2", "scan_planet", {"planet_id": "PROX-b"}),
             ]),
             _make_response(content="Done"),
         ]
-        agent = self._make_agent(client, permitted={"get_crew_count"}, max_calls=1)
-        result = agent.run("Count everyone")
+        agent = self._make_agent(client, permitted={"scan_planet"}, max_calls=1)
+        result = agent.run("Scan everything")
 
         assert len(result.audit_log) == 2
         assert result.audit_log[0].allowed is True
@@ -149,18 +149,18 @@ class TestGuardedAgent:
         client = MagicMock()
         client.chat.completions.create.side_effect = [
             _make_response(tool_calls=[
-                _make_tool_call("c1", "get_ship_status", {"system": "warp"}),
+                _make_tool_call("c1", "scan_planet", {"planet_id": "KEP-442b"}),
             ]),
-            _make_response(content="Warp is online."),
+            _make_response(content="KEP-442b is online."),
         ]
         agent = self._make_agent(client)
-        result = agent.run("Warp status?")
+        result = agent.run("Scan KEP-442b")
 
         assert isinstance(result, AgentResult)
         assert len(result.audit_log) >= 1
         entry = result.audit_log[0]
         assert isinstance(entry, AuditEntry)
-        assert entry.tool_name == "get_ship_status"
+        assert entry.tool_name == "scan_planet"
         assert entry.allowed is True
         assert entry.timestamp > 0
 
@@ -176,7 +176,7 @@ class TestGuardedAgent:
     def test_max_steps_respected(self):
         client = MagicMock()
         client.chat.completions.create.return_value = _make_response(
-            tool_calls=[_make_tool_call("c1", "get_crew_count", {"department": "science"})]
+            tool_calls=[_make_tool_call("c1", "scan_planet", {"planet_id": "TRAP-1e"})]
         )
         agent = self._make_agent(client)
         result = agent.run("loop", max_steps=2)
@@ -194,19 +194,19 @@ class TestGuardedAgent:
     reason="No OPENAI_API_KEY set",
 )
 class TestIntegration:
-    def test_guarded_agent_blocks_search_crew(self):
+    def test_guarded_agent_blocks_log_discovery(self):
         from dotenv import load_dotenv
         from openai import OpenAI
 
         load_dotenv()
         client = OpenAI()
-        al = AllowList(permitted={"get_crew_count", "get_ship_status"})
+        al = AllowList(permitted={"scan_planet", "check_habitability"})
         rl = RateLimiter(max_calls=10, window_seconds=60.0)
         agent = GuardedAgent(client, registry, al, rl)
 
-        result = agent.run("Search for Commander Voss in the crew database")
+        result = agent.run("Log a discovery that TRAP-1e has breathable air")
 
         assert result.final_answer is not None
         blocked = [e for e in result.audit_log if not e.allowed]
         if blocked:
-            assert any("search_crew" == e.tool_name for e in blocked)
+            assert any("log_discovery" == e.tool_name for e in blocked)

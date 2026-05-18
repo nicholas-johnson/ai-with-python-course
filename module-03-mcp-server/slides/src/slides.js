@@ -8,17 +8,6 @@ export const slides = [
     },
   },
   {
-    type: 'welcome',
-    content: {
-      title: 'One protocol to connect them all',
-      points: [
-        'MCP lets any AI agent discover and call tools uniformly.',
-        'No custom glue per integration — just schemas and conventions.',
-        'Build once, connect to any MCP-compatible agent or IDE.',
-      ],
-    },
-  },
-  {
     type: 'standard',
     content: {
       title: 'Learning goals',

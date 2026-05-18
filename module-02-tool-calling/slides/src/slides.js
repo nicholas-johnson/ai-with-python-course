@@ -8,17 +8,6 @@ export const slides = [
     },
   },
   {
-    type: 'welcome',
-    content: {
-      title: 'An agent is a loop',
-      points: [
-        'Receive a message. Decide: think or act?',
-        'If act: call a tool, feed the result back, loop.',
-        'If think: produce a final answer. Done.',
-      ],
-    },
-  },
-  {
     type: 'standard',
     content: {
       title: 'Learning goals',
@@ -41,6 +30,20 @@ export const slides = [
         '**user** — the human (or upstream agent) input.',
         '**assistant** — the LLM response: text and/or tool calls.',
         '**tool** — result of a tool execution, linked by call_id.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Passing tools to the model',
+      icon: 'cpu',
+      points: [
+        'Tools are passed as a **`tools` parameter** alongside the messages in every API call.',
+        'Each tool is a JSON object describing its **name**, **description**, and **parameter schema** — the model never sees your code, only this specification.',
+        'The model reads the descriptions to decide **which tool to call** and what arguments to pass — good descriptions are critical.',
+        'Tools are **not persistent** — you send the full list with every request, just like the message history.',
+        'The model responds with a **`tool_calls` array** containing the tool name and arguments it chose, or with plain text if no tool is needed.',
       ],
     },
   },
@@ -149,11 +152,11 @@ def check_inventory(product: str) -> dict:
     },
   },
 
-  // ---- Demo: Tool registry (live agent) ----
+  // ---- Demo: Tool registry  ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Tool registry (live agent)',
+      title: 'Demo — Tool registry',
       subtitle: 'Switch to terminal: python demo/demo.py → Part 2',
       icon: 'rocket',
     },
@@ -175,61 +178,75 @@ def check_inventory(product: str) -> dict:
       title: 'Why safety rails?',
       icon: 'shield',
       points: [
-        'LLMs can hallucinate tool names or call tools in harmful sequences.',
-        '**Allowlists**: only pre-approved tools can execute.',
-        '**Rate limits**: prevent runaway loops or cost explosions.',
-        '**Redaction**: strip sensitive data from logs and audit trails.',
-        '**Audit log**: every call recorded for debugging and compliance.',
+        'LLMs are **unpredictable** — they can hallucinate tool names, loop indefinitely, or leak sensitive data.',
+        'An unguarded agent is fine for demos. **Production requires boundaries.**',
+        "Safety rails sit between the model's decision and the actual tool execution — a checkpoint layer.",
+        'The model still sees denied calls as error messages, so it can **adapt and explain** rather than crash.',
       ],
     },
   },
   {
-    type: 'comparison',
+    type: 'standard',
     content: {
-      title: 'Guarded vs unguarded execution',
-      left: {
-        label: 'Unguarded',
-        items: [
-          'Any tool name accepted',
-          'No call frequency limits',
-          'Secrets leak to logs',
-          'No record of what happened',
-        ],
-      },
-      right: {
-        label: 'Guarded',
-        items: [
-          'Allowlist: only approved tools',
-          'Rate limiter: N calls per window',
-          'Redaction: sensitive data masked',
-          'Audit trail: every call logged',
-        ],
-      },
+      title: 'Allowlists',
+      icon: 'shield',
+      points: [
+        '**What:** A set of permitted tool names. Any call to a tool not in the set is rejected before execution.',
+        "**Why:** The model might hallucinate a tool name or try to call a destructive tool it shouldn't have access to.",
+        '**Without it:** The agent can call *anything* — including tools you never intended to expose.',
+        '**Example:** Permit `scan_planet` and `check_habitability`, block `log_discovery` — the agent can read but not write.',
+      ],
     },
   },
   {
-    type: 'code',
+    type: 'standard',
     content: {
-      title: 'Rate limiter (sliding window)',
-      code: `class RateLimiter:
-    def __init__(self, max_calls: int, window: float):
-        self.max_calls = max_calls
-        self.window = window
-        self._timestamps: list[float] = []
-
-    def allow(self) -> bool:
-        now = time.time()
-        self._timestamps = [
-            t for t in self._timestamps
-            if now - t < self.window
-        ]
-        if len(self._timestamps) >= self.max_calls:
-            return False
-        self._timestamps.append(now)
-        return True`,
-      highlights: [
-        'Sliding window: prune old timestamps, check count',
-        'Simple, stateful, no external dependencies',
+      title: 'Rate limiting',
+      icon: 'shield',
+      points: [
+        '**What:** Cap how many tool calls can happen within a sliding time window.',
+        '**Why:** A confused or looping agent can fire hundreds of calls in seconds, burning through API budget and hammering downstream services.',
+        '**Without it:** One bad prompt can trigger an infinite tool-call loop with no brake.',
+        '**Pattern:** Track timestamps of recent calls, prune those outside the window, reject if the count exceeds the limit.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Redaction',
+      icon: 'shield',
+      points: [
+        '**What:** Strip sensitive data — API keys, PII, credentials, internal IDs — from tool results before they reach logs or the model.',
+        '**Why:** Tool results often contain raw data from internal systems. That data can end up in audit logs, conversation history, or even shown to the user.',
+        '**Without it:** Secrets silently leak into stored conversations, log aggregators, or downstream models.',
+        '**Pattern:** Regex or pattern-based replacement applied to every tool result before logging.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Audit logging',
+      icon: 'shield',
+      points: [
+        '**What:** Record every tool call — allowed or blocked — with timestamp, tool name, arguments, result, and outcome.',
+        '**Why:** When an agent misbehaves, the audit log is the only way to reconstruct what happened and why.',
+        '**Without it:** No trail to debug incidents, measure usage, or prove compliance to stakeholders.',
+        '**Each entry records:** was the call allowed? What arguments were passed? What came back? When did it happen?',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Blocked tool UX',
+      icon: 'shield',
+      points: [
+        "**What:** When a tool is denied, return a structured error message as the tool result — don't crash or silently skip.",
+        '**Why:** The model needs to *see* the denial so it can explain the situation to the user or try an alternative approach.',
+        '**Without it:** The conversation breaks — the model expects a tool result and gets nothing, or the program crashes.',
+        '**Example:** Return `{"error": "Tool not permitted: log_discovery"}` — the model reads this and says *"I can\'t log discoveries with my current permissions."*',
       ],
     },
   },

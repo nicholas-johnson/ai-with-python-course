@@ -83,6 +83,16 @@ def demo_basic_chat(client: OpenAI):
             break
 
         messages.append({"role": "user", "content": user_msg})
+
+        print(f"\n--- Sending {len(messages)} messages to the API ---")
+        for i, m in enumerate(messages):
+            role = m["role"].upper()
+            text = m["content"]
+            if len(text) > 120:
+                text = text[:120] + "..."
+            print(f"  [{i}] {role}: {text}")
+        print()
+
         response = chat(client, messages)
         messages.append({"role": "assistant", "content": response})
         print(f"AI>  {response}\n")
@@ -103,6 +113,53 @@ def demo_streaming(client: OpenAI):
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     print("\nWith stream=True, tokens arrive one by one.")
+    print("Each chunk is shown as it arrives, then the final assembled response.")
+    print("Type your messages below. Type 'quit' to return to the menu.\n")
+
+    while True:
+        try:
+            user_msg = input("You> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not user_msg or user_msg.lower() == "quit":
+            break
+
+        messages.append({"role": "user", "content": user_msg})
+
+        response = client.chat.completions.create(
+            model=MODEL, messages=messages, stream=True,
+        )
+        tokens = []
+        chunk_num = 0
+        print("\n--- Chunks arriving ---")
+        for chunk in response:
+            delta = chunk.choices[0].delta
+            content = delta.content
+            finish = chunk.choices[0].finish_reason
+            print(f"  chunk {chunk_num}: content={content!r}  finish_reason={finish}")
+            chunk_num += 1
+            if content:
+                tokens.append(content)
+
+        full_response = "".join(tokens)
+        print(f"\n--- Assembled response ({chunk_num} chunks, {len(tokens)} with content) ---")
+        print(f"AI>  {full_response}\n")
+        messages.append({"role": "assistant", "content": full_response})
+
+
+# ---------------------------------------------------------------------------
+# Part 2b: Plain streaming chat (no logging)
+# ---------------------------------------------------------------------------
+
+def demo_streaming_clean(client: OpenAI):
+    print("=" * 60)
+    print("PART 2b: STREAMING (CLEAN)")
+    print("=" * 60)
+
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+    print("\nSame streaming, but just the nice output — no chunk logging.")
     print("Type your messages below. Type 'quit' to return to the menu.\n")
 
     while True:
@@ -253,9 +310,10 @@ def demo_prompting(client: OpenAI):
 # ---------------------------------------------------------------------------
 
 DEMOS = {
-    "1": ("Basic chat",        demo_basic_chat),
-    "2": ("Streaming",         demo_streaming),
-    "3": ("Prompt engineering", demo_prompting),
+    "1":  ("Basic chat",              demo_basic_chat),
+    "2":  ("Streaming (with chunks)", demo_streaming),
+    "2b": ("Streaming (clean)",       demo_streaming_clean),
+    "3":  ("Prompt engineering",      demo_prompting),
 }
 
 

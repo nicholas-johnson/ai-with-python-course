@@ -33,7 +33,7 @@ class RateLimiter:
 
 The key design decision: when a tool is blocked, you do **not** crash or silently skip the call. Instead, you send back an error message as the tool result so the model can see it and adapt. This keeps the conversation flowing.
 
-This exercise builds on Exercise 02. The `ToolRegistry`, tool registrations, and ship data are provided from the Exercise 02 solution. You only need to implement `AllowList`, `RateLimiter`, and `GuardedAgent`.
+This exercise builds on Exercise 02. The `ToolRegistry`, tool registrations, and planetary data are provided from the Exercise 02 solution. You only need to implement `AllowList`, `RateLimiter`, and `GuardedAgent`.
 
 ## What you build
 
@@ -52,7 +52,7 @@ def check(self, name: str) -> bool:
     return name in self._permitted
 ```
 
-The tests create an allowlist with `{"get_crew_count", "get_ship_status"}` and check that `search_crew` is rejected.
+The tests create an allowlist with `{"scan_planet", "check_habitability"}` and check that `log_discovery` is rejected.
 
 ### 2. Implement `RateLimiter.allow() -> bool`
 
@@ -91,16 +91,16 @@ The audit log is `self.audit_log` -- append `AuditEntry` objects as you go, then
 python start.py
 ```
 
-The agent starts with `search_crew` blocked. Try these:
+The agent starts with `log_discovery` blocked -- it can observe planets but cannot write to the mission log. Try these:
 
-- `"How many crew in science?"` -- should succeed via `get_crew_count`. Audit shows ALLOWED.
-- `"Find all engineers"` -- the model will try `search_crew`, get a "not permitted" error, and explain the denial.
-- `"What's the warp status?"` -- should succeed. Watch the audit log grow.
+- `"Scan planet TRAP-1e"` -- should succeed via `scan_planet`. Audit shows ALLOWED.
+- `"Log that TRAP-1e has breathable air"` -- the model will try `log_discovery`, get a "not permitted" error, and explain the denial.
+- `"Is KEP-442b habitable?"` -- should succeed. Watch the audit log grow.
 
 ## Tests
 
 ```bash
-pytest module-02-tool-calling/exercises/03-guarded-agent/test_start.py -v
+pytest test_start.py -v
 ```
 
 ## Stretch goals
