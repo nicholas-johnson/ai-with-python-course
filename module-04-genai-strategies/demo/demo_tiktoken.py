@@ -225,11 +225,6 @@ def demo_costs() -> None:
             f"{in_cost:10.6f} {out_cost:10.6f} {total:10.6f}"
         )
 
-    print(
-        "\n  Note: tiktoken counts tokens; pricing comes from MODEL_PRICING constants."
-    )
-    print("  Same text can tokenize differently per encoding — compare Input column above.")
-    print("  Use this before calling the API to avoid surprise bills and context overflows.")
 
 
 DEMOS = [
