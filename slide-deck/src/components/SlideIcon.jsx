@@ -82,6 +82,7 @@ import {
   Image,
   List,
   Wifi,
+  Scissors,
 } from "lucide-react";
 
 // Map icon names to Lucide components
@@ -180,6 +181,7 @@ const iconMap = {
   "folder-tree": FolderPlus,
 
   // Tools
+  scissors: Scissors,
   wrench: Wrench,
   settings: Settings,
   eraser: Eraser,

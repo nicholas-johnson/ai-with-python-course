@@ -55,7 +55,7 @@ def build_index(
     chroma = chromadb.Client()
     try:
         chroma.delete_collection(collection_name)
-    except ValueError:
+    except chromadb.errors.NotFoundError:
         pass
     collection = chroma.create_collection(collection_name)
 

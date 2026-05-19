@@ -38,19 +38,19 @@ async with stdio_client(server_params) as (read, write):
 
 Two files:
 
-| File | Description |
-|---|---|
+| File        | Description                                                                              |
+| ----------- | ---------------------------------------------------------------------------------------- |
 | `server.py` | **Provided** — MCP server with 5 research tools (fetch_url, save/list/read/search notes) |
-| `start.py` | FastAPI app with streaming chat, tool-calling loop, and tool list endpoint |
+| `start.py`  | FastAPI app with streaming chat, tool-calling loop, and tool list endpoint               |
 
 ### SSE events
 
-| Event | Payload | When |
-|---|---|---|
-| `token` | `{"token": "Hello"}` | Each incremental piece of text |
-| `tool_call` | `{"name": "fetch_url", "arguments": {...}}` | LLM requests a tool call |
-| `tool_result` | `{"name": "fetch_url", "content": "..."}` | Tool execution result |
-| `done` | `{"role": "assistant", "content": "..."}` | The complete assistant message at the end |
+| Event         | Payload                                     | When                                      |
+| ------------- | ------------------------------------------- | ----------------------------------------- |
+| `token`       | `{"token": "Hello"}`                        | Each incremental piece of text            |
+| `tool_call`   | `{"name": "fetch_url", "arguments": {...}}` | LLM requests a tool call                  |
+| `tool_result` | `{"name": "fetch_url", "content": "..."}`   | Tool execution result                     |
+| `done`        | `{"role": "assistant", "content": "..."}`   | The complete assistant message at the end |
 
 ## Step-by-step
 
@@ -118,7 +118,7 @@ Start the backend, then the frontend:
 ```bash
 # Terminal 1 — backend
 cd module-04-genai-strategies/exercises/01-research-chat
-uvicorn start:app --reload --port 8000
+uvicorn solution:app --reload --port 8000
 
 # Terminal 2 — frontend
 cd module-04-genai-strategies/frontend
@@ -136,6 +136,7 @@ pytest test_start.py -v
 ```
 
 The tests check:
+
 - `/health` returns 200 with the correct JSON
 - `/tools` returns the MCP tool list
 - `/chat` correctly streams tool events

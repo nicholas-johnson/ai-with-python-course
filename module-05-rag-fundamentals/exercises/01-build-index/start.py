@@ -45,6 +45,17 @@ def build_index(
     collection_name: str = "scout_logs",
 ) -> chromadb.Collection:
     """Chunk all logs, embed with OpenAI, and store in ChromaDB."""
+    chroma = chromadb.Client()
+
+    try:
+        chroma.delete_collection(collection_name)
+    except chromadb.errors.NotFoundError:
+        pass
+    collection = chroma.create_collection(collection_name)
+
+    # TODO: chunk each log entry using chunk_text()
+    # TODO: batch-embed all chunks with OpenAI text-embedding-3-small
+    # TODO: add chunks to the collection with ids, embeddings, documents, and metadatas
     raise NotImplementedError("TODO: chunk, embed, and store in ChromaDB")
 
 

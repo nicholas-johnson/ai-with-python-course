@@ -4,17 +4,14 @@ Module 5 Demo — ingest.py
 Load ship logs, chunk, embed with OpenAI, and store in ChromaDB.
 
 Requires:
-  - ChromaDB running via docker compose (port 8100)
   - OPENAI_API_KEY environment variable
 
 Usage:
-  python ingest.py              # ingest (skip if collection exists)
-  python ingest.py --reset      # wipe and rebuild
-  python ingest.py --chunk-size 300 --overlap 30
+  python ingest.py
 """
 
-import argparse
 import json
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,8 +22,7 @@ from openai import OpenAI
 load_dotenv()
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "ship_logs.json"
-CHROMA_HOST = "localhost"
-CHROMA_PORT = 8100
+CHROMA_PATH = str(Path(__file__).resolve().parent / "chroma_data")
 COLLECTION_NAME = "ship_logs"
 
 
@@ -54,24 +50,21 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]
     return chunks
 
 
-def ingest(chunk_size: int = 500, overlap: int = 50, reset: bool = False):
+def ingest(chunk_size: int = 500, overlap: int = 50):
     """Load logs, chunk, embed, and store in ChromaDB."""
     client = OpenAI()
-    chroma = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 
-    if reset:
-        try:
-            chroma.delete_collection(COLLECTION_NAME)
-            print(f"  Deleted existing '{COLLECTION_NAME}' collection.")
-        except Exception:
-            pass
+    chroma_path = Path(CHROMA_PATH)
+    if chroma_path.exists():
+        shutil.rmtree(chroma_path)
+        print("  Cleared previous embeddings.\n")
 
-    collection = chroma.get_or_create_collection(COLLECTION_NAME)
-
-    if collection.count() > 0 and not reset:
-        print(f"  Collection '{COLLECTION_NAME}' already has {collection.count()} chunks.")
-        print("  Use --reset to wipe and rebuild.")
-        return collection
+    chroma = chromadb.PersistentClient(path=CHROMA_PATH)
+    collection = chroma.create_collection(
+        COLLECTION_NAME,
+        metadata={"hnsw:space": "cosine"},
+        embedding_function=None,
+    )
 
     # Load
     logs = load_logs()
@@ -94,10 +87,16 @@ def ingest(chunk_size: int = 500, overlap: int = 50, reset: bool = False):
                     },
                 )
             )
-    print(f"  Created {len(all_chunks)} chunks (size={chunk_size}, overlap={overlap})")
+    print(f"  Created {len(all_chunks)} chunks (size={chunk_size}, overlap={overlap})\n")
+
+    for i, chunk in enumerate(all_chunks):
+        header = f"  [{chunk.source_id} #{chunk.chunk_index}]"
+        preview = chunk.text[:80].replace("\n", " ")
+        print(f"  {header} {preview}...")
+    print()
 
     # Embed + store in batches
-    batch_size = 100
+    batch_size = 20
     for i in range(0, len(all_chunks), batch_size):
         batch = all_chunks[i : i + batch_size]
         texts = [c.text for c in batch]
@@ -130,19 +129,44 @@ def ingest(chunk_size: int = 500, overlap: int = 50, reset: bool = False):
     return collection
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Ingest ship logs into ChromaDB")
-    parser.add_argument("--chunk-size", type=int, default=500, help="Chunk size in characters")
-    parser.add_argument("--overlap", type=int, default=50, help="Overlap between chunks")
-    parser.add_argument("--reset", action="store_true", help="Wipe and rebuild the collection")
-    args = parser.parse_args()
+def prompt_params() -> tuple[int, int]:
+    """Interactive menu to configure chunk parameters."""
+    print("  Chunking parameters:")
+    print("  --------------------")
+    print(f"  [1] chunk_size=300, overlap=30  (small, high granularity)")
+    print(f"  [2] chunk_size=500, overlap=50  (default)")
+    print(f"  [3] chunk_size=800, overlap=100 (large, more context)")
+    print(f"  [4] Custom")
+    print()
 
+    choice = input("  Choose [1-4] (default: 2): ").strip()
+
+    if choice == "1":
+        return 300, 30
+    elif choice == "3":
+        return 800, 100
+    elif choice == "4":
+        try:
+            cs = int(input("  chunk_size: ").strip())
+            ov = int(input("  overlap: ").strip())
+            return cs, ov
+        except ValueError:
+            print("  Invalid input, using defaults.")
+            return 500, 50
+    else:
+        return 500, 50
+
+
+def main():
     print("=" * 50)
     print("  Module 5 Demo — Ingest")
     print("=" * 50)
     print()
 
-    ingest(chunk_size=args.chunk_size, overlap=args.overlap, reset=args.reset)
+    chunk_size, overlap = prompt_params()
+    print(f"\n  Using chunk_size={chunk_size}, overlap={overlap}\n")
+
+    ingest(chunk_size=chunk_size, overlap=overlap)
 
 
 if __name__ == "__main__":

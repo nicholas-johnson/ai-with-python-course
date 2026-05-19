@@ -45,10 +45,10 @@ print(transcript.text)
 
 Two new endpoints added to `start.py` (which ships with the Exercise 1 solution — chat and tools already work):
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/vision` | POST | Accepts `{"image": "<base64>", "prompt": "..."}`, returns structured analysis |
-| `/transcribe` | POST | Accepts audio file upload, returns `{"transcript": "..."}` |
+| Endpoint      | Method | Description                                                                   |
+| ------------- | ------ | ----------------------------------------------------------------------------- |
+| `/vision`     | POST   | Accepts `{"image": "<base64>", "prompt": "..."}`, returns structured analysis |
+| `/transcribe` | POST   | Accepts audio file upload, returns `{"transcript": "..."}`                    |
 
 ## Step-by-step
 
@@ -94,6 +94,7 @@ async def transcribe(file: UploadFile = File(...)):
 ### 5. Test with the frontend
 
 Start the backend and frontend. Try:
+
 - Click the image button and upload a photo — the image analysis panel appears
 - Click the microphone button and upload a voice memo — the transcript appears in the chat
 - Keep chatting — everything from Exercise 1 still works
@@ -117,6 +118,7 @@ pytest test_start.py -v
 ```
 
 The tests check:
+
 - `/vision` accepts a base64 image and returns a description
 - `/transcribe` accepts an audio file and returns a transcript
 - All previous endpoints still work

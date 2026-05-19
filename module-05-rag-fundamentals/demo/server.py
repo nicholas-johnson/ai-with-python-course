@@ -10,11 +10,12 @@ Usage:
   python -m mcp dev server.py       # MCP Inspector web UI
 
 Requires:
-  - ChromaDB running via docker compose (port 8100)
   - OPENAI_API_KEY environment variable
 """
 
 import json
+import sys
+from pathlib import Path
 
 import chromadb
 from dotenv import load_dotenv
@@ -23,16 +24,15 @@ from openai import OpenAI
 
 load_dotenv()
 
-CHROMA_HOST = "localhost"
-CHROMA_PORT = 8100
+CHROMA_PATH = str(Path(__file__).resolve().parent / "chroma_data")
 COLLECTION_NAME = "ship_logs"
 
 mcp = FastMCP("RAG Server")
 openai_client = OpenAI()
-chroma = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-collection = chroma.get_or_create_collection(COLLECTION_NAME)
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
+collection = chroma.get_or_create_collection(COLLECTION_NAME, embedding_function=None)
 
-print(f"RAG Server: connected to ChromaDB, collection has {collection.count()} chunks", flush=True)
+print(f"RAG Server: connected to ChromaDB, collection has {collection.count()} chunks", file=sys.stderr, flush=True)
 
 
 def _embed(text: str) -> list[float]:

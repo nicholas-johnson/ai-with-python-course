@@ -10,7 +10,7 @@ Usage:
   python agent.py
 
 Requires:
-  - ChromaDB running via docker compose (port 8100) with data ingested
+  - Data ingested via ingest.py
   - OPENAI_API_KEY environment variable
 """
 
@@ -91,6 +91,7 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
             choice = response.choices[0]
 
             if choice.finish_reason == "tool_calls":
+                messages.append(choice.message)
                 for tc in choice.message.tool_calls:
                     fn_name = tc.function.name
                     fn_args = json.loads(tc.function.arguments)
@@ -101,7 +102,6 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
                     preview = result_text[:200].replace("\n", " ")
                     print(f"  [tool_result] {preview}...")
 
-                    messages.append(choice.message)
                     messages.append(
                         {
                             "role": "tool",
