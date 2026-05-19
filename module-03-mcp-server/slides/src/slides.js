@@ -217,6 +217,19 @@ server.run()  # stdio transport`,
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'MCP servers in the wild',
+      icon: 'package',
+      points: [
+        '**Official reference servers** — GitHub (repos, PRs, issues), PostgreSQL (natural-language queries), Filesystem (ships with Claude Desktop), Brave Search.',
+        '**Popular community servers** — Playwright (browser automation), Memory (vector + graph), Fetch (HTML extraction), SQLite.',
+        '**Enterprise first-party** — Slack, Stripe, Sentry, Snowflake, Salesforce, Databricks — OAuth 2.1 auth, audit logging, rate limits.',
+        '**Discovery** — MCP Registry indexes 4 000+ servers; Smithery tracks installs. Browse at github.com/modelcontextprotocol/servers.',
+      ],
+    },
+  },
+  {
     type: 'welcome',
     content: {
       title: 'Exercises',

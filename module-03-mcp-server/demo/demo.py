@@ -45,7 +45,7 @@ def section(title: str):
 
 def pause():
     input("  [press Enter to continue]\n")
-
+    
 
 def log(tag: str, message: str):
     print(f"  [{tag}] {message}")

@@ -1,5 +1,6 @@
 node_modules/
 __pycache__/
+*.egg-info/
 **/slides/dist/
 .pnpm-store/
 coverage/

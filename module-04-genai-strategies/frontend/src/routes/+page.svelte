@@ -2,7 +2,7 @@
 	import { streamChat, analyseImage, transcribeAudio, checkHealth, type Message, type ToolCall, type ToolResult } from '$lib/api';
 	import ChatMessage from '$lib/components/ChatMessage.svelte';
 	import ToolCallCard from '$lib/components/ToolCallCard.svelte';
-	import { Search, ImagePlus, Mic, Send, Loader2, Wifi, WifiOff } from 'lucide-svelte';
+	import { Search, ImagePlus, Mic, MicOff, Send, Loader2, Wifi, WifiOff } from 'lucide-svelte';
 
 	type ChatItem =
 		| { kind: 'message'; message: Message }
@@ -16,6 +16,9 @@
 	let input = $state('');
 	let streaming = $state(false);
 	let connected = $state(false);
+	let recording = $state(false);
+	let mediaRecorder: MediaRecorder | null = $state(null);
+	let audioChunks: Blob[] = $state([]);
 	let scrollContainer: HTMLElement;
 
 	$effect(() => {
@@ -122,34 +125,58 @@
 		fileInput.click();
 	}
 
-	async function handleAudioUpload() {
-		const fileInput = document.createElement('input');
-		fileInput.type = 'file';
-		fileInput.accept = 'audio/*';
-		fileInput.onchange = async () => {
-			const file = fileInput.files?.[0];
-			if (!file) return;
+	async function toggleRecording() {
+		if (recording && mediaRecorder) {
+			mediaRecorder.stop();
+			return;
+		}
 
-			items = [
-				...items,
-				{ kind: 'message', message: { role: 'user', content: `🎤 Uploaded audio: ${file.name}` } },
-			];
-			scrollToBottom();
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			audioChunks = [];
+			const recorder = new MediaRecorder(stream);
+			mediaRecorder = recorder;
 
-			try {
-				const result = await transcribeAudio(file);
-				items = [...items, { kind: 'transcript', text: result.transcript }];
-				const assistantMsg: Message = { role: 'assistant', content: `Transcript: ${result.transcript}` };
-				messages = [...messages, assistantMsg];
-			} catch (err) {
+			recorder.ondataavailable = (e) => {
+				if (e.data.size > 0) audioChunks.push(e.data);
+			};
+
+			recorder.onstop = async () => {
+				recording = false;
+				stream.getTracks().forEach((t) => t.stop());
+
+				const blob = new Blob(audioChunks, { type: recorder.mimeType });
+				const file = new File([blob], 'recording.webm', { type: recorder.mimeType });
+
 				items = [
 					...items,
-					{ kind: 'message', message: { role: 'assistant', content: `Transcription error: ${err}` } },
+					{ kind: 'message', message: { role: 'user', content: '🎤 Recorded audio from microphone' } },
 				];
-			}
+				scrollToBottom();
+
+				try {
+					const result = await transcribeAudio(file);
+					items = [...items, { kind: 'transcript', text: result.transcript }];
+					const assistantMsg: Message = { role: 'assistant', content: `Transcript: ${result.transcript}` };
+					messages = [...messages, assistantMsg];
+				} catch (err) {
+					items = [
+						...items,
+						{ kind: 'message', message: { role: 'assistant', content: `Transcription error: ${err}` } },
+					];
+				}
+				scrollToBottom();
+			};
+
+			recorder.start();
+			recording = true;
+		} catch (err) {
+			items = [
+				...items,
+				{ kind: 'message', message: { role: 'assistant', content: `Microphone access denied: ${err}` } },
+			];
 			scrollToBottom();
-		};
-		fileInput.click();
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -230,11 +257,15 @@
 				<ImagePlus class="h-4 w-4" />
 			</button>
 			<button
-				onclick={handleAudioUpload}
-				class="flex items-center justify-center h-10 w-10 rounded-md border bg-background hover:bg-accent transition-colors"
-				title="Upload audio"
+				onclick={toggleRecording}
+				class="flex items-center justify-center h-10 w-10 rounded-md border transition-colors {recording ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-background hover:bg-accent'}"
+				title={recording ? 'Stop recording' : 'Record audio'}
 			>
-				<Mic class="h-4 w-4" />
+				{#if recording}
+					<MicOff class="h-4 w-4" />
+				{:else}
+					<Mic class="h-4 w-4" />
+				{/if}
 			</button>
 			<textarea
 				bind:value={input}

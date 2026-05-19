@@ -328,7 +328,7 @@ class AuditEntry:
 
 
 class SafetyLayer:
-    def __init__(self, allowed_tools: set[str], rate_limit: int = 10, rate_window: float = 60.0):
+    def __init__(self, allowed_tools: set[str], rate_limit: int = 3, rate_window: float = 60.0):
         self._allowed = allowed_tools
         self._rate_limit = rate_limit
         self._rate_window = rate_window
@@ -367,13 +367,13 @@ def demo_safety_rails(client: OpenAI):
 
     safety = SafetyLayer(
         allowed_tools={"get_crew_count", "ship_status"},
-        rate_limit=3,
-        rate_window=10.0,
+        rate_limit=2,
+        rate_window=60.0,
     )
 
     print("  Same agent as Part 2, but every tool call now passes through:")
     print("    1. Allowlist    — only {get_crew_count, ship_status} permitted")
-    print("    2. Rate limiter — max 3 calls per 10s sliding window")
+    print("    2. Rate limiter — max 2 calls per 60s sliding window")
     print("    3. Redaction    — strips clearanceLevel, api_key from output")
     print("    4. Audit log    — every call recorded (allowed or blocked)")
     print()

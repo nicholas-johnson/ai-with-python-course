@@ -29,4 +29,7 @@ Requires-Dist: langchain>=0.3; extra == "langchain"
 Requires-Dist: langgraph>=0.2; extra == "langchain"
 Provides-Extra: structured
 Requires-Dist: instructor>=1.4; extra == "structured"
+Provides-Extra: audio
+Requires-Dist: sounddevice>=0.4; extra == "audio"
+Requires-Dist: numpy>=1.26; extra == "audio"
 Dynamic: license-file

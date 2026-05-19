@@ -36,6 +36,10 @@ langchain = [
 structured = [
     "instructor>=1.4",
 ]
+audio = [
+    "sounddevice>=0.4",
+    "numpy>=1.26",
+]
 
 [tool.setuptools]
 packages = []
