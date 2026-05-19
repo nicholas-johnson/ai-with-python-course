@@ -10,10 +10,28 @@ export const slides = [
   {
     type: 'image',
     content: {
-      title: 'Machine Learning',
-      src: 'https://imgs.xkcd.com/comics/machine_learning.png',
-      alt: 'XKCD 1838: Machine Learning — "The pile of linear algebra you pour data into until answers come out."',
-      credit: 'xkcd.com/1838 by Randall Munroe (CC BY-NC 2.5)',
+      title: 'K9',
+      src: '/k9.webp',
+      alt: 'K9 — the robot dog from Doctor Who',
+      credit: 'K9 from Doctor Who, BBC',
+    },
+  },
+  {
+    type: 'image',
+    content: {
+      title: 'B.O.B. and V.I.N.CENT',
+      src: '/black-hole.jpg',
+      alt: "B.O.B. and V.I.N.CENT — robots from Disney's The Black Hole (1979)",
+      credit: 'The Black Hole (1979), Walt Disney Productions',
+    },
+  },
+  {
+    type: 'image',
+    content: {
+      title: 'The Hardware — NVIDIA GPU Servers',
+      src: '/nvidia-gpu-server.png',
+      alt: 'NVIDIA Tesla rackmount GPU server with multiple GPU cards installed',
+      credit: 'Image: NVIDIA Corporation',
     },
   },
   {
@@ -44,15 +62,7 @@ export const slides = [
         'Rosenblatt, F. (1958). "The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain." Psychological Review, 65(6), 386–408.',
     },
   },
-  {
-    type: 'image',
-    content: {
-      title: 'The Hardware — NVIDIA GPU Servers',
-      src: '/nvidia-gpu-server.png',
-      alt: 'NVIDIA Tesla rackmount GPU server with multiple GPU cards installed',
-      credit: 'Image: NVIDIA Corporation',
-    },
-  },
+
   {
     type: 'standard',
     content: {
@@ -109,6 +119,15 @@ export const slides = [
           ],
         },
       ],
+    },
+  },
+  {
+    type: 'image',
+    content: {
+      title: 'Machine Learning',
+      src: 'https://imgs.xkcd.com/comics/machine_learning.png',
+      alt: 'XKCD 1838: Machine Learning — "The pile of linear algebra you pour data into until answers come out."',
+      credit: 'xkcd.com/1838 by Randall Munroe (CC BY-NC 2.5)',
     },
   },
   {
@@ -286,7 +305,7 @@ async def chat(request: ChatRequest):
       icon: 'pen-tool',
       points: [
         '**What:** Constrain the response to a specific machine-readable format — JSON, XML, CSV, or a fixed template.',
-        '**Why it works:** Explicit format instructions suppress the model\'s default tendency to add preamble, explanation, or narrative. You get data you can parse directly.',
+        "**Why it works:** Explicit format instructions suppress the model's default tendency to add preamble, explanation, or narrative. You get data you can parse directly.",
         '**Example:** *"Return only valid JSON with keys: status, priority, and summary. No other text."*',
         'Combine with a schema definition for even tighter control. Validate the output with a parser.',
       ],
@@ -326,7 +345,7 @@ async def chat(request: ChatRequest):
       points: [
         '**What:** Explicitly state what the model must **not** do — forbidden formats, phrases, behaviours, or topics.',
         '**Why it works:** Models have strong defaults (hedging, filler phrases, analogies). Explicit exclusions override those defaults more reliably than positive instructions alone.',
-        '**Example:** *"Do NOT use analogies or metaphors. Do NOT start with \'Sure!\' or \'Great question!\'. Do NOT exceed 3 sentences."*',
+        "**Example:** *\"Do NOT use analogies or metaphors. Do NOT start with 'Sure!' or 'Great question!'. Do NOT exceed 3 sentences.\"*",
         'Most effective when paired with positive instructions: say what to do **and** what to avoid.',
       ],
     },
