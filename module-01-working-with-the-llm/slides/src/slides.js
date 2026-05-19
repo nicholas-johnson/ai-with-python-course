@@ -2,6 +2,14 @@ export const slides = [
   {
     type: 'title',
     content: {
+      title: 'AI Python Course',
+      subtitle: 'Nicholas Johnson',
+      icon: 'sparkles',
+    },
+  },
+  {
+    type: 'title',
+    content: {
       title: 'Module 1 — Working with the LLM',
       subtitle: 'Chat, streaming, and prompt engineering',
       icon: 'message-square',
@@ -28,7 +36,7 @@ export const slides = [
   {
     type: 'image',
     content: {
-      title: 'The Hardware — NVIDIA GPU Servers',
+      title: 'NVIDIA GPU Servers',
       src: '/nvidia-gpu-server.png',
       alt: 'NVIDIA Tesla rackmount GPU server with multiple GPU cards installed',
       credit: 'Image: NVIDIA Corporation',
@@ -376,19 +384,7 @@ async def chat(request: ChatRequest):
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'Self-Consistency',
-      icon: 'pen-tool',
-      points: [
-        '**What:** Run the same prompt multiple times (with temperature > 0), then take the **majority answer** across all runs.',
-        '**Why it works:** Individual responses may err, but errors tend to be random. The correct answer appears most often across samples — ensemble reasoning without multiple models.',
-        '**Example:** Ask a maths question 5 times with chain-of-thought. Three answers say 42, one says 38, one says 45 — pick 42.',
-        'Best for tasks with a single correct answer: maths, classification, fact extraction. Trade-off is cost (multiple API calls).',
-      ],
-    },
-  },
+  
   // ---- Demo: Prompt engineering ----
   {
     type: 'title',
