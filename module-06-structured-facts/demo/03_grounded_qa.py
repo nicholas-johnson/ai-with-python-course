@@ -170,7 +170,7 @@ def main():
 
     section("Part 1: Grounded QA")
 
-    question = "What maintenance work has been done on the ship?"
+    question = "What do we know about the Warp core?"
     print(f"  Question: {question}\n")
     print("  Extracting entities, retrieving evidence, generating answer...\n")
 
@@ -197,7 +197,11 @@ def main():
 
     section("Part 3: Ask Your Own Questions (Interactive)")
 
-    print("  Enter a question, or 'quit' to exit.\n")
+    entities = sorted(G.nodes())
+    print(f"  Entities in graph ({len(entities)}):\n")
+    for name in entities:
+        print(f"    - {name}")
+    print("\n  Enter a question, or 'quit' to exit.\n")
 
     while True:
         try:
@@ -206,6 +210,9 @@ def main():
             break
         if q.lower() == "quit":
             break
+        if not q:
+            print("  (empty input — type a question or 'quit')\n")
+            continue
 
         answer, evidence = grounded_qa(q, G)
         print(f"  Agent: {answer}")

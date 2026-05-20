@@ -27,6 +27,7 @@ import {
   PartyPopper,
   Braces,
   Link,
+  Share2,
   Ban,
   CheckCircle,
   AlertTriangle,
@@ -44,6 +45,7 @@ import {
   Bell,
   Siren,
   Search,
+  Filter,
   CheckSquare,
   Hash,
   FileText,
@@ -75,6 +77,7 @@ import {
   FolderPlus,
   FileCode,
   Cpu,
+  Database,
   Shield,
   MessageSquare,
   Server,
@@ -94,6 +97,7 @@ const iconMap = {
   braces: Braces,
 
   cpu: Cpu,
+  database: Database,
 
   // Navigation & Direction
   compass: Compass,
@@ -170,6 +174,8 @@ const iconMap = {
   bell: Bell,
   mail: Mail,
   link: Link,
+  "share-2": Share2,
+  share: Share2,
 
   // Files & Documents
   "file-text": FileText,
@@ -188,6 +194,7 @@ const iconMap = {
   flask: FlaskConical,
   "test-tube": FlaskConical,
   search: Search,
+  filter: Filter,
 
   // Devices & Input
   server: Server,
