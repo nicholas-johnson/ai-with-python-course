@@ -86,7 +86,9 @@ import {
   List,
   Wifi,
   Scissors,
-} from "lucide-react";
+  FileMinus,
+  EyeOff,
+} from 'lucide-react';
 
 // Map icon names to Lucide components
 const iconMap = {
@@ -105,8 +107,8 @@ const iconMap = {
   target: Target,
   crosshair: Target,
   rocket: Rocket,
-  "arrow-right": ArrowRight,
-  "git-branch": GitBranch,
+  'arrow-right': ArrowRight,
+  'git-branch': GitBranch,
 
   // UI & Layout
   layers: Layers,
@@ -116,18 +118,20 @@ const iconMap = {
   puzzle: Puzzle,
   template: LayoutTemplate,
   square: Square,
+  'file-minus': FileMinus,
+  'eye-off': EyeOff,
 
   // Actions & Effects
   zap: Zap,
   lightning: Zap,
   sparkles: Sparkles,
-  "party-popper": PartyPopper,
+  'party-popper': PartyPopper,
   refresh: RefreshCw,
-  "refresh-cw": RefreshCw,
+  'refresh-cw': RefreshCw,
   recycle: Recycle,
 
   // Design & Styling
-  "pen-tool": PenTool,
+  'pen-tool': PenTool,
   image: Image,
   palette: Palette,
   paintbrush: Palette,
@@ -137,7 +141,7 @@ const iconMap = {
   // Data & State
   list: List,
   clipboard: ClipboardList,
-  "clipboard-list": ClipboardList,
+  'clipboard-list': ClipboardList,
   scale: Scale,
   calculator: Calculator,
   hash: Hash,
@@ -149,42 +153,42 @@ const iconMap = {
   plug: Plug,
 
   // Help & Info
-  "help-circle": HelpCircle,
+  'help-circle': HelpCircle,
   question: HelpCircle,
   lightbulb: Lightbulb,
   brain: Brain,
 
   // Alerts & Status
-  "alert-circle": AlertCircle,
-  "alert-triangle": AlertTriangle,
+  'alert-circle': AlertCircle,
+  'alert-triangle': AlertTriangle,
   warning: AlertTriangle,
   siren: Siren,
   ban: Ban,
   stop: Ban,
-  "check-circle": CheckCircle,
+  'check-circle': CheckCircle,
   check: CheckCircle,
-  "check-square": CheckSquare,
+  'check-square': CheckSquare,
 
   // Communication
   wifi: Wifi,
-  "message-square": MessageSquare,
+  'message-square': MessageSquare,
   globe: Globe,
   world: Globe,
   radio: Radio,
   bell: Bell,
   mail: Mail,
   link: Link,
-  "share-2": Share2,
+  'share-2': Share2,
   share: Share2,
 
   // Files & Documents
-  "file-text": FileText,
+  'file-text': FileText,
   file: FileText,
-  "book-open": BookOpen,
+  'book-open': BookOpen,
   book: BookOpen,
-  "file-code": FileCode,
-  "folder-plus": FolderPlus,
-  "folder-tree": FolderPlus,
+  'file-code': FileCode,
+  'folder-plus': FolderPlus,
+  'folder-tree': FolderPlus,
 
   // Tools
   scissors: Scissors,
@@ -192,7 +196,7 @@ const iconMap = {
   settings: Settings,
   eraser: Eraser,
   flask: FlaskConical,
-  "test-tube": FlaskConical,
+  'test-tube': FlaskConical,
   search: Search,
   filter: Filter,
 
@@ -216,7 +220,7 @@ const iconMap = {
 
   // Misc
   eye: Eye,
-  "volume-2": Volume2,
+  'volume-2': Volume2,
   ear: Volume2,
   upload: Upload,
   tag: Tag,
@@ -227,13 +231,13 @@ const iconMap = {
   frown: Frown,
   triangle: Triangle,
   disc: Disc,
-  "circle-dot": CircleDot,
-  "circle-up": CircleArrowUp,
-  "trending-up": TrendingUp,
+  'circle-dot': CircleDot,
+  'circle-up': CircleArrowUp,
+  'trending-up': TrendingUp,
   user: User,
 };
 
-export function SlideIcon({ name, size = 48, className = "" }) {
+export function SlideIcon({ name, size = 48, className = '' }) {
   const IconComponent = iconMap[name?.toLowerCase()];
 
   if (!IconComponent) {
