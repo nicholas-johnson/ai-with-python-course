@@ -133,19 +133,25 @@ def prompt_params() -> tuple[int, int]:
     """Interactive menu to configure chunk parameters."""
     print("  Chunking parameters:")
     print("  --------------------")
-    print(f"  [1] chunk_size=300, overlap=30  (small, high granularity)")
-    print(f"  [2] chunk_size=500, overlap=50  (default)")
-    print(f"  [3] chunk_size=800, overlap=100 (large, more context)")
-    print(f"  [4] Custom")
+    print(f"  [1] chunk_size=50,  overlap=5   (too small — fragments lose meaning)")
+    print(f"  [2] chunk_size=100, overlap=10  (too small — splits mid-sentence)")
+    print(f"  [3] chunk_size=300, overlap=30  (small, high granularity)")
+    print(f"  [4] chunk_size=500, overlap=50  (default, good balance)")
+    print(f"  [5] chunk_size=800, overlap=100 (large, more context per chunk)")
+    print(f"  [6] Custom")
     print()
 
-    choice = input("  Choose [1-4] (default: 2): ").strip()
+    choice = input("  Choose [1-6] (default: 4): ").strip()
 
     if choice == "1":
-        return 300, 30
+        return 50, 5
+    elif choice == "2":
+        return 100, 10
     elif choice == "3":
+        return 300, 30
+    elif choice == "5":
         return 800, 100
-    elif choice == "4":
+    elif choice == "6":
         try:
             cs = int(input("  chunk_size: ").strip())
             ov = int(input("  overlap: ").strip())

@@ -16,14 +16,25 @@ All commands run from this directory (`module-05-rag-fundamentals/demo/`).
 python ingest.py
 ```
 
-This loads `data/ship_logs.json`, chunks the content, embeds with `text-embedding-3-small`, and stores everything in a local ChromaDB database (`chroma_data/`).
+This loads `data/ship_logs.json`, chunks the content, embeds with `text-embedding-3-small`, and stores everything in a local ChromaDB database (`chroma_data/`). An interactive menu lets you pick chunk size — try the deliberately bad small sizes to see how retrieval degrades.
 
-Options:
-- `--chunk-size 300` -- try smaller chunks
-- `--overlap 30` -- adjust overlap
-- `--reset` -- wipe and rebuild the collection
+### 2. Query the vector database
 
-### 2. (Optional) Inspect the MCP server
+```bash
+python query.py
+```
+
+A lightweight REPL for searching the index directly. Shows similarity scores and chunk content. Useful for demonstrating how chunk size affects retrieval quality without the overhead of the full agent.
+
+Commands:
+- Type any query to search
+- `/chunk <id>` -- show full chunk text and metadata
+- `/sources` -- list all source document IDs
+- `/stats` -- collection info
+- `/k <number>` -- change number of results
+- `quit` -- exit
+
+### 3. (Optional) Inspect the MCP server
 
 ```bash
 python -m mcp dev server.py
@@ -34,7 +45,7 @@ Opens the MCP Inspector in your browser. You can call each tool individually and
 - `list_sources` to see all document IDs
 - `ask_docs` with `question: "What happened in sector 7?"`
 
-### 3. Chat with the RAG agent
+### 4. Chat with the RAG agent
 
 ```bash
 python agent.py
@@ -52,5 +63,6 @@ Commands:
 | File | Purpose |
 |------|---------|
 | `ingest.py` | Load, chunk, embed, store |
+| `query.py` | Interactive vector search REPL |
 | `server.py` | FastMCP server with RAG tools |
 | `agent.py` | MCP client + OpenAI agent loop |
