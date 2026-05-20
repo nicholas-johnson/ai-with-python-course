@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { Check, X, Loader2, Clock } from 'lucide-svelte';
+	import { marked } from 'marked';
 	import type { PlanStep } from '$lib/api';
 
 	let { step }: { step: PlanStep } = $props();
+
+	marked.setOptions({ breaks: true, gfm: true });
+
+	let resultHtml = $derived(step.result ? marked.parse(step.result) : '');
 </script>
 
 <div class="flex items-start gap-3 py-2">
@@ -40,7 +45,9 @@
 			{step.description}
 		</p>
 		{#if step.result}
-			<p class="text-xs text-muted-foreground mt-1 leading-relaxed">{step.result}</p>
+			<div class="prose prose-xs dark:prose-invert text-muted-foreground mt-1 leading-relaxed">
+				{@html resultHtml}
+			</div>
 		{/if}
 	</div>
 </div>

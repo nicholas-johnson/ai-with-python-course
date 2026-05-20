@@ -119,15 +119,30 @@ def register_mcp_tools() -> None:
 register_mcp_tools()
 
 
+class MessageItem(BaseModel):
+    role: str
+    content: str
+
+
 class ChatRequest(BaseModel):
-    message: str
+    message: str | None = None
+    messages: list[MessageItem] | None = None
+
+    def user_message(self) -> str:
+        if self.message:
+            return self.message
+        if self.messages:
+            for m in reversed(self.messages):
+                if m.role == "user":
+                    return m.content
+        return ""
 
 
 def execute_plan_steps(plan: list[PlanStep], results: list[dict], client: OpenAI):
     """Execute each plan step via ReAct. Yields SSE event strings and appends to *results*."""
     for step in plan:
         step.status = "running"
-        yield f"data: {json.dumps({'type': 'step_start', 'step': step.step_number, 'description': step.description})}\n\n"
+        yield f"event: plan_step\ndata: {json.dumps({'number': step.step_number, 'description': step.description, 'status': 'running', 'result': None})}\n\n"
 
         try:
             react_result = execute_step(step, results, client)
@@ -138,11 +153,11 @@ def execute_plan_steps(plan: list[PlanStep], results: list[dict], client: OpenAI
                 "description": step.description,
                 "result": step.result,
             })
-            yield f"data: {json.dumps({'type': 'step_done', 'step': step.step_number, 'result': step.result})}\n\n"
+            yield f"event: plan_step\ndata: {json.dumps({'number': step.step_number, 'description': step.description, 'status': 'done', 'result': step.result})}\n\n"
         except Exception as e:
             step.status = "failed"
             step.result = str(e)
-            yield f"data: {json.dumps({'type': 'step_failed', 'step': step.step_number, 'error': str(e)})}\n\n"
+            yield f"event: plan_step\ndata: {json.dumps({'number': step.step_number, 'description': step.description, 'status': 'failed', 'result': str(e)})}\n\n"
 
 
 def summarize_results(message: str, results: list[dict], client: OpenAI) -> str:
@@ -174,10 +189,17 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/preferences")
+def preferences():
+    """Return stored user travel preferences."""
+    from solution_server import _preferences
+    return dict(_preferences)
+
+
 @app.post("/plan")
 def create_plan(req: ChatRequest):
     """Generate a plan for the given message. Returns JSON with plan steps."""
-    plan = generate_plan(req.message, client)
+    plan = generate_plan(req.user_message(), client)
     return {
         "plan": [
             {"step_number": s.step_number, "description": s.description}
@@ -189,19 +211,17 @@ def create_plan(req: ChatRequest):
 @app.post("/chat")
 def chat(req: ChatRequest):
     """Run plan-and-execute and stream results as SSE."""
+    message = req.user_message()
 
     def sse_generator():
-        plan = generate_plan(req.message, client)
-        plan_data = [
-            {"step_number": s.step_number, "description": s.description}
-            for s in plan
-        ]
-        yield f"data: {json.dumps({'type': 'plan', 'steps': plan_data})}\n\n"
+        plan = generate_plan(message, client)
+        for s in plan:
+            yield f"event: plan_step\ndata: {json.dumps({'number': s.step_number, 'description': s.description, 'status': 'pending', 'result': None})}\n\n"
 
         results: list[dict] = []
         yield from execute_plan_steps(plan, results, client)
 
-        answer = summarize_results(req.message, results, client)
-        yield f"data: {json.dumps({'type': 'answer', 'content': answer})}\n\n"
+        answer = summarize_results(message, results, client)
+        yield f"event: done\ndata: {json.dumps({'role': 'assistant', 'content': answer})}\n\n"
 
     return StreamingResponse(sse_generator(), media_type="text/event-stream")
