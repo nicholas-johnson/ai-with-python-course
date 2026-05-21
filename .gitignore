@@ -8,6 +8,7 @@ coverage/
 *.log
 .env
 .env.local
+.venv/
 module-07-node-tools/demo/scratch-fs-demo/
 module-07-node-tools/exercises/01-sighting-logger/sightings.log
 module-07-node-tools/exercises/03-stream-processor/output.json
