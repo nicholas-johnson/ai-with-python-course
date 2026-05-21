@@ -8,17 +8,6 @@ export const slides = [
     },
   },
   {
-    type: 'welcome',
-    content: {
-      title: 'When and how to distribute work across multiple agents',
-      points: [
-        'Sometimes one agent is not enough — and sometimes it is.',
-        'Multi-agent adds latency and failure modes. Use it when it earns its keep.',
-        'Roles, coordination patterns, shared tools, and conflict resolution.',
-      ],
-    },
-  },
-  {
     type: 'standard',
     content: {
       title: 'Learning goals',
@@ -54,7 +43,7 @@ export const slides = [
       points: [
         '**Router**: classifies the query and dispatches to the right specialist.',
         '**Specialist**: domain expert with a focused system prompt and tools.',
-        '**Critic**: reviews another agent\'s output for accuracy and gaps.',
+        "**Critic**: reviews another agent's output for accuracy and gaps.",
         '**Supervisor**: orchestrates the team, merges results, decides when done.',
         '**Executor**: takes the final plan and runs it (deploy, notify, write).',
       ],
@@ -183,7 +172,7 @@ def route(query, client):
 # Judge:    "The skeptic's risk case wins."`,
       highlights: [
         'Multiple rounds sharpen arguments before the judge decides',
-        'Useful for high-stakes decisions where you want a devil\'s advocate',
+        "Useful for high-stakes decisions where you want a devil's advocate",
       ],
     },
   },
