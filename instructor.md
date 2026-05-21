@@ -241,21 +241,24 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 - Shared context and tools across agents
 - Consensus and conflict resolution
 
-**Demo:**
+**Demo:** `python module-09-multi-agent/demo/demo.py` (single interactive file, five parts)
 
-| Script | What it shows |
-| ------ | ------------- |
-| `module-09-multi-agent/demo/01_agent_roles.py` | Define and run agents with different roles |
-| `module-09-multi-agent/demo/02_supervisor_pattern.py` | Supervisor delegates to specialists, synthesises results |
-| `module-09-multi-agent/demo/03_debate_pattern.py` | Two agents argue, third votes |
+| Part | What it shows |
+| ---- | ------------- |
+| Part 1 | Specialist agents + LLM router |
+| Part 2 | Supervisor-critic pipeline with revision loop |
+| Part 3 | Structured debate with a judge |
+| Part 4 | Consensus voting across specialists |
+| Part 5 | Swarm handoffs with scoped tools |
 
 **Exercises:**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-router-agent` | Route queries to navigation, engineering, or science specialists |
-| `exercises/02-supervisor-critic` | Supervisor coordinates researcher + critic |
-| `exercises/03-consensus` | Multiple agents propose answers, vote on best |
+| `exercises/01-router-agent` | Route queries to medical, tactical, or comms specialists |
+| `exercises/02-supervisor-critic` | Supervisor orchestrates specialists + critic |
+| `exercises/03-consensus` | Debate, judge synthesis, and consensus voting |
+| `exercises/04-swarm-tools` | Scoped tools and peer-to-peer handoffs between agents |
 
 ---
 

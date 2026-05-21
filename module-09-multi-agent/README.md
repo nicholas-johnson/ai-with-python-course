@@ -1,6 +1,6 @@
 # Module 9 — Multi-Agent Systems
 
-> One agent is useful. A crew of agents — each with a speciality, coordinated by a supervisor — can tackle problems no single model could handle alone. The Pathfinder's bridge crew is the model: a commander routes queries, a science officer researches, an engineer inspects systems, and a critic reviews the work before it reaches the crew. In this module you design multi-agent architectures, build coordination patterns, and learn when multiple agents are worth the complexity.
+> One agent is useful. A crew of agents — each with a speciality, coordinated by a supervisor or handing off peer-to-peer — can tackle problems no single model could handle alone. The Pathfinder's bridge crew is the model: a commander routes queries, a science officer researches, an engineer inspects systems, and a critic reviews the work before it reaches the crew. In this module you design multi-agent architectures, build coordination patterns (supervisor, swarm, debate, consensus), and learn when multiple agents are worth the complexity.
 
 ## Learning goals
 
@@ -110,6 +110,41 @@ Debate is expensive (many LLM calls) but produces more balanced analysis. Use it
 
 ---
 
+## Swarm / handoff pattern
+
+In the supervisor pattern a central agent decides who runs next. In the **swarm** pattern there is no central controller — the **active agent** decides whether to use a tool, answer the user, or **hand off** to a colleague. The handoff is itself a tool call (`transfer_to_engineering`), so the LLM decides when to transfer based on its system prompt and the conversation so far.
+
+```
+User query → Comms (decrypt_signal)
+           → transfer_to_engineering   ← handoff
+           → Engineering (check_reactor)
+           → final answer
+```
+
+Each agent has a **scoped tool set** — comms can decrypt signals but not check the reactor; engineering can run diagnostics but not scan frequencies. Transfer tools are the only bridge between domains. This enforces least-privilege access and keeps each agent's context focused.
+
+```python
+def swarm_loop(query, client, start_dept="comms", max_hops=6):
+    dept = start_dept
+    messages = build_agent_messages(dept, query)
+    chain = [dept]
+
+    for hop in range(max_hops):
+        msg = run_agent_turn(dept, messages, client)
+        if not msg.tool_calls:
+            return msg.content, chain
+
+        tool_msgs, transfer = handle_tool_calls(msg, dept)
+        messages.extend(tool_msgs)
+        if transfer:
+            dept = transfer
+            chain.append(dept)
+```
+
+Cap hops with `max_hops` — unbounded handoff chains can burn tokens and loop. Always log the chain so you can trace the path through agents after the fact.
+
+---
+
 ## Shared context and tools
 
 Agents in a team often need to share data — the researcher's findings feed the critic, the supervisor's plan guides the executor. Two approaches:
@@ -172,10 +207,11 @@ python module-09-multi-agent/demo/demo.py
 | [`exercises/03-consensus`](exercises/03-consensus/) | Debate pattern, judge synthesis, and consensus voting across multiple agents. |
 | [`exercises/04-swarm-tools`](exercises/04-swarm-tools/) | Swarm handoffs: each agent has scoped ship tools and passes control via `transfer_to_*`. |
 
-Run tests for this module:
+Run tests per exercise (each folder has its own `test_start.py`):
 
 ```bash
-pytest module-09-multi-agent/
+pytest module-09-multi-agent/exercises/01-router-agent/ -v
+pytest module-09-multi-agent/exercises/04-swarm-tools/ -v
 ```
 
 ## Slides
@@ -184,6 +220,32 @@ From repo root: `pnpm slides:09`, or `cd module-09-multi-agent/slides && pnpm de
 
 ## Reference
 
+### Frameworks and documentation
+
 - [LangGraph — Multi-Agent](https://langchain-ai.github.io/langgraph/concepts/multi_agent/)
 - [OpenAI Swarm (experimental)](https://github.com/openai/swarm)
 - [AutoGen](https://microsoft.github.io/autogen/)
+
+### Academic papers
+
+**Surveys and foundations**
+
+- [The Rise and Potential of Large Language Model Based Agents (Xi et al. 2023)](https://arxiv.org/abs/2309.07864) — taxonomy of LLM agents, planning, memory, and multi-agent collaboration.
+- [ReAct: Synergizing Reasoning and Acting in Language Models (Yao et al. 2022)](https://arxiv.org/abs/2210.03629) — tool-using agents; basis for specialist agents with scoped tools (see also Module 8).
+
+**Multi-agent frameworks and role specialisation**
+
+- [AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation (Wu et al. 2023)](https://arxiv.org/abs/2308.08155) — conversational multi-agent orchestration and human-in-the-loop patterns.
+- [CAMEL: Communicative Agents for “Mind” Exploration (Li et al. 2023)](https://arxiv.org/abs/2303.17760) — role-playing agents with structured handoffs between specialised roles.
+- [MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework (Hong et al. 2023)](https://arxiv.org/abs/2308.00352) — standardised operating procedures and division of labour across agents.
+- [ChatDev: Communicative Agents for Software Development (Qian et al. 2023)](https://arxiv.org/abs/2307.07924) — chain-style collaboration (design → code → review) akin to supervisor pipelines.
+
+**Debate, critique, and consensus**
+
+- [Improving Factuality and Reasoning in Language Models through Multiagent Debate (Du et al. 2023)](https://arxiv.org/abs/2305.14325) — adversarial agents and a judge; motivates the debate pattern in Exercise 03.
+- [Reflexion: Language Agents with Verbal Reinforcement Learning (Shinn et al. 2023)](https://arxiv.org/abs/2303.11366) — self-critique and revision loops; close to supervisor–critic pipelines.
+- [Self-Consistency Improves Chain of Thought Reasoning in Language Models (Wang et al. 2022)](https://arxiv.org/abs/2203.11171) — sampling multiple answers and aggregating; theoretical basis for majority voting / consensus.
+
+**Agent societies and emergent coordination**
+
+- [Generative Agents: Interactive Simulacra of Human Behavior (Park et al. 2023)](https://arxiv.org/abs/2304.03442) — many agents sharing an environment and memory; useful context for swarm-style peer coordination.

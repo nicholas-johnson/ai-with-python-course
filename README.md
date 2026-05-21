@@ -220,9 +220,10 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Router agent | [`exercises/01-router-agent`](module-09-multi-agent/exercises/01-router-agent/) | Route queries to navigation, engineering, or science specialists |
-| Supervisor-critic | [`exercises/02-supervisor-critic`](module-09-multi-agent/exercises/02-supervisor-critic/) | Supervisor coordinates researcher + critic for mission briefings |
-| Consensus | [`exercises/03-consensus`](module-09-multi-agent/exercises/03-consensus/) | Multiple agents propose answers; vote on the best response |
+| Router agent | [`exercises/01-router-agent`](module-09-multi-agent/exercises/01-router-agent/) | Route queries to medical, tactical, or comms specialists |
+| Supervisor-critic | [`exercises/02-supervisor-critic`](module-09-multi-agent/exercises/02-supervisor-critic/) | Supervisor orchestrates specialists + critic with a revision loop |
+| Consensus | [`exercises/03-consensus`](module-09-multi-agent/exercises/03-consensus/) | Debate pattern, judge synthesis, and consensus voting |
+| Swarm tools | [`exercises/04-swarm-tools`](module-09-multi-agent/exercises/04-swarm-tools/) | Scoped tools and peer-to-peer handoffs between agents |
 
 ### Module 10 — [LangChain with Python](module-10-langchain/)
 
