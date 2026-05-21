@@ -28,6 +28,60 @@ export const slides = [
         'Cormack, Clarke & Büttcher (2009). "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods." SIGIR.',
     },
   },
+
+  {
+    type: 'equation',
+    content: {
+      title: 'BM25 scoring',
+      mathml: `<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mi>score</mi>
+  <mo>(</mo>
+  <mi>D</mi>
+  <mo>,</mo>
+  <mi>Q</mi>
+  <mo>)</mo>
+  <mo>=</mo>
+  <munderover>
+    <mo>&sum;</mo>
+    <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow>
+    <mi>n</mi>
+  </munderover>
+  <mi>IDF</mi>
+  <mo>(</mo>
+  <msub><mi>q</mi><mi>i</mi></msub>
+  <mo>)</mo>
+  <mo>&#x22C5;</mo>
+  <mfrac>
+    <mrow>
+      <mi>f</mi>
+      <mo>(</mo><msub><mi>q</mi><mi>i</mi></msub><mo>,</mo><mi>D</mi><mo>)</mo>
+      <mo>&#x22C5;</mo>
+      <mo>(</mo><msub><mi>k</mi><mn>1</mn></msub><mo>+</mo><mn>1</mn><mo>)</mo>
+    </mrow>
+    <mrow>
+      <mi>f</mi>
+      <mo>(</mo><msub><mi>q</mi><mi>i</mi></msub><mo>,</mo><mi>D</mi><mo>)</mo>
+      <mo>+</mo>
+      <msub><mi>k</mi><mn>1</mn></msub>
+      <mo>&#x22C5;</mo>
+      <mrow>
+        <mo>(</mo>
+        <mn>1</mn><mo>&#x2212;</mo><mi>b</mi>
+        <mo>+</mo>
+        <mi>b</mi><mo>&#x22C5;</mo>
+        <mfrac>
+          <mrow><mo>|</mo><mi>D</mi><mo>|</mo></mrow>
+          <mi>avgdl</mi>
+        </mfrac>
+        <mo>)</mo>
+      </mrow>
+    </mrow>
+  </mfrac>
+</math>`,
+      description:
+        'IDF weights rare terms higher. The fraction is term frequency with saturation (k₁ ≈ 1.5) — repeated terms give diminishing returns. b (≈ 0.75) normalises by document length so long docs are not unfairly boosted.',
+    },
+  },
   {
     type: 'equation',
     content: {
@@ -82,8 +136,7 @@ export const slides = [
       description:
         '**Re-ranking** is a second pass that re-sorts search results for accuracy. It is used when initial retrieval returns many candidates but the order is unreliable. A **re-ranker** (usually a small cross-encoder, not your chat LLM) scores each passage together with the question. The best passages move to the top, then the LLM generates its answer from those — so the model sees the right context first.',
       icon: 'arrow-up-down',
-      credit:
-        'Nogueira & Cho (2019). "Passage Re-ranking with BERT." arXiv:1901.04085',
+      credit: 'Nogueira & Cho (2019). "Passage Re-ranking with BERT." arXiv:1901.04085',
     },
   },
   {
@@ -114,7 +167,7 @@ export const slides = [
     content: {
       title: 'What is HyDE?',
       description:
-        '**HyDE** (Hypothetical Document Embeddings) is a retrieval trick for short or vague questions. It is used when the user\'s query looks nothing like the long documents in your index. The LLM writes a **hypothetical answer**, you embed that text, and search with that embedding instead of the raw question. Retrieval often improves because the fake answer sits closer to real passages in embedding space.',
+        "**HyDE** (Hypothetical Document Embeddings) is a retrieval trick for short or vague questions. It is used when the user's query looks nothing like the long documents in your index. The LLM writes a **hypothetical answer**, you embed that text, and search with that embedding instead of the raw question. Retrieval often improves because the fake answer sits closer to real passages in embedding space.",
       icon: 'lightbulb',
       credit:
         'Gao et al. (2022). "Precise Zero-Shot Dense Retrieval without Relevance Labels." arXiv:2212.10496',
@@ -250,7 +303,7 @@ export const slides = [
     content: {
       title: 'What is LLM-as-judge eval?',
       description:
-        '**LLM-as-judge** evaluation uses a strong model to grade your RAG system\'s answers. It is used to measure quality before shipping and to compare prompt or retrieval changes. You run questions through the pipeline, then ask the judge to score **correctness**, **faithfulness**, and **relevance** against references or context. You get repeatable scores and explanations — so you know what to fix.',
+        "**LLM-as-judge** evaluation uses a strong model to grade your RAG system's answers. It is used to measure quality before shipping and to compare prompt or retrieval changes. You run questions through the pipeline, then ask the judge to score **correctness**, **faithfulness**, and **relevance** against references or context. You get repeatable scores and explanations — so you know what to fix.",
       icon: 'trending-up',
       credit:
         'Zheng et al. (2023). "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena." arXiv:2306.05685',
@@ -276,7 +329,7 @@ export const slides = [
   </mfrac>
 </math>`,
       description:
-        'Precision: what fraction of retrieved documents are relevant? Recall: what fraction of relevant documents were retrieved? Both require a labelled test set.',
+        'Precision: what fraction of retrieved documents are relevant? Recall: what fraction of relevant documents were retrieved? Both require a labelled test set. — TP: retrieved & relevant · FP: retrieved but not relevant · FN: relevant but not retrieved.',
     },
   },
   {
@@ -484,40 +537,6 @@ export const slides = [
     },
   },
 
-  // --- 13. Speculative Decoding ---
-  {
-    type: 'title',
-    content: {
-      title: '13. Speculative Decoding',
-      subtitle: 'Draft fast, verify smart',
-      icon: 'cpu',
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'What is speculative decoding?',
-      description:
-        '**Speculative decoding** is a way to generate text faster without changing the answer. It is used to reduce latency and cost at inference. A small **draft** model proposes several tokens; the large model checks them in one pass and accepts matches. Mismatches are discarded and retried. Throughput rises ~2–4× while the output stays the same as normal greedy decoding.',
-      icon: 'cpu',
-      credit:
-        'Leviathan et al. (2023). "Fast Inference from Transformers via Speculative Decoding." ICML 2023.',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Speculative decoding',
-      icon: 'cpu',
-      points: [
-        'Draft model proposes **K tokens** ahead cheaply.',
-        'Large model **verifies** all K in one forward pass.',
-        'Matched tokens accepted; mismatches rolled back and retried.',
-        '~2–4× speed-up with **identical** output to greedy decoding.',
-      ],
-    },
-  },
-
   // --- 14. GraphRAG ---
   {
     type: 'title',
@@ -620,8 +639,7 @@ export const slides = [
       description:
         'A **Mixture of Experts (MoE)** model has many specialist sub-networks but only runs a few per token. It is used to build very capable models without paying the full cost of every parameter on every token. A **router** picks top-K experts for each token; the rest stay idle. You get large-model quality with smaller active compute — e.g. Mixtral activates ~13B of ~47B parameters per token.',
       icon: 'layers',
-      credit:
-        'Jiang et al. (2024). "Mixtral of Experts." arXiv:2401.04088',
+      credit: 'Jiang et al. (2024). "Mixtral of Experts." arXiv:2401.04088',
     },
   },
   {
@@ -678,14 +696,6 @@ export const slides = [
       title: 'Demo — Local training',
       subtitle: 'python module-11-edge-topics/demo/14_train_local.py',
       icon: 'rocket',
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Exercise 14 — Local training',
-      subtitle: 'exercises/14-local-training/',
-      icon: 'clipboard-list',
     },
   },
 
