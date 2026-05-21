@@ -88,6 +88,8 @@ import {
   Scissors,
   FileMinus,
   EyeOff,
+  ArrowUpDown,
+  Bot,
 } from 'lucide-react';
 
 // Map icon names to Lucide components
@@ -120,6 +122,9 @@ const iconMap = {
   square: Square,
   'file-minus': FileMinus,
   'eye-off': EyeOff,
+  'arrow-up-down': ArrowUpDown,
+  robot: Bot,
+  bot: Bot,
 
   // Actions & Effects
   zap: Zap,

@@ -9,5 +9,6 @@ export { ThreeWayComparison } from "./ThreeWayComparison";
 export { ImageSlide } from "./ImageSlide";
 export { EquationSlide } from "./EquationSlide";
 export { CardsSlide } from "./CardsSlide";
+export { DescriptionSlide } from "./DescriptionSlide";
 export { SlideIcon, availableIcons } from "./SlideIcon";
 export { InlineMarkdown, parseInlineMarkdown } from "./InlineMarkdown";

@@ -40,6 +40,12 @@ audio = [
     "sounddevice>=0.4",
     "numpy>=1.26",
 ]
+local-ml = [
+    "torch>=2.2",
+    "transformers>=4.40",
+    "datasets>=2.19",
+    "accelerate>=0.30",
+]
 
 [tool.setuptools]
 packages = []

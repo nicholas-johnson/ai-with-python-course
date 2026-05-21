@@ -45,7 +45,8 @@ pip install -e .
 pip install -e ".[dev]"                        # pytest + ruff
 pip install -e ".[rag]"                        # chromadb, sentence-transformers
 pip install -e ".[langchain]"                  # langchain, langgraph
-pip install -e ".[dev,rag,langchain,structured]"  # everything
+pip install -e ".[local-ml]"                     # torch, transformers (CPU training)
+pip install -e ".[dev,rag,langchain,structured,local-ml]"  # everything
 ```
 
 > **Tip:** If `python3 --version` shows an old version but `py --version` shows 3.12+, use `py` instead. On macOS with Homebrew Python you **must** use a virtual environment — pip will refuse to install system-wide.

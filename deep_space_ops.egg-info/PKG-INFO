@@ -32,4 +32,9 @@ Requires-Dist: instructor>=1.4; extra == "structured"
 Provides-Extra: audio
 Requires-Dist: sounddevice>=0.4; extra == "audio"
 Requires-Dist: numpy>=1.26; extra == "audio"
+Provides-Extra: local-ml
+Requires-Dist: torch>=2.2; extra == "local-ml"
+Requires-Dist: transformers>=4.40; extra == "local-ml"
+Requires-Dist: datasets>=2.19; extra == "local-ml"
+Requires-Dist: accelerate>=0.30; extra == "local-ml"
 Dynamic: license-file

@@ -24,6 +24,12 @@ langchain-openai>=0.3
 langchain>=0.3
 langgraph>=0.2
 
+[local-ml]
+torch>=2.2
+transformers>=4.40
+datasets>=2.19
+accelerate>=0.30
+
 [rag]
 chromadb>=0.5
 sentence-transformers>=3.0

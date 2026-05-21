@@ -295,6 +295,7 @@ export const slides = [
         '**Secrets** — API keys in `.env` (gitignored), secrets manager in production.',
         '**Containers** — Dockerfile packages the app with its dependencies for consistent deployment.',
         '**Health checks** — `/health` endpoint returns 200 when the service is ready. Check dependencies.',
+        'Provider-specific mappings: **AWS / Azure / GCP** sections below.',
       ],
     },
   },
@@ -319,6 +320,140 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]`,
         '**HEALTHCHECK** — orchestrators use this to route traffic only to healthy instances.',
         '**Slim base image** — smaller attack surface, faster builds.',
         'Copy requirements first — Docker caches the layer, rebuilds only when deps change.',
+      ],
+    },
+  },
+
+  // --- Cloud production ---
+
+  {
+    type: 'title',
+    content: {
+      title: 'Section — Cloud production',
+      subtitle: 'Map patterns to your provider',
+      icon: 'globe',
+    },
+  },
+  {
+    type: 'three-way',
+    content: {
+      title: 'Production patterns at a glance',
+      left: {
+        label: 'AWS',
+        code: `Run API: App Runner, ECS Fargate
+Secrets: Secrets Manager, SSM
+Logs/trace: CloudWatch, X-Ray, ADOT
+Managed LLM: Amazon Bedrock
+Cost: AWS Budgets, quotas`,
+      },
+      middle: {
+        label: 'Azure',
+        code: `Run API: Container Apps, App Service
+Secrets: Key Vault
+Logs/trace: App Insights, Monitor
+Managed LLM: Azure OpenAI
+Cost: Cost Management, AOAI quotas`,
+      },
+      right: {
+        label: 'GCP',
+        code: `Run API: Cloud Run, GKE
+Secrets: Secret Manager
+Logs/trace: Cloud Logging, Trace
+Managed LLM: Vertex AI
+Cost: Billing budgets, quotas`,
+      },
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Section — AWS',
+      subtitle: 'Enterprise AI on the most common cloud',
+      icon: 'server',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'When teams choose AWS',
+      description:
+        '**AWS** is used when an organisation already runs on Amazon infrastructure or needs broad service coverage and compliance programs. For AI production you keep the same patterns from this module — trace IDs, retries, budgets — but wire them to **CloudWatch**, **Secrets Manager**, and optionally **Bedrock** instead of calling OpenAI directly. You deploy the capstone FastAPI image to **App Runner** or **Fargate** and inject secrets at runtime, not in the Docker image.',
+      icon: 'server',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'AWS service mapping',
+      icon: 'server',
+      points: [
+        '**Run container** — App Runner (simplest) or ECS Fargate for the capstone FastAPI image.',
+        '**Secrets** — Secrets Manager or SSM Parameter Store for `OPENAI_API_KEY`; never bake into the image.',
+        '**Tracing** — JSON logs with `trace_id` → CloudWatch Logs; optional X-Ray or ADOT OpenTelemetry.',
+        '**Managed LLM** — Amazon Bedrock when policy requires models inside your AWS account.',
+        '**Cost** — AWS Budgets + service quotas; align with in-app `CostTracker` session/daily limits.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Section — Azure',
+      subtitle: 'Microsoft cloud + Azure OpenAI',
+      icon: 'globe',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'When teams choose Azure',
+      description:
+        '**Azure** fits Microsoft-centric enterprises: Entra ID, existing subscriptions, and **Azure OpenAI Service** for GPT models behind a private endpoint. Production AI apps use **Container Apps** or **App Service** for the FastAPI container, **Key Vault** for API keys, and **Application Insights** for the same span JSON you log in `TraceContext`. Capstones still teach portable Python; on Azure you swap the OpenAI client endpoint and deployment name while keeping tracing and cost patterns unchanged.',
+      icon: 'globe',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Azure service mapping',
+      icon: 'globe',
+      points: [
+        '**Run container** — Azure Container Apps (scale-to-zero) or App Service with Linux containers.',
+        '**Secrets** — Key Vault references injected as env vars into Container Apps / App Service.',
+        '**Tracing** — Application Insights ingests structured logs and dependency spans.',
+        '**Managed LLM** — Azure OpenAI: resource endpoint + deployment name (not raw api.openai.com).',
+        '**Cost** — Cost Management budgets; AOAI TPM/RPM quotas mirror token budget enforcement.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Section — GCP',
+      subtitle: 'Cloud Run + Vertex AI',
+      icon: 'database',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'When teams choose GCP',
+      description:
+        '**GCP** is strong for container-native AI APIs: **Cloud Run** runs a single Docker image with minimal ops, and **Vertex AI** hosts Gemini and other models in-region. Teams on Google Cloud map `TraceContext` JSON to **Cloud Logging**, store secrets in **Secret Manager**, and use **Cloud Trace** for latency breakdowns. The capstone Dockerfile maps cleanly to Cloud Run — one service, env-based config, `/health` for readiness probes.',
+      icon: 'database',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'GCP service mapping',
+      icon: 'database',
+      points: [
+        '**Run container** — Cloud Run (best fit for one FastAPI container) or GKE for larger fleets.',
+        '**Secrets** — Secret Manager mounted as env vars or volumes at deploy time.',
+        '**Tracing** — Cloud Logging + Cloud Trace; OpenTelemetry export supported.',
+        '**Managed LLM** — Vertex AI (Gemini, Model Garden) when data residency requires Google-hosted models.',
+        '**Cost** — Billing budgets and quotas; pair with app-level `CostTracker` for per-session caps.',
       ],
     },
   },
