@@ -724,6 +724,22 @@ export const slides = [
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'Small models to try on CPU',
+      icon: 'package',
+      points: [
+        '`distilbert-base-uncased-finetuned-sst-2-english` — sentiment (66M, ~250MB).',
+        '`cardiffnlp/twitter-roberta-base-sentiment-latest` — 3-class sentiment (125M, ~500MB).',
+        '`sentence-transformers/all-MiniLM-L6-v2` — sentence embeddings (22M, ~90MB).',
+        '`facebook/bart-large-mnli` — zero-shot classification (407M, ~1.6GB).',
+        '`Helsinki-NLP/opus-mt-en-fr` — English→French translation (74M, ~300MB).',
+        '`google/flan-t5-small` — instruction-tuned text generation (77M, ~300MB).',
+        'Rule of thumb: <500M params, "base"/"small"/"distil"/"mini" in the name → fine on CPU.',
+      ],
+    },
+  },
+  {
     type: 'title',
     content: {
       title: 'Demo — Hugging Face run',
