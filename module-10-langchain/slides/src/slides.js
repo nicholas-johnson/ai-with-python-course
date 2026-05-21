@@ -8,17 +8,6 @@ export const slides = [
     },
   },
   {
-    type: 'welcome',
-    content: {
-      title: 'Why LangChain?',
-      points: [
-        'LangChain packages common AI patterns into composable building blocks.',
-        'Prompt → model → parser becomes one line with the pipe operator.',
-        'Tool agents, RAG pipelines — same patterns, less boilerplate.',
-      ],
-    },
-  },
-  {
     type: 'standard',
     content: {
       title: 'Learning goals',
@@ -28,6 +17,60 @@ export const slides = [
         'Wrap functions as **LangChain tools** and run them via **AgentExecutor**.',
         'Construct a **RAG chain** with a LangChain retriever and ChromaDB.',
         'Know when to use LangChain and when to stay hand-rolled.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What is LangChain?',
+      icon: 'link',
+      points: [
+        'A Python/JS **framework for building LLM-powered applications** — the most widely adopted in the ecosystem.',
+        'Standardises interfaces between components so they compose together (prompt, model, parser, retriever, tools).',
+        'Huge integration surface: 100+ model providers, 50+ vector stores, document loaders, memory systems.',
+        'Every chain is automatically **streamable**, **batchable**, and **invocable** — no extra wiring.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What can you build with it?',
+      icon: 'layers',
+      points: [
+        '**Chains** — prompt to model to structured output in one line.',
+        '**Tool agents** — LLM decides which functions to call, framework runs the loop.',
+        '**RAG pipelines** — retrieval, context injection, and generation wired together.',
+        '**Beyond this module**: memory, conversation management, document ingestion, multi-model routing, evaluation.',
+      ],
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'The broader ecosystem',
+      icon: 'globe',
+      points: [
+        '**LangGraph** — stateful, graph-based multi-agent workflows (cycles, branching, human-in-the-loop).',
+        '**LangSmith** — tracing and observability for debugging chains in production.',
+        '**LangServe** — deploy any chain as a REST API with one command.',
+        'We focus on core LangChain in this module — the rest builds on top.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'How does the pipe (|) work?',
+      icon: 'plug',
+      points: [
+        'The `|` **looks** like a Unix pipe — it is **real Python**. LangChain defines what `|` means for its own objects.',
+        'Every chain step (prompt, model, parser) is a **Runnable**: anything with `.invoke()`, `.stream()`, and `.batch()`.',
+        '`prompt | model | parser` uses **operator overloading** — Python calls `__or__` and builds a **RunnableSequence** (a recipe, not a result).',
+        'Nothing runs until you call **`.invoke()`** — then output flows left to right, same as three manual `.invoke()` calls in Demo 1.',
+        'You can only pipe **LangChain Runnables** — plain strings or unrelated types will not work.',
       ],
     },
   },
@@ -61,7 +104,11 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-chain = prompt | ChatOpenAI(model="gpt-4o-mini") | JsonOutputParser()
+model = ChatOpenAI(model="gpt-4o-mini")
+
+json_parser = JsonOutputParser()
+
+chain = prompt | model | json_parser
 
 result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
 # {"category": "engineering", "summary": "...", "priority": "high"}`,
