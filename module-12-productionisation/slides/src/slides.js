@@ -8,17 +8,6 @@ export const slides = [
     },
   },
   {
-    type: 'welcome',
-    content: {
-      title: 'From prototype to production',
-      points: [
-        'Your prototype works on your laptop. That is not the same as production software.',
-        'Production AI systems must be **traceable**, **reliable**, **cost-aware**, and **deployable**.',
-        'This module teaches the patterns. Then you pick a capstone app and build it for real.',
-      ],
-    },
-  },
-  {
     type: 'standard',
     content: {
       title: 'Learning goals',
@@ -472,12 +461,14 @@ Cost: Billing budgets, quotas`,
         },
         {
           rule: 'Retry with backoff and jitter',
-          example: 'Flat retries cause thundering herds. Exponential backoff with jitter prevents them.',
+          example:
+            'Flat retries cause thundering herds. Exponential backoff with jitter prevents them.',
           icon: 'refresh-cw',
         },
         {
           rule: 'Budget tokens before you spend them',
-          example: 'Track per-session and per-day. A runaway agent produces a surprising bill.',
+          example:
+            'Track per-session and per-day. A runaway agent produces a surprising bill.',
           icon: 'list',
         },
         {
