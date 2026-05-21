@@ -74,6 +74,7 @@ import {
   Settings,
   Award,
   User,
+  Users,
   FolderPlus,
   FileCode,
   Cpu,
@@ -90,6 +91,8 @@ import {
   EyeOff,
   ArrowUpDown,
   Bot,
+  Terminal,
+  Route,
 } from 'lucide-react';
 
 // Map icon names to Lucide components
@@ -106,6 +109,7 @@ const iconMap = {
   // Navigation & Direction
   compass: Compass,
   map: Map,
+  route: Route,
   target: Target,
   crosshair: Target,
   rocket: Rocket,
@@ -211,6 +215,7 @@ const iconMap = {
   phone: Smartphone,
   mouse: Mouse,
   keyboard: Keyboard,
+  terminal: Terminal,
   gamepad: Gamepad2,
 
   // Time & Scheduling
@@ -240,6 +245,7 @@ const iconMap = {
   'circle-up': CircleArrowUp,
   'trending-up': TrendingUp,
   user: User,
+  users: Users,
 };
 
 export function SlideIcon({ name, size = 48, className = '' }) {
