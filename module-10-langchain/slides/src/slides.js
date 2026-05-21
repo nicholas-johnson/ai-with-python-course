@@ -274,6 +274,69 @@ rag_chain = (
     },
   },
 
+  // ---- Section: LangServe ----
+  {
+    type: 'title',
+    content: {
+      title: 'LangServe — deploy chains as APIs',
+      subtitle: 'python module-10-langchain/demo/04_langserve.py',
+      icon: 'plug',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What is LangServe?',
+      icon: 'plug',
+      points: [
+        'Deploys **Runnables** as a REST API on top of **FastAPI** — the chain you built becomes HTTP endpoints.',
+        '**add_routes** auto-creates `/invoke`, `/stream`, `/batch`, and an interactive **/playground**.',
+        'Pydantic validates every request; OpenAPI docs are generated automatically.',
+        'For **new production** deployments, LangChain recommends **LangGraph Platform** — LangServe is ideal for learning and simple chain APIs.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'add_routes — chain to API',
+      code: `from fastapi import FastAPI
+from langserve import add_routes
+
+chain = prompt | ChatOpenAI(model="gpt-4o-mini") | JsonOutputParser()
+
+app = FastAPI(title="Report API")
+add_routes(app, chain, path="/classify")
+
+# POST /classify/invoke  {"input": {"report": "..."}}`,
+      highlights: [
+        'Same LCEL chain as demo 01 — add_routes wires it to HTTP',
+        'Run with: uvicorn server:app --reload',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'LangServe endpoints',
+      icon: 'globe',
+      points: [
+        '**POST /classify/invoke** — body `{"input": {"report": "..."}}` → `{"output": {category, summary, priority}}`.',
+        '**POST /classify/stream** — token-by-token streaming for the same chain.',
+        '**GET /classify/playground** — browser UI to test the chain without writing a client.',
+        'Your FastAPI app can add ordinary routes too (e.g. `GET /health`).',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — LangServe',
+      subtitle: 'Switch to terminal: python module-10-langchain/demo/04_langserve.py',
+      icon: 'rocket',
+    },
+  },
+
   // ---- Section: Wrap-up ----
   {
     type: 'title',
@@ -327,6 +390,7 @@ rag_chain = (
         '01 — Chain basics: LCEL chain that classifies crew reports',
         '02 — Tool agent: wraps the classifier + ship tools in AgentExecutor (builds on 01)',
         '03 — RAG chain: adds retrieval to the agent over ship logs (builds on 02)',
+        '04 — LangServe API: expose the Horizon classifier as a FastAPI service',
       ],
     },
   },

@@ -7,6 +7,7 @@
 - Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.
 - Wrap functions as **LangChain tools** and run them via **AgentExecutor**.
 - Construct a **RAG chain** with a LangChain retriever and ChromaDB.
+- Deploy an LCEL chain as a REST API with **LangServe** and FastAPI.
 - Know when to use LangChain and when to stay hand-rolled.
 
 ---
@@ -121,6 +122,26 @@ answer = rag_chain.invoke("What caused the reactor anomaly?")
 
 ---
 
+## LangServe — deploy chains as APIs
+
+[LangServe](https://github.com/langchain-ai/langserve) mounts any Runnable on FastAPI. One call registers invoke, stream, batch, and a browser playground.
+
+```python
+from fastapi import FastAPI
+from langserve import add_routes
+
+app = FastAPI(title="Report API")
+add_routes(app, chain, path="/classify")
+
+# POST /classify/invoke  {"input": {"report": "..."}}
+```
+
+Install with the langchain extra: `pip install -e ".[langchain]"` (includes `langserve[server]`).
+
+For new production deployments, LangChain recommends [LangGraph Platform](https://langchain-ai.github.io/langgraph/); LangServe remains useful for learning and simple chain APIs.
+
+---
+
 ## When to use LangChain vs. hand-rolled
 
 LangChain accelerates development when you are building standard patterns (RAG, tool agents, chains). But it adds a dependency and an abstraction layer that can obscure what is happening.
@@ -152,19 +173,22 @@ The recommendation: **know the pattern first, then use the framework**. You can 
 python module-10-langchain/demo/01_chains_and_prompts.py
 python module-10-langchain/demo/02_langchain_agents.py
 python module-10-langchain/demo/03_langchain_rag.py
+python module-10-langchain/demo/04_langserve.py
+python module-10-langchain/demo/04_langserve.py serve   # live server + playground
 ```
 
 ## Exercises
 
 **Demos vs exercises:** Demos use the **DSS Pathfinder** and shared repo data (`data/ship_logs.json`, `data/crew.json`). Exercises use the **CSS Horizon** cargo survey vessel and local data in [`exercises/data/`](exercises/data/) (`horizon_logs.json`, `horizon_crew.json`) — same LangChain patterns, different scenario so you apply what you saw in the demo rather than copy it verbatim.
 
-The three exercises chain together. Each builds on the last; you can bring your own code forward or use the provided solution from the previous exercise.
+Exercises 01–03 chain together; exercise 04 is standalone (same LCEL pattern as 01, exposed over HTTP).
 
 | Folder | What you build |
 | ------ | -------------- |
 | [`exercises/01-chain-basics`](exercises/01-chain-basics/) | LCEL chain that classifies crew reports into category, summary, and priority. |
 | [`exercises/02-tool-agent`](exercises/02-tool-agent/) | Tool agent that wraps the classifier from 01 + ship tools in AgentExecutor. |
 | [`exercises/03-rag-chain`](exercises/03-rag-chain/) | RAG chain that adds retrieval over ship logs to the agent from 02. |
+| [`exercises/04-langserve-api`](exercises/04-langserve-api/) | FastAPI service with LangServe `/classify` routes and a health check. |
 
 Run tests for this module:
 
@@ -182,3 +206,4 @@ From repo root: `pnpm slides:10`, or `cd module-10-langchain/slides && pnpm dev`
 - [LCEL — LangChain Expression Language](https://python.langchain.com/docs/concepts/lcel/)
 - [LangGraph](https://langchain-ai.github.io/langgraph/)
 - [LangSmith (tracing)](https://smith.langchain.com/)
+- [LangServe](https://github.com/langchain-ai/langserve)

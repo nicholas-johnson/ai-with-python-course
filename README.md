@@ -234,6 +234,7 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Chain basics | [`exercises/01-chain-basics`](module-10-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
 | Tool agent | [`exercises/02-tool-agent`](module-10-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via AgentExecutor |
 | RAG chain | [`exercises/03-rag-chain`](module-10-langchain/exercises/03-rag-chain/) | RetrievalQA chain over the Pathfinder knowledge base |
+| LangServe API | [`exercises/04-langserve-api`](module-10-langchain/exercises/04-langserve-api/) | Expose the Horizon classifier as a FastAPI service via LangServe |
 
 ### Module 11 — [Edge Topics](module-11-edge-topics/)
 

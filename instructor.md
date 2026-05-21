@@ -270,6 +270,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 - Chains, prompt templates, output parsers, LCEL
 - Tool-calling agents: create_tool_calling_agent, AgentExecutor
 - RetrievalQA chains for RAG
+- LangServe: `add_routes` turns an LCEL chain into `/invoke`, `/stream`, and `/playground` on FastAPI
 - Trade-offs: convenience vs control, debugging, vendor lock-in
 
 **Demo:**
@@ -279,6 +280,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | `module-10-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
 | `module-10-langchain/demo/02_langchain_agents.py` | Wrap tools, run via AgentExecutor |
 | `module-10-langchain/demo/03_langchain_rag.py` | RetrievalQA chain over knowledge base |
+| `module-10-langchain/demo/04_langserve.py` | Deploy classification chain via LangServe; httpx in-process invoke |
 
 **Exercises:**
 
@@ -287,6 +289,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | `exercises/01-chain-basics` | Prompt template + chain for crew report classification |
 | `exercises/02-tool-agent` | Wrap ship tools as LangChain tools, run via AgentExecutor |
 | `exercises/03-rag-chain` | RetrievalQA chain over the Pathfinder knowledge base |
+| `exercises/04-langserve-api` | FastAPI + LangServe `/classify` routes; health check; httpx tests |
 
 ---
 
