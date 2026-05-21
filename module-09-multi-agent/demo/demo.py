@@ -2,16 +2,24 @@
 MODULE 9 DEMO — Multi-Agent Systems
 
 Interactive walkthrough of specialist routing, supervisor-critic
-pipelines, structured debate, and consensus voting aboard the
-DSS Pathfinder.
+pipelines, structured debate, consensus voting, and swarm handoffs
+aboard the DSS Pathfinder.
 
 Run:  python module-09-multi-agent/demo/demo.py
 """
 from __future__ import annotations
 
 import json
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
+
+# Exercise 04 swarm implementation (reused for Part 5)
+_EX04 = Path(__file__).resolve().parent.parent / "exercises" / "04-swarm-tools"
+if str(_EX04) not in sys.path:
+    sys.path.insert(0, str(_EX04))
+from solution import swarm_loop  # noqa: E402
 
 load_dotenv()
 
@@ -276,6 +284,39 @@ def main():
     winner = max(tally, key=tally.get)
     print(f"  Tally:   {tally}")
     print(f"  Winner:  {winner}")
+
+    wait()
+
+    # ---- Part 5: Swarm + Tool Handoffs ----
+    print("## Part 5: Swarm + Tool Handoffs\n")
+    print("Agents pass control peer-to-peer. Each officer has scoped")
+    print("tools (comms, engineering, tactical) plus transfer_to_* handoffs.\n")
+
+    swarm_query = (
+        "Decrypt incoming signal X42 and check if the reactor can handle "
+        "a power boost to amplify the relay array."
+    )
+    print(f"  Query: {swarm_query}")
+    print(f"  Start: comms\n")
+
+    result = swarm_loop(swarm_query, client, start_dept="comms", max_hops=8)
+    print("\n  [Swarm trace]")
+    for step in result["trace"]:
+        action = step.get("action", "")
+        agent = step.get("agent", "")
+        if action == "handoff":
+            print(f"    {agent} --handoff--> {step.get('to')}")
+        elif action == "tool_result":
+            preview = step.get("content", "")[:80]
+            print(f"    {agent} tool: {preview}...")
+        elif action == "final_answer":
+            print(f"    {agent} final answer")
+        else:
+            print(f"    {agent}: {action}")
+
+    chain = " -> ".join(result["chain"])
+    print(f"\n  Chain:  {chain} -> (done)")
+    print(f"  Answer: {result['answer']}\n")
 
     print("\n" + "=" * 60)
     print("  Demo complete.")

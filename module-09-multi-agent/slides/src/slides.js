@@ -26,7 +26,7 @@ export const slides = [
       points: [
         'Decide **when** multi-agent designs are worth the complexity.',
         'Model **roles**: router, researcher, critic, supervisor, executor.',
-        'Implement **coordination patterns**: supervisor, debate, consensus.',
+        'Implement **coordination patterns**: supervisor, swarm, debate, consensus.',
         'Share **context and tools** safely across agents.',
         'Apply **consensus** and conflict resolution strategies.',
       ],
@@ -245,6 +245,68 @@ def route(query, client):
     },
   },
 
+  // ---- Section: Swarm ----
+  {
+    type: 'title',
+    content: {
+      title: 'Swarm + handoffs',
+      subtitle: 'Peer-to-peer agents with scoped tools — no central supervisor',
+      icon: 'users',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Swarm vs supervisor',
+      icon: 'git-branch',
+      points: [
+        '**Supervisor**: one agent decides who runs next (router, critic loop).',
+        '**Swarm**: the active agent decides — use a tool, answer, or **hand off**.',
+        'Each agent gets a **scoped tool set** (principle of least privilege).',
+        '**Handoff** is a tool: `transfer_to_engineering` passes full context.',
+        'More hops = more latency; cap with `max_hops` and log the chain.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Swarm loop with handoffs',
+      code: `def swarm_loop(query, client, start="comms"):
+    dept = start
+    messages = build_messages(dept, query)
+    chain = [dept]
+
+    for hop in range(max_hops):
+        msg = run_turn(dept, messages, tools=AGENT_TOOLS[dept])
+        if not msg.tool_calls:
+            return msg.content, chain
+
+        tool_msgs, transfer = handle_tools(msg)
+        messages.extend(tool_msgs)
+        if transfer:
+            dept = transfer
+            chain.append(dept)
+        # else: same agent, another tool round
+
+# comms -> engineering -> final answer`,
+      highlights: [
+        'No supervisor — handoff is just another tool call',
+        'Each department sees only its domain tools + transfer_to_*',
+      ],
+    },
+  },
+
+  // ---- Demo break 5 ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Swarm + tool handoffs',
+      subtitle: 'Switch to terminal: demo/demo.py — Part 5',
+      icon: 'rocket',
+    },
+  },
+
   // ---- Section: Wrap-up ----
   {
     type: 'title',
@@ -309,6 +371,7 @@ def route(query, client):
         '01 — Router agent: classify queries and dispatch to specialist agents',
         '02 — Supervisor-critic: orchestrate specialists with a quality review loop',
         '03 — Debate + consensus: argue, judge, and vote across multiple agents',
+        '04 — Swarm tools: scoped tools and peer-to-peer handoffs between agents',
       ],
     },
   },

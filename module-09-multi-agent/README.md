@@ -170,6 +170,7 @@ python module-09-multi-agent/demo/demo.py
 | [`exercises/01-router-agent`](exercises/01-router-agent/) | Build specialist agents (medical, tactical, comms) and an LLM-powered router that classifies queries and dispatches to the right specialist. |
 | [`exercises/02-supervisor-critic`](exercises/02-supervisor-critic/) | Supervisor orchestrates specialists + critic with a revision loop for quality control. |
 | [`exercises/03-consensus`](exercises/03-consensus/) | Debate pattern, judge synthesis, and consensus voting across multiple agents. |
+| [`exercises/04-swarm-tools`](exercises/04-swarm-tools/) | Swarm handoffs: each agent has scoped ship tools and passes control via `transfer_to_*`. |
 
 Run tests for this module:
 
