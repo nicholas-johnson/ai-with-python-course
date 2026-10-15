@@ -8,7 +8,7 @@
 - Connect an **MCP server** to a web API for real-time tool use.
 - Reason about **model selection** trade-offs: quality, cost, latency.
 - Count tokens and enforce **budgets** before calling the model.
-- Work with **multimodal** inputs: vision/image analysis via GPT-4o, speech-to-text via Whisper.
+- Work with **multimodal** inputs: vision/image analysis via GPT-6 Luna, speech-to-text via `gpt-transcribe`.
 - Apply **guardrails**: schema validation, content filters, and confidence thresholds.
 
 ---
@@ -28,25 +28,27 @@ exercises/
 
 ## Model selection trade-offs
 
-Not every query needs GPT-4o. Simple classification tasks run fine on GPT-4o-mini at 10-50x lower cost. The rule of thumb: **start with the cheapest model that passes your eval suite**, then upgrade only where quality demands it.
+Not every query needs a premium model. Simple classification tasks run fine on GPT-6 Luna at 20x lower cost than GPT-6 Sol. The rule of thumb: **start with the cheapest model that passes your eval suite**, then upgrade only where quality demands it.
 
-| Dimension | Premium (GPT-4o) | Budget (GPT-4o-mini) |
-| --------- | ---------------- | -------------------- |
+| Dimension | Premium (GPT-6 Sol) | Budget (GPT-6 Luna) |
+| --------- | ------------------- | ------------------- |
 | Quality | Best reasoning | Good for classification |
-| Cost | Higher per token | 10-50x cheaper |
+| Cost | $2 / $10 per 1M tokens (in / out) | $0.10 / $0.50, 20x cheaper |
 | Latency | Slower | Faster |
-| Context | 128k tokens | 128k tokens |
+| Context | 1M+ tokens | 1M+ tokens |
+
+Both are reasoning models. `reasoning_effort` (`none` through `max`) is a second dial alongside model choice: more effort buys better answers on hard problems at the cost of latency and output tokens.
 
 ---
 
 ## Token counting and budgets
 
-Every token costs money and counts against the context window. Before sending a request, count the tokens and trim if necessary. The `tiktoken` library gives you exact counts for OpenAI models.
+Every token costs money and counts against the context window. Before sending a request, count the tokens and trim if necessary. The `tiktoken` library gives you exact counts for OpenAI models. Current OpenAI chat models all use the `o200k_base` encoding. `tiktoken.encoding_for_model()` only knows the model names that existed when your tiktoken version was released, so ask for the encoding directly:
 
 ```python
 import tiktoken
 
-enc = tiktoken.encoding_for_model("gpt-4o")
+enc = tiktoken.get_encoding("o200k_base")
 
 def count_tokens(text: str) -> int:
     return len(enc.encode(text))
@@ -72,7 +74,8 @@ Modern models can process images and audio alongside text.
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model=MODEL,
+    reasoning_effort="none",
     messages=[{
         "role": "user",
         "content": [
@@ -87,7 +90,7 @@ response = client.chat.completions.create(
 
 Content is a list of parts — text and images mixed freely. This works with base64 data URIs or public HTTPS URLs.
 
-**Audio** — the Whisper API transcribes speech to text. Send raw audio bytes to the transcription endpoint and get back a transcript you can feed into the chat pipeline.
+**Audio** — the transcription endpoint (`gpt-transcribe`) turns speech into text. Send raw audio bytes to the transcription endpoint and get back a transcript you can feed into the chat pipeline.
 
 ---
 
@@ -134,15 +137,15 @@ python module-04-genai-strategies/demo/demo.py
 ```
 
 A quick multimodal demo — press Enter between sections:
-1. **Vision** — sends a sample image to GPT-4o and prints the structured analysis
-2. **Audio** — sends a sample WAV to Whisper and prints the transcript
+1. **Vision** — sends a sample image to the chat model and prints the structured analysis
+2. **Audio** — sends a sample WAV to `gpt-transcribe` and prints the transcript
 
 ## Exercises
 
 | # | Folder | What you build |
 |---|--------|---------------|
 | 1 | [`exercises/01-research-chat`](exercises/01-research-chat/) | **Research Chat** — Streaming chat with MCP tool calling (server provided). Wire up SSE streaming, tool discovery, and the tool-calling loop. |
-| 2 | [`exercises/02-multimodal`](exercises/02-multimodal/) | **Vision & Audio** — Add `/vision` (GPT-4o image analysis) and `/transcribe` (Whisper) endpoints. |
+| 2 | [`exercises/02-multimodal`](exercises/02-multimodal/) | **Vision & Audio** — Add `/vision` (image analysis) and `/transcribe` (speech-to-text) endpoints. |
 
 ### Frontend
 

@@ -59,7 +59,7 @@
 **Talk about:**
 
 - What MCP is: JSON-RPC between agent host and tool server, tools/list and tools/call
-- FastMCP: decorator-based, auto-generates schemas from type hints
+- MCPServer (formerly FastMCP): decorator-based, auto-generates schemas from type hints
 - Practical tools: sensor reads, crew lookups, log search
 - Auth and scopes: per-tool access control, token-based scoping
 - Structured logging: every tool call logged with timestamp, caller, args, result, duration
@@ -69,13 +69,13 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-03-mcp-server/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: MCP protocol as data — discovery, call, result. Part 2: FastMCP decorator pattern and auto-generated schemas. Part 3: live agent connecting to an MCP server, discovering tools, calling them via OpenAI. |
+| `module-03-mcp-server/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: MCP protocol as data — discovery, call, result. Part 2: MCPServer decorator pattern and auto-generated schemas. Part 3: live agent connecting to an MCP server, discovering tools, calling them via OpenAI. |
 
 **Exercises (chained — each builds on the previous):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-mcp-agent` | FastMCP server + console agent connected via MCP stdio. `python start.py` for interactive chat. |
+| `exercises/01-mcp-agent` | `MCPServer` + console agent connected via MCP stdio. `python start.py` for interactive chat. |
 | `exercises/02-data-tools` | Richer server reading crew, logs, sensors, missions from JSON files. Ships with ex01 agent. |
 | `exercises/03-live-tools` | Server with web fetch (httpx) + note save/list/read. Ships with ex01 agent. The "it actually does stuff" moment. |
 
@@ -89,7 +89,7 @@
 - Structured outputs: `response_format={"type": "json_object"}`, Pydantic validation, schema in system prompt
 - Model selection trade-offs: quality vs cost vs latency, tiered routing
 - Token counting and budgets (lecture): tiktoken, truncate or summarise if over budget
-- Multimodal: Vision API (base64 image in message, content parts), Whisper for audio transcription
+- Multimodal: Vision API (base64 image in message, content parts), gpt-transcribe for audio transcription
 - Guardrails (lecture): schema validation, content filter, confidence threshold — already practised in Module 2
 - FastAPI + SSE streaming for real-time chat backends
 
@@ -97,7 +97,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-04-genai-strategies/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: vague vs specific prompts, response_format, few-shot classification. Part 2: same task on GPT-4o vs GPT-4o-mini — latency, tokens, quality. Part 3: Pydantic guardrails chain — schema validation, content filter, confidence gate with 4 test cases + live LLM. |
+| `module-04-genai-strategies/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: vague vs specific prompts, response_format, few-shot classification. Part 2: same task on GPT-6 Sol vs GPT-6 Luna — latency, tokens, quality. Part 3: Pydantic guardrails chain — schema validation, content filter, confidence gate with 4 test cases + live LLM. |
 
 **Exercises (chained — delegates build a Research Assistant web app):**
 
@@ -105,7 +105,7 @@
 | ------ | --------------- |
 | `exercises/01-chat-api` | FastAPI backend with SSE streaming `/chat` and `/health`. Frontend chat panel lights up. |
 | `exercises/02-tool-chat` | MCP server with web fetch + notes tools. Extend chat with tool-calling loop. Frontend shows tool activity. |
-| `exercises/03-multimodal` | Add `/vision` (GPT-4o image analysis) and `/transcribe` (Whisper). Frontend image/audio uploads work. |
+| `exercises/03-multimodal` | Add `/vision` (image analysis) and `/transcribe` (gpt-transcribe). Frontend image/audio uploads work. |
 
 A Svelte + ShadCN + Tailwind frontend is provided in `frontend/`. Delegates focus on the FastAPI backend.
 
@@ -195,7 +195,7 @@ Each demo is a separate interactive script with real OpenAI calls:
 | ------ | --------------- |
 | `exercises/01-memory-store` | Session + long-term memory with decay/forget, interactive agent with /memories, /decay, /forget |
 | `exercises/02-conversation-summary` | Auto-summarise long conversations, /summary, /turns, /force-summarise |
-| `exercises/03-memory-server` | Memory as FastMCP server, console agent via stdio, /tools |
+| `exercises/03-memory-server` | Memory as MCPServer, console agent via stdio, /tools |
 
 ---
 
@@ -268,9 +268,9 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 - What LangChain provides vs building from scratch
 - Chains, prompt templates, output parsers, LCEL
-- Tool-calling agents: create_tool_calling_agent, AgentExecutor
-- RetrievalQA chains for RAG
-- LangServe: `add_routes` turns an LCEL chain into `/invoke`, `/stream`, and `/playground` on FastAPI
+- Tool-calling agents: `create_agent` (LangChain 1.x, runs on LangGraph; replaces `AgentExecutor`)
+- LCEL RAG chains with a retriever
+- Serving a chain: FastAPI routes that call `ainvoke` / `abatch` / `astream` (LangServe is unmaintained)
 - Trade-offs: convenience vs control, debugging, vendor lock-in
 
 **Demo:**
@@ -278,56 +278,48 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | Script | What it shows |
 | ------ | ------------- |
 | `module-10-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
-| `module-10-langchain/demo/02_langchain_agents.py` | Wrap tools, run via AgentExecutor |
-| `module-10-langchain/demo/03_langchain_rag.py` | RetrievalQA chain over knowledge base |
-| `module-10-langchain/demo/04_langserve.py` | Deploy classification chain via LangServe; httpx in-process invoke |
+| `module-10-langchain/demo/02_langchain_agents.py` | Wrap tools, run via `create_agent` |
+| `module-10-langchain/demo/03_langchain_rag.py` | LCEL RAG chain over knowledge base |
+| `module-10-langchain/demo/04_serving_chains.py` | Serve the classification chain with FastAPI (invoke / batch / stream); httpx in-process invoke |
 
 **Exercises:**
 
 | Folder | Delegates build |
 | ------ | --------------- |
 | `exercises/01-chain-basics` | Prompt template + chain for crew report classification |
-| `exercises/02-tool-agent` | Wrap ship tools as LangChain tools, run via AgentExecutor |
-| `exercises/03-rag-chain` | RetrievalQA chain over the Pathfinder knowledge base |
-| `exercises/04-langserve-api` | FastAPI + LangServe `/classify` routes; health check; httpx tests |
+| `exercises/02-tool-agent` | Wrap ship tools as LangChain tools, run via `create_agent` |
+| `exercises/03-rag-chain` | LCEL RAG chain over the Horizon ship logs |
+| `exercises/04-chain-api` | FastAPI `/classify/invoke` route over the chain; health check; httpx tests |
 
 ---
 
-### Module 11 — Edge Topics
+### Module 11 — Evals
 
 **Talk about:**
 
-- Advanced retrieval patterns: hybrid search, re-ranking, HyDE
-- Agentic RAG: agent-driven retrieval with self-critique and citation verification
-- Evaluation: automated LLM eval metrics, fine-tuning data pipelines
-- Guardrails: input/output validation, safety filters
-- Caching: semantic similarity caching for LLM responses
-- And more: web search backends, text-to-SQL, multimodal RAG, contextual chunking
-- This is a pick-and-choose module — delegates work on topics that interest them most
+- Why a live demo is not an eval: frozen test sets, CI vs token spend
+- Golden-file tests: mock the LLM, run the real agent loop, assert tools + answer
+- Retrieval metrics: recall@k, precision@k, MRR on a labelled query set
+- LLM-as-judge: correctness, completeness, relevance (JSON, temperature 0)
+- Faithfulness: claims grounded in retrieved context, not the gold answer
+- Scorecard + gate: pick a winner, fail a release below a floor
+- Capstone (Module 12) can reuse the harness as a release check
 
 **Demo:**
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-11-edge-topics/demo/demo.py` | Interactive walkthrough of hybrid search, agentic RAG, citation verification, semantic caching |
+| `module-11-evals/demo/demo.py` | Five parts, no API key: golden tests, retrieval metrics, judge, faithfulness, scorecard + gate |
 
-**Exercises (13 standalone exercises, one per topic):**
+**Exercises (chained — each adds a measurement the next one can consume):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-hybrid-search` | Combine dense and sparse retrieval |
-| `exercises/02-reranking` | Re-rank retrieved results for relevance |
-| `exercises/03-hyde` | Hypothetical Document Embeddings for better retrieval |
-| `exercises/04-agentic-rag` | Agent-driven retrieval with self-critique |
-| `exercises/05-citation-verification` | Verify and ground citations in source documents |
-| `exercises/06-web-search-backend` | Integrate web search as a retrieval source |
-| `exercises/07-text-to-sql` | Natural language to SQL query generation |
-| `exercises/08-llm-eval` | Evaluate LLM outputs with automated metrics |
-| `exercises/09-fine-tuning-data` | Build datasets for fine-tuning |
-| `exercises/10-guardrails` | Input/output validation and safety filters |
-| `exercises/11-semantic-cache` | Cache LLM responses by semantic similarity |
-| `exercises/12-multimodal-rag` | RAG with images and text |
-| `exercises/13-contextual-chunking` | Context-aware document chunking strategies |
+| `exercises/01-golden-tests` | Mock-LLM agent loop, score tools + answer, run a golden suite |
+| `exercises/02-retrieval-metrics` | recall@k, precision@k, MRR on labelled ship-log queries |
+| `exercises/03-llm-judge` | LLM-as-judge: correctness, completeness, relevance |
+| `exercises/04-faithfulness` | Claim extraction + support check + faithfulness ratio |
+| `exercises/05-eval-compare` | Scorecard two configs, pick a winner, gate a release |
 
 ---
 
@@ -358,3 +350,40 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | `exercises/02-movie-night` | RAG + text-to-SQL + reranking + chart data |
 | `exercises/03-travel-planner` | Agentic RAG + tool calling + structured itineraries |
 | `exercises/04-personal-assistant` | Chat + tools + MCP + RAG notes + calendar management |
+
+---
+
+### Module 13 — Edge Topics
+
+**Talk about:**
+
+- Advanced retrieval patterns: hybrid search, re-ranking, HyDE
+- Agentic RAG: agent-driven retrieval with self-critique and citation verification
+- Fine-tuning data pipelines (eval lives in Module 11)
+- Guardrails: input/output validation, safety filters
+- Caching: semantic similarity caching for LLM responses
+- And more: web search backends, text-to-SQL, multimodal RAG, contextual chunking
+- This is a pick-and-choose module — delegates work on topics that interest them most
+
+**Demo:**
+
+| Script | What it shows |
+| ------ | ------------- |
+| `module-13-edge-topics/demo/demo.py` | Interactive walkthrough of hybrid search, agentic RAG, citation verification, semantic caching |
+
+**Exercises (standalone labs, one per topic; LLM eval moved to Module 11):**
+
+| Folder | Delegates build |
+| ------ | --------------- |
+| `exercises/01-hybrid-search` | Combine dense and sparse retrieval |
+| `exercises/02-reranking` | Re-rank retrieved results for relevance |
+| `exercises/03-hyde` | Hypothetical Document Embeddings for better retrieval |
+| `exercises/04-agentic-rag` | Agent-driven retrieval with self-critique |
+| `exercises/05-citation-verification` | Verify and ground citations in source documents |
+| `exercises/06-web-search-backend` | Integrate web search as a retrieval source |
+| `exercises/07-text-to-sql` | Natural language to SQL query generation |
+| `exercises/09-fine-tuning-data` | Build datasets for fine-tuning |
+| `exercises/10-guardrails` | Input/output validation and safety filters |
+| `exercises/11-semantic-cache` | Cache LLM responses by semantic similarity |
+| `exercises/12-multimodal-rag` | RAG with images and text |
+| `exercises/13-contextual-chunking` | Context-aware document chunking strategies |

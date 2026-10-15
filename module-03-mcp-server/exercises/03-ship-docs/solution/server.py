@@ -5,9 +5,9 @@ Exercise 03 — Ship Documentation MCP Server (solution)
 import json
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("Ship Documentation")
+server = MCPServer("Ship Documentation")
 
 DOCS_DIR = Path(__file__).parent.parent / "docs"
 

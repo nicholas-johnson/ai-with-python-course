@@ -3,9 +3,12 @@ Conversation Summary — provided from Exercise 02 solution.
 summarise_turns and SmartSessionMemory.
 """
 from __future__ import annotations
+import os
 from openai import OpenAI
 
 from memory_store import SessionMemory
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def summarise_turns(turns: list[dict], client: OpenAI) -> str:
@@ -15,7 +18,8 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",

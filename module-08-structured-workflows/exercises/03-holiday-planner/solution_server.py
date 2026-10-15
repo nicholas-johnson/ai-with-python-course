@@ -1,7 +1,7 @@
 """
 Exercise 03 — Holiday Planner MCP Server (Solution)
 =====================================================
-A FastMCP server with holiday planning tools.
+A MCPServer server with holiday planning tools.
 
 Run standalone:  python solution_server.py
 """
@@ -10,14 +10,14 @@ import json
 import random
 import re
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 try:
     import httpx
 except ImportError:
     httpx = None
 
-mcp = FastMCP("Holiday Planner")
+mcp = MCPServer("Holiday Planner")
 
 _preferences: dict[str, str] = {}
 

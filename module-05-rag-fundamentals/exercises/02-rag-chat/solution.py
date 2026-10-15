@@ -8,6 +8,7 @@ Run:  python solution.py
 
 import json
 from dataclasses import dataclass
+import os
 from pathlib import Path
 
 import chromadb
@@ -15,6 +16,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "scout_logs.json"
 client = OpenAI()
@@ -125,7 +128,7 @@ def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
 def rag_chat(query: str, collection, k: int = 5) -> tuple[str, list[dict]]:
     passages = search(collection, query, k)
     messages = build_grounded_prompt(query, passages)
-    response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content, passages
 
 
@@ -156,7 +159,8 @@ def handle_norag_command(client: OpenAI, last_query: str | None):
     """Re-ask the last question without retrieval augmentation."""
     if last_query:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=[{"role": "user", "content": last_query}],
         )
         print(f"  (No RAG) {response.choices[0].message.content}\n")

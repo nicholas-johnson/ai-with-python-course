@@ -10,6 +10,7 @@ Run:  python module-08-structured-workflows/demo/02_plan_and_execute.py
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass, field
 import httpx
@@ -17,6 +18,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +89,8 @@ class PlanStep:
 
 def generate_plan(goal: str, client: OpenAI) -> list[PlanStep]:
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -120,7 +124,8 @@ def execute_step(step: PlanStep, client: OpenAI) -> str:
 
     for _ in range(3):
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=TOOL_SCHEMAS,
             tool_choice="auto",
@@ -154,7 +159,8 @@ def revise_plan(
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -228,7 +234,8 @@ def plan_and_execute(goal: str, client: OpenAI, max_replans: int = 1) -> dict:
         f"{s.number}. {s.description} -> {s.result}" for s in completed
     )
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": "Synthesise the results of these steps into a final answer."},
             {"role": "user", "content": synthesis_prompt},

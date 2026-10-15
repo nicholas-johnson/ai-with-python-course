@@ -23,7 +23,8 @@ When the conversation exceeds a threshold, the oldest half of messages gets summ
 def summarise_turns(turns, client):
     formatted = "\n".join(f"{t['role']}: {t['content']}" for t in turns)
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": "Summarise this conversation..."},
             {"role": "user", "content": formatted},
@@ -66,7 +67,7 @@ from memory_store import SessionMemory, LongTermMemory, MemoryEntry, build_syste
 Write a function that takes a list of message dicts and an OpenAI client, and returns a summary string:
 
 1. Format the turns into a readable transcript
-2. Call `gpt-4o-mini` with a system prompt instructing it to summarise the conversation concisely
+2. Call the model (`MODEL`) with a system prompt instructing it to summarise the conversation concisely
 3. Return the summary text
 
 ### 3. Implement `SmartSessionMemory`

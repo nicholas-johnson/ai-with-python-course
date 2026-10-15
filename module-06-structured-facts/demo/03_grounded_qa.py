@@ -9,6 +9,7 @@ Requires: OPENAI_API_KEY environment variable.
 """
 
 import json
+import os
 from pathlib import Path
 
 import networkx as nx
@@ -17,6 +18,8 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "ship_logs.json"
 client = OpenAI()
@@ -37,7 +40,8 @@ def load_logs() -> list[dict]:
 def extract_facts(text: str) -> list[Fact]:
     schema_desc = json.dumps(Fact.model_json_schema(), indent=2)
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -103,7 +107,8 @@ def retrieve_evidence(G: nx.DiGraph, entities: list[str], max_hops: int = 2) -> 
 def grounded_qa(question: str, G: nx.DiGraph) -> tuple[str, list[dict]]:
     """Answer a question grounded in graph evidence."""
     entity_resp = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "Extract entity names from the question. Return JSON: {\"entities\": [...]}"},
@@ -136,7 +141,7 @@ def grounded_qa(question: str, G: nx.DiGraph) -> tuple[str, list[dict]]:
         {"role": "system", "content": "Answer using ONLY the facts below. Cite as [Fact N]. If insufficient, say so."},
         {"role": "user", "content": "\n".join(fact_lines) + f"\n\nQuestion: {question}"},
     ]
-    resp = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    resp = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return resp.choices[0].message.content, evidence
 
 
@@ -187,7 +192,8 @@ def main():
 
     print(f"  Same question without graph evidence:\n")
     raw_resp = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[{"role": "user", "content": question}],
     )
     print(f"  {raw_resp.choices[0].message.content}\n")

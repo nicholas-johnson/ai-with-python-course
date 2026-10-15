@@ -5,6 +5,7 @@ Connects to server.py via stdio, discovers tools, runs an interactive chat loop.
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -14,6 +15,8 @@ from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SYSTEM_PROMPT = (
     "You are the station power grid AI. Use your tools to answer power "
@@ -28,7 +31,7 @@ def mcp_to_openai_tools(mcp_tools: list) -> list[dict]:
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         }
         for tool in mcp_tools
@@ -52,7 +55,7 @@ async def run_agent(session, client, openai_tools):
 
         for _ in range(10):
             response = client.chat.completions.create(
-                model="gpt-4o-mini", messages=messages, tools=openai_tools
+                model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools
             )
             msg = response.choices[0].message
 

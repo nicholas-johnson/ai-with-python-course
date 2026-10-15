@@ -2,20 +2,21 @@
 
 ## Recap
 
-GPT-4o is a multimodal model — it can process images alongside text. OpenAI also provides the Whisper API for audio transcription. Adding these to your Research Assistant gives users the ability to:
+GPT-6 Luna is a multimodal model — it can process images alongside text. OpenAI also provides a transcription API (`gpt-transcribe`) for audio. Adding these to your Research Assistant gives users the ability to:
 
 - **Drop an image** into the chat and get structured analysis
 - **Upload a voice memo** and get a transcript
 
 This is the fun one. Two small functions, two endpoints, and suddenly your assistant can see and hear.
 
-### Vision with GPT-4o
+### Vision
 
 Send images as base64 data URLs in the message content:
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model=MODEL,
+    reasoning_effort="none",
     messages=[
         {
             "role": "user",
@@ -31,11 +32,11 @@ response = client.chat.completions.create(
 )
 ```
 
-### Audio with Whisper
+### Audio transcription
 
 ```python
 transcript = client.audio.transcriptions.create(
-    model="whisper-1",
+    model="gpt-transcribe",
     file=audio_file,
 )
 print(transcript.text)
@@ -54,18 +55,18 @@ Two new endpoints added to `start.py` (which ships with the Exercise 1 solution 
 
 ### 1. Implement `transcribe_audio`
 
-Wrap the audio bytes in an `io.BytesIO` with a `.name` attribute, then call the Whisper API:
+Wrap the audio bytes in an `io.BytesIO` with a `.name` attribute, then call the transcription API:
 
 ```python
 audio_file = io.BytesIO(audio_bytes)
 audio_file.name = "audio.wav"
-transcript = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
+transcript = client.audio.transcriptions.create(model="gpt-transcribe", file=audio_file)
 return transcript.text
 ```
 
 ### 2. Implement `analyze_image`
 
-Build a chat completion with GPT-4o that includes the image as a base64 data URL. Ask the model to respond in JSON with `description` and `key_points` fields. Use `response_format={"type": "json_object"}` to enforce JSON output.
+Build a chat completion with `MODEL` that includes the image as a base64 data URL. Ask the model to respond in JSON with `description` and `key_points` fields. Use `response_format={"type": "json_object"}` to enforce JSON output.
 
 ### 3. Add `POST /vision`
 

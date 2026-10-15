@@ -8,6 +8,7 @@ Run:  python solution.py
 
 import json
 from dataclasses import dataclass, field
+import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -16,6 +17,8 @@ from fact_extractor import load_logs, extract_facts, validate_facts
 from graph_builder import build_graph, KnowledgeGraph
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 client = OpenAI()
 
@@ -33,7 +36,8 @@ def extract_query_entities(question: str, client: OpenAI, graph: KnowledgeGraph)
     graph_nodes = list(graph.graph.nodes())
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -144,7 +148,8 @@ def grounded_qa(
 
     messages = build_grounded_prompt(question, evidence)
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=messages,
     )
     answer = response.choices[0].message.content
@@ -203,7 +208,8 @@ def handle_repl_command(
         if last_question:
             print("  (Without graph)")
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=MODEL,
+                reasoning_effort="none",
                 messages=[{"role": "user", "content": last_question}],
             )
             print(f"  {response.choices[0].message.content}\n")

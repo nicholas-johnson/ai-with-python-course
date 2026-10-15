@@ -35,7 +35,7 @@ A console app in **`start.py`** that layers a critic review loop on top of the E
 
 The critic evaluates a specialist's response and returns structured feedback:
 
-- Call `client.chat.completions.create` with `gpt-4o-mini` and JSON mode
+- Call `client.chat.completions.create` with `model=MODEL, reasoning_effort="none"` and JSON mode
 - Use `CRITIC_PROMPT` as the system prompt
 - The user message should include both the original query and the specialist's response so the critic has full context
 - Parse the JSON response into `{"approved": bool, "feedback": str}`

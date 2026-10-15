@@ -1,5 +1,7 @@
 """FastAPI app — AI Recipe Finder with RAG, caching, guardrails, and tracing."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -11,7 +13,22 @@ from .guardrails import check_allergens, redact_pii
 from .vision import identify_ingredients
 from .tracing import TraceContext
 
-app = FastAPI(title="AI Recipe Finder")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Load recipes.json and build the search index on startup.
+
+    Steps:
+    1. Load recipes from DATA_DIR/recipes.json
+    2. Call build_index(recipes) and store the collection globally
+    3. Print how many recipes were indexed
+    """
+    global recipes, collection
+    # TODO: load recipes and build index
+    yield
+
+
+app = FastAPI(title="AI Recipe Finder", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,19 +50,6 @@ class SearchRequest(BaseModel):
 class PhotoRequest(BaseModel):
     image_base64: str
     dietary_filter: str | None = None
-
-
-@app.on_event("startup")
-async def startup():
-    """Load recipes.json and build the search index on startup.
-
-    Steps:
-    1. Load recipes from DATA_DIR/recipes.json
-    2. Call build_index(recipes) and store the collection globally
-    3. Print how many recipes were indexed
-    """
-    global recipes, collection
-    # TODO: load recipes and build index
 
 
 @app.get("/api/health")

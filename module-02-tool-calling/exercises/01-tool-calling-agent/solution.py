@@ -4,6 +4,9 @@ Exercise 01 — Tool-Calling Agent (solution)
 
 import json
 from dataclasses import dataclass, field
+import os
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 # ---------------------------------------------------------------------------
 # Tool schemas
@@ -138,7 +141,8 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
     for _ in range(max_steps):
         steps += 1
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=TOOLS,
         )

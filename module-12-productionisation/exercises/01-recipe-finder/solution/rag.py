@@ -133,6 +133,7 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
 
     response = client.chat.completions.create(
         model=OPENAI_MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",
@@ -147,7 +148,7 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
                 "content": f"Query: {query}\n\nCandidates:\n{candidates}",
             },
         ],
-        max_tokens=100,
+        max_completion_tokens=100,
     )
 
     try:

@@ -6,6 +6,7 @@ When the session buffer gets too long, older messages are compressed into a summ
 Run:  python start.py
 """
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -17,6 +18,8 @@ from memory_store import (
 )
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def summarise_turns(turns: list[dict], client: OpenAI) -> str:
@@ -31,7 +34,7 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     """
     # TODO: implement summarisation
     #   1. Format the turns into a readable transcript string
-    #   2. Call client.chat.completions.create with gpt-4o-mini
+    #   2. Call client.chat.completions.create with model=MODEL, reasoning_effort="none"
     #      - system prompt: instruct the model to summarise the conversation
     #        concisely, preserving key facts, decisions, and user preferences
     #      - user message: the formatted transcript

@@ -6,10 +6,11 @@ Run:  python solution.py
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain.agents import create_agent
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,7 +20,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 EXERCISE_DATA = Path(__file__).resolve().parents[1] / "data"
 CREW = json.loads((EXERCISE_DATA / "horizon_crew.json").read_text())
 
@@ -46,7 +47,7 @@ _classify_prompt = ChatPromptTemplate.from_messages([
     ),
     ("human", "{report}"),
 ])
-_classify_chain = _classify_prompt | ChatOpenAI(model=MODEL, temperature=0) | JsonOutputParser()
+_classify_chain = _classify_prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0) | JsonOutputParser()
 
 
 def classify_report(report: str) -> dict:
@@ -82,21 +83,17 @@ def query_crew(department: str) -> str:
 
 tools = [classify, read_sensor, query_crew]
 
-agent_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     "You are the CSS Horizon AI assistant. "
-     "Use your tools to help the crew. Do not guess — always use a tool when data is needed."),
-    ("placeholder", "{chat_history}"),
-    ("human", "{input}"),
-    ("placeholder", "{agent_scratchpad}"),
-])
+SYSTEM_PROMPT = (
+    "You are the CSS Horizon AI assistant. "
+    "Use your tools to help the crew. Do not guess — always use a tool when data is needed."
+)
 
-agent = create_tool_calling_agent(ChatOpenAI(model=MODEL, temperature=0), tools, agent_prompt)
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+agent = create_agent(ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0), tools, system_prompt=SYSTEM_PROMPT)
 
 
 def run_agent(query: str) -> str:
-    return executor.invoke({"input": query})["output"]
+    result = agent.invoke({"messages": [{"role": "user", "content": query}]})
+    return result["messages"][-1].text
 
 
 # --- RAG chain (Exercise 03) ---
@@ -141,7 +138,7 @@ def build_rag_chain(vectorstore: Chroma):
     chain = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
         | rag_prompt
-        | ChatOpenAI(model=MODEL, temperature=0)
+        | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
         | StrOutputParser()
     )
     return chain, retriever
@@ -156,8 +153,8 @@ def ask(chain, retriever, question: str) -> tuple[str, list]:
 
 def ask_norag(question: str) -> str:
     """Answer without RAG for comparison."""
-    model = ChatOpenAI(model=MODEL, temperature=0)
-    return model.invoke([{"role": "user", "content": question}]).content
+    model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+    return model.invoke([{"role": "user", "content": question}]).text
 
 
 def main():

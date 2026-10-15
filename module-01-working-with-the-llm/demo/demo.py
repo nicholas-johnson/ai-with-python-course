@@ -10,6 +10,7 @@ Walks through the full module in one script:
 Requires: OPENAI_API_KEY environment variable.
 """
 
+import os
 import sys
 
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 SYSTEM_PROMPT = "You are a helpful AI assistant. Be concise and professional."
 
 
@@ -27,14 +28,14 @@ SYSTEM_PROMPT = "You are a helpful AI assistant. Be concise and professional."
 
 def chat(client: OpenAI, messages: list[dict]) -> str:
     """Non-streaming single-shot call. Returns the response text."""
-    response = client.chat.completions.create(model=MODEL, messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content
 
 
 def stream_response(client: OpenAI, messages: list[dict]) -> str:
     """Stream the response token by token, printing as they arrive."""
     response = client.chat.completions.create(
-        model=MODEL, messages=messages, stream=True,
+        model=MODEL, reasoning_effort="none", messages=messages, stream=True,
     )
     tokens = []
     for chunk in response:
@@ -51,6 +52,7 @@ def run_prompt(client: OpenAI, system_prompt: str, user_message: str) -> str:
     """One-shot call with a custom system prompt."""
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message},
@@ -128,7 +130,7 @@ def demo_streaming(client: OpenAI):
         messages.append({"role": "user", "content": user_msg})
 
         response = client.chat.completions.create(
-            model=MODEL, messages=messages, stream=True,
+            model=MODEL, reasoning_effort="none", messages=messages, stream=True,
         )
         tokens = []
         chunk_num = 0

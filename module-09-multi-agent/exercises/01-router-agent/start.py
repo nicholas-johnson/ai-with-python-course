@@ -6,10 +6,13 @@ user queries to the right specialist using LLM-based classification.
 Run:  python start.py
 """
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DEPARTMENTS = ["medical", "tactical", "comms"]
 
@@ -41,7 +44,7 @@ def classify_query(query: str, client: OpenAI) -> str:
     Returns one of: 'medical', 'tactical', 'comms'.
 
     Steps:
-        1. Call client.chat.completions.create with gpt-4o-mini
+        1. Call client.chat.completions.create with model=MODEL, reasoning_effort="none"
         2. Use response_format={"type": "json_object"}
         3. System prompt: instruct the model to classify into one of the
            three departments and return JSON: {"department": "<name>"}
@@ -58,7 +61,7 @@ def specialist_agent(department: str, query: str, client: OpenAI) -> str:
     Steps:
         1. Look up the system prompt from SPECIALIST_PROMPTS for the department
            (fall back to "medical" for unknown departments)
-        2. Call client.chat.completions.create with gpt-4o-mini
+        2. Call client.chat.completions.create with model=MODEL, reasoning_effort="none"
         3. Pass the system prompt and the user's query
         4. Return the response text
     """

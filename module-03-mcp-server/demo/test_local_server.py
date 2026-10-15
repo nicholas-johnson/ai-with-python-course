@@ -39,7 +39,7 @@ async def main():
             for tool in tools:
                 print(f"  {tool.name}")
                 print(f"    description: {tool.description}")
-                print(f"    inputSchema: {json.dumps(tool.inputSchema, indent=6)}")
+                print(f"    input_schema: {json.dumps(tool.input_schema, indent=6)}")
                 print()
 
             # ----- Call each tool -----

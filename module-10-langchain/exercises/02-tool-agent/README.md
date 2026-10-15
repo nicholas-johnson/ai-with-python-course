@@ -17,17 +17,17 @@ def read_sensor(sensor_name: str) -> str:
     return json.dumps(SENSOR_DATA.get(sensor_name, {"error": "Unknown sensor"}))
 ```
 
-**`AgentExecutor`** — runs the tool-calling loop. You create an agent from a model + tools + prompt, then the executor handles: LLM call → tool dispatch → feed result back → repeat until the model answers directly.
+**`create_agent`** — runs the tool-calling loop. You give it a model, tools, and a system prompt; it handles: LLM call → tool dispatch → feed result back → repeat until the model answers directly. Under the hood it is a LangGraph graph.
 
 ```python
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_agent
 
-agent = create_tool_calling_agent(model, tools, prompt)
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-result = executor.invoke({"input": "What is the reactor temperature?"})
+agent = create_agent(model, tools, system_prompt="You are the CSS Horizon AI assistant.")
+result = agent.invoke({"messages": [{"role": "user", "content": "What is the reactor temperature?"}]})
+answer = result["messages"][-1].text
 ```
 
-`verbose=True` prints the full thought/action/observation trace — the same pattern you built by hand.
+`result["messages"]` holds every step — the user message, each tool call, each tool result, and the final answer — the same pattern you built by hand.
 
 ## What you build
 
@@ -39,7 +39,7 @@ The Exercise 1 classifier chain is already inlined at the top of `start.py` — 
 
 | Function | Description |
 |---|---|
-| `run_agent(query)` | Invoke the agent executor, return the response string |
+| `run_agent(query)` | Invoke the agent, return the final answer string |
 
 **Tools the agent can call:**
 
@@ -102,29 +102,23 @@ def query_crew(department: str) -> str:
 
 ### 4. Build the agent
 
-Create a prompt, model, and agent:
+Create a system prompt, model, and agent:
 
 ```python
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are the CSS Horizon AI assistant. Use your tools to help the crew."),
-    ("placeholder", "{chat_history}"),
-    ("human", "{input}"),
-    ("placeholder", "{agent_scratchpad}"),
-])
+SYSTEM_PROMPT = "You are the CSS Horizon AI assistant. Use your tools to help the crew."
 
-model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-agent = create_tool_calling_agent(model, tools, prompt)
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+agent = create_agent(model, tools, system_prompt=SYSTEM_PROMPT)
 ```
 
-The `{agent_scratchpad}` placeholder is where LangChain inserts tool call/result pairs during the loop.
+There is no prompt template with an `{agent_scratchpad}` any more — the agent keeps tool calls and results in its `messages` state.
 
 ### 5. Implement `run_agent`
 
 ```python
 def run_agent(query: str) -> str:
-    result = executor.invoke({"input": query})
-    return result["output"]
+    result = agent.invoke({"messages": [{"role": "user", "content": query}]})
+    return result["messages"][-1].text
 ```
 
 ### 6. Build the interactive loop

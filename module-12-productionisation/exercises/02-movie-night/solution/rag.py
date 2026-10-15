@@ -92,6 +92,7 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
 
     response = client.chat.completions.create(
         model=OPENAI_MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": "You are a movie recommendation assistant. "
              "Given a user's mood/request and a list of candidate movies, return ONLY "

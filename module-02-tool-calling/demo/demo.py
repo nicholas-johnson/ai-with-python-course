@@ -11,6 +11,7 @@ Requires: OPENAI_API_KEY environment variable.
 """
 
 import json
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 # ---------------------------------------------------------------------------
@@ -107,7 +108,7 @@ def demo_message_format(client: OpenAI):
         print(f"  [USER]      {user_msg}")
 
         response = client.chat.completions.create(
-            model=MODEL, messages=messages, tools=TOOLS
+            model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS
         )
         assistant_msg = response.choices[0].message
 
@@ -123,7 +124,7 @@ def demo_message_format(client: OpenAI):
                 )
 
             final = client.chat.completions.create(
-                model=MODEL, messages=messages, tools=TOOLS
+                model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS
             )
             answer = final.choices[0].message.content
             messages.append({"role": "assistant", "content": answer})
@@ -149,7 +150,7 @@ def agent_loop(client: OpenAI, messages: list[dict], tools_list: list[dict],
                tool_handler, *, label: str = ""):
     """One turn of the agent loop: call LLM, handle tool calls, return final answer."""
     response = client.chat.completions.create(
-        model=MODEL, messages=messages, tools=tools_list
+        model=MODEL, reasoning_effort="none", messages=messages, tools=tools_list
     )
     assistant_msg = response.choices[0].message
 
@@ -168,7 +169,7 @@ def agent_loop(client: OpenAI, messages: list[dict], tools_list: list[dict],
         messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
 
     final = client.chat.completions.create(
-        model=MODEL, messages=messages, tools=tools_list
+        model=MODEL, reasoning_effort="none", messages=messages, tools=tools_list
     )
     answer = final.choices[0].message.content
     messages.append({"role": "assistant", "content": answer})

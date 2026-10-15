@@ -5,12 +5,15 @@ Separate planning from execution: LLM plans, ReAct executes each step.
 from __future__ import annotations
 import json
 from dataclasses import dataclass
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from react_agent import run_react, TOOLS, print_trace
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 @dataclass
@@ -24,7 +27,7 @@ class PlanStep:
 def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
     """Ask the LLM to create a numbered plan. Returns list of PlanStep."""
     # TODO: call client.chat.completions.create with:
-    #   model="gpt-4o-mini"
+    #   model=MODEL
     #   response_format={"type": "json_object"}
     #   A system prompt asking for a JSON object with a "steps" array
     #   Each step: {"step_number": int, "description": str}

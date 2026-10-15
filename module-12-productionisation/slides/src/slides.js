@@ -79,14 +79,14 @@ export const slides = [
 
   // --- Demo: tracing ---
 
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Structured tracing',
-      subtitle: 'Trace IDs propagating through a request pipeline',
-      icon: 'cpu',
-    },
-  },
+  // {
+  //   type: 'title',
+  //   content: {
+  //     title: 'Demo — Structured tracing',
+  //     subtitle: 'Trace IDs propagating through a request pipeline',
+  //     icon: 'cpu',
+  //   },
+  // },
 
   // --- Reliability patterns ---
 
@@ -207,14 +207,14 @@ export const slides = [
 
   // --- Demo: circuit breaker ---
 
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Circuit breaker',
-      subtitle: 'Watch the breaker open, fail fast, and recover',
-      icon: 'cpu',
-    },
-  },
+  // {
+  //   type: 'title',
+  //   content: {
+  //     title: 'Demo — Circuit breaker',
+  //     subtitle: 'Watch the breaker open, fail fast, and recover',
+  //     icon: 'cpu',
+  //   },
+  // },
 
   // --- Cost controls ---
 
@@ -255,14 +255,14 @@ export const slides = [
 
   // --- Demo: cost controls ---
 
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Cost controls',
-      subtitle: 'Token budgets, model tiering, and cost tracking',
-      icon: 'cpu',
-    },
-  },
+  // {
+  //   type: 'title',
+  //   content: {
+  //     title: 'Demo — Cost controls',
+  //     subtitle: 'Token budgets, model tiering, and cost tracking',
+  //     icon: 'cpu',
+  //   },
+  // },
 
   // --- Deployment ---
 

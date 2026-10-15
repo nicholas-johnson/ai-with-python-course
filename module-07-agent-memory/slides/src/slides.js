@@ -209,7 +209,7 @@ export const slides = [
       title: 'Memory as MCP tools',
       icon: 'wrench',
       points: [
-        'Wrap memory behind a **FastMCP server** with remember/recall/forget tools.',
+        'Wrap memory behind an **MCPServer** with remember/recall/forget tools.',
         'Any agent can connect via stdio and use memory without importing code.',
         'Memory persists as long as the server runs — agents can restart.',
         'This is how production systems separate concerns: memory is a service.',

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "crew-count-engineering",
+    "question": "How many people are in engineering?",
+    "scripted_responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call_eng",
+            "name": "get_crew_count",
+            "arguments": {"department": "engineering"}
+          }
+        ]
+      },
+      {
+        "content": "Engineering has 2 crew members."
+      }
+    ],
+    "expected_tools": [
+      {"name": "get_crew_count", "arguments": {"department": "engineering"}}
+    ],
+    "expected_answer": "Engineering has 2 crew members."
+  },
+  {
+    "id": "ship-status-warp",
+    "question": "Is the warp drive healthy?",
+    "scripted_responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call_warp",
+            "name": "get_ship_status",
+            "arguments": {"system": "warp"}
+          }
+        ]
+      },
+      {
+        "content": "Warp is online at 97% efficiency."
+      }
+    ],
+    "expected_tools": [
+      {"name": "get_ship_status", "arguments": {"system": "warp"}}
+    ],
+    "expected_answer": "Warp is online at 97% efficiency."
+  },
+  {
+    "id": "search-voss",
+    "question": "Who is Commander Voss?",
+    "scripted_responses": [
+      {
+        "tool_calls": [
+          {
+            "id": "call_search",
+            "name": "search_crew",
+            "arguments": {"query": "Voss"}
+          }
+        ]
+      },
+      {
+        "content": "Commander Elara Voss is the captain."
+      }
+    ],
+    "expected_tools": [
+      {"name": "search_crew", "arguments": {"query": "Voss"}}
+    ],
+    "expected_answer": "Commander Elara Voss is the captain."
+  },
+  {
+    "id": "direct-answer",
+    "question": "What ship are we on?",
+    "scripted_responses": [
+      {
+        "content": "You are aboard the DSS Pathfinder."
+      }
+    ],
+    "expected_tools": [],
+    "expected_answer": "You are aboard the DSS Pathfinder."
+  }
+]

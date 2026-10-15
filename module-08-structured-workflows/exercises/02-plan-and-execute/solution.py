@@ -8,12 +8,15 @@ Run:  python solution.py
 from __future__ import annotations
 import json
 from dataclasses import dataclass
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from react_agent import run_react, TOOLS, print_trace
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 @dataclass
@@ -49,7 +52,8 @@ REVISE_SYSTEM = (
 def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
     """Ask the LLM to create a numbered plan. Returns list of PlanStep."""
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": PLAN_SYSTEM},
@@ -112,7 +116,8 @@ def revise_plan(
             context += f"  Step {s.step_number}: {s.description} (status: {s.status})\n"
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": REVISE_SYSTEM},
@@ -179,7 +184,8 @@ def plan_and_execute(query: str, client: OpenAI) -> dict:
     combined = "\n".join(summary_parts)
 
     final_response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",

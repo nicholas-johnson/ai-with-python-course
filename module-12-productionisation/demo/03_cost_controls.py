@@ -6,17 +6,23 @@ Shows token budget tracking, model tiering, and cost awareness.
 Run:  python module-12-productionisation/demo/03_cost_controls.py
 """
 
+import os
+
 from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 client = OpenAI()
 
+CHEAP_MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+PREMIUM_MODEL = "gpt-6-sol"
+
 
 class CostTracker:
+    # USD per 1K tokens, standard tier (October 2026)
     COST_PER_1K = {
-        "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
-        "gpt-4o": {"input": 0.0025, "output": 0.01},
+        "gpt-6-luna": {"input": 0.0001, "output": 0.0005},
+        "gpt-6-sol": {"input": 0.002, "output": 0.01},
     }
 
     def __init__(self, session_budget: int = 5000, daily_budget: int = 100_000):
@@ -32,7 +38,7 @@ class CostTracker:
         self.session_usage += total
         self.daily_usage += total
         self.calls += 1
-        rates = self.COST_PER_1K.get(model, self.COST_PER_1K["gpt-4o-mini"])
+        rates = self.COST_PER_1K.get(model, self.COST_PER_1K["gpt-6-luna"])
         self.session_cost_usd += (prompt_tokens / 1000) * rates["input"] + (completion_tokens / 1000) * rates["output"]
 
     def within_budget(self) -> bool:
@@ -71,14 +77,15 @@ def demo_cost_controls():
             continue
 
         complexity = classify_complexity(query)
-        model = "gpt-4o-mini" if complexity == "simple" else "gpt-4o"
+        model = CHEAP_MODEL if complexity == "simple" else PREMIUM_MODEL
         print(f"\n  Query: {query[:60]}...")
         print(f"  Complexity: {complexity} → Model: {model}")
 
         response = client.chat.completions.create(
             model=model,
+            reasoning_effort="none",
             messages=[{"role": "user", "content": query}],
-            max_tokens=150,
+            max_completion_tokens=150,
         )
         answer = response.choices[0].message.content.strip()
         tracker.record(model, response.usage.prompt_tokens, response.usage.completion_tokens)

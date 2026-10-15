@@ -3,15 +3,18 @@ Exercise 01 — First Chat
 Make your first LLM API call, then build an interactive console chat.
 """
 
+import os
+
 SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful and concise."
-MODEL = "gpt-4o-mini"
+# Override with OPENAI_MODEL in your .env to try a different model.
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def chat(client, messages: list[dict]) -> str:
     """
     Send messages to the LLM and return the response text.
 
-    1. Call client.chat.completions.create(model=MODEL, messages=messages).
+    1. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages).
     2. Extract the text from response.choices[0].message.content.
     3. Return it.
     """

@@ -8,6 +8,7 @@ Run:  uvicorn solution:app --reload --port 8000
 """
 from __future__ import annotations
 import json
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +28,8 @@ from solution_server import (
 )
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 app = FastAPI(title="Holiday Planner")
 
@@ -164,7 +167,8 @@ def summarize_results(message: str, results: list[dict], client: OpenAI) -> str:
     """Compile step results into a final travel plan summary."""
     combined = "\n".join(f"Step {r['step_number']}: {r['result']}" for r in results)
     final = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",

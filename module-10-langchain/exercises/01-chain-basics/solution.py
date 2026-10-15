@@ -5,6 +5,7 @@ Run:  python solution.py
 
 from __future__ import annotations
 
+import os
 import time
 
 from dotenv import load_dotenv
@@ -14,7 +15,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SAMPLE_REPORTS = [
     "Main drive output at 91% during station power draw. Cargo hold pressure stable.",
@@ -41,7 +42,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-model = ChatOpenAI(model=MODEL, temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 parser = JsonOutputParser()
 
 chain = prompt | model | parser

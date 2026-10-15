@@ -12,6 +12,7 @@ Requires: OPENAI_API_KEY environment variable.
 """
 
 import json
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -23,7 +24,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGS = json.loads((PROJECT_ROOT / "data" / "ship_logs.json").read_text())
 
@@ -64,8 +65,8 @@ rag_prompt = ChatPromptTemplate.from_messages([
     ("human", "Sources:\n{context}\n\nQuestion: {question}"),
 ])
 
-model = ChatOpenAI(model=MODEL, temperature=0)
-norag_model = ChatOpenAI(model=MODEL, temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+norag_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 
 rag_chain = (
     {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -184,7 +185,7 @@ def demo_interactive():
         if user_input == "/norag" and last_question:
             answer = norag_model.invoke(
                 [{"role": "user", "content": last_question}]
-            ).content
+            ).text
             print(f"\nNo-RAG> {answer}\n")
             continue
 

@@ -64,5 +64,5 @@ Commands:
 |------|---------|
 | `ingest.py` | Load, chunk, embed, store |
 | `query.py` | Interactive vector search REPL |
-| `server.py` | FastMCP server with RAG tools |
+| `server.py` | MCPServer with RAG tools |
 | `agent.py` | MCP client + OpenAI agent loop |

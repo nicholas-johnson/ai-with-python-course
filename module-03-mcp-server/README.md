@@ -1,11 +1,12 @@
 # Module 3 — MCP Server
 
 > The Pathfinder AI can answer questions about the ship, but only if the data is already in its context window. Real ship systems — sensor arrays, crew databases, maintenance logs — live behind APIs. The Model Context Protocol (MCP) gives LLMs a standard way to discover and call those APIs. In this module you build MCP servers of increasing power and wire each one to a console agent that discovers tools dynamically.
+> `
 
 ## Learning goals
 
 - Understand the **Model Context Protocol**: tool discovery, schemas, calling conventions.
-- Build **FastMCP servers** with practical tools: data queries, web fetch, file I/O.
+- Build **MCP servers** with `MCPServer` and practical tools: data queries, web fetch, file I/O.
 - Connect an MCP server to a **real agent** via `mcp.client.stdio`.
 - Convert MCP tool schemas to **OpenAI tool-calling format** for dynamic discovery.
 
@@ -19,23 +20,25 @@ The benefit is **loose coupling**: add a new tool to the server and the agent di
 
 **Key concepts:**
 
-| Concept | Role |
-| ------- | ---- |
-| **Server** | Exposes tools via JSON-RPC (`tools/list`, `tools/call`) |
-| **Tool schema** | JSON Schema describing each tool's parameters |
-| **Host** | The agent runtime that connects to one or more servers |
-| **Transport** | How messages travel: stdio, HTTP+SSE, or WebSocket |
+| Concept         | Role                                                    |
+| --------------- | ------------------------------------------------------- |
+| **Server**      | Exposes tools via JSON-RPC (`tools/list`, `tools/call`) |
+| **Tool schema** | JSON Schema describing each tool's parameters           |
+| **Host**        | The agent runtime that connects to one or more servers  |
+| **Transport**   | How messages travel: stdio or Streamable HTTP           |
+
+> **Spec revision 2026-07-28.** The latest MCP spec drops the per-connection session (`Mcp-Session-Id`) so any server instance can answer any request, and adds `server/discover` for fetching capabilities on demand. The Python SDK v2 used in this course speaks both the new revision and older ones, so the `session.initialize()` call in our client code still works. The older HTTP+SSE transport is deprecated, and the SDK has dropped WebSocket support.
 
 ---
 
-## Building a FastMCP server
+## Building an MCP server with `MCPServer`
 
-The `mcp` Python package provides `FastMCP`, a high-level server class that handles protocol details. You define tools as decorated functions — the decorator generates the JSON Schema from type hints automatically.
+The `mcp` Python package (v2) provides `MCPServer`, a high-level server class that handles protocol details. (In v1 of the SDK this class was called `FastMCP` — you will still see that name in older tutorials.) You define tools as decorated functions — the decorator generates the JSON Schema from type hints automatically.
 
 ```python
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-mcp = FastMCP("Pathfinder")
+mcp = MCPServer("Pathfinder")
 
 @mcp.tool()
 def greet(name: str) -> str:
@@ -53,7 +56,7 @@ Type hints drive schema generation: `name: str` becomes `{"type": "string"}` in 
 Run it with:
 
 ```bash
-python -m mcp run server.py
+mcp run server.py
 ```
 
 Or from code with `mcp.run(transport="stdio")` for local development and testing.
@@ -141,19 +144,20 @@ python module-03-mcp-server/demo/demo.py
 ```
 
 Walks through all three topics interactively — press Enter between sections:
+
 1. **MCP concepts** — tool discovery, schemas, calling conventions (data walkthrough, no server)
-2. **FastMCP server** — decorator pattern, type hints to JSON Schema, auto-generated tool definitions
+2. **`MCPServer`** — decorator pattern, type hints to JSON Schema, auto-generated tool definitions
 3. **Connecting a client** — spawns a real MCP server, discovers tools, converts to OpenAI format, runs a live tool-calling agent loop
 
 ## Exercises
 
 Each exercise builds an MCP server (`server.py`) and runs it via a console agent (`start.py`). `python start.py` is interactive. Exercises chain: Exercise 2 ships with Exercise 1's agent, Exercise 3 ships with Exercise 1+2's solutions.
 
-| Folder | Mission |
-| ------ | ------- |
-| [`exercises/01-mcp-agent`](exercises/01-mcp-agent/) | Build a FastMCP server + console agent that connects via MCP stdio. |
+| Folder                                                | Mission                                                                       |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`exercises/01-mcp-agent`](exercises/01-mcp-agent/)   | Build an `MCPServer` + console agent that connects via MCP stdio.           |
 | [`exercises/02-data-tools`](exercises/02-data-tools/) | Build a server that queries crew, logs, sensors, and missions from JSON data. |
-| [`exercises/03-live-tools`](exercises/03-live-tools/) | Build a server that fetches web pages and manages notes on disk. |
+| [`exercises/03-live-tools`](exercises/03-live-tools/) | Build a server that fetches web pages and manages notes on disk.              |
 
 Run tests for this module:
 
@@ -168,5 +172,5 @@ From repo root: `pnpm slides:03`, or `cd module-03-mcp-server/slides && pnpm dev
 ## Reference
 
 - [Model Context Protocol spec](https://modelcontextprotocol.io/)
-- [FastMCP (Python)](https://github.com/modelcontextprotocol/python-sdk)
+- [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) — [v1 → v2 migration guide](https://py.sdk.modelcontextprotocol.io/migration/)
 - [MCP — Cursor integration](https://docs.cursor.com/context/model-context-protocol)

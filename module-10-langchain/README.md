@@ -5,9 +5,9 @@
 ## Learning goals
 
 - Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.
-- Wrap functions as **LangChain tools** and run them via **AgentExecutor**.
+- Wrap functions as **LangChain tools** and run them with **`create_agent`** (LangChain 1.x).
 - Construct a **RAG chain** with a LangChain retriever and ChromaDB.
-- Deploy an LCEL chain as a REST API with **LangServe** and FastAPI.
+- Serve an LCEL chain as a REST API with **FastAPI** using the Runnable `ainvoke` / `astream` methods.
 - Know when to use LangChain and when to stay hand-rolled.
 
 ---
@@ -32,7 +32,7 @@ prompt = ChatPromptTemplate.from_messages([
 ```python
 from langchain_openai import ChatOpenAI
 
-model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 ```
 
 **OutputParser** — transforms the model's raw text into structured data. `JsonOutputParser` extracts JSON, `StrOutputParser` passes text through.
@@ -66,11 +66,11 @@ LCEL chains are:
 
 ## Tool-calling agents
 
-LangChain wraps the tool-calling loop from Module 2 into `AgentExecutor`. You define tools, create an agent, and run it — the framework handles the loop, tool dispatch, and error recovery.
+LangChain wraps the tool-calling loop from Module 2 into `create_agent`. You define tools, create an agent, and run it — the framework handles the loop, tool dispatch, and error recovery. In LangChain 1.x the agent runs on LangGraph, so it also supports middleware (human-in-the-loop, retries, summarisation) and checkpointed memory.
 
 ```python
 from langchain_core.tools import tool
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_agent
 
 @tool
 def read_sensor(sensor_name: str) -> str:
@@ -84,13 +84,17 @@ def query_crew(department: str) -> str:
     return json.dumps(results)
 
 tools = [read_sensor, query_crew]
-agent = create_tool_calling_agent(model, tools, prompt)
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+agent = create_agent(model, tools, system_prompt="You are the DSS Pathfinder AI assistant.")
 
-result = executor.invoke({"input": "What is the reactor temperature?"})
+result = agent.invoke({"messages": [{"role": "user", "content": "What is the reactor temperature?"}]})
+answer = result["messages"][-1].text
 ```
 
-The `@tool` decorator generates the JSON Schema from the function's type hints and docstring — same pattern as the `ToolRegistry` you built in Module 2, but standardised. `verbose=True` prints the thought/action/observation trace.
+Use `.text` rather than `.content` to read a reply. When you give `gpt-6-*` models tools, `ChatOpenAI` switches to the Responses API, and `.content` comes back as a list of content blocks. `.text` always gives you a plain string.
+
+The `@tool` decorator generates the JSON Schema from the function's type hints and docstring — same pattern as the `ToolRegistry` you built in Module 2, but standardised. `result["messages"]` contains every tool call and tool result, so you can print the full trace.
+
+> **Upgrading from LangChain 0.x?** `AgentExecutor`, `create_tool_calling_agent`, and the legacy chains (`RetrievalQA`, `LLMChain`) moved to the `langchain-classic` package in 1.0. Use `create_agent` for new code.
 
 ---
 
@@ -122,23 +126,30 @@ answer = rag_chain.invoke("What caused the reactor anomaly?")
 
 ---
 
-## LangServe — deploy chains as APIs
+## Serving chains as APIs
 
-[LangServe](https://github.com/langchain-ai/langserve) mounts any Runnable on FastAPI. One call registers invoke, stream, batch, and a browser playground.
+Every LCEL chain is a Runnable with async `ainvoke`, `abatch`, and `astream`. Exposing one over HTTP is a thin FastAPI route:
 
 ```python
 from fastapi import FastAPI
-from langserve import add_routes
+from pydantic import BaseModel
+
+class ReportInput(BaseModel):
+    report: str
+
+class InvokeRequest(BaseModel):
+    input: ReportInput
 
 app = FastAPI(title="Report API")
-add_routes(app, chain, path="/classify")
+
+@app.post("/classify/invoke")
+async def classify_invoke(req: InvokeRequest):
+    return {"output": await chain.ainvoke(req.input.model_dump())}
 
 # POST /classify/invoke  {"input": {"report": "..."}}
 ```
 
-Install with the langchain extra: `pip install -e ".[langchain]"` (includes `langserve[server]`).
-
-For new production deployments, LangChain recommends [LangGraph Platform](https://langchain-ai.github.io/langgraph/); LangServe remains useful for learning and simple chain APIs.
+Older material uses LangServe's `add_routes` for this. LangServe is no longer maintained and conflicts with current dependencies, so the course writes the routes directly. For deploying agents, LangChain points to [LangGraph](https://langchain-ai.github.io/langgraph/) / LangSmith deployment.
 
 ---
 
@@ -162,7 +173,7 @@ The recommendation: **know the pattern first, then use the framework**. You can 
 
 - **Know the pattern, then pick the tool.** LangChain is faster only if you know what it does underneath.
 - **Use LCEL for standard pipelines.** Prompt → model → parser is one line.
-- **Keep `verbose=True` during development.** The trace shows every tool call and decision.
+- **Inspect `result["messages"]` during development** (or turn on LangSmith tracing). The trace shows every tool call and decision.
 - **Know when to eject.** If the framework fights you, go back to plain Python.
 
 ---
@@ -173,8 +184,8 @@ The recommendation: **know the pattern first, then use the framework**. You can 
 python module-10-langchain/demo/01_chains_and_prompts.py
 python module-10-langchain/demo/02_langchain_agents.py
 python module-10-langchain/demo/03_langchain_rag.py
-python module-10-langchain/demo/04_langserve.py
-python module-10-langchain/demo/04_langserve.py serve   # live server + playground
+python module-10-langchain/demo/04_serving_chains.py
+python module-10-langchain/demo/04_serving_chains.py serve   # live server
 ```
 
 ## Exercises
@@ -186,9 +197,9 @@ Exercises 01–03 chain together; exercise 04 is standalone (same LCEL pattern a
 | Folder | What you build |
 | ------ | -------------- |
 | [`exercises/01-chain-basics`](exercises/01-chain-basics/) | LCEL chain that classifies crew reports into category, summary, and priority. |
-| [`exercises/02-tool-agent`](exercises/02-tool-agent/) | Tool agent that wraps the classifier from 01 + ship tools in AgentExecutor. |
+| [`exercises/02-tool-agent`](exercises/02-tool-agent/) | Tool agent that wraps the classifier from 01 + ship tools with `create_agent`. |
 | [`exercises/03-rag-chain`](exercises/03-rag-chain/) | RAG chain that adds retrieval over ship logs to the agent from 02. |
-| [`exercises/04-langserve-api`](exercises/04-langserve-api/) | FastAPI service with LangServe `/classify` routes and a health check. |
+| [`exercises/04-chain-api`](exercises/04-chain-api/) | FastAPI service exposing the classifier chain at `/classify/invoke`, plus a health check. |
 
 Run tests for this module:
 
@@ -206,4 +217,4 @@ From repo root: `pnpm slides:10`, or `cd module-10-langchain/slides && pnpm dev`
 - [LCEL — LangChain Expression Language](https://python.langchain.com/docs/concepts/lcel/)
 - [LangGraph](https://langchain-ai.github.io/langgraph/)
 - [LangSmith (tracing)](https://smith.langchain.com/)
-- [LangServe](https://github.com/langchain-ai/langserve)
+- [LangChain 1.0 agents (`create_agent`)](https://docs.langchain.com/oss/python/langchain/agents)

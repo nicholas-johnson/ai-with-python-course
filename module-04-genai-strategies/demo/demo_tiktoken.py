@@ -14,14 +14,14 @@ import copy
 
 import tiktoken
 
-# Per-million-token prices (USD). Update from:
-# https://openai.com/api/pricing/
-DEFAULT_MODEL = "gpt-4o"
+# Per-million-token prices (USD), standard tier, October 2026. Update from:
+# https://developers.openai.com/api/docs/pricing
+DEFAULT_MODEL = "gpt-6-luna"
 
 MODEL_PRICING: dict[str, dict[str, float]] = {
-    "gpt-4o": {"input": 2.50, "output": 10.00},
-    "gpt-4o-mini": {"input": 0.15, "output": 0.60},
-    "gpt-4": {"input": 30.00, "output": 60.00},
+    "gpt-6-luna": {"input": 0.10, "output": 0.50},
+    "gpt-6-sol": {"input": 2.00, "output": 10.00},
+    "gpt-6-astra": {"input": 10.00, "output": 50.00},
 }
 
 MODEL_CHOICES = ", ".join(MODEL_PRICING)
@@ -58,12 +58,23 @@ def section(title: str) -> None:
     print(f"{'='*60}\n")
 
 
-def resolve_model(raw: str, default: str = DEFAULT_MODEL) -> str:
-    """Return a model name tiktoken recognises; fall back on invalid input."""
-    model = raw.strip() or default
+def get_encoding(model: str) -> tiktoken.Encoding:
+    """Return the tokenizer for a model.
+
+    tiktoken only knows model names that existed when it was released, so
+    newer models (like gpt-6-luna) fall back to o200k_base — the encoding
+    used by every current OpenAI chat model.
+    """
     try:
-        tiktoken.encoding_for_model(model)
+        return tiktoken.encoding_for_model(model)
     except KeyError:
+        return tiktoken.get_encoding("o200k_base")
+
+
+def resolve_model(raw: str, default: str = DEFAULT_MODEL) -> str:
+    """Return a model name we have prices for; fall back on invalid input."""
+    model = raw.strip() or default
+    if model not in MODEL_PRICING:
         print(
             f"  Unknown model {model!r} — using {default}. "
             f"Valid examples: {MODEL_CHOICES}"
@@ -79,22 +90,18 @@ def prompt_model() -> str:
 
 
 def count_tokens(text: str, model: str = DEFAULT_MODEL) -> int:
-    enc = tiktoken.encoding_for_model(model)
+    enc = get_encoding(model)
     return len(enc.encode(text))
 
 
 def num_tokens_from_messages(messages: list[dict], model: str = DEFAULT_MODEL) -> int:
     """Count tokens in a chat messages list (OpenAI cookbook formula)."""
     model = resolve_model(model)
-    encoding = tiktoken.encoding_for_model(model)
+    encoding = get_encoding(model)
 
-    if "gpt-3.5-turbo" in model:
-        tokens_per_message = 4
-        tokens_per_name = -1
-    else:
-        # gpt-4, gpt-4o, gpt-4o-mini, and other modern chat models
-        tokens_per_message = 3
-        tokens_per_name = 1
+    # Every message is wrapped in a few formatting tokens on top of its content
+    tokens_per_message = 3
+    tokens_per_name = 1
 
     num_tokens = 0
     for message in messages:
@@ -140,7 +147,7 @@ def demo_encoding() -> None:
     text = input(f"  Enter text to tokenize [{SAMPLE_TEXT[:40]}…]: ").strip() or SAMPLE_TEXT
     model = prompt_model()
 
-    enc = tiktoken.encoding_for_model(model)
+    enc = get_encoding(model)
     token_ids = enc.encode(text)
 
     print(f"\n  Model:     {model}")
@@ -173,10 +180,10 @@ def demo_counting() -> None:
 
     total = num_tokens_from_messages(SAMPLE_MESSAGES, model)
     print(f"\n  Total tokens (with message overhead): {total}")
-    print(f"  Encoding: {tiktoken.encoding_for_model(model).name}")
+    print(f"  Encoding: {get_encoding(model).name}")
 
     print("\n  Per-message breakdown:")
-    enc = tiktoken.encoding_for_model(model)
+    enc = get_encoding(model)
     for msg in SAMPLE_MESSAGES:
         content_tokens = len(enc.encode(str(msg["content"])))
         print(f"    {msg['role']:10}  content={content_tokens:4d}  (+3 overhead in full count)")
@@ -217,7 +224,7 @@ def demo_costs() -> None:
     print(f"  {'-'*16} {'-'*14} {'-'*7} {'-'*7} {'-'*10} {'-'*10} {'-'*10}")
 
     for model in MODEL_PRICING:
-        enc = tiktoken.encoding_for_model(model)
+        enc = get_encoding(model)
         input_tokens = len(enc.encode(text))
         in_cost, out_cost, total = estimate_cost(input_tokens, output_tokens, model)
         print(

@@ -4,9 +4,9 @@ Exercise 02 — HTTP MCP Server: Science Lab (solution)
 
 import json
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("Station Science Lab", stateless_http=True)
+server = MCPServer("Station Science Lab")
 
 # ---------------------------------------------------------------------------
 # Lab data
@@ -95,4 +95,4 @@ def run_analysis(sample_id: str, method: str) -> str:
 
 if __name__ == "__main__":
     print("Science Lab server starting at http://localhost:8000/mcp")
-    server.run(transport="streamable-http")
+    server.run(transport="streamable-http", stateless_http=True)

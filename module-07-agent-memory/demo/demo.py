@@ -10,12 +10,15 @@ Run:  python module-07-agent-memory/demo/demo.py
 from __future__ import annotations
 
 import json
+import os
 import time
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 # ---------------------------------------------------------------------------
@@ -97,7 +100,8 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     """Ask the LLM to compress a conversation into a short summary."""
     formatted = "\n".join(f"{t['role']}: {t['content']}" for t in turns)
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",
@@ -147,7 +151,8 @@ def chat(
     messages = [system] + session.get_messages()
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=messages,
     )
     reply = response.choices[0].message.content
@@ -160,7 +165,8 @@ def chat(
 def _auto_remember(user_input: str, long_term: LongTermMemory, client: OpenAI):
     """Ask the LLM if the user said anything worth remembering."""
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {

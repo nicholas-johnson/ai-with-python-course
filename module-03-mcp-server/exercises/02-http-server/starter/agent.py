@@ -5,6 +5,7 @@ Connects to local_server.py (stdio) and server.py (HTTP), wires both to one LLM.
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -12,9 +13,11 @@ import openai
 from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SYSTEM_PROMPT = (
     "You are the station AI. You have access to power grid tools AND science lab tools. "
@@ -32,7 +35,7 @@ def mcp_to_openai_tools(mcp_tools: list) -> list[dict]:
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         }
         for tool in mcp_tools
@@ -57,7 +60,7 @@ async def run_agent(tool_router, openai_tools):
 
         for _ in range(10):
             response = client.chat.completions.create(
-                model="gpt-4o-mini", messages=messages, tools=openai_tools
+                model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools
             )
             msg = response.choices[0].message
 
@@ -92,7 +95,7 @@ async def main():
         async with ClientSession(stdio_read, stdio_write) as power_session:
             await power_session.initialize()
 
-            async with streamablehttp_client(HTTP_SERVER_URL) as (http_read, http_write, _):
+            async with streamable_http_client(HTTP_SERVER_URL) as (http_read, http_write):
                 async with ClientSession(http_read, http_write) as lab_session:
                     await lab_session.initialize()
 
@@ -106,7 +109,7 @@ async def main():
                             "function": {
                                 "name": tool.name,
                                 "description": tool.description or "",
-                                "parameters": tool.inputSchema,
+                                "parameters": tool.input_schema,
                             },
                         })
 
@@ -117,7 +120,7 @@ async def main():
                             "function": {
                                 "name": tool.name,
                                 "description": tool.description or "",
-                                "parameters": tool.inputSchema,
+                                "parameters": tool.input_schema,
                             },
                         })
 

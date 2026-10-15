@@ -4,8 +4,11 @@ Used by the Holiday Planner exercise as a dependency.
 """
 from __future__ import annotations
 import json
+import os
 import re
 from openai import OpenAI
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 try:
     import httpx
@@ -157,7 +160,8 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
 
     for _step in range(max_steps):
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=TOOL_SCHEMAS,
         )

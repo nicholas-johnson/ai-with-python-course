@@ -10,7 +10,7 @@ To enable streaming, pass `stream=True` to the API call:
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-4o-mini", messages=messages, stream=True,
+    model=MODEL, reasoning_effort="none", messages=messages, stream=True,
 )
 ```
 

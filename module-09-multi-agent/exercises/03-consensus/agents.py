@@ -1,7 +1,10 @@
 """Specialist agents — provided from Exercise 01 solution."""
 from __future__ import annotations
 import json
+import os
 from openai import OpenAI
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DEPARTMENTS = ["medical", "tactical", "comms"]
 
@@ -29,7 +32,8 @@ SPECIALIST_PROMPTS = {
 
 def classify_query(query: str, client: OpenAI) -> str:
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -59,7 +63,8 @@ def classify_query(query: str, client: OpenAI) -> str:
 def specialist_agent(department: str, query: str, client: OpenAI) -> str:
     system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": query},

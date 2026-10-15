@@ -3,10 +3,13 @@ Exercise 01 — ReAct Agent
 Build a ReAct loop: Thought → Action → Observation with explicit traces.
 """
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 # --- Tools ---
 _notes: list[str] = []
@@ -82,7 +85,7 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
     """Run a ReAct loop: send query, handle tool calls, return trace + answer."""
     # TODO: implement the ReAct loop
     # 1. Start with messages = [SYSTEM_PROMPT, {"role": "user", "content": query}]
-    # 2. Call client.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=TOOL_SCHEMAS)
+    # 2. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOL_SCHEMAS)
     # 3. If response has tool_calls:
     #    a. Append the assistant message to messages
     #    b. For each tool_call: look up TOOLS[name], parse args, call it

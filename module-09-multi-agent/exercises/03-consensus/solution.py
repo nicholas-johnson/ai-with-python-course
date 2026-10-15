@@ -7,6 +7,7 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import json
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -14,6 +15,8 @@ from agents import DEPARTMENTS, specialist_agent
 from supervisor import run_supervised_query
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def _advocate_turn(
@@ -36,7 +39,7 @@ def _advocate_turn(
         })
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini", messages=advocate_history
+        model=MODEL, reasoning_effort="none", messages=advocate_history
     )
     arg = response.choices[0].message.content
     advocate_history.append({"role": "assistant", "content": arg})
@@ -70,7 +73,7 @@ def _skeptic_turn(
         })
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini", messages=skeptic_history
+        model=MODEL, reasoning_effort="none", messages=skeptic_history
     )
     arg = response.choices[0].message.content
     skeptic_history.append({"role": "assistant", "content": arg})
@@ -123,7 +126,8 @@ def judge(
     Returns {"winner": "advocate"|"skeptic", "reasoning": str}.
     """
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -167,7 +171,8 @@ def _collect_department_votes(
 
     for dept in DEPARTMENTS:
         vote_result = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             response_format={"type": "json_object"},
             messages=[
                 {

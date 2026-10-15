@@ -165,6 +165,7 @@ def run_assistant(
     for _ in range(max_iterations):
         response = client.chat.completions.create(
             model=OPENAI_MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=TOOL_DEFINITIONS,
         )
@@ -208,6 +209,7 @@ async def run_assistant_stream(
     for _ in range(max_iterations):
         stream = client.chat.completions.create(
             model=OPENAI_MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=TOOL_DEFINITIONS,
             stream=True,

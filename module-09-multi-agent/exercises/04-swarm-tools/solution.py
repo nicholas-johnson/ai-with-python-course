@@ -8,6 +8,7 @@ Run:  python solution.py
 from __future__ import annotations
 
 import json
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -15,7 +16,7 @@ from tools import AGENT_PROMPTS, AGENT_TOOLS, DEPARTMENTS, TOOL_FUNCTIONS
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def build_agent_messages(department: str, query: str) -> list[dict]:
@@ -32,6 +33,7 @@ def run_agent_turn(department: str, messages: list[dict], client: OpenAI):
     tools = AGENT_TOOLS.get(department, AGENT_TOOLS["comms"])
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         messages=messages,
         tools=tools,
         tool_choice="auto",

@@ -7,10 +7,13 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import json
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DEPARTMENTS = ["medical", "tactical", "comms"]
 
@@ -42,7 +45,8 @@ def classify_query(query: str, client: OpenAI) -> str:
     Returns one of: 'medical', 'tactical', 'comms'.
     """
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -73,7 +77,8 @@ def specialist_agent(department: str, query: str, client: OpenAI) -> str:
     """Run a specialist agent for the given department."""
     system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": query},

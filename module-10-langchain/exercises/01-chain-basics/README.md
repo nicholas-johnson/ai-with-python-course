@@ -22,7 +22,7 @@ prompt = ChatPromptTemplate.from_messages([
 ```python
 from langchain_openai import ChatOpenAI
 
-model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 ```
 
 **OutputParser** — transforms the model's raw text into structured data:
@@ -71,7 +71,7 @@ Pipe three steps together:
 chain = prompt | model | parser
 ```
 
-Use `ChatOpenAI(model="gpt-4o-mini", temperature=0)` for deterministic output and `JsonOutputParser()` to parse the JSON.
+Use `ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)` for deterministic output and `JsonOutputParser()` to parse the JSON.
 
 ### 3. Implement `classify_report`
 

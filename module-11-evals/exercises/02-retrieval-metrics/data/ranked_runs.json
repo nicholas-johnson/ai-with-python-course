@@ -1,0 +1,46 @@
+{
+  "naive": [
+    {
+      "query": "warp core efficiency",
+      "ranked_ids": ["LOG-007", "LOG-016", "LOG-002", "LOG-011", "LOG-005"]
+    },
+    {
+      "query": "Kepler mineral samples",
+      "ranked_ids": ["LOG-007", "LOG-009", "LOG-015", "LOG-010", "LOG-002"]
+    },
+    {
+      "query": "TRAPPIST water",
+      "ranked_ids": ["LOG-005", "LOG-013", "LOG-007", "LOG-014", "LOG-016"]
+    },
+    {
+      "query": "crew radiation health",
+      "ranked_ids": ["LOG-016", "LOG-015", "LOG-007", "LOG-005", "LOG-002"]
+    },
+    {
+      "query": "Boötes Void navigation",
+      "ranked_ids": ["LOG-007", "LOG-002", "LOG-015", "LOG-016", "LOG-005"]
+    }
+  ],
+  "reranked": [
+    {
+      "query": "warp core efficiency",
+      "ranked_ids": ["LOG-002", "LOG-011", "LOG-007", "LOG-016", "LOG-005"]
+    },
+    {
+      "query": "Kepler mineral samples",
+      "ranked_ids": ["LOG-010", "LOG-009", "LOG-007", "LOG-015", "LOG-002"]
+    },
+    {
+      "query": "TRAPPIST water",
+      "ranked_ids": ["LOG-013", "LOG-014", "LOG-005", "LOG-007", "LOG-016"]
+    },
+    {
+      "query": "crew radiation health",
+      "ranked_ids": ["LOG-005", "LOG-002", "LOG-016", "LOG-015", "LOG-007"]
+    },
+    {
+      "query": "Boötes Void navigation",
+      "ranked_ids": ["LOG-015", "LOG-016", "LOG-007", "LOG-002", "LOG-005"]
+    }
+  ]
+}

@@ -1,14 +1,14 @@
 """
 Exercise 03 — Holiday Planner MCP Server (scaffold)
 =====================================================
-A FastMCP server with holiday planning tools.
+A MCPServer server with holiday planning tools.
 
 Run standalone:  python server.py
 """
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-mcp = FastMCP("Holiday Planner")
+mcp = MCPServer("Holiday Planner")
 
 _preferences: dict[str, str] = {}
 

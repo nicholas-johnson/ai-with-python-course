@@ -12,6 +12,7 @@ Requires: OPENAI_API_KEY environment variable.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -22,7 +23,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGS = json.loads((PROJECT_ROOT / "data" / "ship_logs.json").read_text())
@@ -48,7 +49,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-model = ChatOpenAI(model=MODEL, temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 json_parser = JsonOutputParser()
 str_parser = StrOutputParser()
 
@@ -85,7 +86,7 @@ def demo_build_chain():
 
     print("  Step 2: Model generates a response")
     response = model.invoke(messages)
-    print(f"  → Raw: {response.content[:120]}...\n")
+    print(f"  → Raw: {response.text[:120]}...\n")
 
     print("  Step 3: Parser extracts structured data")
     parsed = json_parser.invoke(response)

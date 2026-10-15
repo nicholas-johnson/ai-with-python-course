@@ -2,7 +2,7 @@
 
 ## Recap
 
-You're building the backend for a **Research Assistant** web app. A Svelte frontend is provided — your job is to wire up the FastAPI backend that streams chat from GPT-4o-mini and executes tools via a provided MCP server.
+You're building the backend for a **Research Assistant** web app. A Svelte frontend is provided — your job is to wire up the FastAPI backend that streams chat from the OpenAI model (`gpt-6-luna` by default) and executes tools via a provided MCP server.
 
 The key ingredients:
 
@@ -11,7 +11,7 @@ The key ingredients:
 
 ```python
 stream = client.chat.completions.create(
-    model="gpt-4o-mini", messages=messages, stream=True
+    model=MODEL, reasoning_effort="none", messages=messages, stream=True
 )
 for chunk in stream:
     token = chunk.choices[0].delta.content
@@ -66,7 +66,7 @@ async def health():
 
 ### 2. Convert MCP tools to OpenAI format
 
-Implement `mcp_to_openai_tools(mcp_tools)`. Each MCP tool has `.name`, `.description`, and `.inputSchema`. Convert to:
+Implement `mcp_to_openai_tools(mcp_tools)`. Each MCP tool has `.name`, `.description`, and `.input_schema`. Convert to:
 
 ```python
 {
@@ -74,7 +74,7 @@ Implement `mcp_to_openai_tools(mcp_tools)`. Each MCP tool has `.name`, `.descrip
     "function": {
         "name": tool.name,
         "description": tool.description,
-        "parameters": tool.inputSchema,
+        "parameters": tool.input_schema,
     },
 }
 ```
@@ -143,6 +143,6 @@ The tests check:
 
 ## Stretch goals
 
-- Add a `model` field to `ChatRequest` so the user can pick `gpt-4o-mini` vs `gpt-4o`
+- Add a `model` field to `ChatRequest` so the user can pick `gpt-6-luna` vs `gpt-6-sol`
 - Add a system message that gives the assistant a research-focused personality
 - Handle the case where `OPENAI_API_KEY` is not set with a friendly error

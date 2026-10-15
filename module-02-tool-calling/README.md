@@ -48,7 +48,7 @@ def run_agent(client, question, max_steps=5):
 
     for _ in range(max_steps):
         response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=messages, tools=TOOLS,
+            model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS,
         )
         message = response.choices[0].message
 

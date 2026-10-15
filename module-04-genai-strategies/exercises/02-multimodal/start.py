@@ -2,8 +2,8 @@
 Exercise 2: Multimodal -- Vision and Audio
 ============================================
 Extend the Research Assistant with two new endpoints:
-  POST /vision     -> analyse an image with GPT-4o
-  POST /transcribe -> transcribe audio with Whisper
+  POST /vision     -> analyse an image with the chat model
+  POST /transcribe -> transcribe audio with gpt-transcribe
 
 Ships with the Exercise 1 solution (chat + MCP tools).
 
@@ -13,6 +13,7 @@ Run with:  uvicorn start:app --reload --port 8000
 import asyncio
 import io
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -27,6 +28,9 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+TRANSCRIBE_MODEL = "gpt-transcribe"
 
 client = OpenAI()
 
@@ -47,7 +51,7 @@ def mcp_to_openai_tools(mcp_tools):
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         }
         for tool in mcp_tools
@@ -139,11 +143,11 @@ async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
 
 
 async def transcribe_audio(audio_bytes: bytes) -> str:
-    """Send audio bytes to OpenAI Whisper and return the transcript text.
+    """Send audio bytes to OpenAI speech-to-text and return the transcript text.
 
     Steps:
       1. Wrap audio_bytes in an io.BytesIO with a .name attribute
-      2. Call client.audio.transcriptions.create(model="whisper-1", file=...)
+      2. Call client.audio.transcriptions.create(model=TRANSCRIBE_MODEL, file=...)
       3. Return transcript.text
     """
     # TODO: implement
@@ -151,7 +155,7 @@ async def transcribe_audio(audio_bytes: bytes) -> str:
 
 
 async def analyze_image(image_b64: str, prompt: str) -> dict:
-    """Send a base64 image to GPT-4o and return {description, key_points}.
+    """Send a base64 image to the chat model and return {description, key_points}.
 
     Steps:
       1. Build messages with a system prompt requesting JSON output
@@ -187,7 +191,8 @@ async def chat(req: ChatRequest):
 
         while True:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=MODEL,
+                reasoning_effort="none",
                 messages=messages,
                 tools=tools,
             )
@@ -235,7 +240,8 @@ async def chat(req: ChatRequest):
             content = choice.message.content or ""
 
             stream = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=MODEL,
+                reasoning_effort="none",
                 messages=messages,
                 stream=True,
             )

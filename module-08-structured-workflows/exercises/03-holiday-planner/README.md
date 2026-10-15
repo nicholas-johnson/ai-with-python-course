@@ -40,7 +40,7 @@ The **MCP server** provides domain-specific tools (flight/hotel search, preferen
 
 Two files to complete:
 
-1. **`server.py`** — a FastMCP server with holiday planning tools
+1. **`server.py`** — an MCPServer with holiday planning tools
 2. **`start.py`** — a FastAPI backend that uses plan-and-execute
 
 The ReAct agent (`react_agent.py`) and planner (`planner.py`) are provided from previous exercises.

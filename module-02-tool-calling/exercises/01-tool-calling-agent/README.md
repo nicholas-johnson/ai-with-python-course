@@ -46,7 +46,7 @@ tools = [
 ]
 
 response = client.chat.completions.create(
-    model="gpt-4o-mini", messages=messages, tools=tools,
+    model=MODEL, reasoning_effort="none", messages=messages, tools=tools,
 )
 ```
 
@@ -102,7 +102,7 @@ This is the core loop:
 1. Build the messages list: `[system_msg, {"role": "user", "content": question}]`.
 2. Track `tool_calls_made` (list of tool names) and `steps` (counter).
 3. Loop up to `max_steps` times:
-   - Call `client.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=TOOLS)`.
+   - Call `client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS)`.
    - Get `message = response.choices[0].message`.
    - If `message.tool_calls` is not empty:
      - Append the assistant message to `messages`.

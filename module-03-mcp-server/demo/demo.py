@@ -15,6 +15,7 @@ Requires:
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -23,11 +24,11 @@ from openai import OpenAI
 
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 SHIP_SERVER_SCRIPT = str(Path(__file__).parent / "local_server.py")
 NAV_SERVER_URL = "http://localhost:8000/mcp"
 
@@ -57,8 +58,8 @@ async def discover_and_print(session: ClientSession, server_name: str):
     tools = result.tools
     log("discovery", f"{server_name} advertises {len(tools)} tools:")
     for tool in tools:
-        params = tool.inputSchema.get("properties", {})
-        required = tool.inputSchema.get("required", [])
+        params = tool.input_schema.get("properties", {})
+        required = tool.input_schema.get("required", [])
         log("discovery", f"  {tool.name}: {tool.description}")
         log("discovery", f"    params={list(params.keys())}  required={required}")
     print()
@@ -84,7 +85,7 @@ async def call_and_print(session: ClientSession, name: str, args: dict):
 async def demo_explore_stdio():
     section("Part 1: Explore the Ship Server (stdio)")
 
-    print("  server.py is a FastMCP server with crew and ship tools.")
+    print("  server.py is a MCPServer server with crew and ship tools.")
     print("  Transport: stdio — we spawn it as a subprocess.\n")
 
     server_params = StdioServerParameters(
@@ -117,11 +118,11 @@ async def demo_explore_stdio():
 async def demo_explore_http():
     section("Part 2: Explore the Navigation Server (HTTP)")
 
-    print("  http_server.py is a FastMCP server with navigation tools.")
+    print("  http_server.py is a MCPServer server with navigation tools.")
     print(f"  Transport: Streamable HTTP at {NAV_SERVER_URL}")
     print("  (Make sure it's running in another terminal: python http_server.py)\n")
 
-    async with streamablehttp_client(NAV_SERVER_URL) as (read, write, _):
+    async with streamable_http_client(NAV_SERVER_URL) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
 
@@ -160,7 +161,7 @@ async def demo_multi_server_agent():
         async with ClientSession(stdio_read, stdio_write) as ship_session:
             await ship_session.initialize()
 
-            async with streamablehttp_client(NAV_SERVER_URL) as (http_read, http_write, _):
+            async with streamable_http_client(NAV_SERVER_URL) as (http_read, http_write):
                 async with ClientSession(http_read, http_write) as nav_session:
                     await nav_session.initialize()
 
@@ -184,7 +185,7 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         })
         log("discovery", f"  [ship/stdio]  {tool.name}: {tool.description}")
@@ -196,7 +197,7 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         })
         log("discovery", f"  [nav/http]    {tool.name}: {tool.description}")
@@ -233,7 +234,7 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
             log("llm request", f"Sending {len(messages)} messages, {len(openai_tools)} tools")
 
             response = client.chat.completions.create(
-                model=MODEL, messages=messages, tools=openai_tools
+                model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools
             )
             choice = response.choices[0]
             msg = choice.message

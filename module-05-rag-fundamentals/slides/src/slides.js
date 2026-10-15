@@ -196,11 +196,11 @@ def search(query, index, k=5):
   {
     type: 'code',
     content: {
-      title: 'FastMCP tool registration',
-      code: `from mcp.server.fastmcp import FastMCP
+      title: 'MCPServer tool registration',
+      code: `from mcp.server.mcpserver import MCPServer
 from index_builder import load_logs, build_index, search
 
-mcp = FastMCP("RAG Server")
+mcp = MCPServer("RAG Server")
 logs = load_logs()
 collection = build_index(logs)
 

@@ -8,6 +8,7 @@ Run:  python solution.py
 
 import asyncio
 import json
+import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -15,6 +16,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SERVER_SCRIPT = "solution_server.py"
 
@@ -27,7 +30,7 @@ def mcp_to_openai_tools(mcp_tools) -> list[dict]:
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         }
         for tool in mcp_tools
@@ -38,7 +41,7 @@ async def run_turn(client, messages, session, openai_tools, max_steps: int = 10)
     """Execute one conversational turn: call the LLM, handle tool calls, return final text."""
     for _ in range(max_steps):
         response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=messages, tools=openai_tools,
+            model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools,
         )
         choice = response.choices[0]
 

@@ -34,7 +34,7 @@ The MCP server exposes five tools:
 
 Two files:
 
-1. **`server.py`** -- A FastMCP server that manages memory and exposes tools
+1. **`server.py`** -- An MCPServer that manages memory and exposes tools
 2. **`start.py`** -- A console agent that connects to the server via stdio and uses OpenAI tool-calling
 
 The Exercise 1 and 2 solutions are provided as `memory_store.py` and `summary.py`.
@@ -43,14 +43,14 @@ The Exercise 1 and 2 solutions are provided as `memory_store.py` and `summary.py
 
 ### 1. Build `server.py`
 
-Create a FastMCP server that initialises the memory system and registers five tools:
+Create an MCPServer that initialises the memory system and registers five tools:
 
 ```python
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from memory_store import LongTermMemory
 from summary import SmartSessionMemory
 
-mcp = FastMCP("Cantina Memory")
+mcp = MCPServer("Cantina Memory")
 
 long_term = LongTermMemory()
 session = SmartSessionMemory(...)

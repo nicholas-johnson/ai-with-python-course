@@ -1,8 +1,11 @@
 """Supervisor-Critic pipeline — provided from Exercise 02 solution."""
 from __future__ import annotations
 import json
+import os
 from openai import OpenAI
 from agents import classify_query, specialist_agent, DEPARTMENTS, SPECIALIST_PROMPTS
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 CRITIC_PROMPT = (
@@ -23,7 +26,8 @@ class CriticAgent:
     def review(self, query: str, response: str) -> dict:
         """Return {"approved": bool, "feedback": str}."""
         result = self.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": CRITIC_PROMPT},
@@ -78,7 +82,8 @@ class SupervisorAgent:
     def _revise(self, department: str, query: str, previous: str, feedback: str) -> str:
         system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])
         result = self.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": query},

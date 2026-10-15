@@ -6,12 +6,13 @@ The run_prompt() helper and the interactive main() are provided.
 Study the BASE_PROMPTS examples, then complete each challenge function.
 """
 
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 # ---------------------------------------------------------------------------
@@ -51,6 +52,7 @@ def run_prompt(client, system_prompt: str, user_message: str) -> str:
     """Call the LLM with a system prompt and user message. Return the response text."""
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message},

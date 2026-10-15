@@ -16,14 +16,18 @@
 The core pattern is a function that calls the OpenAI API:
 
 ```python
+import os
 from openai import OpenAI
 
 client = OpenAI()
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 def chat(client, messages):
-    response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content
 ```
+
+Every script in this course reads the model name from `OPENAI_MODEL` (set it in `.env`) and falls back to `gpt-6-luna`, a fast, cheap model. `gpt-6-luna` is a *reasoning* model: by default it thinks before it answers. `reasoning_effort="none"` turns that off, so it answers straight away like a classic chat model. Chat Completions also insists on it before it will accept function tools or a custom `temperature`, so you will see it on every call.
 
 The model sees the full context every time — that is how it "remembers" the conversation. The catch is that the history grows with every turn. When it exceeds the model's context window you need to truncate or summarise (covered in Module 7).
 
@@ -51,7 +55,7 @@ With streaming, the first token appears in ~200ms and words flow in as they are 
 ```python
 def stream_response(client, messages):
     response = client.chat.completions.create(
-        model="gpt-4o-mini", messages=messages, stream=True,
+        model=MODEL, reasoning_effort="none", messages=messages, stream=True,
     )
     tokens = []
     for chunk in response:

@@ -89,7 +89,7 @@ Work through the starter files in this order:
 - **`identify_ingredients`**: Send the base64 image to OpenAI's vision API with a system prompt asking for a comma-separated ingredient list.
 
 ### Step 5: `app.py` — Wire It All Together
-- **`startup`**: Load `recipes.json` and call `build_index`.
+- **`lifespan`**: Load `recipes.json` and call `build_index` (runs once when the app starts).
 - **`health`**: Return status and collection count.
 - **`search`**: Check cache → hybrid search → dietary filter → rerank → format → cache result. Add tracing spans around each step.
 - **`upload_photo`**: Identify ingredients → search → filter → rerank → format.

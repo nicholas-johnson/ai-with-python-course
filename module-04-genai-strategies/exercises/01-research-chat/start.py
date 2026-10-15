@@ -1,7 +1,7 @@
 """
 Exercise 1: Research Chat — Streaming Chat with MCP Tools
 ==========================================================
-Build a FastAPI backend that streams chat from GPT-4o-mini and
+Build a FastAPI backend that streams chat from the OpenAI model and
 executes tools via a provided MCP server.
 
 The MCP server (server.py) is provided — it exposes fetch_url
@@ -12,6 +12,7 @@ Run with:  uvicorn start:app --reload --port 8000
 
 import asyncio
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -26,6 +27,8 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 client = OpenAI()
 
@@ -111,7 +114,7 @@ def mcp_to_openai_tools(mcp_tools):
     Each tool becomes:
         {"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}
 
-    Hint: each MCP tool has .name, .description, and .inputSchema attributes.
+    Hint: each MCP tool has .name, .description, and .input_schema attributes.
     """
     # TODO: implement
     raise NotImplementedError
@@ -179,7 +182,8 @@ async def chat(req: ChatRequest):
 
         # Placeholder: simple streaming without tools (replace with the loop above)
         stream = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=messages,
             stream=True,
         )

@@ -5,6 +5,9 @@ Build a tool-calling agent that makes real OpenAI API calls.
 
 import json
 from dataclasses import dataclass, field
+import os
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 # ---------------------------------------------------------------------------
 # Tool schemas — tell the model what tools are available
@@ -108,7 +111,7 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
     Run the tool-calling agent loop.
 
     1. Build messages: system prompt + user question.
-    2. Call client.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=TOOLS).
+    2. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS).
     3. Check response.choices[0].message:
        - If message.tool_calls: for each tool call, execute the handler from TOOL_HANDLERS,
          append the assistant message and tool result message, then loop.

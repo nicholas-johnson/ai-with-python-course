@@ -4,9 +4,9 @@ Exercise 01 — Local MCP Server: Power Grid (solution)
 
 import json
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("Station Power Grid")
+server = MCPServer("Station Power Grid")
 
 # ---------------------------------------------------------------------------
 # Power grid data

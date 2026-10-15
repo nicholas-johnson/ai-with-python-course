@@ -12,24 +12,30 @@ sys.path.insert(0, str(Path(__file__).parent / target))
 from server import server as mcp_server
 
 
+async def call_tool(name, arguments):
+    """Call a tool through the public MCPServer API and return its text output."""
+    result = await mcp_server.call_tool(name, arguments)
+    return result.content[0].text
+
+
 class TestListExperiments:
     @pytest.mark.asyncio
     async def test_all_experiments(self):
-        result = await mcp_server._tool_manager.call_tool("list_experiments", {})
+        result = await call_tool("list_experiments", {})
         data = json.loads(result)
         assert isinstance(data, list)
         assert len(data) == 4
 
     @pytest.mark.asyncio
     async def test_filter_by_status(self):
-        result = await mcp_server._tool_manager.call_tool("list_experiments", {"status": "running"})
+        result = await call_tool("list_experiments", {"status": "running"})
         data = json.loads(result)
         assert all(e["status"] == "running" for e in data)
         assert len(data) == 2
 
     @pytest.mark.asyncio
     async def test_filter_no_match(self):
-        result = await mcp_server._tool_manager.call_tool("list_experiments", {"status": "cancelled"})
+        result = await call_tool("list_experiments", {"status": "cancelled"})
         data = json.loads(result)
         assert data == []
 
@@ -37,7 +43,7 @@ class TestListExperiments:
 class TestGetSample:
     @pytest.mark.asyncio
     async def test_known_sample(self):
-        result = await mcp_server._tool_manager.call_tool("get_sample", {"sample_id": "S-101"})
+        result = await call_tool("get_sample", {"sample_id": "S-101"})
         data = json.loads(result)
         assert data["sample_id"] == "S-101"
         assert data["type"] == "mineral"
@@ -45,7 +51,7 @@ class TestGetSample:
 
     @pytest.mark.asyncio
     async def test_unknown_sample(self):
-        result = await mcp_server._tool_manager.call_tool("get_sample", {"sample_id": "S-999"})
+        result = await call_tool("get_sample", {"sample_id": "S-999"})
         data = json.loads(result)
         assert "error" in data
 
@@ -53,7 +59,7 @@ class TestGetSample:
 class TestRunAnalysis:
     @pytest.mark.asyncio
     async def test_valid_analysis(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "run_analysis", {"sample_id": "S-101", "method": "spectral"}
         )
         data = json.loads(result)
@@ -63,7 +69,7 @@ class TestRunAnalysis:
 
     @pytest.mark.asyncio
     async def test_unknown_sample(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "run_analysis", {"sample_id": "S-999", "method": "spectral"}
         )
         data = json.loads(result)
@@ -71,7 +77,7 @@ class TestRunAnalysis:
 
     @pytest.mark.asyncio
     async def test_unknown_method(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "run_analysis", {"sample_id": "S-101", "method": "alchemy"}
         )
         data = json.loads(result)
@@ -79,8 +85,9 @@ class TestRunAnalysis:
 
 
 class TestToolDiscovery:
-    def test_all_tools_registered(self):
-        tools = mcp_server._tool_manager.list_tools()
+    @pytest.mark.asyncio
+    async def test_all_tools_registered(self):
+        tools = await mcp_server.list_tools()
         names = {t.name for t in tools}
         assert "list_experiments" in names
         assert "get_sample" in names

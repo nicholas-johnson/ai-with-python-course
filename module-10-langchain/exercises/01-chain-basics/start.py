@@ -8,6 +8,7 @@ Test: pytest test_start.py -v
 
 from __future__ import annotations
 
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +18,7 @@ load_dotenv()
 # from langchain_openai import ChatOpenAI
 # from langchain_core.output_parsers import JsonOutputParser
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SAMPLE_REPORTS = [
     "Main drive output at 91% during station power draw. Cargo hold pressure stable.",

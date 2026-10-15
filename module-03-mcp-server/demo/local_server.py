@@ -1,6 +1,6 @@
 """
 Module 3 Demo — MCP Server
-A standalone FastMCP server with ship tools.
+A standalone MCPServer server with ship tools.
 
 Run directly:  python server.py   (starts MCP stdio server)
 Used by:       test_server.py and demo.py connect to this server.
@@ -9,9 +9,9 @@ Used by:       test_server.py and demo.py connect to this server.
 import json
 import sys
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("Pathfinder Ship")
+server = MCPServer("Pathfinder Ship")
 
 # ---------------------------------------------------------------------------
 # Ship data

@@ -1,6 +1,6 @@
 """
 Exercise 03 — Ship Documentation MCP Server
-Build a stdio FastMCP server that serves ship docs as MCP resources
+Build a stdio MCPServer server that serves ship docs as MCP resources
 and provides search/listing tools.
 
 The docs/ folder contains markdown files that this server exposes.
@@ -9,9 +9,9 @@ The docs/ folder contains markdown files that this server exposes.
 import json
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("Ship Documentation")
+server = MCPServer("Ship Documentation")
 
 DOCS_DIR = Path(__file__).parent.parent / "docs"
 

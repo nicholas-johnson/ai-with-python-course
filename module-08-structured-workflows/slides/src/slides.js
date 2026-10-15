@@ -55,7 +55,7 @@ export const slides = [
 
     for step in range(max_steps):
         response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=messages,
+            model=MODEL, reasoning_effort="none", messages=messages,
             tools=tool_schemas, tool_choice="auto",
         )
         msg = response.choices[0].message

@@ -1,5 +1,6 @@
 """Tests for Exercise 3: RAG MCP Server."""
 
+import asyncio
 import importlib
 import sys
 from pathlib import Path
@@ -40,13 +41,7 @@ def _import_client():
 def test_server_has_expected_tools():
     """The MCP server should register search_docs, get_chunk, ask_docs, list_sources."""
     server = _import_server()
-    tool_names = set()
-    if hasattr(server.mcp, "_tool_manager"):
-        for tool in server.mcp._tool_manager.list_tools():
-            tool_names.add(tool.name)
-    elif hasattr(server.mcp, "list_tools"):
-        for tool in server.mcp.list_tools():
-            tool_names.add(tool.name)
+    tool_names = {tool.name for tool in asyncio.run(server.mcp.list_tools())}
 
     expected = {"search_docs", "get_chunk", "ask_docs", "list_sources"}
     missing = expected - tool_names
@@ -62,7 +57,7 @@ def test_mcp_to_openai_tools():
     mock_tool = MagicMock()
     mock_tool.name = "search_docs"
     mock_tool.description = "Search documents"
-    mock_tool.inputSchema = {
+    mock_tool.input_schema = {
         "type": "object",
         "properties": {"query": {"type": "string"}},
         "required": ["query"],

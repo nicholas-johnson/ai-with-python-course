@@ -2,12 +2,15 @@
 Exercise 01 — First Chat (solution)
 """
 
+import os
+
 SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful and concise."
-MODEL = "gpt-4o-mini"
+# Override with OPENAI_MODEL in your .env to try a different model.
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def chat(client, messages: list[dict]) -> str:
-    response = client.chat.completions.create(model=MODEL, messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content
 
 

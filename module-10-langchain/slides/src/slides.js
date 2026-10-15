@@ -14,7 +14,7 @@ export const slides = [
       icon: 'target',
       points: [
         'Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.',
-        'Wrap functions as **LangChain tools** and run them via **AgentExecutor**.',
+        'Wrap functions as **LangChain tools** and run them with **create_agent**.',
         'Construct a **RAG chain** with a LangChain retriever and ChromaDB.',
         'Know when to use LangChain and when to stay hand-rolled.',
       ],
@@ -55,7 +55,7 @@ export const slides = [
       points: [
         '**LangGraph** — stateful, graph-based multi-agent workflows (cycles, branching, human-in-the-loop).',
         '**LangSmith** — tracing and observability for debugging chains in production.',
-        '**LangServe** — deploy any chain as a REST API with one command.',
+        '**LangChain 1.x agents** run on LangGraph — `create_agent` plus middleware.',
         'We focus on core LangChain in this module — the rest builds on top.',
       ],
     },
@@ -104,7 +104,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-model = ChatOpenAI(model="gpt-4o-mini")
+model = ChatOpenAI(model=MODEL, reasoning_effort="none")
 
 json_parser = JsonOutputParser()
 
@@ -140,13 +140,13 @@ result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
   {
     type: 'standard',
     content: {
-      title: 'From @tool to AgentExecutor',
+      title: 'From @tool to create_agent',
       icon: 'wrench',
       points: [
         'The **@tool** decorator generates JSON Schema from type hints + docstring.',
-        '`create_tool_calling_agent` builds the agent from model + tools + prompt.',
-        '**AgentExecutor** runs the loop: LLM → tool call → result → repeat.',
-        '`verbose=True` prints the full thought/action/observation trace.',
+        '`create_agent` builds the agent from model + tools + system prompt.',
+        'It runs the loop: LLM → tool call → result → repeat (on LangGraph).',
+        '`result["messages"]` holds every tool call and result — print it for a trace.',
       ],
     },
   },
@@ -155,7 +155,7 @@ result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
     content: {
       title: 'Tool-calling agent',
       code: `from langchain_core.tools import tool
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_agent
 
 @tool
 def read_sensor(sensor_name: str) -> str:
@@ -171,13 +171,13 @@ def query_crew(department: str) -> str:
     return json.dumps([c for c in CREW if c["department"] == department])
 
 tools = [read_sensor, query_crew]
-agent = create_tool_calling_agent(model, tools, prompt)
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+agent = create_agent(model, tools, system_prompt="You are the Pathfinder AI.")
 
-result = executor.invoke({"input": "What is the shield integrity?"})`,
+result = agent.invoke({"messages": [{"role": "user", "content": "What is the shield integrity?"}]})
+print(result["messages"][-1].text)`,
       highlights: [
         '@tool decorator = schema from type hints + docstring',
-        'AgentExecutor handles the loop — same pattern as Module 2',
+        'create_agent handles the loop — same pattern as Module 2',
       ],
     },
   },
@@ -274,43 +274,50 @@ rag_chain = (
     },
   },
 
-  // ---- Section: LangServe ----
+  // ---- Section: Serving chains ----
   {
     type: 'title',
     content: {
-      title: 'LangServe — deploy chains as APIs',
-      subtitle: 'python module-10-langchain/demo/04_langserve.py',
+      title: 'Serving chains as APIs',
+      subtitle: 'python module-10-langchain/demo/04_serving_chains.py',
       icon: 'plug',
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'What is LangServe?',
+      title: 'A chain is already an API',
       icon: 'plug',
       points: [
-        'Deploys **Runnables** as a REST API on top of **FastAPI** — the chain you built becomes HTTP endpoints.',
-        '**add_routes** auto-creates `/invoke`, `/stream`, `/batch`, and an interactive **/playground**.',
+        'Every **Runnable** has `ainvoke`, `abatch`, and `astream` — wrap them in **FastAPI** routes.',
         'Pydantic validates every request; OpenAPI docs are generated automatically.',
-        'For **new production** deployments, LangChain recommends **LangGraph Platform** — LangServe is ideal for learning and simple chain APIs.',
+        'Older tutorials use **LangServe** `add_routes` — it is unmaintained and conflicts with current deps.',
+        'For deploying **agents**, LangChain points to **LangGraph / LangSmith deployment**.',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'add_routes — chain to API',
+      title: 'Chain to API in a few lines',
       code: `from fastapi import FastAPI
-from langserve import add_routes
+from pydantic import BaseModel
 
-chain = prompt | ChatOpenAI(model="gpt-4o-mini") | JsonOutputParser()
+chain = prompt | ChatOpenAI(model=MODEL, reasoning_effort="none") | JsonOutputParser()
+
+class ReportInput(BaseModel):
+    report: str
+
+class InvokeRequest(BaseModel):
+    input: ReportInput
 
 app = FastAPI(title="Report API")
-add_routes(app, chain, path="/classify")
 
-# POST /classify/invoke  {"input": {"report": "..."}}`,
+@app.post("/classify/invoke")
+async def classify_invoke(req: InvokeRequest):
+    return {"output": await chain.ainvoke(req.input.model_dump())}`,
       highlights: [
-        'Same LCEL chain as demo 01 — add_routes wires it to HTTP',
+        'Same LCEL chain as demo 01 — ainvoke inside an async route',
         'Run with: uvicorn server:app --reload',
       ],
     },
@@ -318,12 +325,12 @@ add_routes(app, chain, path="/classify")
   {
     type: 'standard',
     content: {
-      title: 'LangServe endpoints',
+      title: 'Endpoints in the demo',
       icon: 'globe',
       points: [
         '**POST /classify/invoke** — body `{"input": {"report": "..."}}` → `{"output": {category, summary, priority}}`.',
-        '**POST /classify/stream** — token-by-token streaming for the same chain.',
-        '**GET /classify/playground** — browser UI to test the chain without writing a client.',
+        '**POST /classify/batch** — `chain.abatch(...)` over several reports.',
+        '**POST /classify/stream** — `chain.astream(...)` + `StreamingResponse` (NDJSON of the partial result).',
         'Your FastAPI app can add ordinary routes too (e.g. `GET /health`).',
       ],
     },
@@ -331,8 +338,8 @@ add_routes(app, chain, path="/classify")
   {
     type: 'title',
     content: {
-      title: 'Demo — LangServe',
-      subtitle: 'Switch to terminal: python module-10-langchain/demo/04_langserve.py',
+      title: 'Demo — Serving chains',
+      subtitle: 'Switch to terminal: python module-10-langchain/demo/04_serving_chains.py',
       icon: 'rocket',
     },
   },
@@ -370,8 +377,8 @@ add_routes(app, chain, path="/classify")
           icon: 'layers',
         },
         {
-          rule: 'Keep verbose=True during development',
-          example: 'The trace shows every tool call and decision.',
+          rule: 'Inspect the message trace during development',
+          example: 'result["messages"] (or LangSmith) shows every tool call and decision.',
           icon: 'check-square',
         },
         {
@@ -388,9 +395,9 @@ add_routes(app, chain, path="/classify")
       title: 'Exercises',
       points: [
         '01 — Chain basics: LCEL chain that classifies crew reports',
-        '02 — Tool agent: wraps the classifier + ship tools in AgentExecutor (builds on 01)',
+        '02 — Tool agent: wraps the classifier + ship tools with create_agent (builds on 01)',
         '03 — RAG chain: adds retrieval to the agent over ship logs (builds on 02)',
-        '04 — LangServe API: expose the Horizon classifier as a FastAPI service',
+        '04 — Chain API: expose the Horizon classifier as a FastAPI service',
       ],
     },
   },

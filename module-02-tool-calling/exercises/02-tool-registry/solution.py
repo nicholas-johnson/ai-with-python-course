@@ -8,7 +8,10 @@ type hints, wired into an agent that explores exoplanets.
 import inspect
 import json
 from dataclasses import dataclass, field
+import os
 from typing import Callable
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 # ---------------------------------------------------------------------------
 # Type mapping: Python types → JSON Schema types
@@ -179,7 +182,8 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
     for _ in range(max_steps):
         steps += 1
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=registry.list_tools(),
         )

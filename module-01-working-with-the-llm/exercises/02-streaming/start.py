@@ -6,10 +6,11 @@ The basic chat function and input loop are provided (from Exercise 01's solution
 You only need to implement stream_response().
 """
 
+import os
 import sys
 
 SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful and concise."
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 # ---------------------------------------------------------------------------
@@ -18,7 +19,7 @@ MODEL = "gpt-4o-mini"
 
 def chat(client, messages: list[dict]) -> str:
     """Non-streaming chat — kept for reference."""
-    response = client.chat.completions.create(model=MODEL, messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content
 
 
@@ -30,7 +31,7 @@ def stream_response(client, messages: list[dict]) -> str:
     """
     Stream the LLM response token by token.
 
-    1. Call client.chat.completions.create(model=MODEL, messages=messages, stream=True).
+    1. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, stream=True).
     2. Iterate over the response chunks.
     3. For each chunk, extract the token from chunk.choices[0].delta.content.
        (It may be None for the first/last chunks — skip those.)

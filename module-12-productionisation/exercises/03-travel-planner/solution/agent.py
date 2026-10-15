@@ -152,6 +152,7 @@ Research thoroughly, then return ONLY the JSON."""
 
         response = client.chat.completions.create(
             model=OPENAI_MODEL,
+            reasoning_effort="none",
             messages=messages,
             tools=TOOLS,
             tool_choice="auto" if iteration < max_iterations - 1 else "none",

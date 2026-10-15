@@ -10,6 +10,7 @@ Run:  python module-09-multi-agent/demo/demo.py
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
@@ -23,7 +24,7 @@ from solution import swarm_loop  # noqa: E402
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SPECIALIST_PROMPTS = {
     "navigation": (
@@ -48,6 +49,7 @@ DEPARTMENTS = list(SPECIALIST_PROMPTS.keys())
 def classify_query(query: str, client: OpenAI) -> str:
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -71,6 +73,7 @@ def specialist_respond(department: str, query: str, client: OpenAI) -> str:
     prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": query},
@@ -82,6 +85,7 @@ def critic_review(query: str, answer: str, client: OpenAI) -> dict:
     """Returns {"approved": bool, "feedback": str}."""
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -109,6 +113,7 @@ def revise_answer(department: str, query: str, previous: str, feedback: str, cli
     prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": query},
@@ -133,7 +138,7 @@ def debate_round(topic: str, position: str, opponent_arg: str, client: OpenAI) -
     ]
     if opponent_arg:
         messages.append({"role": "user", "content": f"Opponent's argument: {opponent_arg}"})
-    response = client.chat.completions.create(model=MODEL, messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content
 
 def judge_debate(topic: str, advocate_args: list[str], skeptic_args: list[str], client: OpenAI) -> str:
@@ -142,6 +147,7 @@ def judge_debate(topic: str, advocate_args: list[str], skeptic_args: list[str], 
         transcript += f"Round {i} — Advocate: {a}\nRound {i} — Skeptic: {s}\n\n"
     response = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",
@@ -253,6 +259,7 @@ def main():
     for dept in DEPARTMENTS:
         response = client.chat.completions.create(
             model=MODEL,
+            reasoning_effort="none",
             response_format={"type": "json_object"},
             messages=[
                 {

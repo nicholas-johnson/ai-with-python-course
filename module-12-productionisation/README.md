@@ -62,9 +62,9 @@ Usage in a request handler:
 @app.post("/chat")
 async def chat(request: ChatRequest):
     trace = TraceContext()
-    sid = trace.start_span("llm_call", {"model": "gpt-4o-mini"})
+    sid = trace.start_span("llm_call", {"model": MODEL})
     response = client.chat.completions.create(
-        model="gpt-4o-mini", messages=messages,
+        model=MODEL, reasoning_effort="none", messages=messages,
     )
     trace.end_span(sid, {"tokens": response.usage.total_tokens})
     return {"reply": response.choices[0].message.content, "trace_id": trace.trace_id}
@@ -112,7 +112,7 @@ async def llm_call_with_timeout(messages, timeout_seconds: float = 30.0):
     try:
         return await asyncio.wait_for(
             client.chat.completions.create(
-                model="gpt-4o-mini", messages=messages,
+                model=MODEL, reasoning_effort="none", messages=messages,
             ),
             timeout=timeout_seconds,
         )
@@ -168,9 +168,9 @@ When the primary model is unavailable, fall through a chain of alternatives inst
 ```python
 async def chat_with_fallback(messages: list[dict], trace: TraceContext) -> str:
     chain = [
-        ("gpt-4o-mini", call_openai),
-        ("gpt-4o-mini", call_openai_with_retry),
-        ("gpt-3.5-turbo", call_cheap_model),
+        ("gpt-6-sol", call_openai),
+        ("gpt-6-sol", call_openai_with_retry),
+        ("gpt-6-luna", call_cheap_model),
         ("cache", lookup_cached_response),
     ]
     for name, fn in chain:
@@ -196,10 +196,11 @@ LLM calls cost money. A single runaway loop can burn through a daily budget in m
 
 ```python
 class CostTracker:
+    # USD per 1K tokens, standard tier (October 2026)
     COST_PER_1K = {
-        "gpt-4o": {"input": 0.0025, "output": 0.01},
-        "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
-        "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},
+        "gpt-6-astra": {"input": 0.01, "output": 0.05},
+        "gpt-6-sol": {"input": 0.002, "output": 0.01},
+        "gpt-6-luna": {"input": 0.0001, "output": 0.0005},
     }
 
     def __init__(self, session_budget: float = 1.0, daily_budget: float = 50.0):
@@ -221,7 +222,7 @@ class CostTracker:
                 and self.daily_spent < self.daily_budget)
 ```
 
-**Model tiering** — route simple tasks (classification, extraction) to cheap models (`gpt-4o-mini`) and reserve expensive models (`gpt-4o`) for complex reasoning. A routing layer that checks query complexity before choosing a model can cut costs by 60-80%.
+**Model tiering** — route simple tasks (classification, extraction) to cheap models (`gpt-6-luna`) and reserve expensive models (`gpt-6-sol`) for complex reasoning. Reasoning effort is a second lever: the same model at `reasoning_effort="none"` is far cheaper than at `"high"`, because reasoning tokens are billed as output. A routing layer that checks query complexity before choosing a model can cut costs by 60-80%.
 
 **Caching** — identical prompts produce identical responses. Hash the prompt and cache the result. For RAG pipelines, cache at the retrieval layer too — vector search results for the same query do not change every second.
 

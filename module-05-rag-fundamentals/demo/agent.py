@@ -16,6 +16,7 @@ Requires:
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -27,7 +28,7 @@ from mcp.client.stdio import stdio_client
 load_dotenv()
 
 SERVER_SCRIPT = str(Path(__file__).parent / "server.py")
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def mcp_to_openai_tools(mcp_tools) -> list[dict]:
@@ -38,7 +39,7 @@ def mcp_to_openai_tools(mcp_tools) -> list[dict]:
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         }
         for tool in mcp_tools
@@ -85,6 +86,7 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
         while True:
             response = client.chat.completions.create(
                 model=MODEL,
+                reasoning_effort="none",
                 messages=messages,
                 tools=openai_tools,
             )

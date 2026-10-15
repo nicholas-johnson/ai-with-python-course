@@ -6,12 +6,15 @@ then wire them into an interactive chat agent.
 Run:  python start.py
 """
 from __future__ import annotations
+import os
 import time
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 @dataclass
@@ -87,7 +90,7 @@ def chat(
     #   1. Add the user message to session memory
     #   2. Build the system prompt with long-term memories
     #   3. Construct messages: [system_prompt] + session.get_messages()
-    #   4. Call client.chat.completions.create with model="gpt-4o-mini"
+    #   4. Call client.chat.completions.create with model=MODEL
     #   5. Add the assistant response to session memory
     #   6. Auto-detect facts worth remembering (second LLM call)
     #   7. Return the response text

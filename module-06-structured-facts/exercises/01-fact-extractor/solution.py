@@ -7,6 +7,7 @@ Run:  python solution.py
 """
 
 import json
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -14,6 +15,8 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "derelict_logs.json"
 client = OpenAI()
@@ -37,7 +40,8 @@ def extract_facts(text: str, client: OpenAI) -> tuple[list[Fact], str]:
     schema_desc = json.dumps(Fact.model_json_schema(), indent=2)
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {

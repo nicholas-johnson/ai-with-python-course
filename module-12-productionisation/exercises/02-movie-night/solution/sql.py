@@ -22,6 +22,7 @@ def text_to_sql(question: str, schema: str) -> str:
     """Use the LLM to convert a natural-language question into a SQL query."""
     response = client.chat.completions.create(
         model=OPENAI_MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content":
              "You are a SQL expert. Given the database schema below, write a single "

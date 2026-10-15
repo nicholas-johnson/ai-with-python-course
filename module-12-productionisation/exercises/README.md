@@ -10,7 +10,7 @@ They focus on **Hugging Face models running on CPU**, so you can work offline af
 pip install -e ".[local-ml]"
 ```
 
-For model sizes and CPU tips, see [Exercise 15 — Hugging Face Run](../../module-11-edge-topics/exercises/15-huggingface-run/README.md) in Module 11.
+For model sizes and CPU tips, see [Exercise 15 — Hugging Face Run](../../module-13-edge-topics/exercises/15-huggingface-run/README.md) in Module 13.
 
 ---
 
@@ -36,7 +36,7 @@ Build a service that ingests text (reviews, support tickets, ship logs, social p
 
 | Technique                                                            | Course module                 |
 | -------------------------------------------------------------------- | ----------------------------- |
-| HF inference (`AutoTokenizer`, `AutoModelForSequenceClassification`) | Module 11 — Edge Topics       |
+| HF inference (`AutoTokenizer`, `AutoModelForSequenceClassification`) | Module 13 — Edge Topics       |
 | FastAPI endpoints                                                    | Exercises 01–04               |
 | Tracing / observability                                              | Module 12 — Productionisation |
 
@@ -67,7 +67,7 @@ Pick language pairs you care about; each pair is a separate model download.
 
 | Technique                             | Course module               |
 | ------------------------------------- | --------------------------- |
-| Translation (`AutoModelForSeq2SeqLM`) | Module 11 — Edge Topics     |
+| Translation (`AutoModelForSeq2SeqLM`) | Module 13 — Edge Topics     |
 | RAG (index, search, answer)           | Module 5 — RAG Fundamentals |
 | Guardrails                            | Module 8 — Guardrails       |
 
@@ -97,7 +97,7 @@ Start with one toxicity model; add zero-shot labels only if you need custom cate
 
 | Technique                 | Course module                 |
 | ------------------------- | ----------------------------- |
-| HF classification         | Module 11 — Edge Topics       |
+| HF classification         | Module 13 — Edge Topics       |
 | Guardrails & policy gates | Module 8 — Guardrails         |
 | Tracing                   | Module 12 — Productionisation |
 
@@ -112,7 +112,7 @@ Replace OpenAI embeddings with a sentence-transformer model and build a **fully 
 - Embed your corpus with `sentence-transformers` (or `AutoModel` + mean pooling)
 - Store vectors in ChromaDB (or numpy + cosine similarity for a small corpus)
 - Search endpoint that returns top-k chunks with scores
-- Optional: hybrid search (BM25 + vectors) if you want to combine with Module 11 patterns
+- Optional: hybrid search (BM25 + vectors) if you want to combine with Module 13 patterns
 
 **Suggested models**
 
@@ -126,7 +126,7 @@ Replace OpenAI embeddings with a sentence-transformer model and build a **fully 
 | Technique                   | Course module                 |
 | --------------------------- | ----------------------------- |
 | Embeddings & vector search  | Module 5 — RAG Fundamentals   |
-| Hybrid search (optional)    | Module 11 — Edge Topics       |
+| Hybrid search (optional)    | Module 13 — Edge Topics       |
 | Semantic caching (optional) | Module 12 — Productionisation |
 
 ---
@@ -137,7 +137,7 @@ Fine-tune DistilBERT on a custom labeled dataset, save the checkpoint, and deplo
 
 **What to build**
 
-- Labeled JSON dataset (text + category), similar to Module 11 Exercise 14
+- Labeled JSON dataset (text + category), similar to Module 13 Exercise 14
 - Train with Hugging Face `Trainer` on CPU (keep `max_steps` modest for a laptop)
 - `/classify` endpoint loading your saved model from disk
 - Cache identical or near-identical queries; trace train vs inference paths separately
@@ -152,7 +152,7 @@ Fine-tune DistilBERT on a custom labeled dataset, save the checkpoint, and deplo
 
 | Technique                             | Course module                 |
 | ------------------------------------- | ----------------------------- |
-| Fine-tuning (`Trainer`, labeled data) | Module 11 — Exercise 14       |
+| Fine-tuning (`Trainer`, labeled data) | Module 13 — Exercise 14       |
 | FastAPI deployment                    | Exercises 01–04               |
 | Semantic caching, tracing             | Module 12 — Productionisation |
 
@@ -182,7 +182,7 @@ Build a service that accepts long text (articles, meeting notes, incident report
 
 | Technique                   | Course module                 |
 | --------------------------- | ----------------------------- |
-| Seq2seq generation          | Module 11 — Edge Topics       |
+| Seq2seq generation          | Module 13 — Edge Topics       |
 | Prompt / output structuring | Module 7 — Prompt Engineering |
 | Guardrails                  | Module 8 — Guardrails         |
 
@@ -210,7 +210,7 @@ Build a labeling API that classifies text into **arbitrary categories supplied a
 
 | Technique                | Course module                 |
 | ------------------------ | ----------------------------- |
-| Zero-shot classification | Module 11 — Edge Topics       |
+| Zero-shot classification | Module 13 — Edge Topics       |
 | Semantic caching         | Module 12 — Productionisation |
 | FastAPI                  | Exercises 01–04               |
 
@@ -235,13 +235,13 @@ Deploy a small instruction-tuned causal language model behind an API with multi-
 | `HuggingFaceTB/SmolLM2-360M-Instruct` | Chat / instructions          | ~720MB |
 | `Qwen/Qwen2-0.5B-Instruct`            | Alternative small chat model | ~1GB   |
 
-See Module 11 demo `17_huggingface_generate.py` for a minimal local chat loop.
+See Module 13 demo `17_huggingface_generate.py` for a minimal local chat loop.
 
 **Techniques → Course modules**
 
 | Technique                      | Course module                    |
 | ------------------------------ | -------------------------------- |
-| Causal LM generation           | Module 11 — Edge Topics          |
+| Causal LM generation           | Module 13 — Edge Topics          |
 | Conversation memory            | Module 4 — Agents                |
 | Circuit breaker, cost controls | Module 12 — Productionisation    |
 | SSE streaming (optional)       | Exercise 04 — Personal Assistant |

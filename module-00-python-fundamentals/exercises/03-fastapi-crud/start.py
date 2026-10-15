@@ -4,6 +4,7 @@ Build a FastAPI CRUD app for mission records.
 """
 
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -13,11 +14,13 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 def create_app() -> FastAPI:
     """Create and return a configured FastAPI application."""
-    app = FastAPI(title="DSS Pathfinder — Mission API")
-
-    @app.on_event("startup")
-    async def load_data():
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Runs once at startup (before `yield`) and once at shutdown (after it).
         app.state.missions = json.loads((DATA_DIR / "missions.json").read_text())
+        yield
+
+    app = FastAPI(title="DSS Pathfinder — Mission API", lifespan=lifespan)
 
     # TODO: implement the following endpoints:
     #

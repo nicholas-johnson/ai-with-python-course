@@ -15,7 +15,7 @@ export const slides = [
       points: [
         'Build a **Research Assistant** web app — streaming chat, tool use, vision, and audio.',
         'Model selection: choosing the right model for **quality, cost, and latency**.',
-        'Multimodal: **vision**/image analysis, **speech-to-text** (Whisper).',
+        'Multimodal: **vision**/image analysis, **speech-to-text** (gpt-transcribe).',
         'Guardrails: schema validation, content filters, and **confidence thresholds**.',
       ],
     },
@@ -29,7 +29,7 @@ export const slides = [
         'Build a **FastAPI app** with SSE streaming chat and tool integration.',
         'Connect an **MCP server** to a web API for real-time tool use.',
         'Count tokens, enforce **budgets**, and truncate context gracefully.',
-        'Work with **multimodal** inputs: images (GPT-4o), audio (Whisper).',
+        'Work with **multimodal** inputs: images (GPT-6 Luna), audio (gpt-transcribe).',
         'Chain **guardrails**: schema check → content filter → confidence gate.',
       ],
     },
@@ -126,7 +126,7 @@ export const slides = [
       title: 'Model selection trade-offs',
       icon: 'scale',
       points: [
-        '**Quality**: GPT-4o for hard reasoning; GPT-4o-mini for simple classification.',
+        '**Quality**: GPT-6 Sol for hard reasoning; GPT-6 Luna for simple classification.',
         '**Cost**: 10-50x price difference between tiers — measure before committing.',
         '**Latency**: smaller models respond faster; streaming helps perception.',
         '**Context window**: 128k tokens is huge but costs scale linearly.',
@@ -140,7 +140,7 @@ export const slides = [
       title: 'Token counting and budgets',
       code: `import tiktoken
 
-enc = tiktoken.encoding_for_model("gpt-4o")
+enc = tiktoken.get_encoding("o200k_base")  # all current OpenAI chat models
 
 def count_tokens(text: str) -> int:
     return len(enc.encode(text))
@@ -164,7 +164,7 @@ def enforce_budget(messages, max_tokens):
     type: 'title',
     content: {
       title: 'Multimodal — see and hear',
-      subtitle: 'Vision with GPT-4o and audio with Whisper',
+      subtitle: 'Vision with GPT-6 Luna and audio with gpt-transcribe',
       icon: 'image',
     },
   },
@@ -176,7 +176,7 @@ def enforce_budget(messages, max_tokens):
       icon: 'image',
       points: [
         '**Vision**: send images as base64 data URIs or public URLs in user messages.',
-        '**Audio input**: Whisper API transcribes speech to text.',
+        '**Audio input**: the transcription API (gpt-transcribe) turns speech into text.',
         'Same chat completions API — content is just a **list of parts** instead of a string.',
         'Use `response_format: {"type": "json_object"}` to get structured vision output.',
       ],
@@ -187,7 +187,8 @@ def enforce_budget(messages, max_tokens):
     content: {
       title: 'Vision — image analysis',
       code: `response = client.chat.completions.create(
-    model="gpt-4o",
+    model=MODEL,
+    reasoning_effort="none",
     messages=[{
         "role": "user",
         "content": [
@@ -207,19 +208,19 @@ def enforce_budget(messages, max_tokens):
   {
     type: 'code',
     content: {
-      title: 'Audio — Whisper transcription',
+      title: 'Audio — speech-to-text',
       code: `import io
 
 audio_file = io.BytesIO(audio_bytes)
 audio_file.name = "recording.wav"
 
 transcript = client.audio.transcriptions.create(
-    model="whisper-1",
+    model="gpt-transcribe",
     file=audio_file,
 )
 print(transcript.text)  # "Hello, this is a voice memo about..."`,
       highlights: [
-        'Whisper accepts file-like objects — wrap raw bytes in BytesIO',
+        'The transcription API accepts file-like objects — wrap raw bytes in BytesIO',
         'Set .name so the API knows the audio format',
       ],
     },
@@ -269,7 +270,7 @@ print(transcript.text)  # "Hello, this is a voice memo about..."`,
       title: 'Exercises — Build the Research Assistant',
       points: [
         '01 — Research chat: streaming chat with MCP tool calling (server provided)',
-        '02 — Multimodal: add vision (GPT-4o image analysis) and audio (Whisper)',
+        '02 — Multimodal: add vision (image analysis) and audio (speech-to-text)',
       ],
     },
   },

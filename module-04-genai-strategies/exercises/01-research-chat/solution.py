@@ -4,6 +4,7 @@ Exercise 1: Research Chat — Streaming Chat with MCP Tools -- SOLUTION
 
 import asyncio
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -18,6 +19,8 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 client = OpenAI()
 
@@ -38,7 +41,7 @@ def mcp_to_openai_tools(mcp_tools):
             "function": {
                 "name": tool.name,
                 "description": tool.description or "",
-                "parameters": tool.inputSchema,
+                "parameters": tool.input_schema,
             },
         }
         for tool in mcp_tools
@@ -136,7 +139,8 @@ async def chat(req: ChatRequest):
 
         while True:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=MODEL,
+                reasoning_effort="none",
                 messages=messages,
                 tools=tools,
             )
@@ -184,7 +188,8 @@ async def chat(req: ChatRequest):
             content = choice.message.content or ""
 
             stream = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=MODEL,
+                reasoning_effort="none",
                 messages=messages,
                 stream=True,
             )

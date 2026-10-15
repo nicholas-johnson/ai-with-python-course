@@ -1,21 +1,22 @@
 """
-Demo 2: LangChain Agents — @tool decorator, AgentExecutor, and the tool-calling loop.
+Demo 2: LangChain Agents — @tool decorator, create_agent, and the tool-calling loop.
 Run:  python module-10-langchain/demo/02_langchain_agents.py
 
 DSS Pathfinder: build a tool agent that reads sensors, classifies reports, and queries crew.
 
 Part 1: Define tools — @tool decorator and schema generation
-Part 2: Build and run the agent — AgentExecutor with verbose trace
+Part 2: Build and run the agent — create_agent with a step-by-step trace
 Part 3: Interactive — ask the agent anything
 
 Requires: OPENAI_API_KEY environment variable.
 """
 
 import json
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain.agents import create_agent
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
@@ -23,7 +24,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CREW = json.loads((PROJECT_ROOT / "data" / "crew.json").read_text())
 
@@ -53,7 +54,7 @@ _classify_prompt = ChatPromptTemplate.from_messages([
     ),
     ("human", "{report}"),
 ])
-_classify_model = ChatOpenAI(model=MODEL, temperature=0)
+_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 _classify_chain = _classify_prompt | _classify_model | JsonOutputParser()
 
 
@@ -89,21 +90,27 @@ def query_crew(department: str) -> str:
 
 tools = [classify_report, read_sensor, query_crew]
 
-agent_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     "You are the DSS Pathfinder AI assistant. "
-     "Use your tools to help the crew. Do not guess — always use a tool when data is needed."),
-    ("placeholder", "{chat_history}"),
-    ("human", "{input}"),
-    ("placeholder", "{agent_scratchpad}"),
-])
+SYSTEM_PROMPT = (
+    "You are the DSS Pathfinder AI assistant. "
+    "Use your tools to help the crew. Do not guess — always use a tool when data is needed."
+)
 
-model = ChatOpenAI(model=MODEL, temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def print_trace(messages):
+    """Show each step of the tool-calling loop: tool calls, tool results, final answer."""
+    for msg in messages:
+        if msg.type == "ai" and msg.tool_calls:
+            for call in msg.tool_calls:
+                print(f"  → {call['name']}({json.dumps(call['args'])})")
+        elif msg.type == "tool":
+            print(f"  ← {msg.content[:200]}")
+
 
 def pause():
     try:
@@ -126,7 +133,7 @@ def demo_tools():
     for t in tools:
         print(f"  Tool: {t.name}")
         print(f"    Description: {t.description}")
-        schema = t.args_schema.schema() if t.args_schema else {}
+        schema = t.args_schema.model_json_schema() if t.args_schema else {}
         print(f"    Schema: {json.dumps(schema.get('properties', {}), indent=6)}")
         print()
 
@@ -145,8 +152,7 @@ def demo_agent():
     print("PART 2: BUILD AND RUN THE AGENT")
     print("=" * 60)
 
-    agent = create_tool_calling_agent(model, tools, agent_prompt)
-    executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    agent = create_agent(model, tools, system_prompt=SYSTEM_PROMPT)
 
     queries = [
         "What is the current shield integrity?",
@@ -155,8 +161,9 @@ def demo_agent():
 
     for q in queries:
         print(f"\n  Query: {q}\n")
-        result = executor.invoke({"input": q})
-        print(f"\n  Final answer: {result['output']}")
+        result = agent.invoke({"messages": [{"role": "user", "content": q}]})
+        print_trace(result["messages"])
+        print(f"\n  Final answer: {result['messages'][-1].text}")
         pause()
 
 
@@ -169,8 +176,8 @@ def demo_interactive():
     print("PART 3: INTERACTIVE")
     print("=" * 60)
 
-    agent = create_tool_calling_agent(model, tools, agent_prompt)
-    executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    agent = create_agent(model, tools, system_prompt=SYSTEM_PROMPT)
+    history = []
 
     print("\nAsk the agent anything. It can read sensors, classify reports, and query crew.")
     print("Commands: /tools, quit\n")
@@ -191,8 +198,10 @@ def demo_interactive():
             continue
 
         try:
-            result = executor.invoke({"input": user_input})
-            print(f"\nAgent> {result['output']}\n")
+            result = agent.invoke({"messages": history + [{"role": "user", "content": user_input}]})
+            print_trace(result["messages"][len(history):])
+            history = result["messages"]
+            print(f"\nAgent> {history[-1].text}\n")
         except Exception as e:
             print(f"\n  Error: {e}\n")
 
@@ -239,8 +248,8 @@ def main():
     print("=" * 60)
     print()
     print("  @tool          — schema from type hints + docstring")
-    print("  AgentExecutor  — runs the tool-calling loop for you")
-    print("  verbose=True   — shows the full thought/action/observation trace")
+    print("  create_agent   — runs the tool-calling loop for you (built on LangGraph)")
+    print("  messages       — the result holds every tool call and tool result")
     print("=" * 60)
 
 

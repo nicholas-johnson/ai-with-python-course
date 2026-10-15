@@ -8,9 +8,9 @@ Start:  python http_server.py
 import json
 import math
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("Pathfinder Navigation", stateless_http=True)
+server = MCPServer("Pathfinder Navigation")
 
 # ---------------------------------------------------------------------------
 # Navigation data
@@ -103,4 +103,4 @@ def nearby_objects(sector: str, radius: float) -> str:
 
 if __name__ == "__main__":
     print("Pathfinder Navigation server starting at http://localhost:8000/mcp")
-    server.run(transport="streamable-http")
+    server.run(transport="streamable-http", stateless_http=True)

@@ -1,25 +1,28 @@
 """
 Exercise 3: RAG MCP Server -- server.py
 ==========================================
-A FastMCP server that wraps the RAG pipeline as discoverable tools.
+A MCPServer server that wraps the RAG pipeline as discoverable tools.
 
 Run standalone:  python -m mcp dev server.py
 """
 
 import json
 from dataclasses import dataclass
+import os
 from pathlib import Path
 
 import chromadb
 from dotenv import load_dotenv
 from openai import OpenAI
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 load_dotenv()
 
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
 DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "scout_logs.json"
 client = OpenAI()
-mcp = FastMCP("RAG Server")
+mcp = MCPServer("RAG Server")
 
 
 # ---------------------------------------------------------------------------
@@ -131,7 +134,7 @@ def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
 def rag_chat(query: str, collection_ref, k: int = 5) -> tuple[str, list[dict]]:
     passages = search(collection_ref, query, k)
     messages = build_grounded_prompt(query, passages)
-    response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
     return response.choices[0].message.content, passages
 
 

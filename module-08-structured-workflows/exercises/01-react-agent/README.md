@@ -17,7 +17,8 @@ from openai import OpenAI
 client = OpenAI()
 
 response = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model=MODEL,
+    reasoning_effort="none",
     messages=messages,
     tools=tool_schemas,
 )
@@ -83,7 +84,7 @@ Build the `TOOL_SCHEMAS` list — one OpenAI function-calling schema per tool:
 This is the core loop:
 
 1. Start with `[SYSTEM_PROMPT, {"role": "user", "content": query}]`
-2. Call `client.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=TOOL_SCHEMAS)`
+2. Call `client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOL_SCHEMAS)`
 3. If the response has `tool_calls`:
    - For each tool call, look up the function in `TOOLS`, parse the JSON arguments, call it
    - Append the assistant message and each tool result as a `{"role": "tool", ...}` message

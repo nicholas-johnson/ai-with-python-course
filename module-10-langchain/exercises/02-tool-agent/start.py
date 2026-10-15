@@ -1,6 +1,6 @@
 """
 Exercise 02 — Tool Agent (CSS Horizon)
-Wrap ship tools as LangChain tools and run via AgentExecutor.
+Wrap ship tools as LangChain tools and run them with create_agent.
 
 Run:  python start.py
 Test: pytest test_start.py -v
@@ -9,6 +9,7 @@ Test: pytest test_start.py -v
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 EXERCISE_DATA = Path(__file__).resolve().parents[1] / "data"
 CREW = json.loads((EXERCISE_DATA / "horizon_crew.json").read_text())
 
@@ -49,7 +50,7 @@ _classify_prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-_classify_model = ChatOpenAI(model=MODEL, temperature=0)
+_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 _classify_chain = _classify_prompt | _classify_model | JsonOutputParser()
 
 
@@ -63,7 +64,7 @@ def classify_report(report: str) -> dict:
 # ---------------------------------------------------------------------------
 
 # from langchain_core.tools import tool
-# from langchain.agents import create_tool_calling_agent, AgentExecutor
+# from langchain.agents import create_agent
 
 # @tool
 # def classify(report: str) -> str:
@@ -87,20 +88,16 @@ def classify_report(report: str) -> dict:
 # ---------------------------------------------------------------------------
 
 # tools = [classify, read_sensor, query_crew]
-# prompt = ChatPromptTemplate.from_messages([
-#     ("system", "You are the CSS Horizon AI assistant. ..."),
-#     ("placeholder", "{chat_history}"),
-#     ("human", "{input}"),
-#     ("placeholder", "{agent_scratchpad}"),
-# ])
-# model = ChatOpenAI(model=MODEL, temperature=0)
-# agent = create_tool_calling_agent(model, tools, prompt)
-# executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+# SYSTEM_PROMPT = "You are the CSS Horizon AI assistant. ..."
+# model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+# agent = create_agent(model, tools, system_prompt=SYSTEM_PROMPT)
 
 
 def run_agent(query: str) -> str:
     """Run the agent on a query. Returns the response string."""
-    raise NotImplementedError("TODO: implement using executor.invoke()")
+    # Hint: agent.invoke({"messages": [{"role": "user", "content": query}]})
+    #       returns {"messages": [...]} — the last message is the answer.
+    raise NotImplementedError("TODO: implement using agent.invoke()")
 
 
 # ---------------------------------------------------------------------------

@@ -27,7 +27,7 @@ def run_react(query, tools, client, max_steps=10):
     trace = []
     for _ in range(max_steps):
         response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=messages,
+            model=MODEL, reasoning_effort="none", messages=messages,
             tools=tool_schemas, tool_choice="auto",
         )
         msg = response.choices[0].message

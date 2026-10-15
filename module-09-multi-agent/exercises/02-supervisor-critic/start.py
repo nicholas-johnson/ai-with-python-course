@@ -6,12 +6,15 @@ The critic validates each response before it reaches the user.
 Run:  python start.py
 """
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from agents import classify_query, specialist_agent, DEPARTMENTS, SPECIALIST_PROMPTS
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 CRITIC_PROMPT = (
@@ -37,7 +40,7 @@ class CriticAgent:
         Returns {"approved": bool, "feedback": str}.
 
         Steps:
-            1. Call client.chat.completions.create with gpt-4o-mini and JSON mode
+            1. Call client.chat.completions.create with model=MODEL, reasoning_effort="none" and JSON mode
             2. System prompt: CRITIC_PROMPT
             3. User message: include both the original query and the specialist response
             4. Parse the JSON result into {"approved": bool, "feedback": str}

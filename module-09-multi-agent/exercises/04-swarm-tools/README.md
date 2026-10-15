@@ -45,7 +45,7 @@ Look up `AGENT_PROMPTS[department]` and return:
 
 ### 2. Implement `run_agent_turn`
 
-- Model: `gpt-4o-mini`
+- Model: `MODEL` (`gpt-6-luna` unless `OPENAI_MODEL` is set), with `reasoning_effort="none"`
 - Pass `messages` and `tools=AGENT_TOOLS[department]`
 - `tool_choice="auto"`
 - Return `response.choices[0].message` (the message object, not just text)

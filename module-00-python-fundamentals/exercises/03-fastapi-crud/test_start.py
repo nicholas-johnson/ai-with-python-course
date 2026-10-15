@@ -13,9 +13,11 @@ def app():
 
 @pytest.fixture()
 async def client(app):
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
-        yield c
+    # ASGITransport does not send lifespan events, so enter the app's lifespan ourselves.
+    async with app.router.lifespan_context(app):
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+            yield c
 
 
 class TestListMissions:

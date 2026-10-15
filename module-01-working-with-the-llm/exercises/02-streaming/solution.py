@@ -2,15 +2,16 @@
 Exercise 02 — Streaming Chat (solution)
 """
 
+import os
 import sys
 
 SYSTEM_PROMPT = "You are the DSS Pathfinder ship AI. Be helpful and concise."
-MODEL = "gpt-4o-mini"
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def stream_response(client, messages: list[dict]) -> str:
     response = client.chat.completions.create(
-        model=MODEL, messages=messages, stream=True,
+        model=MODEL, reasoning_effort="none", messages=messages, stream=True,
     )
     tokens = []
     for chunk in response:

@@ -22,7 +22,7 @@ SERVER_SCRIPT = "server.py"
 def mcp_to_openai_tools(mcp_tools) -> list[dict]:
     """Convert MCP tool definitions to OpenAI function-calling format.
 
-    Each MCP tool has .name, .description, .inputSchema.
+    Each MCP tool has .name, .description, .input_schema.
     Return a list of {"type": "function", "function": {...}} dicts.
     """
     raise NotImplementedError

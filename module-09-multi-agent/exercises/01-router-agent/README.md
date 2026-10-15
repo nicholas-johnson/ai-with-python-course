@@ -9,7 +9,8 @@ The classification step can be simple keyword matching, but using an LLM with JS
 ```python
 def classify_query(query: str, client: OpenAI) -> str:
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "Classify into a department. Return JSON."},

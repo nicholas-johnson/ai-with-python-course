@@ -1,0 +1,22 @@
+[
+  {
+    "query": "warp core efficiency",
+    "relevant_ids": ["LOG-002", "LOG-011"]
+  },
+  {
+    "query": "Kepler mineral samples",
+    "relevant_ids": ["LOG-009", "LOG-010"]
+  },
+  {
+    "query": "TRAPPIST water",
+    "relevant_ids": ["LOG-013", "LOG-014"]
+  },
+  {
+    "query": "crew radiation health",
+    "relevant_ids": ["LOG-005"]
+  },
+  {
+    "query": "Boötes Void navigation",
+    "relevant_ids": ["LOG-015"]
+  }
+]

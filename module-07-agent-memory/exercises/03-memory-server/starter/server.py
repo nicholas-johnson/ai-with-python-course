@@ -1,17 +1,17 @@
 """
 Exercise 03: Memory MCP Server -- server.py
 ==============================================
-A FastMCP server that wraps the memory system as discoverable tools.
+A MCPServer server that wraps the memory system as discoverable tools.
 
 Run standalone:  python -m mcp dev server.py
 """
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 # TODO: Import from memory_store: LongTermMemory
 # TODO: Import from summary: SmartSessionMemory
 
-mcp = FastMCP("Cantina Memory")
+mcp = MCPServer("Cantina Memory")
 
 # TODO: Create memory instances at module level
 # long_term = LongTermMemory()

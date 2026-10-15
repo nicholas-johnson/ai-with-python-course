@@ -101,7 +101,7 @@ def run_assistant(
 
     # TODO: Implement the agent loop
     # Hint: response = client.chat.completions.create(
-    #     model=OPENAI_MODEL, messages=messages, tools=TOOL_DEFINITIONS
+    #     model=OPENAI_MODEL, reasoning_effort="none", messages=messages, tools=TOOL_DEFINITIONS
     # )
     # Check choice.finish_reason == "tool_calls"
 

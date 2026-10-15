@@ -1,0 +1,20 @@
+[
+  {
+    "id": "grounded-warp",
+    "answer": "The warp core is at 94% efficiency. Plasma conduit 7-B has a minor fluctuation.",
+    "context": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance.",
+    "notes": "Both claims are in the log."
+  },
+  {
+    "id": "hallucinated-temp",
+    "answer": "The warp core is at 94% efficiency. Core temperature is 9000K.",
+    "context": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances.",
+    "notes": "9000K is not in the source."
+  },
+  {
+    "id": "kepler-extra",
+    "answer": "Pathfinder arrived at Kepler-442 and raised shields to level 2. The crew found a derelict Romulan scout.",
+    "context": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution — asteroid density higher than projected. Deploying first sensor buoy at coordinates K442-A1.",
+    "notes": "Romulan scout is invented."
+  }
+]

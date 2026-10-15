@@ -18,14 +18,16 @@ The `system` message sets the AI's personality and constraints. You send it once
 The key API call looks like this:
 
 ```python
+import os
 from openai import OpenAI
 
 client = OpenAI()
-response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
 text = response.choices[0].message.content
 ```
 
-`model` selects which model to use (`gpt-4o-mini` is fast and cheap for development). The response object contains a `choices` list -- in normal usage there is one choice, and its `.message.content` holds the text.
+`model` selects which model to use. `MODEL` reads `OPENAI_MODEL` from your environment and defaults to `gpt-6-luna`, which is fast and cheap for development. `gpt-6-luna` is a reasoning model, and `reasoning_effort="none"` tells it to answer directly without thinking first. The response object contains a `choices` list -- in normal usage there is one choice, and its `.message.content` holds the text.
 
 This exercise uses the `openai` package, which is already installed via the project's `pyproject.toml`.
 
@@ -41,7 +43,7 @@ This exercise uses the `openai` package, which is already installed via the proj
 Call `client.chat.completions.create()` with `model=MODEL` and the `messages` list. Extract the text from the response and return it.
 
 ```python
-response = client.chat.completions.create(model=MODEL, messages=messages)
+response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
 return response.choices[0].message.content
 ```
 

@@ -97,7 +97,8 @@ class TestRunPrompt:
 )
 class TestIntegration:
     @pytest.fixture(scope="class")
-    def client(self):
+    @staticmethod
+    def client():
         from dotenv import load_dotenv
         from openai import OpenAI
 

@@ -1,0 +1,32 @@
+{
+  "rag": {
+    "retrieval": {
+      "avg_recall": 0.50,
+      "avg_precision": 0.33,
+      "avg_mrr": 0.40
+    },
+    "judge": {
+      "avg_correctness": 3.2,
+      "avg_completeness": 2.8,
+      "avg_relevance": 3.5
+    },
+    "faithfulness": {
+      "avg_faithfulness": 0.62
+    }
+  },
+  "rag_rerank": {
+    "retrieval": {
+      "avg_recall": 0.80,
+      "avg_precision": 0.60,
+      "avg_mrr": 0.85
+    },
+    "judge": {
+      "avg_correctness": 4.1,
+      "avg_completeness": 3.9,
+      "avg_relevance": 4.4
+    },
+    "faithfulness": {
+      "avg_faithfulness": 0.88
+    }
+  }
+}

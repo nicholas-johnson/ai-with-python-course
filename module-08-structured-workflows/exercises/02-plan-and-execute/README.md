@@ -58,7 +58,7 @@ class PlanStep:
 
 ### 2. Implement `generate_plan`
 
-Call `gpt-4o-mini` with `response_format={"type": "json_object"}` and a system prompt asking for a JSON object like:
+Call the model (`MODEL`) with `response_format={"type": "json_object"}` and a system prompt asking for a JSON object like:
 
 ```json
 {

@@ -3,9 +3,12 @@ Memory Store — provided from Exercise 01 solution.
 SessionMemory, LongTermMemory, and chat utilities.
 """
 from __future__ import annotations
+import os
 import json, time
 from dataclasses import dataclass, field
 from openai import OpenAI
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 @dataclass
@@ -106,7 +109,8 @@ def extract_memories(
 ) -> list[dict]:
     """Ask the LLM to identify memorable facts from an exchange."""
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -145,7 +149,8 @@ def chat(
     messages = [{"role": "system", "content": system_prompt}] + session.get_messages()
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=messages,
     )
     assistant_msg = response.choices[0].message.content

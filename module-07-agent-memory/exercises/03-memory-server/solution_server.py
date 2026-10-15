@@ -1,17 +1,17 @@
 """
 Exercise 03: Memory MCP Server -- solution_server.py
 ======================================================
-Complete FastMCP server wrapping the memory system.
+Complete MCPServer server wrapping the memory system.
 
 Run standalone:  python -m mcp dev solution_server.py
 """
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from memory_store import LongTermMemory
 from summary import SmartSessionMemory
 
-mcp = FastMCP("Cantina Memory")
+mcp = MCPServer("Cantina Memory")
 
 print("Cantina Memory: initialising memory systems...", flush=True)
 long_term = LongTermMemory()

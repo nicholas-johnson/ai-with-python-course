@@ -4,9 +4,12 @@ Exercise 03 — Guarded Agent (solution)
 
 import inspect
 import json
+import os
 import time
 from dataclasses import dataclass, field
 from typing import Callable
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 # ---------------------------------------------------------------------------
 # Type mapping (from Exercise 02)
@@ -261,7 +264,8 @@ class GuardedAgent:
         for _ in range(max_steps):
             steps += 1
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=MODEL,
+                reasoning_effort="none",
                 messages=messages,
                 tools=self.registry.list_tools(),
             )

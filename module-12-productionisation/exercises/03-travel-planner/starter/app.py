@@ -1,5 +1,7 @@
 """FastAPI backend for the AI Travel Planner."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -11,7 +13,21 @@ from .tools import get_weather
 from .guardrails import validate_budget, check_safety
 from .tracing import TraceContext
 
-app = FastAPI(title="AI Travel Planner")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Load destinations and build the search index on startup.
+
+    TODO:
+    - Load destinations.json from DATA_DIR
+    - Call build_index(destinations) to create the ChromaDB collection
+    - Store both in the global variables
+    """
+    global destinations, collection
+    yield
+
+
+app = FastAPI(title="AI Travel Planner", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,18 +48,6 @@ class PlanRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     query: str
-
-
-@app.on_event("startup")
-async def startup():
-    """Load destinations and build the search index.
-
-    TODO:
-    - Load destinations.json from DATA_DIR
-    - Call build_index(destinations) to create the ChromaDB collection
-    - Store both in the global variables
-    """
-    pass
 
 
 @app.get("/api/health")

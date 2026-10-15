@@ -83,7 +83,7 @@ Wire everything together:
 1. Add the user's message to session memory
 2. Build the system prompt (with long-term memories)
 3. Construct the messages list: system prompt + session history
-4. Call `client.chat.completions.create` with `gpt-4o-mini`
+4. Call `client.chat.completions.create` with `model=MODEL, reasoning_effort="none"`
 5. Add the assistant's response to session memory
 6. Auto-detect memorable facts: make a second LLM call asking "What facts from this exchange are worth remembering long-term?" and store any results
 7. Return the response text

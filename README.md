@@ -46,7 +46,7 @@ pip install -e ".[dev]"                        # pytest + ruff
 pip install -e ".[rag]"                        # chromadb, sentence-transformers
 pip install -e ".[langchain]"                  # langchain, langgraph
 pip install -e ".[local-ml]"                     # torch, transformers (CPU training)
-pip install -e ".[dev,rag,langchain,structured,local-ml]"  # everything
+pip install -e ".[dev,rag,langchain,local-ml]"  # everything
 ```
 
 > **Tip:** If `python3 --version` shows an old version but `py --version` shows 3.12+, use `py` instead. On macOS with Homebrew Python you **must** use a virtual environment — pip will refuse to install system-wide.
@@ -85,7 +85,7 @@ Shared mission data lives in [`data/`](data/).
 Each module includes a Vite app under `slides/` that renders teaching decks with the workspace package [`slide-deck`](slide-deck/).
 
 ```bash
-pnpm slides:01          # same pattern :00 … :12
+pnpm slides:01          # same pattern :00 … :13
 # or
 cd module-01-working-with-the-llm/slides && pnpm dev
 ```
@@ -117,8 +117,9 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | ----- | ------ | ----- |
 | 9 | [module-09-multi-agent](module-09-multi-agent/) | Roles, coordination patterns, shared context |
 | 10 | [module-10-langchain](module-10-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
-| 11 | [module-11-edge-topics](module-11-edge-topics/) | Hybrid search, re-ranking, HyDE, agentic RAG, eval, guardrails, and more |
+| 11 | [module-11-evals](module-11-evals/) | Golden tests, retrieval metrics, LLM-as-judge, faithfulness, scorecard + gate |
 | 12 | [module-12-productionisation](module-12-productionisation/) | Production hardening + capstone apps: tracing, reliability, cost controls, deployment |
+| 13 | [module-13-edge-topics](module-13-edge-topics/) | Hybrid search, re-ranking, HyDE, agentic RAG, guardrails, and more |
 
 ## Course outline
 
@@ -156,23 +157,23 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 3 — [MCP Server](module-03-mcp-server/)
 
-**Topics:** MCP concepts (tool discovery, schemas, calling conventions), building FastMCP servers, connecting to an agent via MCP stdio, dynamic tool discovery, real-world tools (web fetch, file I/O).
+**Topics:** MCP concepts (tool discovery, schemas, calling conventions), building MCP servers with `MCPServer`, connecting to an agent via MCP stdio, dynamic tool discovery, real-world tools (web fetch, file I/O).
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| MCP agent | [`exercises/01-mcp-agent`](module-03-mcp-server/exercises/01-mcp-agent/) | FastMCP server + console agent connected via MCP stdio |
+| MCP agent | [`exercises/01-mcp-agent`](module-03-mcp-server/exercises/01-mcp-agent/) | `MCPServer` + console agent connected via MCP stdio |
 | Data tools | [`exercises/02-data-tools`](module-03-mcp-server/exercises/02-data-tools/) | Server reading crew, logs, sensors, missions from JSON data |
 | Live tools | [`exercises/03-live-tools`](module-03-mcp-server/exercises/03-live-tools/) | Server with web fetch and note file management |
 
 ### Module 4 — [GenAI Strategies](module-04-genai-strategies/)
 
-**Topics:** Prompt engineering, structured outputs, model selection trade-offs, multimodal (vision via GPT-4o, audio via Whisper), FastAPI with SSE streaming, MCP tool integration in a web API. Delegates build a **Research Assistant** web app -- the Day 1 closer.
+**Topics:** Prompt engineering, structured outputs, model selection trade-offs, multimodal (vision via GPT-6 Luna, audio via gpt-transcribe), FastAPI with SSE streaming, MCP tool integration in a web API. Delegates build a **Research Assistant** web app -- the Day 1 closer.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
 | Chat API | [`exercises/01-chat-api`](module-04-genai-strategies/exercises/01-chat-api/) | FastAPI backend with SSE streaming chat |
 | Tool chat | [`exercises/02-tool-chat`](module-04-genai-strategies/exercises/02-tool-chat/) | MCP server with web fetch + notes, tool-calling loop in the API |
-| Multimodal | [`exercises/03-multimodal`](module-04-genai-strategies/exercises/03-multimodal/) | Add /vision (GPT-4o) and /transcribe (Whisper) endpoints |
+| Multimodal | [`exercises/03-multimodal`](module-04-genai-strategies/exercises/03-multimodal/) | Add /vision (image analysis) and /transcribe (speech-to-text) endpoints |
 
 ### Module 5 — [RAG Fundamentals](module-05-rag-fundamentals/)
 
@@ -232,29 +233,21 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
 | Chain basics | [`exercises/01-chain-basics`](module-10-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
-| Tool agent | [`exercises/02-tool-agent`](module-10-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via AgentExecutor |
-| RAG chain | [`exercises/03-rag-chain`](module-10-langchain/exercises/03-rag-chain/) | RetrievalQA chain over the Pathfinder knowledge base |
-| LangServe API | [`exercises/04-langserve-api`](module-10-langchain/exercises/04-langserve-api/) | Expose the Horizon classifier as a FastAPI service via LangServe |
+| Tool agent | [`exercises/02-tool-agent`](module-10-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via `create_agent` |
+| RAG chain | [`exercises/03-rag-chain`](module-10-langchain/exercises/03-rag-chain/) | LCEL RAG chain over the Horizon ship logs |
+| Chain API | [`exercises/04-chain-api`](module-10-langchain/exercises/04-chain-api/) | Expose the Horizon classifier as a FastAPI service |
 
-### Module 11 — [Edge Topics](module-11-edge-topics/)
+### Module 11 — [Evals](module-11-evals/)
 
-**Topics:** Advanced retrieval patterns (hybrid search, re-ranking, HyDE), agentic RAG, citation verification, web search backends, text-to-SQL, LLM evaluation, fine-tuning data pipelines, guardrails, semantic caching, multimodal RAG, contextual chunking. Pick-and-choose — delegates work on topics that interest them most.
+**Topics:** Golden-file agent tests (mock LLM), retrieval metrics (recall@k, precision@k, MRR), LLM-as-judge (correctness, completeness, relevance), faithfulness / claim grounding, eval-driven comparison and a release gate.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Hybrid search | [`exercises/01-hybrid-search`](module-11-edge-topics/exercises/01-hybrid-search/) | Combine dense and sparse retrieval |
-| Reranking | [`exercises/02-reranking`](module-11-edge-topics/exercises/02-reranking/) | Re-rank retrieved results for relevance |
-| HyDE | [`exercises/03-hyde`](module-11-edge-topics/exercises/03-hyde/) | Hypothetical Document Embeddings for better retrieval |
-| Agentic RAG | [`exercises/04-agentic-rag`](module-11-edge-topics/exercises/04-agentic-rag/) | Agent-driven retrieval with self-critique |
-| Citation verification | [`exercises/05-citation-verification`](module-11-edge-topics/exercises/05-citation-verification/) | Verify and ground citations in source documents |
-| Web search backend | [`exercises/06-web-search-backend`](module-11-edge-topics/exercises/06-web-search-backend/) | Integrate web search as a retrieval source |
-| Text-to-SQL | [`exercises/07-text-to-sql`](module-11-edge-topics/exercises/07-text-to-sql/) | Natural language to SQL query generation |
-| LLM eval | [`exercises/08-llm-eval`](module-11-edge-topics/exercises/08-llm-eval/) | Evaluate LLM outputs with automated metrics |
-| Fine-tuning data | [`exercises/09-fine-tuning-data`](module-11-edge-topics/exercises/09-fine-tuning-data/) | Build datasets for fine-tuning |
-| Guardrails | [`exercises/10-guardrails`](module-11-edge-topics/exercises/10-guardrails/) | Input/output validation and safety filters |
-| Semantic cache | [`exercises/11-semantic-cache`](module-11-edge-topics/exercises/11-semantic-cache/) | Cache LLM responses by semantic similarity |
-| Multimodal RAG | [`exercises/12-multimodal-rag`](module-11-edge-topics/exercises/12-multimodal-rag/) | RAG with images and text |
-| Contextual chunking | [`exercises/13-contextual-chunking`](module-11-edge-topics/exercises/13-contextual-chunking/) | Context-aware document chunking strategies |
+| Golden tests | [`exercises/01-golden-tests`](module-11-evals/exercises/01-golden-tests/) | Mock-LLM agent loop, score tools + answer, run a golden suite |
+| Retrieval metrics | [`exercises/02-retrieval-metrics`](module-11-evals/exercises/02-retrieval-metrics/) | recall@k, precision@k, MRR on labelled ship-log queries |
+| LLM-as-judge | [`exercises/03-llm-judge`](module-11-evals/exercises/03-llm-judge/) | Score answers on correctness, completeness, relevance |
+| Faithfulness | [`exercises/04-faithfulness`](module-11-evals/exercises/04-faithfulness/) | Claim extraction + support check + faithfulness ratio |
+| Eval compare | [`exercises/05-eval-compare`](module-11-evals/exercises/05-eval-compare/) | Scorecard two configs, pick a winner, gate a release |
 
 ### Module 12 — [Productionisation](module-12-productionisation/)
 
@@ -266,6 +259,25 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Movie Night | [`exercises/02-movie-night`](module-12-productionisation/exercises/02-movie-night/) | RAG, hybrid search, text-to-SQL, structured output, charts |
 | Travel Planner | [`exercises/03-travel-planner`](module-12-productionisation/exercises/03-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
 | Personal Assistant | [`exercises/04-personal-assistant`](module-12-productionisation/exercises/04-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar management, cost controls |
+
+### Module 13 — [Edge Topics](module-13-edge-topics/)
+
+**Topics:** Advanced retrieval patterns (hybrid search, re-ranking, HyDE), agentic RAG, citation verification, web search backends, text-to-SQL, fine-tuning data pipelines, guardrails, semantic caching, multimodal RAG, contextual chunking. Pick-and-choose — delegates work on topics that interest them most. (LLM eval moved to Module 11.)
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Hybrid search | [`exercises/01-hybrid-search`](module-13-edge-topics/exercises/01-hybrid-search/) | Combine dense and sparse retrieval |
+| Reranking | [`exercises/02-reranking`](module-13-edge-topics/exercises/02-reranking/) | Re-rank retrieved results for relevance |
+| HyDE | [`exercises/03-hyde`](module-13-edge-topics/exercises/03-hyde/) | Hypothetical Document Embeddings for better retrieval |
+| Agentic RAG | [`exercises/04-agentic-rag`](module-13-edge-topics/exercises/04-agentic-rag/) | Agent-driven retrieval with self-critique |
+| Citation verification | [`exercises/05-citation-verification`](module-13-edge-topics/exercises/05-citation-verification/) | Verify and ground citations in source documents |
+| Web search backend | [`exercises/06-web-search-backend`](module-13-edge-topics/exercises/06-web-search-backend/) | Integrate web search as a retrieval source |
+| Text-to-SQL | [`exercises/07-text-to-sql`](module-13-edge-topics/exercises/07-text-to-sql/) | Natural language to SQL query generation |
+| Fine-tuning data | [`exercises/09-fine-tuning-data`](module-13-edge-topics/exercises/09-fine-tuning-data/) | Build datasets for fine-tuning |
+| Guardrails | [`exercises/10-guardrails`](module-13-edge-topics/exercises/10-guardrails/) | Input/output validation and safety filters |
+| Semantic cache | [`exercises/11-semantic-cache`](module-13-edge-topics/exercises/11-semantic-cache/) | Cache LLM responses by semantic similarity |
+| Multimodal RAG | [`exercises/12-multimodal-rag`](module-13-edge-topics/exercises/12-multimodal-rag/) | RAG with images and text |
+| Contextual chunking | [`exercises/13-contextual-chunking`](module-13-edge-topics/exercises/13-contextual-chunking/) | Context-aware document chunking strategies |
 
 ## License
 

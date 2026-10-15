@@ -6,12 +6,15 @@ then wire them into an interactive chat agent.
 Run:  python solution.py
 """
 from __future__ import annotations
+import os
 import json, time
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 @dataclass
@@ -112,7 +115,8 @@ def extract_memories(
 ) -> list[dict]:
     """Ask the LLM to identify memorable facts from an exchange."""
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         response_format={"type": "json_object"},
         messages=[
             {
@@ -151,7 +155,8 @@ def chat(
     messages = [{"role": "system", "content": system_prompt}] + session.get_messages()
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=messages,
     )
     assistant_msg = response.choices[0].message.content

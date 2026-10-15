@@ -7,6 +7,7 @@ Starts a FastAPI server on port 8001, hits it with httpx, then shuts down.
 
 import asyncio
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import httpx
@@ -15,15 +16,18 @@ from fastapi import FastAPI, HTTPException
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
-app = FastAPI(title="DSS Pathfinder — Mission Briefing API")
-
 MISSIONS: list[dict] = []
 
 
-@app.on_event("startup")
-async def load_data():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code before `yield` runs once at startup; code after it runs at shutdown.
     global MISSIONS
     MISSIONS = json.loads((DATA_DIR / "missions.json").read_text())
+    yield
+
+
+app = FastAPI(title="DSS Pathfinder — Mission Briefing API", lifespan=lifespan)
 
 
 @app.get("/health")

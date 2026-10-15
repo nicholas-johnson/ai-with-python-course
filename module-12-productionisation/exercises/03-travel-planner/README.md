@@ -96,7 +96,7 @@ The core agentic loop:
 
 Wire everything together:
 
-- `startup`: load JSON, build index
+- `lifespan`: load JSON, build index (runs once when the app starts)
 - `/api/plan`: safety check → agent planning → budget validation
 - `/api/search`: vector search → return results
 - `/api/destination/{id}`: direct lookup

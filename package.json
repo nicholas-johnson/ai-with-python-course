@@ -21,6 +21,7 @@
     "slides:10": "pnpm --filter @ai-python-course/module-10-slides dev",
     "slides:11": "pnpm --filter @ai-python-course/module-11-slides dev",
     "slides:12": "pnpm --filter @ai-python-course/module-12-slides dev",
+    "slides:13": "pnpm --filter @ai-python-course/module-13-slides dev",
     "lint:slides": "eslint slide-deck/",
     "format:slides": "prettier --write slide-deck/ **/slides/src/**"
   },

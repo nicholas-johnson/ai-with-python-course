@@ -12,10 +12,16 @@ sys.path.insert(0, str(Path(__file__).parent / target))
 from server import server as mcp_server
 
 
+async def call_tool(name, arguments):
+    """Call a tool through the public MCPServer API and return its text output."""
+    result = await mcp_server.call_tool(name, arguments)
+    return result.content[0].text
+
+
 class TestGetPowerStatus:
     @pytest.mark.asyncio
     async def test_known_module(self):
-        result = await mcp_server._tool_manager.call_tool("get_power_status", {"module": "habitat"})
+        result = await call_tool("get_power_status", {"module": "habitat"})
         data = json.loads(result)
         assert data["module"] == "habitat"
         assert "power_level" in data
@@ -25,7 +31,7 @@ class TestGetPowerStatus:
 
     @pytest.mark.asyncio
     async def test_unknown_module(self):
-        result = await mcp_server._tool_manager.call_tool("get_power_status", {"module": "nonexistent"})
+        result = await call_tool("get_power_status", {"module": "nonexistent"})
         data = json.loads(result)
         assert "error" in data
 
@@ -33,7 +39,7 @@ class TestGetPowerStatus:
 class TestAllocatePower:
     @pytest.mark.asyncio
     async def test_valid_transfer(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "allocate_power", {"source": "habitat", "target": "docking", "amount": 50}
         )
         data = json.loads(result)
@@ -42,7 +48,7 @@ class TestAllocatePower:
 
     @pytest.mark.asyncio
     async def test_insufficient_power(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "allocate_power", {"source": "docking", "target": "habitat", "amount": 99999}
         )
         data = json.loads(result)
@@ -50,7 +56,7 @@ class TestAllocatePower:
 
     @pytest.mark.asyncio
     async def test_exceeds_capacity(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "allocate_power", {"source": "habitat", "target": "comms", "amount": 100}
         )
         data = json.loads(result)
@@ -58,7 +64,7 @@ class TestAllocatePower:
 
     @pytest.mark.asyncio
     async def test_unknown_module(self):
-        result = await mcp_server._tool_manager.call_tool(
+        result = await call_tool(
             "allocate_power", {"source": "fake", "target": "habitat", "amount": 10}
         )
         data = json.loads(result)
@@ -68,7 +74,7 @@ class TestAllocatePower:
 class TestListAlerts:
     @pytest.mark.asyncio
     async def test_returns_alerts(self):
-        result = await mcp_server._tool_manager.call_tool("list_alerts", {})
+        result = await call_tool("list_alerts", {})
         data = json.loads(result)
         assert isinstance(data, list)
         assert len(data) >= 1
@@ -77,8 +83,9 @@ class TestListAlerts:
 
 
 class TestToolDiscovery:
-    def test_all_tools_registered(self):
-        tools = mcp_server._tool_manager.list_tools()
+    @pytest.mark.asyncio
+    async def test_all_tools_registered(self):
+        tools = await mcp_server.list_tools()
         names = {t.name for t in tools}
         assert "get_power_status" in names
         assert "allocate_power" in names

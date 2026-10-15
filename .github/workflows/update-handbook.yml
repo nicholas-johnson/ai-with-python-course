@@ -1,0 +1,21 @@
+name: Update linearhorizon.com handbook
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger site rebuild
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "SITE_DISPATCH_TOKEN is not set; skipping handbook rebuild."
+            exit 0
+          fi
+          gh workflow run "Deploy to GitHub Pages" --repo nicholas-johnson/linearhorizon.com

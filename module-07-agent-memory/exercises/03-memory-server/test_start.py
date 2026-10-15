@@ -1,5 +1,6 @@
 """Tests for Exercise 03 — Memory MCP Server."""
 
+import asyncio
 import importlib
 import sys
 from pathlib import Path
@@ -40,13 +41,7 @@ def _import_client():
 def test_server_has_expected_tools():
     """The MCP server should register remember, recall, forget, list_memories, get_summary."""
     server = _import_server()
-    tool_names = set()
-    if hasattr(server.mcp, "_tool_manager"):
-        for tool in server.mcp._tool_manager.list_tools():
-            tool_names.add(tool.name)
-    elif hasattr(server.mcp, "list_tools"):
-        for tool in server.mcp.list_tools():
-            tool_names.add(tool.name)
+    tool_names = {tool.name for tool in asyncio.run(server.mcp.list_tools())}
 
     expected = {"remember", "recall", "forget", "list_memories", "get_summary"}
     missing = expected - tool_names
@@ -62,7 +57,7 @@ def test_mcp_to_openai_tools():
     mock_tool = MagicMock()
     mock_tool.name = "remember"
     mock_tool.description = "Store a fact in long-term memory"
-    mock_tool.inputSchema = {
+    mock_tool.input_schema = {
         "type": "object",
         "properties": {
             "key": {"type": "string"},
@@ -85,6 +80,6 @@ def test_client_has_main():
 
 
 def test_server_has_mcp_instance():
-    """The server module should have a FastMCP instance named 'mcp'."""
+    """The server module should have a MCPServer instance named 'mcp'."""
     server = _import_server()
     assert hasattr(server, "mcp"), "Server module must have an 'mcp' attribute"

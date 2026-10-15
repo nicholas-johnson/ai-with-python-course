@@ -6,6 +6,7 @@ Reads MCP resources from the docs server to provide context to the LLM.
 
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -13,9 +14,11 @@ import openai
 from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SYSTEM_PROMPT = (
     "You are the station AI. You have access to power grid tools, science lab tools, "
@@ -50,7 +53,7 @@ async def run_agent(tool_router, openai_tools, resource_context):
 
         for _ in range(10):
             response = client.chat.completions.create(
-                model="gpt-4o-mini", messages=messages, tools=openai_tools
+                model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools
             )
             msg = response.choices[0].message
 
@@ -86,7 +89,7 @@ async def main():
         async with ClientSession(p_read, p_write) as power_session:
             await power_session.initialize()
 
-            async with streamablehttp_client(HTTP_SERVER_URL) as (h_read, h_write, _):
+            async with streamable_http_client(HTTP_SERVER_URL) as (h_read, h_write):
                 async with ClientSession(h_read, h_write) as lab_session:
                     await lab_session.initialize()
 
@@ -111,7 +114,7 @@ async def main():
                                         "function": {
                                             "name": tool.name,
                                             "description": tool.description or "",
-                                            "parameters": tool.inputSchema,
+                                            "parameters": tool.input_schema,
                                         },
                                     })
 

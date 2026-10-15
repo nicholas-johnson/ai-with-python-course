@@ -14,7 +14,7 @@ export const slides = [
       icon: 'target',
       points: [
         'Understand **MCP concepts**: discovery, schemas, calling conventions.',
-        'Build a **FastMCP server** with practical tools in Python.',
+        'Build an **MCP server** with practical tools in Python.',
         'Compare **transports**: stdio (local) vs Streamable HTTP (remote).',
         'Connect **multiple MCP servers** to a single LLM agent.',
       ],
@@ -76,7 +76,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Building a local MCP server',
-      subtitle: 'FastMCP: decorators, schemas, and transports',
+      subtitle: 'MCPServer: decorators, schemas, and transports',
       icon: 'server',
     },
   },
@@ -84,10 +84,10 @@ export const slides = [
   {
     type: 'code',
     content: {
-      title: 'Building a local MCP server with FastMCP',
-      code: `from mcp.server.fastmcp import FastMCP
+      title: 'Building a local MCP server with MCPServer',
+      code: `from mcp.server.mcpserver import MCPServer
 
-server = FastMCP("API Tools")
+server = MCPServer("API Tools")
 
 @server.tool()
 def lookup_users(role: str | None = None) -> str:
@@ -97,7 +97,7 @@ def lookup_users(role: str | None = None) -> str:
 
 server.run()  # stdio transport`,
       highlights: [
-        'FastMCP generates schemas from type hints + docstrings',
+        'MCPServer (formerly FastMCP) generates schemas from type hints + docstrings',
         'server.run() listens on stdin — the client spawns and manages this process',
       ],
     },
@@ -131,7 +131,7 @@ server.run()  # stdio transport`,
       points: [
         'Server runs independently at a URL — like any web service.',
         'Same JSON-RPC protocol, same tool schemas — just a different wire format.',
-        'Use **streamablehttp_client** to connect from Python.',
+        'Use **streamable_http_client** to connect from Python.',
         'Ideal for **shared team servers**, cloud deployment, cross-network access.',
         'The server doesn\'t need to be rewritten — one-line change to the transport.',
       ],

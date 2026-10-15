@@ -1,7 +1,7 @@
 """
 Module 5 Demo — server.py
 ============================
-FastMCP server that exposes RAG tools over a persistent ChromaDB collection.
+MCPServer server that exposes RAG tools over a persistent ChromaDB collection.
 
 The collection must already be populated by ingest.py.
 
@@ -14,20 +14,23 @@ Requires:
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
 import chromadb
 from dotenv import load_dotenv
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from openai import OpenAI
 
 load_dotenv()
 
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
 CHROMA_PATH = str(Path(__file__).resolve().parent / "chroma_data")
 COLLECTION_NAME = "ship_logs"
 
-mcp = FastMCP("RAG Server")
+mcp = MCPServer("RAG Server")
 openai_client = OpenAI()
 chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = chroma.get_or_create_collection(COLLECTION_NAME, embedding_function=None)
@@ -89,7 +92,8 @@ def _rag_answer(question: str, k: int = 5) -> tuple[str, list[dict]]:
     ]
 
     response = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=messages,
     )
     return response.choices[0].message.content, passages

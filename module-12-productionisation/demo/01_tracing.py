@@ -7,6 +7,7 @@ Run:  python module-12-productionisation/demo/01_tracing.py
 """
 
 import json
+import os
 import time
 import uuid
 
@@ -14,6 +15,9 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
 client = OpenAI()
 
 
@@ -59,12 +63,13 @@ def demo_traced_request():
     # Span 1: classify the query
     span = trace.start_span("classify_query")
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": "Classify this query as one of: question, command, chitchat. Reply with one word."},
             {"role": "user", "content": "What's the weather like in Paris?"},
         ],
-        max_tokens=10,
+        max_completion_tokens=10,
     )
     classification = response.choices[0].message.content.strip()
     trace.end_span(span, metadata={"classification": classification, "tokens": response.usage.total_tokens})
@@ -73,12 +78,13 @@ def demo_traced_request():
     # Span 2: generate response
     span = trace.start_span("generate_response")
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {"role": "system", "content": "You are a helpful assistant. Answer briefly."},
             {"role": "user", "content": "What's the weather like in Paris?"},
         ],
-        max_tokens=100,
+        max_completion_tokens=100,
     )
     answer = response.choices[0].message.content.strip()
     trace.end_span(span, metadata={"tokens": response.usage.total_tokens})

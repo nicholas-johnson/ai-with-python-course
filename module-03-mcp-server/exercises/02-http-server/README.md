@@ -32,9 +32,8 @@ Already defined in `server.py`:
 
 ## What's new
 
-- `FastMCP("...", stateless_http=True)` — enables HTTP transport
-- `server.run(transport="streamable-http")` — starts at `http://localhost:8000/mcp`
-- The agent connects via `streamablehttp_client` instead of `stdio_client`
+- `server.run(transport="streamable-http", stateless_http=True)` — serves over HTTP at `http://localhost:8000/mcp` (transport options go on `run()`, not the constructor)
+- The agent connects via `streamable_http_client` instead of `stdio_client` — it yields `(read, write)`, the same pair as stdio
 
 ## Run it
 

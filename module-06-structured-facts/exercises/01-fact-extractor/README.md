@@ -44,11 +44,12 @@ Use Pydantic with `subject`, `predicate`, `object`, `source_text`, and `confiden
 
 ### 3. Implement `extract_facts`
 
-Build a prompt that instructs the model to extract factual claims as JSON. Use `response_format={"type": "json_object"}` with `gpt-4o-mini`:
+Build a prompt that instructs the model to extract factual claims as JSON. Use `response_format={"type": "json_object"}` with `MODEL`:
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model=MODEL,
+    reasoning_effort="none",
     response_format={"type": "json_object"},
     messages=[
         {"role": "system", "content": "Extract facts as JSON..."},

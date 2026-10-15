@@ -5,6 +5,7 @@ Extend the memory store with automatic conversation summarisation.
 Run:  python solution.py
 """
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -17,6 +18,8 @@ from memory_store import (
 
 load_dotenv()
 
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
 
 def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     """Summarise a list of conversation turns into a concise paragraph."""
@@ -25,7 +28,8 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=MODEL,
+        reasoning_effort="none",
         messages=[
             {
                 "role": "system",
