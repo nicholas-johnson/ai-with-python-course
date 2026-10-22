@@ -6,7 +6,7 @@ A full-stack AI movie recommendation app combining **RAG** (mood-based search) w
 
 | Technique Used | Where in This Exercise | Course Module |
 | --- | --- | --- |
-| Chat completions | `rag.py` reranking, `sql.py` generation | Module 1 — Working with the LLM |
+| OpenAI Responses API | `rag.py` reranking, `sql.py` generation | Module 1 — Working with the LLM |
 | Tool calling (structured output) | `sql.py` text-to-SQL | Module 2 — Tool Calling |
 | Embeddings & vector search | `rag.py` ChromaDB index + search | Module 5 — RAG Fundamentals |
 | RAG pipeline | `rag.py` build → search → rerank | Module 5 — RAG Fundamentals |

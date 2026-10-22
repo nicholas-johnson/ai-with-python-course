@@ -11,16 +11,16 @@ class Route(BaseModel):
     department: Literal["medical", "tactical", "comms"]
 
 def classify_query(query: str, client: OpenAI) -> str:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Route,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Route,
+        input=[
             {"role": "system", "content": "Classify the query into a department."},
             {"role": "user", "content": query},
         ],
     )
-    route = response.choices[0].message.parsed
+    route = response.output_parsed
     return route.department if route else "medical"
 ```
 
@@ -42,18 +42,18 @@ A console app in **`start.py`** with three specialist agents (medical, tactical,
 
 ### 1. Implement `classify_query`
 
-Use `client.chat.completions.parse` to classify a query:
+Use `client.responses.parse` to classify a query:
 
-- Define `Route(BaseModel)` with `department: Literal["medical", "tactical", "comms"]` and pass it as `response_format`
+- Define `Route(BaseModel)` with `department: Literal["medical", "tactical", "comms"]` and pass it as `text_format`
 - System prompt: describe what each department handles (you don't need to describe the JSON -- the schema does)
-- Return `response.choices[0].message.parsed.department`
-- If `parsed` is `None` (the model refused), default to `"medical"`
+- Return `response.output_parsed.department`
+- If `response.output_parsed` is `None` (the model refused), default to `"medical"`
 
 You no longer need to check for an invalid department name: the `Literal` constrains the model's output, and Pydantic would reject anything else.
 
 ### 2. Implement `specialist_agent`
 
-Look up the system prompt from `SPECIALIST_PROMPTS` for the given department, then make a chat completion call:
+Look up the system prompt from `SPECIALIST_PROMPTS` for the given department, then make a `client.responses.create` call:
 
 - Use `SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])` to handle unknown departments gracefully
 - Pass the system prompt and the user query as messages

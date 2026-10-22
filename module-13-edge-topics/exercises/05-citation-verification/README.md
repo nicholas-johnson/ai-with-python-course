@@ -93,10 +93,10 @@ Prompt the LLM to split the answer into individual claims, one per line:
 
 ```python
 def extract_claims(client: OpenAI, answer: str) -> list[str]:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 "Extract each distinct factual claim from this text. "
@@ -106,7 +106,7 @@ def extract_claims(client: OpenAI, answer: str) -> list[str]:
         }],
         temperature=0,
     )
-    lines = response.choices[0].message.content.strip().split("\n")
+    lines = response.output_text.strip().split("\n")
     return [line.strip() for line in lines if line.strip()]
 ```
 

@@ -3,9 +3,10 @@ Module 1 Demo — Working with the LLM
 Run:  python module-01-working-with-the-llm/demo/demo.py
 
 Walks through the full module in one script:
-  Part 1: Basic chat — single API call, message roles, the response object
+  Part 1: Basic chat — single Responses API call, message roles, the response object
   Part 2: Streaming — tokens arrive one by one, perceived latency drops
   Part 3: Prompt engineering — same question, wildly different outputs
+  Part 4: Two APIs — Responses (current) vs Chat Completions (older)
 
 Requires: OPENAI_API_KEY environment variable.
 """
@@ -28,37 +29,34 @@ SYSTEM_PROMPT = "You are a helpful AI assistant. Be concise and professional."
 
 def chat(client: OpenAI, messages: list[dict]) -> str:
     """Non-streaming single-shot call. Returns the response text."""
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text
 
 
 def stream_response(client: OpenAI, messages: list[dict]) -> str:
     """Stream the response token by token, printing as they arrive."""
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=messages, stream=True,
+    stream = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True,
     )
     tokens = []
-    for chunk in response:
-        content = chunk.choices[0].delta.content
-        if content:
-            sys.stdout.write(content)
+    for event in stream:
+        if event.type == "response.output_text.delta":
+            sys.stdout.write(event.delta)
             sys.stdout.flush()
-            tokens.append(content)
+            tokens.append(event.delta)
     print()
     return "".join(tokens)
 
 
 def run_prompt(client: OpenAI, system_prompt: str, user_message: str) -> str:
-    """One-shot call with a custom system prompt."""
-    response = client.chat.completions.create(
+    """One-shot call with a custom system prompt (passed as `instructions`)."""
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message},
-        ],
+        reasoning={"effort": "none"},
+        instructions=system_prompt,
+        input=user_message,
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 
 # ---------------------------------------------------------------------------
@@ -114,8 +112,8 @@ def demo_streaming(client: OpenAI):
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    print("\nWith stream=True, tokens arrive one by one.")
-    print("Each chunk is shown as it arrives, then the final assembled response.")
+    print("\nWith stream=True, the API sends a series of typed events.")
+    print("Text arrives in 'response.output_text.delta' events; the rest mark progress.")
     print("Type your messages below. Type 'quit' to return to the menu.\n")
 
     while True:
@@ -129,23 +127,21 @@ def demo_streaming(client: OpenAI):
 
         messages.append({"role": "user", "content": user_msg})
 
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages, stream=True,
+        stream = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True,
         )
         tokens = []
-        chunk_num = 0
-        print("\n--- Chunks arriving ---")
-        for chunk in response:
-            delta = chunk.choices[0].delta
-            content = delta.content
-            finish = chunk.choices[0].finish_reason
-            print(f"  chunk {chunk_num}: content={content!r}  finish_reason={finish}")
-            chunk_num += 1
-            if content:
-                tokens.append(content)
+        event_num = 0
+        print("\n--- Events arriving ---")
+        for event in stream:
+            delta = event.delta if event.type == "response.output_text.delta" else None
+            print(f"  event {event_num}: {event.type}  delta={delta!r}")
+            event_num += 1
+            if delta:
+                tokens.append(delta)
 
         full_response = "".join(tokens)
-        print(f"\n--- Assembled response ({chunk_num} chunks, {len(tokens)} with content) ---")
+        print(f"\n--- Assembled response ({event_num} events, {len(tokens)} text deltas) ---")
         print(f"AI>  {full_response}\n")
         messages.append({"role": "assistant", "content": full_response})
 
@@ -308,14 +304,68 @@ def demo_prompting(client: OpenAI):
 
 
 # ---------------------------------------------------------------------------
+# Part 4: Two APIs — Responses (current) vs Chat Completions (older)
+# ---------------------------------------------------------------------------
+
+def demo_two_apis(client: OpenAI):
+    print("=" * 60)
+    print("PART 4: RESPONSES API vs CHAT COMPLETIONS")
+    print("=" * 60)
+
+    question = "In one sentence, why do spacecraft use radiators?"
+    print(f"\nSame question through both APIs: {question}\n")
+
+    print("Responses API (what this course uses):")
+    print('  client.responses.create(model=..., instructions="...", input="...")')
+    response = client.responses.create(
+        model=MODEL,
+        reasoning={"effort": "none"},
+        instructions=SYSTEM_PROMPT,
+        input=question,
+    )
+    print(f"  → response.output_text: {response.output_text}")
+    print(f"  → usage: {response.usage.input_tokens} in / {response.usage.output_tokens} out\n")
+
+    print("Chat Completions API (older — still supported, but being phased out):")
+    print("  client.chat.completions.create(model=..., messages=[...])")
+    completion = client.chat.completions.create(
+        model=MODEL,
+        reasoning_effort="none",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": question},
+        ],
+    )
+    print(f"  → completion.choices[0].message.content: {completion.choices[0].message.content}")
+    print(f"  → usage: {completion.usage.prompt_tokens} prompt / {completion.usage.completion_tokens} completion\n")
+
+    print("Server-side conversation state (Responses only):")
+    first = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input="My call sign is Nova-7. Just acknowledge."
+    )
+    follow_up = client.responses.create(
+        model=MODEL,
+        reasoning={"effort": "none"},
+        previous_response_id=first.id,
+        input="What is my call sign?",
+    )
+    print(f"  turn 1 → {first.output_text}")
+    print(f"  turn 2 (previous_response_id={first.id[:14]}...) → {follow_up.output_text}")
+    print("\n  No message list was resent — the API kept the conversation.")
+    print("  You'll still see Chat Completions in older code, tutorials, and other")
+    print("  providers' 'OpenAI-compatible' APIs, so it's worth recognising.\n")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 DEMOS = {
     "1":  ("Basic chat",              demo_basic_chat),
-    "2":  ("Streaming (with chunks)", demo_streaming),
+    "2":  ("Streaming (with events)", demo_streaming),
     "2b": ("Streaming (clean)",       demo_streaming_clean),
     "3":  ("Prompt engineering",      demo_prompting),
+    "4":  ("Responses vs Chat Completions", demo_two_apis),
 }
 
 

@@ -9,26 +9,26 @@
 3. **Observation** — it sees the tool's output
 4. **Repeat** — until it has enough information to answer
 
-OpenAI's tool-calling API maps naturally to ReAct. When you pass `tools=` to `chat.completions.create`, the model can choose to return `tool_calls` instead of (or alongside) content. You execute those calls, feed the results back as `tool` messages, and loop until the model responds with a final answer.
+OpenAI's tool-calling API maps naturally to ReAct. When you pass `tools=` to `responses.create`, the model can choose to return `function_call` items instead of (or alongside) text. You execute those calls, feed the results back as `function_call_output` items, and loop until the model responds with a final answer.
 
 ```python
 from openai import OpenAI
 
 client = OpenAI()
 
-response = client.chat.completions.create(
+response = client.responses.create(
     model=MODEL,
-    reasoning_effort="none",
-    messages=messages,
+    reasoning={"effort": "none"},
+    input=messages,
     tools=tool_schemas,
 )
+calls = [item for item in response.output if item.type == "function_call"]
 
-choice = response.choices[0].message
-if choice.tool_calls:
+if calls:
     # Execute tools, append results, call again
     ...
 else:
-    # Final answer in choice.content
+    # Final answer in response.output_text
     ...
 ```
 
@@ -65,16 +65,14 @@ Build the `TOOL_SCHEMAS` list — one OpenAI function-calling schema per tool:
 ```python
 {
     "type": "function",
-    "function": {
-        "name": "search_web",
-        "description": "Search the web for information. Returns a text summary.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "The search query"}
-            },
-            "required": ["query"],
+    "name": "search_web",
+    "description": "Search the web for information. Returns a text summary.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "The search query"}
         },
+        "required": ["query"],
     },
 }
 ```
@@ -84,13 +82,14 @@ Build the `TOOL_SCHEMAS` list — one OpenAI function-calling schema per tool:
 This is the core loop:
 
 1. Start with `[SYSTEM_PROMPT, {"role": "user", "content": query}]`
-2. Call `client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOL_SCHEMAS)`
-3. If the response has `tool_calls`:
-   - For each tool call, look up the function in `TOOLS`, parse the JSON arguments, call it
-   - Append the assistant message and each tool result as a `{"role": "tool", ...}` message
+2. Call `client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOL_SCHEMAS)`
+3. If `response.output` has `function_call` items:
+   - Add the model's output to the history: `messages += response.output`
+   - For each call, look up the function in `TOOLS`, parse the JSON arguments, call it
+   - Append each result as a `{"type": "function_call_output", "call_id": call.call_id, "output": result}` item
    - Add to the trace: `{"type": "tool", "name": name, "args": args, "result": result}`
    - Loop back to step 2
-4. If the response has `content` (no tool calls), that's the final answer
+4. If there are no function calls, `response.output_text` is the final answer
    - Add to trace: `{"type": "answer", "content": content}`
 5. Return `{"answer": str, "trace": list}`
 6. Enforce `max_steps` — if you hit the limit, return whatever you have

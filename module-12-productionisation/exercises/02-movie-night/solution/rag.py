@@ -90,10 +90,10 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
         for i, r in enumerate(results)
     )
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=OPENAI_MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": "You are a movie recommendation assistant. "
              "Given a user's mood/request and a list of candidate movies, return ONLY "
              "the numbers of the most relevant movies in order of relevance, "
@@ -104,7 +104,7 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
         temperature=0,
     )
 
-    raw = response.choices[0].message.content.strip()
+    raw = response.output_text.strip()
     try:
         indices = [int(x.strip()) - 1 for x in raw.split(",")]
         reranked = [results[i] for i in indices if 0 <= i < len(results)]

@@ -3,7 +3,7 @@ Module 2 Demo — Tool Calling
 Run:  python module-02-tool-calling/demo/demo.py
 
 Walks through the full module in one script:
-  Part 1: Tool-call message flow — live tool call, trace the 4 message roles
+  Part 1: Tool-call flow — live tool call, trace messages and function-call items
   Part 2: Tool registry — live agent with decorator-registered tools
   Part 3: Guarded agent — safety rails (allowlist, rate limit, redaction, audit) wrapping the agent
 
@@ -44,19 +44,17 @@ def section(title: str):
 TOOLS = [
     {
         "type": "function",
-        "function": {
-            "name": "query_crew",
-            "description": "Query crew members assigned to a mission.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "active_mission": {
-                        "type": "string",
-                        "description": "Mission ID",
-                    },
+        "name": "query_crew",
+        "description": "Query crew members assigned to a mission.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "active_mission": {
+                    "type": "string",
+                    "description": "Mission ID",
                 },
-                "required": ["active_mission"],
             },
+            "required": ["active_mission"],
         },
     },
 ]
@@ -82,7 +80,7 @@ def demo_message_format(client: OpenAI):
     section("Part 1: Tool-Call Message Flow — The 4 Roles")
 
     print("  Chat with the Pathfinder AI. It has one tool: query_crew.")
-    print("  Watch the message flow: SYSTEM → USER → ASSISTANT (tool_call) → TOOL → ASSISTANT")
+    print("  Watch the flow: SYSTEM → USER → function_call → function_call_output → ASSISTANT")
     print("  Type 'quit' to return to the menu.\n")
 
     messages = [
@@ -107,37 +105,37 @@ def demo_message_format(client: OpenAI):
         messages.append({"role": "user", "content": user_msg})
         print(f"  [USER]      {user_msg}")
 
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS
+        response = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOLS
         )
-        assistant_msg = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if assistant_msg.tool_calls:
-            messages.append(assistant_msg)
-            for tc in assistant_msg.tool_calls:
-                args = json.loads(tc.function.arguments)
-                print(f"  [ASSISTANT] tool_call → {tc.function.name}({tc.function.arguments})")
-                result = execute_tool(tc.function.name, args)
-                print(f"  [TOOL]      {tc.function.name} returned: {result[:120]}")
+        if calls:
+            messages += response.output
+            for tc in calls:
+                args = json.loads(tc.arguments)
+                print(f"  [FUNCTION_CALL] {tc.name}({tc.arguments})")
+                result = execute_tool(tc.name, args)
+                print(f"  [TOOL]      {tc.name} returned: {result[:120]}")
                 messages.append(
-                    {"role": "tool", "tool_call_id": tc.id, "content": result}
+                    {"type": "function_call_output", "call_id": tc.call_id, "output": result}
                 )
 
-            final = client.chat.completions.create(
-                model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS
+            final = client.responses.create(
+                model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOLS
             )
-            answer = final.choices[0].message.content
+            answer = final.output_text
             messages.append({"role": "assistant", "content": answer})
             print(f"  [ASSISTANT] {answer}\n")
         else:
-            content = assistant_msg.content
+            content = response.output_text
             messages.append({"role": "assistant", "content": content})
             print(f"  [ASSISTANT] {content}\n")
 
     print("  Key concepts:")
-    print("  • 4 message roles: system, user, assistant, tool")
+    print("  • Messages (system, user, assistant) plus function_call / function_call_output items")
     print("  • The model decides whether to call a tool or answer directly")
-    print("  • Tool results feed back as messages — the model interprets them")
+    print("  • Tool results go back as function_call_output items — the model interprets them")
     print("  • This request-response loop is the foundation of every agent")
 
 
@@ -149,29 +147,29 @@ def demo_message_format(client: OpenAI):
 def agent_loop(client: OpenAI, messages: list[dict], tools_list: list[dict],
                tool_handler, *, label: str = ""):
     """One turn of the agent loop: call LLM, handle tool calls, return final answer."""
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=messages, tools=tools_list
+    response = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=messages, tools=tools_list
     )
-    assistant_msg = response.choices[0].message
+    calls = [item for item in response.output if item.type == "function_call"]
 
-    if not assistant_msg.tool_calls:
-        messages.append({"role": "assistant", "content": assistant_msg.content})
-        print(f"  [ASSISTANT] {assistant_msg.content}\n")
+    if not calls:
+        messages.append({"role": "assistant", "content": response.output_text})
+        print(f"  [ASSISTANT] {response.output_text}\n")
         return
 
-    messages.append(assistant_msg)
-    for tc in assistant_msg.tool_calls:
-        args = json.loads(tc.function.arguments)
-        print(f"  [ASSISTANT] tool_call → {tc.function.name}({tc.function.arguments})")
-        result, allowed = tool_handler(tc.function.name, args)
+    messages += response.output
+    for tc in calls:
+        args = json.loads(tc.arguments)
+        print(f"  [FUNCTION_CALL] {tc.name}({tc.arguments})")
+        result, allowed = tool_handler(tc.name, args)
         tag = "ALLOWED" if allowed else "BLOCKED"
-        print(f"  [{tag}]     {tc.function.name} → {result[:120]}")
-        messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+        print(f"  [{tag}]     {tc.name} → {result[:120]}")
+        messages.append({"type": "function_call_output", "call_id": tc.call_id, "output": result})
 
-    final = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=messages, tools=tools_list
+    final = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=messages, tools=tools_list
     )
-    answer = final.choices[0].message.content
+    answer = final.output_text
     messages.append({"role": "assistant", "content": answer})
     print(f"  [ASSISTANT] {answer}\n")
 
@@ -205,11 +203,9 @@ class ToolRegistry:
         return [
             {
                 "type": "function",
-                "function": {
-                    "name": t.name,
-                    "description": t.description,
-                    "parameters": t.parameters,
-                },
+                "name": t.name,
+                "description": t.description,
+                "parameters": t.parameters,
             }
             for t in self._tools.values()
         ]
@@ -480,7 +476,7 @@ if __name__ == "__main__":
     print("  RECAP")
     print("=" * 60)
     print()
-    print("  1. Message flow   — system → user → assistant (tool_call) → tool → assistant")
+    print("  1. Call flow      — system → user → function_call → function_call_output → assistant")
     print("  2. Tool registry  — @register decorator, schema + handler in one place")
     print("  3. Guarded agent  — allowlist, rate limiter, redaction, audit log")
     print()

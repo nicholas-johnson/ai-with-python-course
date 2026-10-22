@@ -92,7 +92,7 @@ The return value of `hyde_search` is a dict:
 
 ### 1. Implement `generate_hypothetical_document`
 
-Use `client.chat.completions.create` with `model=MODEL, reasoning_effort="none"`. Use a `temperature` of 0.7 (custom temperatures need `reasoning_effort="none"` on reasoning models) (we want some creativity, not a deterministic answer). Return the text content of the response.
+Use `client.responses.create` with `model=MODEL, reasoning={"effort": "none"}`. Use a `temperature` of 0.7 (custom temperatures need `reasoning={"effort": "none"}` on reasoning models) (we want some creativity, not a deterministic answer). Return the text content of the response.
 
 > **Important:** The prompt should explicitly say the answer doesn't need to be factually correct. This frees the model to write something structurally realistic rather than hedging.
 

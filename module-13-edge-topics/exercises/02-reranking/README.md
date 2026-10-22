@@ -65,14 +65,14 @@ After re-ranking, each passage gets a `"rerank_score"` added:
 
 ### 1. Implement `score_relevance`
 
-Use `client.chat.completions.create` with a prompt that asks the LLM to rate relevance from 0 to 10. Return the number as a float.
+Use `client.responses.create` with a prompt that asks the LLM to rate relevance from 0 to 10. Return the number as a float.
 
 ```python
 def score_relevance(client: OpenAI, query: str, passage: str) -> float:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 f"Rate how relevant this passage is to the query on a scale "

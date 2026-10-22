@@ -7,19 +7,18 @@ You're building the backend for a **Research Assistant** web app. A Svelte front
 The key ingredients:
 
 - **Server-Sent Events (SSE)** — a one-way channel from server to client over HTTP. The `sse-starlette` package provides `EventSourceResponse` which wraps an async generator into the correct wire format.
-- **OpenAI streaming** — pass `stream=True` to `client.chat.completions.create()` and iterate over chunks:
+- **OpenAI streaming** — pass `stream=True` to `client.responses.create()` and iterate over the events:
 
 ```python
-stream = client.chat.completions.create(
-    model=MODEL, reasoning_effort="none", messages=messages, stream=True
+stream = client.responses.create(
+    model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True
 )
-for chunk in stream:
-    token = chunk.choices[0].delta.content
-    if token:
-        print(token, end="", flush=True)
+for event in stream:
+    if event.type == "response.output_text.delta":
+        print(event.delta, end="", flush=True)
 ```
 
-- **MCP tool discovery** — the backend connects to the MCP server at startup, calls `tools/list`, and converts the tools into OpenAI's function-calling format.
+- **MCP tool discovery** — the backend connects to the MCP server at startup, calls `tools/list`, and converts the tools into OpenAI function tools (`{"type": "function", "name", "description", "parameters"}`).
 - **Tool-calling loop** — when the LLM wants to call a tool, the backend executes it via MCP and feeds the result back. This loop repeats until the LLM produces a final text response.
 
 The MCP client connection uses `mcp.client.stdio`:
@@ -71,11 +70,9 @@ Implement `mcp_to_openai_tools(mcp_tools)`. Each MCP tool has `.name`, `.descrip
 ```python
 {
     "type": "function",
-    "function": {
-        "name": tool.name,
-        "description": tool.description,
-        "parameters": tool.input_schema,
-    },
+    "name": tool.name,
+    "description": tool.description,
+    "parameters": tool.input_schema,
 }
 ```
 
@@ -83,9 +80,9 @@ Implement `mcp_to_openai_tools(mcp_tools)`. Each MCP tool has `.name`, `.descrip
 
 For each tool call from the LLM:
 
-1. Extract `tc.function.name` and `json.loads(tc.function.arguments)`
+1. Extract `tc.name` and `json.loads(tc.arguments)`
 2. Call `session.call_tool(name, args)` to execute it via MCP
-3. Return a `{"role": "tool", "tool_call_id": tc.id, "content": ...}` dict
+3. Return a `{"type": "function_call_output", "call_id": tc.call_id, "output": ...}` dict
 
 ### 4. Add the tools endpoint
 
@@ -99,9 +96,9 @@ async def list_tools():
 
 This is the main event. Replace the placeholder streaming code with a loop:
 
-1. Call `client.chat.completions.create()` **without** `stream=True` (you need to inspect the finish reason)
-2. If `choice.finish_reason == "tool_calls"`:
-   - Append the assistant message (with tool_calls) to the conversation
+1. Call `client.responses.create()` **without** `stream=True` (you need to inspect the output for function calls)
+2. If `response.output` contains `function_call` items:
+   - Add the model's output to the conversation: `messages += response.output`
    - Yield `tool_call` SSE events for each tool call
    - Run them with `execute_tool_calls()`
    - Yield `tool_result` SSE events

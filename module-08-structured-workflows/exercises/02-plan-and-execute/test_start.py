@@ -50,7 +50,7 @@ def test_generate_plan_returns_list(fake_parse):
             {"step_number": 3, "description": "Summarize findings"},
         ]
     })
-    mock_client.chat.completions.parse.side_effect = fake_parse(plan_json)
+    mock_client.responses.parse.side_effect = fake_parse(plan_json)
 
     plan = mod.generate_plan("test query", mock_client)
 
@@ -59,7 +59,7 @@ def test_generate_plan_returns_list(fake_parse):
     assert all(isinstance(s, mod.PlanStep) for s in plan)
     assert plan[0].description == "Search for info"
     assert plan[0].status == "pending"
-    assert mock_client.chat.completions.parse.call_args.kwargs["response_format"] is mod.Plan
+    assert mock_client.responses.parse.call_args.kwargs["text_format"] is mod.Plan
 
 
 def test_execute_step_returns_result():
@@ -68,11 +68,8 @@ def test_execute_step_returns_result():
 
     mock_client = MagicMock()
 
-    mock_message = MagicMock()
-    mock_message.tool_calls = None
-    mock_message.content = "Step result: found the data."
-    mock_client.chat.completions.create.return_value = MagicMock(
-        choices=[MagicMock(message=mock_message)]
+    mock_client.responses.create.return_value = MagicMock(
+        output=[], output_text="Step result: found the data."
     )
 
     step = mod.PlanStep(step_number=1, description="Search for data")
@@ -95,18 +92,11 @@ def test_plan_and_execute_returns_answer_and_plan(fake_parse):
         ]
     })
 
-    mock_client.chat.completions.parse.side_effect = fake_parse(plan_json)
+    mock_client.responses.parse.side_effect = fake_parse(plan_json)
 
-    react_message = MagicMock()
-    react_message.tool_calls = None
-    react_message.content = "Done: the thing is done."
-
-    summary_message = MagicMock()
-    summary_message.content = "Final answer: the thing was done successfully."
-
-    mock_client.chat.completions.create.side_effect = [
-        MagicMock(choices=[MagicMock(message=react_message)]),
-        MagicMock(choices=[MagicMock(message=summary_message)]),
+    mock_client.responses.create.side_effect = [
+        MagicMock(output=[], output_text="Done: the thing is done."),
+        MagicMock(output=[], output_text="Final answer: the thing was done successfully."),
     ]
 
     result = mod.plan_and_execute("Do the thing", mock_client)

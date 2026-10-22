@@ -52,17 +52,17 @@ REVISE_SYSTEM = (
 
 def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
     """Ask the LLM to create a numbered plan. Returns list of PlanStep."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Plan,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Plan,
+        input=[
             {"role": "system", "content": PLAN_SYSTEM},
             {"role": "user", "content": query},
         ],
     )
 
-    plan = response.choices[0].message.parsed
+    plan = response.output_parsed
     if plan is None:
         return []
     return [PlanStep(step_number=s.step_number, description=s.description) for s in plan.steps]
@@ -109,17 +109,17 @@ def revise_plan(
         for s in remaining:
             context += f"  Step {s.step_number}: {s.description} (status: {s.status})\n"
 
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Plan,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Plan,
+        input=[
             {"role": "system", "content": REVISE_SYSTEM},
             {"role": "user", "content": context},
         ],
     )
 
-    plan = response.choices[0].message.parsed
+    plan = response.output_parsed
     if plan is None:
         return []
     return [PlanStep(step_number=s.step_number, description=s.description) for s in plan.steps]
@@ -167,10 +167,10 @@ def plan_and_execute(query: str, client: OpenAI) -> dict:
     summary_parts = [f"Step {r['step_number']}: {r['result']}" for r in results]
     combined = "\n".join(summary_parts)
 
-    final_response = client.chat.completions.create(
+    final_response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": "Summarize the results of a multi-step research plan into a clear, concise answer.",
@@ -181,7 +181,7 @@ def plan_and_execute(query: str, client: OpenAI) -> dict:
             },
         ],
     )
-    answer = final_response.choices[0].message.content or combined
+    answer = final_response.output_text or combined
 
     return {"answer": answer, "plan": plan}
 

@@ -6,20 +6,18 @@
 
 So far the model can only talk. To make it **do** things, we give it **tools**. The model does not execute code -- it returns a structured request saying "I want to call this function with these arguments." Your code executes the function, sends the result back, and the model continues.
 
-This introduces a fourth message role: **tool**. A full tool-calling exchange looks like this:
+This introduces two new kinds of conversation item alongside messages: a **`function_call`** (the model's request) and a **`function_call_output`** (your result). A full tool-calling exchange looks like this:
 
 ```python
 messages = [
     {"role": "system", "content": "You are the Pathfinder AI..."},
     {"role": "user", "content": "How many crew in science?"},
     # Model decides to call a tool:
-    {"role": "assistant", "tool_calls": [
-        {"id": "call_1", "type": "function",
-         "function": {"name": "get_crew_count", "arguments": '{"department": "science"}'}}
-    ]},
-    # You execute the tool and send the result back:
-    {"role": "tool", "tool_call_id": "call_1",
-     "content": '{"department": "science", "count": 3}'},
+    {"type": "function_call", "call_id": "call_1",
+     "name": "get_crew_count", "arguments": '{"department": "science"}'},
+    # You execute the tool and send the result back, matched by call_id:
+    {"type": "function_call_output", "call_id": "call_1",
+     "output": '{"department": "science", "count": 3}'},
     # Model uses the result to answer:
     {"role": "assistant", "content": "There are 3 crew in the science department."},
 ]
@@ -31,32 +29,31 @@ Tools are declared as **JSON Schema** objects that describe the function name, w
 tools = [
     {
         "type": "function",
-        "function": {
-            "name": "get_crew_count",
-            "description": "Get the number of crew members in a department",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "department": {"type": "string", "description": "Department name"},
-                },
-                "required": ["department"],
+        "name": "get_crew_count",
+        "description": "Get the number of crew members in a department",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "department": {"type": "string", "description": "Department name"},
             },
+            "required": ["department"],
         },
     },
 ]
 
-response = client.chat.completions.create(
-    model=MODEL, reasoning_effort="none", messages=messages, tools=tools,
+response = client.responses.create(
+    model=MODEL, reasoning={"effort": "none"}, input=messages, tools=tools,
 )
+calls = [item for item in response.output if item.type == "function_call"]
 ```
 
-The response's `message.tool_calls` will be a list if the model wants to call tools, or `None` if it wants to answer directly. The **agent loop** pattern is: ask the model, if it wants tools then execute them and ask again, repeat until it gives a text answer or you hit `max_steps`.
+`response.output` is a list of items. `calls` holds the `function_call` items -- empty if the model chose to answer directly, in which case the text is in `response.output_text`. The **agent loop** pattern is: ask the model, if it wants tools then execute them and ask again, repeat until it gives a text answer or you hit `max_steps`.
 
 This exercise uses the `openai` package.
 
 ## What you build
 
-- **`TOOLS`** -- a list of 3 tool schemas in OpenAI format.
+- **`TOOLS`** -- a list of 3 tool schemas (`{"type": "function", "name", "description", "parameters"}`).
 - **`get_crew_count(department)`**, **`get_ship_status(system)`**, **`search_crew(query)`** -- handler functions that return JSON strings.
 - **`run_agent(client, question, max_steps)`** -- the tool-calling loop. Returns an `AgentResult`.
 
@@ -69,16 +66,14 @@ Add 3 tool definitions to the `TOOLS` list. Each follows this structure:
 ```python
 {
     "type": "function",
-    "function": {
-        "name": "get_crew_count",
-        "description": "Get the number of crew members in a department",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "department": {"type": "string", "description": "Department name"},
-            },
-            "required": ["department"],
+    "name": "get_crew_count",
+    "description": "Get the number of crew members in a department",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "department": {"type": "string", "description": "Department name"},
         },
+        "required": ["department"],
     },
 }
 ```
@@ -102,13 +97,13 @@ This is the core loop:
 1. Build the messages list: `[system_msg, {"role": "user", "content": question}]`.
 2. Track `tool_calls_made` (list of tool names) and `steps` (counter).
 3. Loop up to `max_steps` times:
-   - Call `client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS)`.
-   - Get `message = response.choices[0].message`.
-   - If `message.tool_calls` is not empty:
-     - Append the assistant message to `messages`.
-     - For each tool call: parse the arguments with `json.loads(tc.function.arguments)`, call the handler from `TOOL_HANDLERS`, append a `{"role": "tool", "tool_call_id": tc.id, "content": result}` message.
+   - Call `client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOLS)`.
+   - Collect the tool calls: `calls = [item for item in response.output if item.type == "function_call"]`.
+   - If `calls` is not empty:
+     - Add the model's output to the history: `messages += response.output`.
+     - For each call `tc`: parse the arguments with `json.loads(tc.arguments)`, call the handler from `TOOL_HANDLERS[tc.name]`, and append `{"type": "function_call_output", "call_id": tc.call_id, "output": result}`.
      - Record the tool name in `tool_calls_made`.
-   - Else if `message.content` is not empty: return an `AgentResult` with the answer.
+   - Else if `response.output_text` is not empty: return an `AgentResult` with the answer.
    - Else: break (unexpected state).
 4. If you exhaust `max_steps`, return `AgentResult(final_answer=None, ...)`.
 

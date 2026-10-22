@@ -152,16 +152,14 @@ def demo_agentic_rag() -> None:
 
     tools = [{
         "type": "function",
-        "function": {
-            "name": "search_documents",
-            "description": "Search ship documents for relevant information.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Search query."},
-                },
-                "required": ["query"],
+        "name": "search_documents",
+        "description": "Search ship documents for relevant information.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query."},
             },
+            "required": ["query"],
         },
     }]
 
@@ -175,27 +173,27 @@ def demo_agentic_rag() -> None:
     ]
 
     for turn in range(3):
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages, tools=tools,
+        response = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages, tools=tools,
         )
-        msg = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if msg.tool_calls:
-            messages.append(msg)
-            for tc in msg.tool_calls:
-                args = json.loads(tc.function.arguments)
+        if calls:
+            messages += response.output
+            for tc in calls:
+                args = json.loads(tc.arguments)
                 print(f"  🔍 Agent searches: '{args['query']}'")
                 results = search_fn(args["query"])
                 for r in results[:2]:
                     print(f"     → [{r['id']}] (score={r['score']}) {r['text'][:50]}...")
                 messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.id,
-                    "content": json.dumps(results),
+                    "type": "function_call_output",
+                    "call_id": tc.call_id,
+                    "output": json.dumps(results),
                 })
             print()
         else:
-            print(f"Agent's answer:\n  {msg.content}\n")
+            print(f"Agent's answer:\n  {response.output_text}\n")
             break
 
     print("✓ The agent decided what to search for and when it had enough info.\n")
@@ -230,26 +228,26 @@ def demo_citation_verification() -> None:
     print()
 
     print("Extracting claims...")
-    extract_resp = client.chat.completions.create(
+    extract_resp = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": f"Extract each factual claim as a separate line:\n\n{answer}",
         }],
         temperature=0,
     )
-    claims = [c.strip() for c in extract_resp.choices[0].message.content.split("\n") if c.strip()]
+    claims = [c.strip() for c in extract_resp.output_text.split("\n") if c.strip()]
     print(f"  Found {len(claims)} claims:\n")
 
     for claim in claims:
         supported = False
         source = None
         for passage in passages:
-            resp = client.chat.completions.create(
+            resp = client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=[{
+                reasoning={"effort": "none"},
+                input=[{
                     "role": "user",
                     "content": (
                         f"Does this passage support this claim? "
@@ -259,7 +257,7 @@ def demo_citation_verification() -> None:
                 }],
                 temperature=0,
             )
-            verdict = resp.choices[0].message.content.strip().lower()
+            verdict = resp.output_text.strip().lower()
             if "supported" in verdict and "unsupported" not in verdict:
                 supported = True
                 source = passage[:40]

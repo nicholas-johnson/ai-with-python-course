@@ -112,7 +112,7 @@ def mcp_to_openai_tools(mcp_tools):
     """Convert a list of MCP tool definitions to OpenAI function-calling format.
 
     Each tool becomes:
-        {"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}
+        {"type": "function", "name": ..., "description": ..., "parameters": ...}
 
     Hint: each MCP tool has .name, .description, and .input_schema attributes.
     """
@@ -129,9 +129,9 @@ async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
     """Execute MCP tool calls and return tool-result messages.
 
     For each tool call:
-      1. Extract tc.function.name and json.loads(tc.function.arguments)
+      1. Extract tc.name and json.loads(tc.arguments)
       2. Call session.call_tool(name, args)
-      3. Build a {"role": "tool", "tool_call_id": tc.id, "content": ...} dict
+      3. Build a {"type": "function_call_output", "call_id": tc.call_id, "output": ...} dict
 
     Return the list of tool-result message dicts.
     """
@@ -164,11 +164,12 @@ async def chat(req: ChatRequest):
         # TODO: Implement the tool-calling loop:
         #
         # while True:
-        #   1. Call client.chat.completions.create(model, messages, tools)
+        #   1. Call client.responses.create(model=MODEL, input=messages, tools=tools)
         #      (non-streaming, to check for tool calls)
         #
-        #   2. If choice.finish_reason == "tool_calls":
-        #      - Append the assistant message (with tool_calls) to messages
+        #   2. calls = [item for item in response.output if item.type == "function_call"]
+        #      If calls:
+        #      - Add the model's output to the history: messages += response.output
         #      - Yield {"event": "tool_call", "data": ...} for each tool call
         #      - Use execute_tool_calls() to run them via MCP
         #      - Yield {"event": "tool_result", "data": ...} for each result
@@ -176,26 +177,26 @@ async def chat(req: ChatRequest):
         #
         #   3. Otherwise (text response):
         #      - Make a STREAMING call to get the final answer token by token
-        #      - Yield {"event": "token", "data": {"token": "..."}} for each chunk
+        #      - Yield {"event": "token", "data": {"token": "..."}} for each
+        #        "response.output_text.delta" event (the text is in event.delta)
         #      - Yield {"event": "done", "data": {"role": "assistant", "content": ...}}
         #      - Break
 
         # Placeholder: simple streaming without tools (replace with the loop above)
-        stream = client.chat.completions.create(
+        stream = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             stream=True,
         )
 
         full_content = ""
-        for chunk in stream:
-            delta = chunk.choices[0].delta
-            if delta.content:
-                full_content += delta.content
+        for event in stream:
+            if event.type == "response.output_text.delta":
+                full_content += event.delta
                 yield {
                     "event": "token",
-                    "data": json.dumps({"token": delta.content}),
+                    "data": json.dumps({"token": event.delta}),
                 }
 
         yield {

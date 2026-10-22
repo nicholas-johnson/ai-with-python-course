@@ -45,61 +45,53 @@ client = OpenAI()
 _EXTRA_SCHEMAS = [
     {
         "type": "function",
-        "function": {
-            "name": "remember_preference",
-            "description": "Store a user travel preference (e.g. budget, dietary needs, interests).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "key": {"type": "string", "description": "Preference name"},
-                    "value": {"type": "string", "description": "Preference value"},
-                },
-                "required": ["key", "value"],
+        "name": "remember_preference",
+        "description": "Store a user travel preference (e.g. budget, dietary needs, interests).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "key": {"type": "string", "description": "Preference name"},
+                "value": {"type": "string", "description": "Preference value"},
             },
+            "required": ["key", "value"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "recall_preferences",
-            "description": "Recall all stored user travel preferences.",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": [],
-            },
+        "name": "recall_preferences",
+        "description": "Recall all stored user travel preferences.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": [],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "search_flights",
-            "description": "Search for flights between two cities on a given date.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "origin": {"type": "string", "description": "Departure city"},
-                    "destination": {"type": "string", "description": "Arrival city"},
-                    "date": {"type": "string", "description": "Travel date (YYYY-MM-DD)"},
-                },
-                "required": ["origin", "destination", "date"],
+        "name": "search_flights",
+        "description": "Search for flights between two cities on a given date.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "origin": {"type": "string", "description": "Departure city"},
+                "destination": {"type": "string", "description": "Arrival city"},
+                "date": {"type": "string", "description": "Travel date (YYYY-MM-DD)"},
             },
+            "required": ["origin", "destination", "date"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "search_hotels",
-            "description": "Search for hotels in a location for given dates.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {"type": "string", "description": "City or area"},
-                    "checkin": {"type": "string", "description": "Check-in date (YYYY-MM-DD)"},
-                    "checkout": {"type": "string", "description": "Check-out date (YYYY-MM-DD)"},
-                },
-                "required": ["location", "checkin", "checkout"],
+        "name": "search_hotels",
+        "description": "Search for hotels in a location for given dates.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string", "description": "City or area"},
+                "checkin": {"type": "string", "description": "Check-in date (YYYY-MM-DD)"},
+                "checkout": {"type": "string", "description": "Check-out date (YYYY-MM-DD)"},
             },
+            "required": ["location", "checkin", "checkout"],
         },
     },
 ]
@@ -113,9 +105,9 @@ def register_mcp_tools() -> None:
     TOOLS["search_flights"] = search_flights
     TOOLS["search_hotels"] = search_hotels
 
-    existing_names = {s["function"]["name"] for s in TOOL_SCHEMAS}
+    existing_names = {s["name"] for s in TOOL_SCHEMAS}
     for schema in _EXTRA_SCHEMAS:
-        if schema["function"]["name"] not in existing_names:
+        if schema["name"] not in existing_names:
             TOOL_SCHEMAS.append(schema)
 
 
@@ -166,10 +158,10 @@ def execute_plan_steps(plan: list[PlanStep], results: list[dict], client: OpenAI
 def summarize_results(message: str, results: list[dict], client: OpenAI) -> str:
     """Compile step results into a final travel plan summary."""
     combined = "\n".join(f"Step {r['step_number']}: {r['result']}" for r in results)
-    final = client.chat.completions.create(
+    final = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -184,7 +176,7 @@ def summarize_results(message: str, results: list[dict], client: OpenAI) -> str:
             },
         ],
     )
-    return final.choices[0].message.content or combined
+    return final.output_text or combined
 
 
 @app.get("/health")

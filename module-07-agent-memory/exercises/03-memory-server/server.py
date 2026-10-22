@@ -3,7 +3,7 @@ Exercise 03: Memory MCP Server -- server.py
 ==============================================
 A MCPServer server that wraps the memory system as discoverable tools.
 
-Run standalone:  python -m mcp dev server.py
+Run standalone:  mcp dev server.py
 """
 
 from mcp.server.mcpserver import MCPServer

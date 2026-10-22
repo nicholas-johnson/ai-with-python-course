@@ -74,10 +74,10 @@ def register(self, description: str):
 
 ### 2. Implement `list_tools() -> list[dict]`
 
-Same as the demo -- iterate `self._tools.values()` and build the OpenAI format:
+Same as the demo -- iterate `self._tools.values()` and build the tool format:
 
 ```python
-[{"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}]
+[{"type": "function", "name": ..., "description": ..., "parameters": ...}]
 ```
 
 ### 3. Implement `execute(name, arguments) -> str`

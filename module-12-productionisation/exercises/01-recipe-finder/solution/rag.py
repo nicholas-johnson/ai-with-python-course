@@ -135,11 +135,11 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
         for i, r in enumerate(results[:10])
     )
 
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=OPENAI_MODEL,
-        reasoning_effort="none",
-        response_format=Ranking,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Ranking,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -152,10 +152,10 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
                 "content": f"Query: {query}\n\nCandidates:\n{candidates}",
             },
         ],
-        max_completion_tokens=100,
+        max_output_tokens=100,
     )
 
-    ranking = response.choices[0].message.parsed
+    ranking = response.output_parsed
     if ranking is None:
         return results[:top_k]
     reranked = [results[i - 1] for i in ranking.order[:top_k] if 1 <= i <= len(results)]

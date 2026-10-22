@@ -47,20 +47,17 @@ def _scripted_client(script):
         if "tool_calls" in item:
             calls = [
                 SimpleNamespace(
-                    id=tc["id"],
-                    function=SimpleNamespace(
-                        name=tc["name"],
-                        arguments=json.dumps(tc["arguments"]),
-                    ),
+                    type="function_call",
+                    call_id=tc["id"],
+                    name=tc["name"],
+                    arguments=json.dumps(tc["arguments"]),
                 )
                 for tc in item["tool_calls"]
             ]
-            message = SimpleNamespace(content=None, tool_calls=calls)
-        else:
-            message = SimpleNamespace(content=item["content"], tool_calls=None)
-        return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+            return SimpleNamespace(output=calls, output_text="")
+        return SimpleNamespace(output=[], output_text=item["content"])
 
-    return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    return SimpleNamespace(responses=SimpleNamespace(create=create))
 
 
 def run_golden_case(client, question: str) -> dict:
@@ -68,19 +65,21 @@ def run_golden_case(client, question: str) -> dict:
     answer = None
     messages = [{"role": "user", "content": question}]
     for _ in range(5):
-        message = client.chat.completions.create(messages=messages).choices[0].message
-        if message.tool_calls:
-            for tc in message.tool_calls:
-                args = json.loads(tc.function.arguments)
-                tools.append({"name": tc.function.name, "arguments": args})
-                if tc.function.name == "get_crew_count":
+        response = client.responses.create(input=messages)
+        calls = [item for item in response.output if item.type == "function_call"]
+        if calls:
+            messages += response.output
+            for tc in calls:
+                args = json.loads(tc.arguments)
+                tools.append({"name": tc.name, "arguments": args})
+                if tc.name == "get_crew_count":
                     dept = args["department"]
                     result = json.dumps({"count": len(CREW.get(dept, []))})
                 else:
                     result = json.dumps({"error": "unknown"})
-                messages.append({"role": "tool", "content": result})
-        elif message.content:
-            answer = message.content
+                messages.append({"type": "function_call_output", "call_id": tc.call_id, "output": result})
+        elif response.output_text:
+            answer = response.output_text
             break
     return {"tools": tools, "answer": answer}
 
@@ -93,7 +92,7 @@ def demo_golden():
     print("    expected tool: get_crew_count(department=engineering)")
     print('    expected answer: "Engineering has 2 crew members."')
     print()
-    print("  The mock LLM returns a scripted tool_call, then a scripted final message.")
+    print("  The mock LLM returns a scripted function_call, then a scripted final answer.")
     print("  Handlers still run — we check behaviour, not the network.\n")
     pause()
 

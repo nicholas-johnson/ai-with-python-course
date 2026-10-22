@@ -7,9 +7,8 @@ from start import score_relevance, rerank, two_stage_retrieve
 def make_mock_client(score_text="7"):
     client = MagicMock()
     response = MagicMock()
-    response.choices = [MagicMock()]
-    response.choices[0].message.content = score_text
-    client.chat.completions.create.return_value = response
+    response.output_text = score_text
+    client.responses.create.return_value = response
     return client
 
 
@@ -37,7 +36,7 @@ class TestScoreRelevance:
     def test_calls_openai(self):
         client = make_mock_client("5")
         score_relevance(client, "test query", "test passage")
-        client.chat.completions.create.assert_called_once()
+        client.responses.create.assert_called_once()
 
 
 class TestRerank:
@@ -47,11 +46,10 @@ class TestRerank:
 
         def create_response(**kwargs):
             resp = MagicMock()
-            resp.choices = [MagicMock()]
-            resp.choices[0].message.content = next(scores)
+            resp.output_text = next(scores)
             return resp
 
-        client.chat.completions.create.side_effect = create_response
+        client.responses.create.side_effect = create_response
 
         results = rerank(client, "reactor", PASSAGES, top_k=2)
         assert len(results) == 2

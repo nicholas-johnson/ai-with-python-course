@@ -69,10 +69,10 @@ def read_notes() -> str:
 TOOLS = {"search_web": search_web, "calculator": calculator, "take_note": take_note, "read_notes": read_notes}
 
 TOOL_SCHEMAS = [
-    {"type": "function", "function": {"name": "search_web", "description": "Search the web.", "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}}},
-    {"type": "function", "function": {"name": "calculator", "description": "Evaluate math.", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}},
-    {"type": "function", "function": {"name": "take_note", "description": "Save a note.", "parameters": {"type": "object", "properties": {"content": {"type": "string"}}, "required": ["content"]}}},
-    {"type": "function", "function": {"name": "read_notes", "description": "Read all notes.", "parameters": {"type": "object", "properties": {}}}},
+    {"type": "function", "name": "search_web", "description": "Search the web.", "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
+    {"type": "function", "name": "calculator", "description": "Evaluate math.", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}},
+    {"type": "function", "name": "take_note", "description": "Save a note.", "parameters": {"type": "object", "properties": {"content": {"type": "string"}}, "required": ["content"]}},
+    {"type": "function", "name": "read_notes", "description": "Read all notes.", "parameters": {"type": "object", "properties": {}}},
 ]
 
 
@@ -100,11 +100,11 @@ class Plan(BaseModel):
 
 
 def generate_plan(goal: str, client: OpenAI) -> list[PlanStep]:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Plan,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Plan,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -116,7 +116,7 @@ def generate_plan(goal: str, client: OpenAI) -> list[PlanStep]:
             {"role": "user", "content": goal},
         ],
     )
-    plan = response.choices[0].message.parsed
+    plan = response.output_parsed
     return [PlanStep(number=s.number, description=s.description) for s in plan.steps] if plan else []
 
 
@@ -134,24 +134,24 @@ def execute_step(step: PlanStep, client: OpenAI) -> str:
     ]
 
     for _ in range(3):
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=TOOL_SCHEMAS,
             tool_choice="auto",
         )
-        msg = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if not msg.tool_calls:
-            return msg.content or "(no result)"
+        if not calls:
+            return response.output_text or "(no result)"
 
-        messages.append(msg)
-        for tc in msg.tool_calls:
-            fn_name = tc.function.name
-            fn_args = json.loads(tc.function.arguments)
+        messages += response.output
+        for tc in calls:
+            fn_name = tc.name
+            fn_args = json.loads(tc.arguments)
             result = TOOLS[fn_name](**fn_args)
-            messages.append({"role": "tool", "content": result, "tool_call_id": tc.id})
+            messages.append({"type": "function_call_output", "output": result, "call_id": tc.call_id})
 
     return "(step timed out)"
 
@@ -169,11 +169,11 @@ def revise_plan(
         f"  {s.number}. {s.description}" for s in remaining
     )
 
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Plan,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Plan,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -190,7 +190,7 @@ def revise_plan(
             },
         ],
     )
-    plan = response.choices[0].message.parsed
+    plan = response.output_parsed
     start_num = len(completed) + 1
     return [
         PlanStep(number=start_num + i, description=s.description)
@@ -243,15 +243,15 @@ def plan_and_execute(goal: str, client: OpenAI, max_replans: int = 1) -> dict:
     synthesis_prompt = "\n".join(
         f"{s.number}. {s.description} -> {s.result}" for s in completed
     )
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": "Synthesise the results of these steps into a final answer."},
             {"role": "user", "content": synthesis_prompt},
         ],
     )
-    answer = response.choices[0].message.content
+    answer = response.output_text
     return {"answer": answer, "plan": completed}
 
 

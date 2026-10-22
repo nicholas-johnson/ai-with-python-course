@@ -31,52 +31,44 @@ def build_agent_messages(department: str, query: str) -> list[dict]:
 def run_agent_turn(department: str, messages: list[dict], client: OpenAI):
     """One LLM call with the agent's scoped tools."""
     tools = AGENT_TOOLS.get(department, AGENT_TOOLS["comms"])
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
         tools=tools,
         tool_choice="auto",
     )
-    return response.choices[0].message
+    return response
 
 
-def handle_tool_calls(response_message, department: str) -> tuple[list[dict], str | None]:
+def function_calls(response) -> list:
+    """The function_call items in a response's output (empty if the model answered)."""
+    return [item for item in response.output if item.type == "function_call"]
+
+
+def handle_tool_calls(response, department: str) -> tuple[list, str | None]:
     """
-    Execute tool calls from the assistant message.
+    Execute the function calls in the agent's response.
 
     Returns:
-        (tool_messages, transfer_target)
-        transfer_target is set when a transfer_to_* tool was called.
+        (new_items, transfer_target)
+        new_items is the model's output followed by one function_call_output per call,
+        ready to extend the conversation. transfer_target is set when a
+        transfer_to_* tool was called.
     """
-    tool_messages: list[dict] = []
+    calls = function_calls(response)
     transfer_target: str | None = None
 
-    if not response_message.tool_calls:
-        return tool_messages, transfer_target
+    if not calls:
+        return [], transfer_target
 
-    # Append assistant message with tool_calls for the next turn
-    assistant_entry = {
-        "role": "assistant",
-        "content": response_message.content or "",
-        "tool_calls": [
-            {
-                "id": tc.id,
-                "type": "function",
-                "function": {
-                    "name": tc.function.name,
-                    "arguments": tc.function.arguments,
-                },
-            }
-            for tc in response_message.tool_calls
-        ],
-    }
-    tool_messages.append(assistant_entry)
+    # Keep the model's function_call items so each output can be matched by call_id
+    tool_messages: list = list(response.output)
 
-    for tc in response_message.tool_calls:
-        fn_name = tc.function.name
+    for tc in calls:
+        fn_name = tc.name
         try:
-            fn_args = json.loads(tc.function.arguments or "{}")
+            fn_args = json.loads(tc.arguments or "{}")
         except json.JSONDecodeError:
             fn_args = {}
 
@@ -94,9 +86,9 @@ def handle_tool_calls(response_message, department: str) -> tuple[list[dict], st
 
         tool_messages.append(
             {
-                "role": "tool",
-                "tool_call_id": tc.id,
-                "content": result if isinstance(result, str) else json.dumps(result),
+                "type": "function_call_output",
+                "call_id": tc.call_id,
+                "output": result if isinstance(result, str) else json.dumps(result),
             }
         )
 
@@ -129,24 +121,24 @@ def swarm_loop(
 
     for hop in range(max_hops):
         trace.append({"hop": hop + 1, "agent": department, "action": "llm_turn"})
-        msg = run_agent_turn(department, messages, client)
+        response = run_agent_turn(department, messages, client)
 
-        if not msg.tool_calls:
-            answer = msg.content or ""
+        if not function_calls(response):
+            answer = response.output_text
             trace.append({"hop": hop + 1, "agent": department, "action": "final_answer"})
             return {"answer": answer, "chain": chain, "trace": trace}
 
-        tool_msgs, transfer = handle_tool_calls(msg, department)
+        tool_msgs, transfer = handle_tool_calls(response, department)
         messages.extend(tool_msgs)
 
         for tm in tool_msgs:
-            if tm.get("role") == "tool":
+            if isinstance(tm, dict) and tm.get("type") == "function_call_output":
                 trace.append(
                     {
                         "hop": hop + 1,
                         "agent": department,
                         "action": "tool_result",
-                        "content": tm.get("content", "")[:120],
+                        "content": tm.get("output", "")[:120],
                     }
                 )
 
@@ -204,7 +196,7 @@ def main():
         if user_input == "/agents":
             print("[Swarm agents]")
             for dept in DEPARTMENTS:
-                names = [t["function"]["name"] for t in AGENT_TOOLS[dept]]
+                names = [t["name"] for t in AGENT_TOOLS[dept]]
                 print(f"  {dept}: {', '.join(names)}")
             print()
             continue

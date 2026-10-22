@@ -61,9 +61,9 @@ Three functions in **`start.py`**. Tools, handlers, and `make_scripted_client` a
 Same loop as Module 2, but you record every tool name + parsed arguments:
 
 1. Messages = system prompt + `case["question"]`.
-2. Call `client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS)`.
-3. If `message.tool_calls`: for each call, `json.loads` the arguments, append to `tools`, run `HANDLERS[name](**arguments)`, append a tool-role message, loop.
-4. If `message.content`: that is the answer — stop.
+2. Call `client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOLS)`.
+3. Collect `calls = [item for item in response.output if item.type == "function_call"]`. If there are any: add `response.output` to `messages`, then for each call `json.loads` the arguments, append to `tools`, run `HANDLERS[call.name](**arguments)`, append a `function_call_output` item with the call's `call_id`, and loop.
+4. Otherwise `response.output_text` is the answer — stop.
 5. Cap with `max_steps`.
 
 ### 2. Implement `score_case`

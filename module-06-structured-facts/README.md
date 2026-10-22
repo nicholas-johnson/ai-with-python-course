@@ -37,28 +37,27 @@ class ExtractionResult(BaseModel):
     raw_text: str
 ```
 
-Pass the model class itself as `response_format` to `client.chat.completions.parse`. The SDK converts it to a strict JSON Schema, the API **constrains generation** to that schema (the model cannot produce a missing key or a wrong type), and the SDK validates the reply back into your Pydantic object:
+Pass the model class itself as `text_format` to `client.responses.parse`. The SDK converts it to a strict JSON Schema, the API **constrains generation** to that schema (the model cannot produce a missing key or a wrong type), and the SDK validates the reply back into your Pydantic object:
 
 ```python
-response = client.chat.completions.parse(
+response = client.responses.parse(
     model=MODEL,
-    reasoning_effort="none",
-    response_format=ExtractionResult,
-    messages=[
+    reasoning={"effort": "none"},
+    text_format=ExtractionResult,
+    input=[
         {"role": "system", "content": "Extract every factual claim from the text."},
         {"role": "user", "content": text},
     ],
 )
-message = response.choices[0].message
-if message.refusal:          # the model declined -- parsed is None
+if response.output_parsed is None:          # the model declined -- parsed is None
     ...
-result = message.parsed      # an ExtractionResult instance
+result = response.output_parsed      # an ExtractionResult instance
 ```
 
 Two things to know:
 
 - **The top level must be an object.** To get a list of facts, wrap it: `class FactList(BaseModel): facts: list[Fact]`.
-- **Older approach: JSON mode.** `response_format={"type": "json_object"}` only guarantees *some* valid JSON, so you have to paste the schema into the prompt, `json.loads` the text, and handle missing or misnamed keys yourself. Structured outputs replace all of that. You will still see JSON mode in older code.
+- **Older approach: JSON mode.** `text={"format": {"type": "json_object"}}` only guarantees *some* valid JSON, so you have to paste the schema into the prompt, `json.loads` the text, and handle missing or misnamed keys yourself. Structured outputs replace all of that. You will still see JSON mode in older code.
 
 ---
 
@@ -66,23 +65,23 @@ Two things to know:
 
 Extraction turns free text into structured facts. The pipeline has three stages:
 
-**Extract** — send the text with the schema as `response_format`. Ask the model to identify every factual claim, the subject entity, and a confidence score; the schema takes care of the format.
+**Extract** — send the text with the schema as `text_format`. Ask the model to identify every factual claim, the subject entity, and a confidence score; the schema takes care of the format.
 
 ```python
 class FactList(BaseModel):
     facts: list[Fact]
 
 def extract_facts(text: str, client: OpenAI) -> list[Fact]:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=FactList,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=FactList,
+        input=[
             {"role": "system", "content": "Extract every factual claim. Rate confidence 0-1."},
             {"role": "user", "content": text},
         ],
     )
-    parsed = response.choices[0].message.parsed
+    parsed = response.output_parsed
     return parsed.facts if parsed else []
 ```
 

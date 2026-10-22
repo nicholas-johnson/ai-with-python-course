@@ -22,15 +22,15 @@ When the conversation exceeds a threshold, the oldest half of messages gets summ
 ```python
 def summarise_turns(turns, client):
     formatted = "\n".join(f"{t['role']}: {t['content']}" for t in turns)
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": "Summarise this conversation..."},
             {"role": "user", "content": formatted},
         ],
     )
-    return response.choices[0].message.content
+    return response.output_text
 ```
 
 ## The scenario

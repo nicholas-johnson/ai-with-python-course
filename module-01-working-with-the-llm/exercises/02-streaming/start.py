@@ -19,8 +19,8 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 def chat(client, messages: list[dict]) -> str:
     """Non-streaming chat — kept for reference."""
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text
 
 
 # ---------------------------------------------------------------------------
@@ -31,10 +31,11 @@ def stream_response(client, messages: list[dict]) -> str:
     """
     Stream the LLM response token by token.
 
-    1. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, stream=True).
-    2. Iterate over the response chunks.
-    3. For each chunk, extract the token from chunk.choices[0].delta.content.
-       (It may be None for the first/last chunks — skip those.)
+    1. Call client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True).
+    2. Iterate over the stream. Each item is an event with a .type.
+    3. Text arrives in events where event.type == "response.output_text.delta";
+       the token is event.delta. Skip every other event type (they mark
+       progress: response.created, response.completed, ...).
     4. Print each token immediately (sys.stdout.write + flush, no newline).
     5. Collect all tokens into a list.
     6. After the loop, print a newline.

@@ -7,9 +7,8 @@ from start import extract_claims, check_claim_support, verify_answer
 def make_mock_client(response_text):
     client = MagicMock()
     response = MagicMock()
-    response.choices = [MagicMock()]
-    response.choices[0].message.content = response_text
-    client.chat.completions.create.return_value = response
+    response.output_text = response_text
+    client.responses.create.return_value = response
     return client
 
 
@@ -34,7 +33,7 @@ class TestExtractClaims:
     def test_calls_openai(self):
         client = make_mock_client("A single claim.")
         extract_claims(client, "Answer text.")
-        client.chat.completions.create.assert_called_once()
+        client.responses.create.assert_called_once()
 
 
 class TestCheckClaimSupport:
@@ -62,11 +61,10 @@ class TestVerifyAnswer:
 
         def create_response(**kwargs):
             resp = MagicMock()
-            resp.choices = [MagicMock()]
-            resp.choices[0].message.content = next(responses)
+            resp.output_text = next(responses)
             return resp
 
-        client.chat.completions.create.side_effect = create_response
+        client.responses.create.side_effect = create_response
 
         results = verify_answer(client, "Answer text.", ["Passage 1"])
         assert isinstance(results, list)
@@ -81,11 +79,10 @@ class TestVerifyAnswer:
 
         def create_response(**kwargs):
             resp = MagicMock()
-            resp.choices = [MagicMock()]
-            resp.choices[0].message.content = next(responses)
+            resp.output_text = next(responses)
             return resp
 
-        client.chat.completions.create.side_effect = create_response
+        client.responses.create.side_effect = create_response
 
         results = verify_answer(client, "Answer.", ["Evidence passage"])
         assert results[0]["supported"] is True
@@ -97,11 +94,10 @@ class TestVerifyAnswer:
 
         def create_response(**kwargs):
             resp = MagicMock()
-            resp.choices = [MagicMock()]
-            resp.choices[0].message.content = next(responses)
+            resp.output_text = next(responses)
             return resp
 
-        client.chat.completions.create.side_effect = create_response
+        client.responses.create.side_effect = create_response
 
         results = verify_answer(client, "Answer.", ["Unrelated passage"])
         assert results[0]["supported"] is False
@@ -113,11 +109,10 @@ class TestVerifyAnswer:
 
         def create_response(**kwargs):
             resp = MagicMock()
-            resp.choices = [MagicMock()]
-            resp.choices[0].message.content = next(responses)
+            resp.output_text = next(responses)
             return resp
 
-        client.chat.completions.create.side_effect = create_response
+        client.responses.create.side_effect = create_response
 
         results = verify_answer(client, "Answer.", ["Passage A", "Passage B"])
         assert results[0]["supported"] is True

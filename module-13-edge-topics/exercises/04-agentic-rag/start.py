@@ -62,8 +62,9 @@ def agentic_rag(
     TODO:
     - Initialize messages with a system prompt and the user question
     - Loop: call the LLM with tools available
-    - If the response has tool_calls, handle each one and append results
-    - If the response has no tool_calls, return the text content
+    - If response.output has function_call items, add response.output to the
+      messages, handle each call, and append function_call_output items
+    - If there are no function calls, return response.output_text
     - Respect max_turns to prevent infinite loops
     """
     # TODO: implement the agentic RAG loop

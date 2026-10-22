@@ -41,11 +41,11 @@ class FactList(BaseModel):
 
 def extract_facts(text: str, client: OpenAI) -> tuple[list[Fact], str]:
     """Extract structured facts from text using OpenAI. Returns (facts, raw_json)."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=FactList,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=FactList,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -59,10 +59,9 @@ def extract_facts(text: str, client: OpenAI) -> tuple[list[Fact], str]:
         ],
     )
 
-    message = response.choices[0].message
-    if message.refusal:
+    if response.output_parsed is None:
         return [], ""
-    return message.parsed.facts, message.content
+    return response.output_parsed.facts, response.output_text
 
 
 def validate_facts(facts: list[Fact], min_confidence: float = 0.7) -> list[Fact]:

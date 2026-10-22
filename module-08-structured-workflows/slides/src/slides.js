@@ -54,20 +54,21 @@ export const slides = [
     trace = []
 
     for step in range(max_steps):
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages,
+        response = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages,
             tools=tool_schemas, tool_choice="auto",
         )
-        msg = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if not msg.tool_calls:
-            trace.append({"type": "answer", "content": msg.content})
-            return {"answer": msg.content, "trace": trace}
+        if not calls:
+            trace.append({"type": "answer", "content": response.output_text})
+            return {"answer": response.output_text, "trace": trace}
 
-        for tc in msg.tool_calls:
-            result = tools[tc.function.name](**json.loads(tc.function.arguments))
-            trace.append({"type": "tool", "name": tc.function.name, "result": result})
-            messages.append({"role": "tool", "content": result, "tool_call_id": tc.id})
+        messages += response.output  # keep the calls so results can be matched
+        for tc in calls:
+            result = tools[tc.name](**json.loads(tc.arguments))
+            trace.append({"type": "tool", "name": tc.name, "result": result})
+            messages.append({"type": "function_call_output", "output": result, "call_id": tc.call_id})
 
     return {"answer": None, "trace": trace}`,
       highlights: [

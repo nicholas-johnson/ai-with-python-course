@@ -130,11 +130,11 @@ def swarm_loop(query, client, start_dept="comms", max_hops=6):
     chain = [dept]
 
     for hop in range(max_hops):
-        msg = run_agent_turn(dept, messages, client)
-        if not msg.tool_calls:
-            return msg.content, chain
+        response = run_agent_turn(dept, messages, client)
+        if not function_calls(response):
+            return response.output_text, chain
 
-        tool_msgs, transfer = handle_tool_calls(msg, dept)
+        tool_msgs, transfer = handle_tool_calls(response, dept)
         messages.extend(tool_msgs)
         if transfer:
             dept = transfer

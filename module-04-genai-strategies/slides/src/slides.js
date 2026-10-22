@@ -177,8 +177,8 @@ def enforce_budget(messages, max_tokens):
       points: [
         '**Vision**: send images as base64 data URIs or public URLs in user messages.',
         '**Audio input**: the transcription API (gpt-transcribe) turns speech into text.',
-        'Same chat completions API — content is just a **list of parts** instead of a string.',
-        'Use `client.chat.completions.parse(response_format=ImageAnalysis)` to get typed vision output.',
+        'Same Responses API call — content is just a **list of parts** (`input_text`, `input_image`) instead of a string.',
+        'Use `client.responses.parse(text_format=ImageAnalysis)` to get typed vision output.',
       ],
     },
   },
@@ -186,16 +186,14 @@ def enforce_budget(messages, max_tokens):
     type: 'code',
     content: {
       title: 'Vision — image analysis',
-      code: `response = client.chat.completions.create(
+      code: `response = client.responses.create(
     model=MODEL,
-    reasoning_effort="none",
-    messages=[{
+    reasoning={"effort": "none"},
+    input=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe what you see in this image."},
-            {"type": "image_url", "image_url": {
-                "url": f"data:image/png;base64,{img_b64}"
-            }},
+            {"type": "input_text", "text": "Describe what you see in this image."},
+            {"type": "input_image", "image_url": f"data:image/png;base64,{img_b64}"},
         ],
     }],
 )`,

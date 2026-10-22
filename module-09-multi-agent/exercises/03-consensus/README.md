@@ -54,13 +54,13 @@ Call the LLM with structured outputs to evaluate both final arguments:
 - Schema: `class Judgment(BaseModel): winner: Literal["advocate", "skeptic"]; reasoning: str`
 - System prompt: impartial judge, pick the stronger case
 - User prompt: the question + both arguments
-- Return `message.parsed.model_dump()`; default to `"advocate"` if `parsed` is `None`
+- Return `response.output_parsed.model_dump()`; default to `"advocate"` if `response.output_parsed` is `None`
 
 ### 3. Implement `consensus_vote`
 
 1. Call `specialist_agent` for each department in `DEPARTMENTS` to collect independent answers
 2. Format all responses into a text block
-3. For each department, ask a voting LLM which response is best, with `response_format=Vote` where `class Vote(BaseModel): vote: Literal["medical", "tactical", "comms"]`
+3. For each department, ask a voting LLM which response is best, with `text_format=Vote` where `class Vote(BaseModel): vote: Literal["medical", "tactical", "comms"]`
 4. Tally votes and return the winner with the highest count
 
 ### 4. Implement `multi_agent_answer`

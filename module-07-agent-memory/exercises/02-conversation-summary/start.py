@@ -34,7 +34,7 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     """
     # TODO: implement summarisation
     #   1. Format the turns into a readable transcript string
-    #   2. Call client.chat.completions.create with model=MODEL, reasoning_effort="none"
+    #   2. Call client.responses.create with model=MODEL, reasoning={"effort": "none"}
     #      - system prompt: instruct the model to summarise the conversation
     #        concisely, preserving key facts, decisions, and user preferences
     #      - user message: the formatted transcript

@@ -144,6 +144,7 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
+        'Call the model with OpenAI\'s **Responses API** — and recognise the older **Chat Completions API**.',
         'Build a **CLI chat loop** with conversation history.',
         '**Stream responses** token by token for real-time output.',
         'Apply **prompt engineering** patterns: personas, structured outputs, few-shot examples.',
@@ -193,6 +194,53 @@ export const slides = [
       ],
     },
   },
+  {
+    type: 'code',
+    content: {
+      title: 'Calling the model — the Responses API',
+      code: `from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-6-luna",
+    reasoning={"effort": "none"},     # answer directly, no thinking step
+    instructions="You are the DSS Pathfinder ship AI.",
+    input="What is our heading?",      # a string, or a list of messages
+)
+print(response.output_text)`,
+      highlights: [
+        'input= takes a string or the full message list',
+        'response.output_text is the reply as a plain string',
+      ],
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Two APIs — Responses vs Chat Completions',
+      left: {
+        label: 'Responses API (use this)',
+        items: [
+          '`client.responses.create(input=..., instructions=...)`',
+          'Reply: `response.output_text`',
+          'Streaming: typed events (`response.output_text.delta`)',
+          'Optional server-side state: `previous_response_id`',
+          'Built-in tools: web search, file search, code interpreter',
+        ],
+      },
+      right: {
+        label: 'Chat Completions (older)',
+        items: [
+          '`client.chat.completions.create(messages=...)`',
+          'Reply: `completion.choices[0].message.content`',
+          'Streaming: chunks (`chunk.choices[0].delta.content`)',
+          'You always resend the full history',
+          'Still supported and widely copied — but new features land in Responses first',
+        ],
+      },
+    },
+  },
   // ---- Demo: Basic chat ----
   {
     type: 'title',
@@ -223,6 +271,7 @@ export const slides = [
         'First token appears in ~200ms vs waiting 2-5s for full response.',
         'Progressive rendering keeps the user engaged during generation.',
         'Server-Sent Events (SSE) — simple, HTTP-native, no WebSocket complexity.',
+        'With `stream=True` the Responses API sends **typed events** — the text is in `response.output_text.delta` events.',
       ],
     },
   },
@@ -253,6 +302,15 @@ async def chat(request: ChatRequest):
     content: {
       title: 'Demo — Streaming',
       subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
+      icon: 'rocket',
+    },
+  },
+
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Responses vs Chat Completions',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
       icon: 'rocket',
     },
   },

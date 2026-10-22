@@ -92,11 +92,9 @@ class ToolRegistry:
         return [
             {
                 "type": "function",
-                "function": {
-                    "name": t["name"],
-                    "description": t["description"],
-                    "parameters": t["parameters"],
-                },
+                "name": t["name"],
+                "description": t["description"],
+                "parameters": t["parameters"],
             }
             for t in self._tools.values()
         ]
@@ -241,11 +239,11 @@ class GuardedAgent:
 
     @staticmethod
     def _build_tool_error(tc_id: str, reason: str) -> dict:
-        """Build a tool-role message dict containing a JSON error.
+        """Build a function_call_output item containing a JSON error.
 
         Return format:
-            {"role": "tool", "tool_call_id": tc_id,
-             "content": '{"error": "<reason>"}'}
+            {"type": "function_call_output", "call_id": tc_id,
+             "output": '{"error": "<reason>"}'}
         """
         # TODO: implement
         raise NotImplementedError

@@ -27,11 +27,9 @@ def mcp_to_openai_tools(mcp_tools) -> list[dict]:
     return [
         {
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description or "",
-                "parameters": tool.input_schema,
-            },
+            "name": tool.name,
+            "description": tool.description or "",
+            "parameters": tool.input_schema,
         }
         for tool in mcp_tools
     ]
@@ -40,27 +38,27 @@ def mcp_to_openai_tools(mcp_tools) -> list[dict]:
 async def run_turn(client, messages, session, openai_tools, max_steps: int = 10) -> str:
     """Execute one conversational turn: call the LLM, handle tool calls, return final text."""
     for _ in range(max_steps):
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools,
+        response = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages, tools=openai_tools,
         )
-        choice = response.choices[0]
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if choice.finish_reason != "tool_calls":
-            answer = choice.message.content or ""
+        if not calls:
+            answer = response.output_text
             messages.append({"role": "assistant", "content": answer})
             return answer
 
-        messages.append(choice.message)
-        for tc in choice.message.tool_calls:
-            fn_name = tc.function.name
-            fn_args = json.loads(tc.function.arguments)
+        messages += response.output
+        for tc in calls:
+            fn_name = tc.name
+            fn_args = json.loads(tc.arguments)
             print(f"  [tool_call] {fn_name}({json.dumps(fn_args)})")
 
             result = await session.call_tool(fn_name, fn_args)
             result_text = result.content[0].text if result.content else "No result"
             print(f"  [tool_result] {result_text[:150].replace(chr(10), ' ')}...")
 
-            messages.append({"role": "tool", "tool_call_id": tc.id, "content": result_text})
+            messages.append({"type": "function_call_output", "call_id": tc.call_id, "output": result_text})
 
     return "(max tool steps reached)"
 

@@ -82,14 +82,12 @@ def test_grounded_qa_returns_answer(fake_parse):
     graph = _make_graph()
 
     mock_client = MagicMock()
-    mock_client.chat.completions.parse.side_effect = fake_parse('{"entities": ["Vasquez"]}')
+    mock_client.responses.parse.side_effect = fake_parse('{"entities": ["Vasquez"]}')
 
     answer_response = MagicMock()
-    answer_response.choices = [MagicMock(message=MagicMock(
-        content="Vasquez repaired the port thruster [Fact 1] and inspected the warp core [Fact 2]."
-    ))]
+    answer_response.output_text = "Vasquez repaired the port thruster [Fact 1] and inspected the warp core [Fact 2]."
 
-    mock_client.chat.completions.create.return_value = answer_response
+    mock_client.responses.create.return_value = answer_response
 
     result = mod.grounded_qa("What did Vasquez do?", graph, mock_client)
 
@@ -104,7 +102,7 @@ def test_grounded_qa_no_entities(fake_parse):
     graph = _make_graph()
 
     mock_client = MagicMock()
-    mock_client.chat.completions.parse.side_effect = fake_parse('{"entities": []}')
+    mock_client.responses.parse.side_effect = fake_parse('{"entities": []}')
 
     result = mod.grounded_qa("What is the meaning of life?", graph, mock_client)
 

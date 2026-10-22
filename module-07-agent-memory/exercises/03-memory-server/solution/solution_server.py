@@ -3,8 +3,10 @@ Exercise 03: Memory MCP Server -- solution_server.py
 ======================================================
 Complete MCPServer server wrapping the memory system.
 
-Run standalone:  python -m mcp dev solution_server.py
+Run standalone:  mcp dev solution_server.py
 """
+
+import sys
 
 from mcp.server.mcpserver import MCPServer
 
@@ -13,10 +15,10 @@ from summary import SmartSessionMemory
 
 mcp = MCPServer("Cantina Memory")
 
-print("Cantina Memory: initialising memory systems...", flush=True)
+print("Cantina Memory: initialising memory systems...", file=sys.stderr, flush=True)
 long_term = LongTermMemory()
 session = SmartSessionMemory(max_turns=30, summarise_threshold=10)
-print("Cantina Memory: ready", flush=True)
+print("Cantina Memory: ready", file=sys.stderr, flush=True)
 
 
 @mcp.tool()

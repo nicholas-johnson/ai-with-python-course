@@ -3,9 +3,10 @@ Exercise 3: RAG MCP Server -- solution_server.py
 ===================================================
 Complete MCPServer server wrapping the RAG pipeline.
 
-Run standalone:  python -m mcp dev solution_server.py
+Run standalone:  mcp dev solution_server.py
 """
 
+import sys
 import json
 from dataclasses import dataclass
 import os
@@ -132,8 +133,8 @@ def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
 def rag_chat(query: str, collection_ref, k: int = 5) -> tuple[str, list[dict]]:
     passages = search(collection_ref, query, k)
     messages = build_grounded_prompt(query, passages)
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content, passages
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text, passages
 
 
 # --- Lazy index init ---
@@ -144,10 +145,10 @@ _collection = None
 def _get_collection() -> chromadb.Collection:
     global _collection
     if _collection is None:
-        print("RAG Server: loading logs and building index...", flush=True)
+        print("RAG Server: loading logs and building index...", file=sys.stderr, flush=True)
         logs = load_logs()
         _collection = build_index(logs)
-        print(f"RAG Server: index ready ({_collection.count()} chunks)", flush=True)
+        print(f"RAG Server: index ready ({_collection.count()} chunks)", file=sys.stderr, flush=True)
     return _collection
 
 

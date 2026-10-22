@@ -9,22 +9,21 @@ Without streaming, the user stares at a blank screen for several seconds while t
 To enable streaming, pass `stream=True` to the API call:
 
 ```python
-response = client.chat.completions.create(
-    model=MODEL, reasoning_effort="none", messages=messages, stream=True,
+stream = client.responses.create(
+    model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True,
 )
 ```
 
-This changes the return type from a single response object to an **iterator of chunks**. Each chunk has the same structure as a normal response, but instead of `.message` it has a `.delta` containing just the new fragment:
+This changes the return value from a single response object to an **iterator of events**. Each event has a `.type`. The text arrives in `response.output_text.delta` events, whose `.delta` holds just the new fragment:
 
 ```python
-for chunk in response:
-    token = chunk.choices[0].delta.content  # may be None
-    if token:
-        sys.stdout.write(token)
+for event in stream:
+    if event.type == "response.output_text.delta":
+        sys.stdout.write(event.delta)
         sys.stdout.flush()
 ```
 
-`delta.content` is `None` for the first and last chunks (which carry metadata, not text). Always check before printing. Use `sys.stdout.write()` + `sys.stdout.flush()` rather than `print()` so tokens appear without newlines between them.
+Other events -- `response.created`, `response.output_text.done`, `response.completed`, ... -- mark progress and carry metadata (the final event holds the complete response, including token usage). Skip them when printing. Use `sys.stdout.write()` + `sys.stdout.flush()` rather than `print()` so tokens appear without newlines between them.
 
 This exercise builds on Exercise 01. The basic `chat()` function and the input loop are already provided -- you only need to implement `stream_response()`.
 
@@ -40,12 +39,12 @@ The chat loop in `main()` is provided and already calls `stream_response()` inst
 
 Follow these steps inside the function:
 
-1. Call `client.chat.completions.create(model=MODEL, messages=messages, stream=True)`.
+1. Call `client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True)`.
 2. Create an empty list to collect tokens.
-3. Iterate over the response chunks with a `for` loop.
-4. For each chunk, extract `chunk.choices[0].delta.content`.
-5. If the content is not `None`, print it immediately with `sys.stdout.write(content)` followed by `sys.stdout.flush()`.
-6. Append the content to your tokens list.
+3. Iterate over the stream's events with a `for` loop.
+4. Skip any event whose `.type` isn't `"response.output_text.delta"`.
+5. For text events, print `event.delta` immediately with `sys.stdout.write(...)` followed by `sys.stdout.flush()`.
+6. Append the delta to your tokens list.
 7. After the loop, print a newline (`print()`).
 8. Return the joined tokens: `"".join(tokens)`.
 
@@ -53,15 +52,16 @@ The key pattern:
 
 ```python
 tokens = []
-for chunk in response:
-    content = chunk.choices[0].delta.content
-    if content:
-        sys.stdout.write(content)
+for event in stream:
+    if event.type == "response.output_text.delta":
+        sys.stdout.write(event.delta)
         sys.stdout.flush()
-        tokens.append(content)
+        tokens.append(event.delta)
 print()
 return "".join(tokens)
 ```
+
+> In the older Chat Completions API, streaming yields *chunks* instead, and the text is in `chunk.choices[0].delta.content` (which can be `None`). You'll see that shape in older code.
 
 The tests check that `stream_response()` returns the full text as a single string, and that it correctly handles the streaming API.
 

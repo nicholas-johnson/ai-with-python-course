@@ -17,10 +17,10 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
         f"{t['role'].upper()}: {t['content']}" for t in turns
     )
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -33,7 +33,7 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
             {"role": "user", "content": transcript},
         ],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 
 class SmartSessionMemory(SessionMemory):

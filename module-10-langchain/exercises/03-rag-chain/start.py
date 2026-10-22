@@ -59,7 +59,7 @@ _classify_prompt = ChatPromptTemplate.from_messages([
     ),
     ("human", "{report}"),
 ])
-_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 _classify_chain = _classify_prompt | _classify_model.with_structured_output(Classification)
 
 
@@ -103,7 +103,7 @@ SYSTEM_PROMPT = (
     "Use your tools to help the crew. Do not guess — always use a tool when data is needed."
 )
 
-agent = create_agent(ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0), tools, system_prompt=SYSTEM_PROMPT)
+agent = create_agent(ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True), tools, system_prompt=SYSTEM_PROMPT)
 
 
 def run_agent(query: str) -> str:

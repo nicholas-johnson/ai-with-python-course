@@ -67,8 +67,8 @@ def test_mcp_to_openai_tools():
     result = client_mod.mcp_to_openai_tools([mock_tool])
     assert len(result) == 1
     assert result[0]["type"] == "function"
-    assert result[0]["function"]["name"] == "remember"
-    assert "parameters" in result[0]["function"]
+    assert result[0]["name"] == "remember"
+    assert "parameters" in result[0]
 
 
 def test_client_has_main():

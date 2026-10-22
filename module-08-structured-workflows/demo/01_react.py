@@ -78,47 +78,39 @@ TOOLS = {
 TOOL_SCHEMAS = [
     {
         "type": "function",
-        "function": {
-            "name": "search_web",
-            "description": "Search the web for information. Returns a text summary.",
-            "parameters": {
-                "type": "object",
-                "properties": {"query": {"type": "string", "description": "Search query"}},
-                "required": ["query"],
-            },
+        "name": "search_web",
+        "description": "Search the web for information. Returns a text summary.",
+        "parameters": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "Search query"}},
+            "required": ["query"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "calculator",
-            "description": "Evaluate a mathematical expression. Returns the result.",
-            "parameters": {
-                "type": "object",
-                "properties": {"expression": {"type": "string", "description": "Math expression"}},
-                "required": ["expression"],
-            },
+        "name": "calculator",
+        "description": "Evaluate a mathematical expression. Returns the result.",
+        "parameters": {
+            "type": "object",
+            "properties": {"expression": {"type": "string", "description": "Math expression"}},
+            "required": ["expression"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "take_note",
-            "description": "Save a note for later reference.",
-            "parameters": {
-                "type": "object",
-                "properties": {"content": {"type": "string", "description": "Note content"}},
-                "required": ["content"],
-            },
+        "name": "take_note",
+        "description": "Save a note for later reference.",
+        "parameters": {
+            "type": "object",
+            "properties": {"content": {"type": "string", "description": "Note content"}},
+            "required": ["content"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "read_notes",
-            "description": "Read all saved notes.",
-            "parameters": {"type": "object", "properties": {}},
-        },
+        "name": "read_notes",
+        "description": "Read all saved notes.",
+        "parameters": {"type": "object", "properties": {}},
     },
 ]
 
@@ -141,36 +133,36 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
     trace = []
 
     for step in range(max_steps):
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=TOOL_SCHEMAS,
             tool_choice="auto",
         )
-        msg = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if msg.content:
-            trace.append({"type": "thought", "content": msg.content})
+        if response.output_text:
+            trace.append({"type": "thought", "content": response.output_text})
 
-        if not msg.tool_calls:
-            trace.append({"type": "answer", "content": msg.content or "(no response)"})
-            return {"answer": msg.content, "trace": trace}
+        if not calls:
+            trace.append({"type": "answer", "content": response.output_text or "(no response)"})
+            return {"answer": response.output_text, "trace": trace}
 
-        messages.append(msg)
+        messages += response.output
 
-        for tc in msg.tool_calls:
-            fn_name = tc.function.name
-            fn_args = json.loads(tc.function.arguments)
+        for tc in calls:
+            fn_name = tc.name
+            fn_args = json.loads(tc.arguments)
             trace.append({"type": "action", "tool": fn_name, "args": fn_args})
 
             result = TOOLS[fn_name](**fn_args)
             trace.append({"type": "observation", "tool": fn_name, "result": result[:500]})
 
             messages.append({
-                "role": "tool",
-                "content": result,
-                "tool_call_id": tc.id,
+                "type": "function_call_output",
+                "output": result,
+                "call_id": tc.call_id,
             })
 
     return {"answer": "(max steps reached)", "trace": trace}

@@ -105,7 +105,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-model = ChatOpenAI(model=MODEL, reasoning_effort="none")
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", use_responses_api=True)
 
 json_parser = JsonOutputParser()
 
@@ -374,7 +374,7 @@ result["answer"], result["docs"]`,
       code: `from fastapi import FastAPI
 from pydantic import BaseModel
 
-chain = prompt | ChatOpenAI(model=MODEL, reasoning_effort="none") | JsonOutputParser()
+chain = prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", use_responses_api=True) | JsonOutputParser()
 
 class ReportInput(BaseModel):
     report: str

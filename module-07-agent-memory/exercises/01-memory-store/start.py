@@ -90,7 +90,7 @@ def chat(
     #   1. Add the user message to session memory
     #   2. Build the system prompt with long-term memories
     #   3. Construct messages: [system_prompt] + session.get_messages()
-    #   4. Call client.chat.completions.create with model=MODEL
+    #   4. Call client.responses.create with model=MODEL
     #   5. Add the assistant response to session memory
     #   6. Auto-detect facts worth remembering (second LLM call)
     #   7. Return the response text

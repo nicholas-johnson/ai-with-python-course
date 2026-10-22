@@ -40,11 +40,9 @@ def mcp_to_openai_tools(mcp_tools):
     return [
         {
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description or "",
-                "parameters": tool.input_schema,
-            },
+            "name": tool.name,
+            "description": tool.description or "",
+            "parameters": tool.input_schema,
         }
         for tool in mcp_tools
     ]
@@ -120,13 +118,13 @@ async def execute_tool_calls(session: MCPConnection, tool_calls) -> list[dict]:
     """Execute MCP tool calls and return tool-result messages."""
     results = []
     for tc in tool_calls:
-        name = tc.function.name
-        args = json.loads(tc.function.arguments)
+        name = tc.name
+        args = json.loads(tc.arguments)
         content = await session.call_tool(name, args)
         results.append({
-            "role": "tool",
-            "tool_call_id": tc.id,
-            "content": content,
+            "type": "function_call_output",
+            "call_id": tc.call_id,
+            "output": content,
         })
     return results
 
@@ -149,11 +147,11 @@ class ImageAnalysis(BaseModel):
 
 async def analyze_image(image_b64: str, prompt: str) -> dict:
     """Send a base64 image to the chat model and return {description, key_points}."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=ImageAnalysis,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=ImageAnalysis,
+        input=[
             {
                 "role": "system",
                 "content": "You are an image analysis assistant.",
@@ -161,21 +159,18 @@ async def analyze_image(image_b64: str, prompt: str) -> dict:
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": prompt},
+                    {"type": "input_text", "text": prompt},
                     {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/png;base64,{image_b64}"
-                        },
+                        "type": "input_image",
+                        "image_url": f"data:image/png;base64,{image_b64}",
                     },
                 ],
             },
         ],
     )
-    message = response.choices[0].message
-    if message.parsed is None:
-        raise HTTPException(status_code=422, detail=message.refusal or "No analysis returned")
-    return message.parsed.model_dump()
+    if response.output_parsed is None:
+        raise HTTPException(status_code=422, detail="The model declined to analyse this image")
+    return response.output_parsed.model_dump()
 
 
 @app.get("/health")
@@ -197,70 +192,52 @@ async def chat(req: ChatRequest):
         tools = mcp_conn.openai_tools if mcp_conn.openai_tools else None
 
         while True:
-            response = client.chat.completions.create(
+            response = client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=messages,
+                reasoning={"effort": "none"},
+                input=messages,
                 tools=tools,
             )
+            calls = [item for item in response.output if item.type == "function_call"]
 
-            choice = response.choices[0]
+            if calls:
+                messages += response.output
 
-            if choice.finish_reason == "tool_calls":
-                assistant_msg = choice.message
-                messages.append(
-                    {
-                        "role": "assistant",
-                        "tool_calls": [
-                            {
-                                "id": tc.id,
-                                "type": "function",
-                                "function": {
-                                    "name": tc.function.name,
-                                    "arguments": tc.function.arguments,
-                                },
-                            }
-                            for tc in assistant_msg.tool_calls
-                        ],
-                    }
-                )
-
-                for tc in assistant_msg.tool_calls:
+                for tc in calls:
                     yield {
                         "event": "tool_call",
-                        "data": json.dumps({"name": tc.function.name, "arguments": json.loads(tc.function.arguments)}),
+                        "data": json.dumps({"name": tc.name, "arguments": json.loads(tc.arguments)}),
                     }
                     await asyncio.sleep(0)
 
-                tool_results = await execute_tool_calls(mcp_conn, assistant_msg.tool_calls)
+                tool_results = await execute_tool_calls(mcp_conn, calls)
 
-                for tc, result_msg in zip(assistant_msg.tool_calls, tool_results):
+                for tc, result_item in zip(calls, tool_results):
                     yield {
                         "event": "tool_result",
-                        "data": json.dumps({"name": tc.function.name, "content": result_msg["content"]}),
+                        "data": json.dumps({"name": tc.name, "content": result_item["output"]}),
                     }
                     await asyncio.sleep(0)
 
                 messages.extend(tool_results)
                 continue
 
-            content = choice.message.content or ""
+            content = response.output_text
 
-            stream = client.chat.completions.create(
+            stream = client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=messages,
+                reasoning={"effort": "none"},
+                input=messages,
                 stream=True,
             )
 
             full_content = ""
-            for chunk in stream:
-                delta = chunk.choices[0].delta
-                if delta.content:
-                    full_content += delta.content
+            for event in stream:
+                if event.type == "response.output_text.delta":
+                    full_content += event.delta
                     yield {
                         "event": "token",
-                        "data": json.dumps({"token": delta.content}),
+                        "data": json.dumps({"token": event.delta}),
                     }
 
             if not full_content:

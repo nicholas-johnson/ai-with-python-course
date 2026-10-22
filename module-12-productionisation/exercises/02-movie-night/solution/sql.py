@@ -20,10 +20,10 @@ def get_schema(db_path: str) -> str:
 
 def text_to_sql(question: str, schema: str) -> str:
     """Use the LLM to convert a natural-language question into a SQL query."""
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=OPENAI_MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content":
              "You are a SQL expert. Given the database schema below, write a single "
              "SQLite SELECT query that answers the user's question. Return ONLY the "
@@ -33,7 +33,7 @@ def text_to_sql(question: str, schema: str) -> str:
         ],
         temperature=0,
     )
-    sql = response.choices[0].message.content.strip()
+    sql = response.output_text.strip()
     if sql.startswith("```"):
         sql = sql.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
     return sql

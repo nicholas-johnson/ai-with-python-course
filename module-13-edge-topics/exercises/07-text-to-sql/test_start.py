@@ -54,9 +54,8 @@ class TestTextToSql:
     def test_returns_string(self):
         client = MagicMock()
         response = MagicMock()
-        response.choices = [MagicMock()]
-        response.choices[0].message.content = "SELECT * FROM crew WHERE role = 'Captain'"
-        client.chat.completions.create.return_value = response
+        response.output_text = "SELECT * FROM crew WHERE role = 'Captain'"
+        client.responses.create.return_value = response
 
         sql = text_to_sql(client, "Who is the captain?", "CREATE TABLE crew (id, name, role)")
         assert isinstance(sql, str)
@@ -65,9 +64,8 @@ class TestTextToSql:
     def test_strips_markdown_fences(self):
         client = MagicMock()
         response = MagicMock()
-        response.choices = [MagicMock()]
-        response.choices[0].message.content = "```sql\nSELECT * FROM crew\n```"
-        client.chat.completions.create.return_value = response
+        response.output_text = "```sql\nSELECT * FROM crew\n```"
+        client.responses.create.return_value = response
 
         sql = text_to_sql(client, "List all crew", "CREATE TABLE crew (id, name)")
         assert "```" not in sql
@@ -107,9 +105,8 @@ class TestAskDatabase:
     def test_returns_dict_with_sql_and_results(self, test_db):
         client = MagicMock()
         response = MagicMock()
-        response.choices = [MagicMock()]
-        response.choices[0].message.content = "SELECT name, role FROM crew"
-        client.chat.completions.create.return_value = response
+        response.output_text = "SELECT name, role FROM crew"
+        client.responses.create.return_value = response
 
         result = ask_database(client, test_db, "List all crew members")
         assert "sql" in result

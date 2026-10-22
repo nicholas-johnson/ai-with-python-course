@@ -10,15 +10,14 @@ def make_mock_client(chat_text="A hypothetical answer about the topic.", embeddi
     client = MagicMock()
 
     chat_response = MagicMock()
-    chat_response.choices = [MagicMock()]
-    chat_response.choices[0].message.content = chat_text
+    chat_response.output_text = chat_text
 
     emb_response = MagicMock()
     emb_data = MagicMock()
     emb_data.embedding = embedding
     emb_response.data = [emb_data]
 
-    client.chat.completions.create.return_value = chat_response
+    client.responses.create.return_value = chat_response
     client.embeddings.create.return_value = emb_response
     return client
 
@@ -45,13 +44,13 @@ class TestGenerateHypotheticalDocument:
     def test_calls_chat_api(self):
         client = make_mock_client()
         generate_hypothetical_document(client, "test query")
-        client.chat.completions.create.assert_called_once()
+        client.responses.create.assert_called_once()
 
     def test_passes_query_in_prompt(self):
         client = make_mock_client()
         generate_hypothetical_document(client, "reactor temperature")
-        call_args = client.chat.completions.create.call_args
-        messages = call_args.kwargs.get("messages", call_args[1].get("messages", []))
+        call_args = client.responses.create.call_args
+        messages = call_args.kwargs.get("input", call_args[1].get("input", []))
         content = messages[0]["content"] if messages else ""
         assert "reactor temperature" in content
 

@@ -63,11 +63,11 @@ class Ballot(BaseModel):
 
 
 def classify_query(query: str, client: OpenAI) -> str:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Route,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Route,
+        input=[
             {
                 "role": "system",
                 "content": "Classify the user query into exactly one department.",
@@ -75,28 +75,28 @@ def classify_query(query: str, client: OpenAI) -> str:
             {"role": "user", "content": query},
         ],
     )
-    route = response.choices[0].message.parsed
+    route = response.output_parsed
     return route.department if route else "science"
 
 def specialist_respond(department: str, query: str, client: OpenAI) -> str:
     prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": query},
         ],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 def critic_review(query: str, answer: str, client: OpenAI) -> dict:
     """Returns {"approved": bool, "feedback": str}."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Review,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Review,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -112,24 +112,24 @@ def critic_review(query: str, answer: str, client: OpenAI) -> dict:
             },
         ],
     )
-    review = response.choices[0].message.parsed
+    review = response.output_parsed
     if review is None:
         return {"approved": True, "feedback": "Reviewer refused."}
     return review.model_dump()
 
 def revise_answer(department: str, query: str, previous: str, feedback: str, client: OpenAI) -> str:
     prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": query},
             {"role": "assistant", "content": previous},
             {"role": "user", "content": f"A reviewer rejected your answer: {feedback}\nPlease revise."},
         ],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 def debate_round(topic: str, position: str, opponent_arg: str, client: OpenAI) -> str:
     messages = [
@@ -146,17 +146,17 @@ def debate_round(topic: str, position: str, opponent_arg: str, client: OpenAI) -
     ]
     if opponent_arg:
         messages.append({"role": "user", "content": f"Opponent's argument: {opponent_arg}"})
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text
 
 def judge_debate(topic: str, advocate_args: list[str], skeptic_args: list[str], client: OpenAI) -> str:
     transcript = ""
     for i, (a, s) in enumerate(zip(advocate_args, skeptic_args), 1):
         transcript += f"Round {i} — Advocate: {a}\nRound {i} — Skeptic: {s}\n\n"
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -169,7 +169,7 @@ def judge_debate(topic: str, advocate_args: list[str], skeptic_args: list[str], 
             {"role": "user", "content": f"Topic: {topic}\n\n{transcript}"},
         ],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 def wait():
     input("\n--- Press Enter to continue ---\n")
@@ -265,11 +265,11 @@ def main():
 
     votes: dict[str, str] = {}
     for dept in DEPARTMENTS:
-        response = client.chat.completions.parse(
+        response = client.responses.parse(
             model=MODEL,
-            reasoning_effort="none",
-            response_format=Ballot,
-            messages=[
+            reasoning={"effort": "none"},
+            text_format=Ballot,
+            input=[
                 {
                     "role": "system",
                     "content": (
@@ -280,7 +280,7 @@ def main():
                 {"role": "user", "content": question},
             ],
         )
-        ballot = response.choices[0].message.parsed
+        ballot = response.output_parsed
         vote = ballot.vote if ballot else options[0]
         reasoning = ballot.reasoning if ballot else "Abstained."
         votes[dept] = vote

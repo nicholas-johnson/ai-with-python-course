@@ -29,8 +29,8 @@ def _mock_client(content: str = "Mock response"):
     """Create a mock OpenAI client returning fixed content."""
     mock = MagicMock()
     mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message=MagicMock(content=content))]
-    mock.chat.completions.create.return_value = mock_response
+    mock_response.output_text = content
+    mock.responses.create.return_value = mock_response
     return mock
 
 
@@ -71,7 +71,7 @@ def test_debate_calls_openai():
     client = _mock_client("Debate point.")
     mod.debate("Is the anomaly dangerous?", client, rounds=2)
 
-    assert client.chat.completions.create.call_count >= 4
+    assert client.responses.create.call_count >= 4
 
 
 # --- judge tests ---
@@ -81,7 +81,7 @@ def test_judge_returns_winner_and_reasoning(fake_parse):
     """judge returns a dict with 'winner' and 'reasoning' keys."""
     mod = _import_start()
     client = MagicMock()
-    client.chat.completions.parse.side_effect = fake_parse(
+    client.responses.parse.side_effect = fake_parse(
         json.dumps({"winner": "skeptic", "reasoning": "More evidence cited."})
     )
     result = mod.judge(
@@ -101,8 +101,8 @@ def test_judge_defaults_on_refusal():
     """judge defaults to 'advocate' when the model refuses (parsed is None)."""
     mod = _import_start()
     client = MagicMock()
-    message = MagicMock(parsed=None, refusal="I can't help with that.")
-    client.chat.completions.parse.return_value = MagicMock(choices=[MagicMock(message=message)])
+    # The model refused: no parsed output.
+    client.responses.parse.return_value = MagicMock(output_parsed=None, output_text="")
     result = mod.judge("Question?", "For.", "Against.", client)
 
     assert result["winner"] == "advocate"
@@ -116,7 +116,7 @@ def test_consensus_vote_returns_correct_structure(fake_parse):
     mod = _import_start()
 
     client = _mock_client("Specialist answer.")
-    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"vote": "medical"}))
+    client.responses.parse.side_effect = fake_parse(json.dumps({"vote": "medical"}))
 
     result = mod.consensus_vote("What caused the power surge?", client)
 
@@ -135,7 +135,7 @@ def test_consensus_vote_responses_have_department_and_response(fake_parse):
     mod = _import_start()
 
     client = _mock_client("Specialist says...")
-    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"vote": "tactical"}))
+    client.responses.parse.side_effect = fake_parse(json.dumps({"vote": "tactical"}))
 
     result = mod.consensus_vote("Status report", client)
 

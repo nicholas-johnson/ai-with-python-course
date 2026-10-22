@@ -65,26 +65,19 @@ class TestChallengeFunctions:
 class TestRunPrompt:
     def test_calls_api_and_returns_text(self):
         client = MagicMock()
-        client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content="mocked response"))
-        ]
+        client.responses.create.return_value.output_text = "mocked response"
         result = run_prompt(client, "You are helpful.", "Hello")
         assert result == "mocked response"
 
-    def test_passes_system_and_user_messages(self):
+    def test_passes_instructions_and_input(self):
         client = MagicMock()
-        client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content="ok"))
-        ]
+        client.responses.create.return_value.output_text = "ok"
         run_prompt(client, "Be concise.", "What is 2+2?")
 
-        call_kwargs = client.chat.completions.create.call_args
+        call_kwargs = client.responses.create.call_args
         kw = call_kwargs.kwargs if call_kwargs.kwargs else call_kwargs[1]
-        messages = kw["messages"]
-        assert messages[0]["role"] == "system"
-        assert messages[0]["content"] == "Be concise."
-        assert messages[1]["role"] == "user"
-        assert messages[1]["content"] == "What is 2+2?"
+        assert kw["instructions"] == "Be concise."
+        assert kw["input"] == "What is 2+2?"
 
 
 # ---------------------------------------------------------------------------

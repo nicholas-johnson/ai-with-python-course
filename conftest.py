@@ -31,27 +31,25 @@ def ship_logs():
 
 @pytest.fixture()
 def fake_parse():
-    """Build a stand-in for client.chat.completions.parse from JSON fixtures.
+    """Build a stand-in for client.responses.parse from JSON fixtures.
 
     Each call validates the next JSON string against the requested
-    response_format model (the last one repeats), so a fixture that doesn't
+    text_format model (the last one repeats), so a fixture that doesn't
     match the schema fails the test the same way a real response would.
 
-        mock_client.chat.completions.parse.side_effect = fake_parse(PLAN_JSON)
+        mock_client.responses.parse.side_effect = fake_parse(PLAN_JSON)
     """
 
     def factory(*json_texts: str):
         calls = {"n": 0}
 
-        def _parse(*, response_format, **kwargs):
+        def _parse(*, text_format, **kwargs):
             text = json_texts[min(calls["n"], len(json_texts) - 1)]
             calls["n"] += 1
-            message = MagicMock(
-                content=text,
-                refusal=None,
-                parsed=response_format.model_validate_json(text),
+            return MagicMock(
+                output_text=text,
+                output_parsed=text_format.model_validate_json(text),
             )
-            return MagicMock(choices=[MagicMock(message=message)])
 
         return _parse
 

@@ -45,15 +45,13 @@ BASE_PROMPTS = {
 # ---------------------------------------------------------------------------
 
 def run_prompt(client, system_prompt: str, user_message: str) -> str:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message},
-        ],
+        reasoning={"effort": "none"},
+        instructions=system_prompt,
+        input=user_message,
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 
 # ---------------------------------------------------------------------------

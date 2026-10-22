@@ -20,29 +20,27 @@ def describe_image(client: OpenAI, image_path: str) -> str:
     with open(image_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode("utf-8")
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": [
                 {
-                    "type": "text",
+                    "type": "input_text",
                     "text": (
                         "Describe this image in detail for a search index. "
                         "Include all visible objects, text, colors, and layout."
                     ),
                 },
                 {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/png;base64,{image_data}",
-                    },
+                    "type": "input_image",
+                    "image_url": f"data:image/png;base64,{image_data}",
                 },
             ],
         }],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 
 def embed_text(client: OpenAI, text: str) -> list[float]:

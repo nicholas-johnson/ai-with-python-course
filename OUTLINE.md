@@ -15,14 +15,14 @@ Build production-grade AI systems — agents, tools, RAG pipelines, and multi-ag
 
 ### Module 1 — Working with the LLM
 
-- Call the LLM chat-completion API directly — message roles, parameters, streaming.
+- Call the LLM directly with OpenAI's Responses API — message roles, parameters, streaming — and recognise the older Chat Completions API.
 - Build a CLI chat loop with conversation history and a FastAPI streaming endpoint with SSE.
 - Implement session storage: in-memory first, then file-based.
 - Apply prompting patterns that hold up in production (structured outputs, grounding).
 
 ### Module 2 — Tool Calling
 
-- Understand the message format that drives an agent (system, user, assistant, tool messages).
+- Understand the conversation items that drive an agent (system, user and assistant messages; function calls and their outputs).
 - Build a tool-calling loop: schema in, action out, result back, repeat.
 - Implement a tool registry with schema validation, routing, and error handling.
 - Add safety rails (allowlists, rate limits, redaction) and an evaluation harness with golden tests.

@@ -67,7 +67,7 @@ Implement all five tools: `remember`, `recall`, `forget`, `list_memories`, `get_
 **Test the server standalone:**
 
 ```bash
-python -m mcp dev server.py
+mcp dev server.py
 ```
 
 This opens the MCP Inspector where you can call each tool and see raw responses.

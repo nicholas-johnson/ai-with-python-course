@@ -14,8 +14,8 @@ def chat(client, messages: list[dict]) -> str:
     """
     Send messages to the LLM and return the response text.
 
-    1. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages).
-    2. Extract the text from response.choices[0].message.content.
+    1. Call client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages).
+    2. Extract the text from response.output_text.
     3. Return it.
     """
     # TODO: implement

@@ -22,19 +22,19 @@ def _import_start():
 
 
 def _mock_client(content: str = "Mock response"):
-    """Create a mock OpenAI client whose plain completions return fixed content."""
+    """Create a mock OpenAI client whose plain text responses return fixed content."""
     mock = MagicMock()
     mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message=MagicMock(content=content))]
-    mock.chat.completions.create.return_value = mock_response
+    mock_response.output_text = content
+    mock.responses.create.return_value = mock_response
     return mock
 
 
 def _refusing_client():
     """A mock client whose structured-output call comes back as a refusal."""
     mock = MagicMock()
-    message = MagicMock(parsed=None, refusal="I can't help with that.")
-    mock.chat.completions.parse.return_value = MagicMock(choices=[MagicMock(message=message)])
+    # The model refused: no parsed output.
+    mock.responses.parse.return_value = MagicMock(output_parsed=None, output_text="")
     return mock
 
 
@@ -44,7 +44,7 @@ def test_classify_returns_valid_department(fake_parse):
     """classify_query returns the department from the parsed Route."""
     mod = _import_start()
     client = MagicMock()
-    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "tactical"}))
+    client.responses.parse.side_effect = fake_parse(json.dumps({"department": "tactical"}))
     result = mod.classify_query("Raise shields!", client)
     assert result == "tactical"
 
@@ -53,9 +53,9 @@ def test_classify_uses_route_schema(fake_parse):
     """classify_query asks for structured output with the Route model."""
     mod = _import_start()
     client = MagicMock()
-    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "comms"}))
+    client.responses.parse.side_effect = fake_parse(json.dumps({"department": "comms"}))
     mod.classify_query("Any signals?", client)
-    assert client.chat.completions.parse.call_args.kwargs["response_format"] is mod.Route
+    assert client.responses.parse.call_args.kwargs["text_format"] is mod.Route
 
 
 def test_route_schema_rejects_unknown_department():
@@ -91,7 +91,7 @@ def test_specialist_calls_openai():
     mod = _import_start()
     client = _mock_client("Response")
     mod.specialist_agent("comms", "any signals?", client)
-    assert client.chat.completions.create.called
+    assert client.responses.create.called
 
 
 def test_specialist_uses_correct_prompt():
@@ -100,8 +100,8 @@ def test_specialist_uses_correct_prompt():
     client = _mock_client("Response")
     mod.specialist_agent("tactical", "shield status?", client)
 
-    call_args = client.chat.completions.create.call_args
-    messages = call_args.kwargs.get("messages", call_args[1].get("messages", []))
+    call_args = client.responses.create.call_args
+    messages = call_args.kwargs.get("input", call_args[1].get("input", []))
     system_msg = messages[0]["content"]
     assert "Tactical" in system_msg
 
@@ -112,8 +112,8 @@ def test_specialist_fallback_for_unknown_department():
     client = _mock_client("Response")
     mod.specialist_agent("catering", "what's for lunch?", client)
 
-    call_args = client.chat.completions.create.call_args
-    messages = call_args.kwargs.get("messages", call_args[1].get("messages", []))
+    call_args = client.responses.create.call_args
+    messages = call_args.kwargs.get("input", call_args[1].get("input", []))
     system_msg = messages[0]["content"]
     assert "Medical" in system_msg
 
@@ -124,7 +124,7 @@ def test_route_and_respond_returns_dict(fake_parse):
     """route_and_respond returns a dict with department and response."""
     mod = _import_start()
     client = _mock_client("Shields at full power.")
-    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "tactical"}))
+    client.responses.parse.side_effect = fake_parse(json.dumps({"department": "tactical"}))
 
     result = mod.route_and_respond("Raise shields!", client)
     assert isinstance(result, dict)
@@ -136,8 +136,8 @@ def test_route_and_respond_classifies_then_answers(fake_parse):
     """route_and_respond makes a structured call (classify) and a text call (specialist)."""
     mod = _import_start()
     client = _mock_client("Crew vitals are stable.")
-    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "medical"}))
+    client.responses.parse.side_effect = fake_parse(json.dumps({"department": "medical"}))
 
     mod.route_and_respond("Crew health report", client)
-    assert client.chat.completions.parse.call_count == 1
-    assert client.chat.completions.create.call_count >= 1
+    assert client.responses.parse.call_count == 1
+    assert client.responses.create.call_count >= 1

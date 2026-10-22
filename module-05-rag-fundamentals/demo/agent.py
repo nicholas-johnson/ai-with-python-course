@@ -36,11 +36,9 @@ def mcp_to_openai_tools(mcp_tools) -> list[dict]:
     return [
         {
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description or "",
-                "parameters": tool.input_schema,
-            },
+            "name": tool.name,
+            "description": tool.description or "",
+            "parameters": tool.input_schema,
         }
         for tool in mcp_tools
     ]
@@ -84,19 +82,19 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
         messages.append({"role": "user", "content": user_input})
 
         while True:
-            response = client.chat.completions.create(
+            response = client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=messages,
+                reasoning={"effort": "none"},
+                input=messages,
                 tools=openai_tools,
             )
-            choice = response.choices[0]
+            calls = [item for item in response.output if item.type == "function_call"]
 
-            if choice.finish_reason == "tool_calls":
-                messages.append(choice.message)
-                for tc in choice.message.tool_calls:
-                    fn_name = tc.function.name
-                    fn_args = json.loads(tc.function.arguments)
+            if calls:
+                messages += response.output
+                for tc in calls:
+                    fn_name = tc.name
+                    fn_args = json.loads(tc.arguments)
                     print(f"  [tool_call] {fn_name}({json.dumps(fn_args)})")
 
                     result = await session.call_tool(fn_name, fn_args)
@@ -106,13 +104,13 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
 
                     messages.append(
                         {
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": result_text,
+                            "type": "function_call_output",
+                            "call_id": tc.call_id,
+                            "output": result_text,
                         }
                     )
             else:
-                answer = choice.message.content
+                answer = response.output_text
                 messages.append({"role": "assistant", "content": answer})
                 print(f"Agent: {answer}\n")
                 break

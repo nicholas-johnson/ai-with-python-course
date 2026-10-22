@@ -88,7 +88,7 @@ test_cases = [
 
 ### 1. Implement `llm_judge`
 
-Define the score schema, build the evaluation prompt, and call `parse()` with `response_format=JudgeScores`:
+Define the score schema, build the evaluation prompt, and call `parse()` with `text_format=JudgeScores`:
 
 ```python
 class JudgeScores(BaseModel):
@@ -98,11 +98,11 @@ class JudgeScores(BaseModel):
     explanation: str
 
 def llm_judge(client, question, answer, reference):
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=JudgeScores,
-        messages=[{
+        reasoning={"effort": "none"},
+        text_format=JudgeScores,
+        input=[{
             "role": "user",
             "content": (
                 f"Evaluate this answer against the reference answer.\n\n"
@@ -117,11 +117,10 @@ def llm_judge(client, question, answer, reference):
         }],
         temperature=0,
     )
-    message = response.choices[0].message
-    return message.parsed.model_dump()
+    return response.output_parsed.model_dump()
 ```
 
-> **Important:** If the model refuses, `message.parsed` is `None` and `message.refusal` explains why. Return default scores of 1 with that explanation rather than crashing. The `ge=1, le=5` bounds are part of the schema, so an out-of-range score can't come back.
+> **Important:** If the model refuses, `response.output_parsed` is `None`. Return default scores of 1 with that explanation rather than crashing. The `ge=1, le=5` bounds are part of the schema, so an out-of-range score can't come back.
 
 ### 2. Implement `evaluate_dataset`
 

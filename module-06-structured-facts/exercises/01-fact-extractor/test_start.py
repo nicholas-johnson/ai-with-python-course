@@ -78,7 +78,7 @@ def test_extract_facts_returns_facts(fake_parse):
     mod = _import_start()
 
     mock_client = MagicMock()
-    mock_client.chat.completions.parse.side_effect = fake_parse(MOCK_FACTS_JSON)
+    mock_client.responses.parse.side_effect = fake_parse(MOCK_FACTS_JSON)
 
     result = mod.extract_facts("Some ship log text.", mock_client)
     if isinstance(result, tuple):
@@ -88,7 +88,7 @@ def test_extract_facts_returns_facts(fake_parse):
 
     assert len(facts) == 3
     assert all(isinstance(f, mod.Fact) for f in facts)
-    assert mock_client.chat.completions.parse.call_args.kwargs["response_format"] is mod.FactList
+    assert mock_client.responses.parse.call_args.kwargs["text_format"] is mod.FactList
 
 
 def test_fact_list_wraps_facts():

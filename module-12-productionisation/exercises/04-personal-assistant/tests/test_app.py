@@ -61,14 +61,9 @@ def test_notes_search(test_client):
 
 @patch("solution.agent.client")
 def test_chat_returns_response(mock_openai, test_client):
-    mock_choice = MagicMock()
-    mock_choice.finish_reason = "stop"
-    mock_choice.message.content = "Hello Alex! How can I help?"
-    mock_choice.message.tool_calls = None
-
-    mock_response = MagicMock()
-    mock_response.choices = [mock_choice]
-    mock_openai.chat.completions.create.return_value = mock_response
+    mock_openai.responses.create.return_value = MagicMock(
+        output=[], output_text="Hello Alex! How can I help?"
+    )
 
     response = test_client.post(
         "/api/chat",

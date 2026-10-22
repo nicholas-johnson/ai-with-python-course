@@ -182,11 +182,9 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
         tool_router[tool.name] = ship_session
         openai_tools.append({
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description or "",
-                "parameters": tool.input_schema,
-            },
+            "name": tool.name,
+            "description": tool.description or "",
+            "parameters": tool.input_schema,
         })
         log("discovery", f"  [ship/stdio]  {tool.name}: {tool.description}")
 
@@ -194,11 +192,9 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
         tool_router[tool.name] = nav_session
         openai_tools.append({
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description or "",
-                "parameters": tool.input_schema,
-            },
+            "name": tool.name,
+            "description": tool.description or "",
+            "parameters": tool.input_schema,
         })
         log("discovery", f"  [nav/http]    {tool.name}: {tool.description}")
 
@@ -233,21 +229,19 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
         for _ in range(10):
             log("llm request", f"Sending {len(messages)} messages, {len(openai_tools)} tools")
 
-            response = client.chat.completions.create(
-                model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools
+            response = client.responses.create(
+                model=MODEL, reasoning={"effort": "none"}, input=messages, tools=openai_tools
             )
-            choice = response.choices[0]
-            msg = choice.message
+            calls = [item for item in response.output if item.type == "function_call"]
+            log("llm response", f"output items: {[item.type for item in response.output]}")
 
-            log("llm response", f"finish_reason={choice.finish_reason}")
+            if calls:
+                log("llm response", f"  {len(calls)} tool call(s) requested")
+                messages += response.output
 
-            if msg.tool_calls:
-                log("llm response", f"  {len(msg.tool_calls)} tool call(s) requested")
-                messages.append(msg)
-
-                for tc in msg.tool_calls:
-                    name = tc.function.name
-                    args = json.loads(tc.function.arguments)
+                for tc in calls:
+                    name = tc.name
+                    args = json.loads(tc.arguments)
                     session = tool_router[name]
                     source = "ship/stdio" if session is not None and name in [t.name for t in ship_tools_raw] else "nav/http"
 
@@ -257,14 +251,14 @@ async def _run_agent_loop(ship_session: ClientSession, nav_session: ClientSessio
                     log("tool result", f"[{source}] {text[:200]}")
 
                     messages.append({
-                        "role": "tool",
-                        "tool_call_id": tc.id,
-                        "content": text,
+                        "type": "function_call_output",
+                        "call_id": tc.call_id,
+                        "output": text,
                     })
 
-            elif msg.content:
-                messages.append({"role": "assistant", "content": msg.content})
-                log("assistant", msg.content)
+            elif response.output_text:
+                messages.append({"role": "assistant", "content": response.output_text})
+                log("assistant", response.output_text)
                 print()
                 break
             else:

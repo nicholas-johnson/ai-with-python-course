@@ -29,11 +29,11 @@ def llm_judge(
     reference: str,
 ) -> dict:
     """Use an LLM to evaluate an answer against a reference."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=JudgeScores,
-        messages=[{
+        reasoning={"effort": "none"},
+        text_format=JudgeScores,
+        input=[{
             "role": "user",
             "content": (
                 f"Evaluate this answer against the reference answer.\n\n"
@@ -48,15 +48,14 @@ def llm_judge(
         }],
         temperature=0,
     )
-    message = response.choices[0].message
-    if message.parsed is None:
+    if response.output_parsed is None:
         return {
             "correctness": 1,
             "completeness": 1,
             "relevance": 1,
-            "explanation": f"Judge refused: {message.refusal}",
+            "explanation": "Judge refused to score this answer.",
         }
-    return message.parsed.model_dump()
+    return response.output_parsed.model_dump()
 
 
 def evaluate_dataset(

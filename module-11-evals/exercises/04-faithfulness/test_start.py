@@ -8,9 +8,8 @@ from start import check_support, extract_claims, score_faithfulness
 def make_mock_client(response_text: str):
     client = MagicMock()
     response = MagicMock()
-    response.choices = [MagicMock()]
-    response.choices[0].message.content = response_text
-    client.chat.completions.create.return_value = response
+    response.output_text = response_text
+    client.responses.create.return_value = response
     return client
 
 
@@ -19,12 +18,11 @@ def client_from_queue(texts: list[str]):
 
     def create(**kwargs):
         resp = MagicMock()
-        resp.choices = [MagicMock()]
-        resp.choices[0].message.content = queue.pop(0)
+        resp.output_text = queue.pop(0)
         return resp
 
     client = MagicMock()
-    client.chat.completions.create.side_effect = create
+    client.responses.create.side_effect = create
     return client
 
 
@@ -49,7 +47,7 @@ class TestExtractClaims:
     def test_calls_openai(self):
         client = make_mock_client("A single claim.")
         extract_claims(client, "Answer text.")
-        client.chat.completions.create.assert_called_once()
+        client.responses.create.assert_called_once()
 
 
 class TestCheckSupport:

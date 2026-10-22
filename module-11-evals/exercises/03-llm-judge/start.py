@@ -41,9 +41,9 @@ def llm_judge(
     - Define a Pydantic model JudgeScores (above this function) with
       correctness/completeness/relevance: int = Field(ge=1, le=5) and explanation: str
     - Prompt the model (MODEL) to evaluate the answer on three dimensions,
-      using client.chat.completions.parse(..., response_format=JudgeScores)
-    - Return message.parsed.model_dump()
-    - If message.parsed is None (the model refused), return scores of 1
+      using client.responses.parse(..., text_format=JudgeScores)
+    - Return response.output_parsed.model_dump()
+    - If response.output_parsed is None (the model refused), return scores of 1
     """
     # TODO: implement LLM judge
     pass
@@ -93,6 +93,7 @@ def compute_summary(results: list[dict]) -> dict:
 
 
 if __name__ == "__main__":
+    import json
     from unittest.mock import MagicMock
 
     canned = {
@@ -102,10 +103,11 @@ if __name__ == "__main__":
         "explanation": "Correct but only mentions one of three causes.",
     }
     client = MagicMock()
-    response = MagicMock()
-    response.choices = [MagicMock()]
-    response.choices[0].message.content = json.dumps(canned)
-    client.chat.completions.create.return_value = response
+
+    def fake_parse(*, text_format, **kwargs):
+        return MagicMock(output_text=json.dumps(canned), output_parsed=text_format(**canned))
+
+    client.responses.parse.side_effect = fake_parse
 
     cases = [
         {

@@ -37,7 +37,7 @@ Commands:
 ### 3. (Optional) Inspect the MCP server
 
 ```bash
-python -m mcp dev server.py
+mcp dev server.py
 ```
 
 Opens the MCP Inspector in your browser. You can call each tool individually and see raw JSON responses. Try:

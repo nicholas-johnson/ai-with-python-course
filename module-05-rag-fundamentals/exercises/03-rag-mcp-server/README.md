@@ -59,7 +59,7 @@ Implement all four tools: `search_docs`, `get_chunk`, `ask_docs`, `list_sources`
 **Test the server standalone:**
 
 ```bash
-python -m mcp dev server.py
+mcp dev server.py
 ```
 
 This opens the MCP Inspector -- a web UI where you can call each tool and see raw responses.

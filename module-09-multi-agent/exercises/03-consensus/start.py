@@ -77,10 +77,10 @@ def judge(
     Steps:
         1. Define class Judgment(BaseModel) with
            winner: Literal["advocate", "skeptic"] and reasoning: str
-        2. Call client.chat.completions.parse(..., response_format=Judgment)
+        2. Call client.responses.parse(..., text_format=Judgment)
         3. System prompt: impartial judge, pick the stronger argument
         4. User prompt: include the question and both final arguments
-        5. Return message.parsed.model_dump(); default to "advocate" if parsed is None
+        5. Return response.output_parsed.model_dump(); default to "advocate" if response.output_parsed is None
     """
     # TODO: implement
     raise NotImplementedError("TODO")

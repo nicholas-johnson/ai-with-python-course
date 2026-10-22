@@ -15,69 +15,61 @@ client = OpenAI()
 TOOLS = [
     {
         "type": "function",
-        "function": {
-            "name": "search_attractions",
-            "description": "Search for attractions and activities at a destination matching a query",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "What to search for (e.g. 'museums', 'outdoor hiking')"},
-                    "dest_id": {"type": "string", "description": "Destination ID to search within"},
-                },
-                "required": ["query", "dest_id"],
+        "name": "search_attractions",
+        "description": "Search for attractions and activities at a destination matching a query",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "What to search for (e.g. 'museums', 'outdoor hiking')"},
+                "dest_id": {"type": "string", "description": "Destination ID to search within"},
             },
+            "required": ["query", "dest_id"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": "Get current weather and 5-day forecast for a city",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "city": {"type": "string", "description": "City name"},
-                },
-                "required": ["city"],
+        "name": "get_weather",
+        "description": "Get current weather and 5-day forecast for a city",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {"type": "string", "description": "City name"},
             },
+            "required": ["city"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "estimate_budget",
-            "description": "Estimate daily costs for a list of planned activities",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "activities": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "List of planned activities for the day",
-                    },
-                    "budget_level": {
-                        "type": "string",
-                        "enum": ["budget", "moderate", "luxury"],
-                        "description": "Traveller's budget level",
-                    },
+        "name": "estimate_budget",
+        "description": "Estimate daily costs for a list of planned activities",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "activities": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of planned activities for the day",
                 },
-                "required": ["activities", "budget_level"],
+                "budget_level": {
+                    "type": "string",
+                    "enum": ["budget", "moderate", "luxury"],
+                    "description": "Traveller's budget level",
+                },
             },
+            "required": ["activities", "budget_level"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "estimate_travel_time",
-            "description": "Estimate travel time between two locations in a city",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "from_loc": {"type": "string", "description": "Starting location"},
-                    "to_loc": {"type": "string", "description": "Destination location"},
-                },
-                "required": ["from_loc", "to_loc"],
+        "name": "estimate_travel_time",
+        "description": "Estimate travel time between two locations in a city",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "from_loc": {"type": "string", "description": "Starting location"},
+                "to_loc": {"type": "string", "description": "Destination location"},
             },
+            "required": ["from_loc", "to_loc"],
         },
     },
 ]
@@ -150,35 +142,35 @@ Research thoroughly, then return ONLY the JSON."""
     for iteration in range(max_iterations):
         iter_span = trace.start_span(f"llm_call_{iteration}")
 
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=OPENAI_MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=TOOLS,
             tool_choice="auto" if iteration < max_iterations - 1 else "none",
         )
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        message = response.choices[0].message
-        messages.append(message)
-        trace.end_span(iter_span, metadata={"finish_reason": response.choices[0].finish_reason})
+        messages += response.output
+        trace.end_span(iter_span, metadata={"function_calls": len(calls)})
 
-        if not message.tool_calls:
+        if not calls:
             break
 
-        for tool_call in message.tool_calls:
-            tool_span = trace.start_span(f"tool_{tool_call.function.name}")
-            args = json.loads(tool_call.function.arguments)
-            result = _execute_tool(tool_call.function.name, args, collection)
+        for tool_call in calls:
+            tool_span = trace.start_span(f"tool_{tool_call.name}")
+            args = json.loads(tool_call.arguments)
+            result = _execute_tool(tool_call.name, args, collection)
             messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": result,
+                "type": "function_call_output",
+                "call_id": tool_call.call_id,
+                "output": result,
             })
             trace.end_span(tool_span, metadata={"args": args})
 
     trace.end_span(span, metadata={"iterations": iteration + 1})
 
-    content = message.content or ""
+    content = response.output_text or ""
     try:
         start = content.index("{")
         end = content.rindex("}") + 1

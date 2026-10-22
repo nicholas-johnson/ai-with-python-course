@@ -29,11 +29,11 @@ class CriticAgent:
 
     def review(self, query: str, response: str) -> dict:
         """Return {"approved": bool, "feedback": str}."""
-        result = self.client.chat.completions.parse(
+        result = self.client.responses.parse(
             model=MODEL,
-            reasoning_effort="none",
-            response_format=Review,
-            messages=[
+            reasoning={"effort": "none"},
+            text_format=Review,
+            input=[
                 {"role": "system", "content": CRITIC_PROMPT},
                 {
                     "role": "user",
@@ -45,7 +45,7 @@ class CriticAgent:
                 },
             ],
         )
-        review = result.choices[0].message.parsed
+        review = result.output_parsed
         if review is None:
             return {"approved": True, "feedback": "Model refused to review."}
         return review.model_dump()
@@ -81,10 +81,10 @@ class SupervisorAgent:
 
     def _revise(self, department: str, query: str, previous: str, feedback: str) -> str:
         system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])
-        result = self.client.chat.completions.create(
+        result = self.client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=[
+            reasoning={"effort": "none"},
+            input=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": query},
                 {"role": "assistant", "content": previous},
@@ -94,7 +94,7 @@ class SupervisorAgent:
                 },
             ],
         )
-        return result.choices[0].message.content
+        return result.output_text
 
 
 def run_supervised_query(query: str, client: OpenAI, max_revisions: int = 2) -> dict:

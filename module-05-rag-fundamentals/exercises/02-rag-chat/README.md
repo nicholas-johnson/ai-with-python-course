@@ -68,7 +68,7 @@ def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
 
 1. Call `search(collection, query, k)` to get passages
 2. Call `build_grounded_prompt(query, passages)` to get the messages
-3. Call OpenAI `chat.completions.create(model=MODEL, reasoning_effort="none", messages=...)`
+3. Call OpenAI `responses.create(model=MODEL, reasoning={"effort": "none"}, input=...)`
 4. Return the answer and the passages used
 
 ### 4. Build the interactive loop

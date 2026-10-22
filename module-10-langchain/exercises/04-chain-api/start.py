@@ -29,7 +29,7 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 # class Classification(BaseModel): ...   (same schema as exercise 01)
 # prompt = ChatPromptTemplate.from_messages([...])
-# model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+# model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 # chain = prompt | model.with_structured_output(Classification)
 
 

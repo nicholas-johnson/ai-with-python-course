@@ -28,11 +28,9 @@ def mcp_to_openai_tools(mcp_tools: list) -> list[dict]:
     return [
         {
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description or "",
-                "parameters": tool.input_schema,
-            },
+            "name": tool.name,
+            "description": tool.description or "",
+            "parameters": tool.input_schema,
         }
         for tool in mcp_tools
     ]
@@ -54,28 +52,28 @@ async def run_agent(session, client, openai_tools):
         messages.append({"role": "user", "content": user_input})
 
         for _ in range(10):
-            response = client.chat.completions.create(
-                model=MODEL, reasoning_effort="none", messages=messages, tools=openai_tools
+            response = client.responses.create(
+                model=MODEL, reasoning={"effort": "none"}, input=messages, tools=openai_tools
             )
-            msg = response.choices[0].message
+            calls = [item for item in response.output if item.type == "function_call"]
 
-            if msg.tool_calls:
-                messages.append(msg)
-                for tc in msg.tool_calls:
-                    name = tc.function.name
-                    args = json.loads(tc.function.arguments)
+            if calls:
+                messages += response.output
+                for tc in calls:
+                    name = tc.name
+                    args = json.loads(tc.arguments)
                     print(f"  [tool] {name}({json.dumps(args)})")
                     result = await session.call_tool(name, arguments=args)
                     text = result.content[0].text if result.content else ""
                     print(f"  [result] {text[:120]}")
                     messages.append({
-                        "role": "tool",
-                        "tool_call_id": tc.id,
-                        "content": text,
+                        "type": "function_call_output",
+                        "call_id": tc.call_id,
+                        "output": text,
                     })
-            elif msg.content:
-                messages.append({"role": "assistant", "content": msg.content})
-                print(f"AI> {msg.content}\n")
+            elif response.output_text:
+                messages.append({"role": "assistant", "content": response.output_text})
+                print(f"AI> {response.output_text}\n")
                 break
             else:
                 print("AI> (no response)\n")
@@ -94,7 +92,7 @@ async def main():
 
             print(f"Connected. Discovered {len(tools)} tools:")
             for t in openai_tools:
-                print(f"  - {t['function']['name']}: {t['function']['description']}")
+                print(f"  - {t['name']}: {t['description']}")
             print()
 
             client = openai.OpenAI()

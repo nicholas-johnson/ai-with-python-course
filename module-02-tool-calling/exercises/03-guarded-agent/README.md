@@ -72,15 +72,15 @@ This follows the same structure as the agent loop from exercises 01/02, but wrap
 1. Build messages: `[system_msg, {"role": "user", "content": question}]`.
 2. Loop up to `max_steps`:
    - Call the API with `messages` and `self.registry.list_tools()`.
-   - If `message.tool_calls`:
-     - Append the assistant message to `messages`.
+   - If `calls`:
+     - Add the model's output to the history: `messages += response.output`.
      - For **each** tool call:
        - **Check the allowlist**: if `self.allow_list.check(name)` is `False`, set `result` to a JSON error like `{"error": "Tool not permitted: <name>"}` and log an `AuditEntry` with `allowed=False`.
        - **Check the rate limiter**: if `self.rate_limiter.allow()` is `False`, set `result` to a JSON error like `{"error": "Rate limit exceeded"}` and log with `allowed=False`.
        - **Otherwise**: execute via `self.registry.execute(name, args)`, log with `allowed=True`.
-       - Append the tool result message: `{"role": "tool", "tool_call_id": tc.id, "content": result}`.
+       - Append the tool result item: `{"type": "function_call_output", "call_id": tc.call_id, "output": result}`.
        - Record the tool name in `tool_calls_made`.
-   - Else if `message.content`: return `AgentResult` with the answer and the audit log.
+   - Else if `response.output_text`: return `AgentResult` with the answer and the audit log.
 3. Return `AgentResult` with `final_answer=None` if you exhaust `max_steps`.
 
 The audit log is `self.audit_log` -- append `AuditEntry` objects as you go, then include them in the result.

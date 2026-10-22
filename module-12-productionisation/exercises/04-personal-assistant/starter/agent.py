@@ -35,16 +35,14 @@ TOOL_DEFINITIONS = [
     # Example structure:
     # {
     #     "type": "function",
-    #     "function": {
-    #         "name": "search_notes",
-    #         "description": "Search through personal notes...",
-    #         "parameters": {
-    #             "type": "object",
-    #             "properties": {
-    #                 "query": {"type": "string", "description": "The search query"},
-    #             },
-    #             "required": ["query"],
+    #     "name": "search_notes",
+    #     "description": "Search through personal notes...",
+    #     "parameters": {
+    #         "type": "object",
+    #         "properties": {
+    #             "query": {"type": "string", "description": "The search query"},
     #         },
+    #         "required": ["query"],
     #     },
     # },
 ]
@@ -87,23 +85,24 @@ def run_assistant(
     Steps:
     1. Build messages list: system prompt + history + new user message
     2. Loop up to max_iterations:
-       a. Call OpenAI chat completions with tools
-       b. If finish_reason is "tool_calls":
-          - Append the assistant message
-          - Execute each tool call using TOOL_MAP
-          - Append tool results as "tool" role messages
+       a. Call client.responses.create with tools
+       b. calls = [item for item in response.output if item.type == "function_call"]
+          If there are calls:
+          - Add the model's output to the history: messages += response.output
+          - Execute each call using TOOL_MAP[call.name]
+          - Append {"type": "function_call_output", "call_id": call.call_id, "output": result}
           - Continue the loop
-       c. Otherwise, return the text content
+       c. Otherwise, return response.output_text
     """
     messages = [{"role": "system", "content": _build_system_prompt()}]
     messages.extend(history)
     messages.append({"role": "user", "content": message})
 
     # TODO: Implement the agent loop
-    # Hint: response = client.chat.completions.create(
-    #     model=OPENAI_MODEL, reasoning_effort="none", messages=messages, tools=TOOL_DEFINITIONS
+    # Hint: response = client.responses.create(
+    #     model=OPENAI_MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOL_DEFINITIONS
     # )
-    # Check choice.finish_reason == "tool_calls"
+    # calls = [item for item in response.output if item.type == "function_call"]
 
     return "Not yet implemented."
 
@@ -118,15 +117,16 @@ async def run_assistant_stream(
 
     Same logic as run_assistant, but:
     - Use stream=True in the API call
-    - Yield delta.content chunks as they arrive
-    - Accumulate tool_calls from deltas before executing
+    - Yield event.delta for each "response.output_text.delta" event
+    - Keep event.response from the "response.completed" event: its .output
+      holds any function_call items to execute before looping again
     """
     messages = [{"role": "system", "content": _build_system_prompt()}]
     messages.extend(history)
     messages.append({"role": "user", "content": message})
 
     # TODO: Implement streaming agent loop
-    # Hint: Use client.chat.completions.create(..., stream=True)
-    # Iterate over chunks, yield content deltas, accumulate tool calls
+    # Hint: Use client.responses.create(..., stream=True)
+    # Iterate over events: yield text deltas, then use the completed response's output
 
     yield "Streaming not yet implemented."

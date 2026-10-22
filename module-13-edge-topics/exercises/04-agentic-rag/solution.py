@@ -14,22 +14,20 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 SEARCH_TOOL = {
     "type": "function",
-    "function": {
-        "name": "search_documents",
-        "description": (
-            "Search the document database for information relevant "
-            "to answering the user's question."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The search query to find relevant documents.",
-                },
+    "name": "search_documents",
+    "description": (
+        "Search the document database for information relevant "
+        "to answering the user's question."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "The search query to find relevant documents.",
             },
-            "required": ["query"],
         },
+        "required": ["query"],
     },
 }
 
@@ -38,11 +36,11 @@ def handle_tool_call(tool_call, search_fn) -> str:
     """
     Execute a tool call and return the result as a JSON string.
     """
-    args = json.loads(tool_call.function.arguments)
-    if tool_call.function.name == "search_documents":
+    args = json.loads(tool_call.arguments)
+    if tool_call.name == "search_documents":
         results = search_fn(args["query"])
         return json.dumps(results)
-    return json.dumps({"error": f"Unknown tool: {tool_call.function.name}"})
+    return json.dumps({"error": f"Unknown tool: {tool_call.name}"})
 
 
 def agentic_rag(
@@ -68,29 +66,29 @@ def agentic_rag(
     ]
 
     for _ in range(max_turns):
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=[SEARCH_TOOL],
         )
-        message = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if not message.tool_calls:
-            return message.content
+        if not calls:
+            return response.output_text
 
-        messages.append(message)
-        for tool_call in message.tool_calls:
+        messages += response.output
+        for tool_call in calls:
             result = handle_tool_call(tool_call, search_fn)
             messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": result,
+                "type": "function_call_output",
+                "call_id": tool_call.call_id,
+                "output": result,
             })
 
-    final = client.chat.completions.create(
+    final = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
     )
-    return final.choices[0].message.content
+    return final.output_text

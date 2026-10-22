@@ -36,11 +36,11 @@ A console app in **`start.py`** that layers a critic review loop on top of the E
 The critic evaluates a specialist's response and returns structured feedback:
 
 - Define `Review(BaseModel)` with `approved: bool` and `feedback: str`
-- Call `client.chat.completions.parse` with `model=MODEL, reasoning_effort="none", response_format=Review`
+- Call `client.responses.parse` with `model=MODEL, reasoning={"effort": "none"}, text_format=Review`
 - Use `CRITIC_PROMPT` as the system prompt
 - The user message should include both the original query and the specialist's response so the critic has full context
-- Return `message.parsed.model_dump()` -- `{"approved": bool, "feedback": str}`
-- If `parsed` is `None` (the model refused), default to `approved=True` (fail open)
+- Return `response.output_parsed.model_dump()` -- `{"approved": bool, "feedback": str}`
+- If `response.output_parsed` is `None` (the model refused), default to `approved=True` (fail open)
 
 ### 2. Implement `SupervisorAgent.run`
 

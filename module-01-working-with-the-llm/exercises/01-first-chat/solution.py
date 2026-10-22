@@ -10,8 +10,8 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def chat(client, messages: list[dict]) -> str:
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text
 
 
 def main(client) -> None:

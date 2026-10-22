@@ -130,8 +130,8 @@ def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
 def rag_chat(query: str, collection, k: int = 5) -> tuple[str, list[dict]]:
     passages = search(collection, query, k)
     messages = build_grounded_prompt(query, passages)
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content, passages
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text, passages
 
 
 def display_sources(passages: list[dict], brief: bool = False):
@@ -160,12 +160,12 @@ def handle_sources_command(last_passages: list[dict] | None):
 def handle_norag_command(client: OpenAI, last_query: str | None):
     """Re-ask the last question without retrieval augmentation."""
     if last_query:
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=[{"role": "user", "content": last_query}],
+            reasoning={"effort": "none"},
+            input=[{"role": "user", "content": last_query}],
         )
-        print(f"  (No RAG) {response.choices[0].message.content}\n")
+        print(f"  (No RAG) {response.output_text}\n")
     else:
         print("  No previous query. Ask a question first.")
 

@@ -24,18 +24,18 @@ import base64
 with open("diagram.png", "rb") as f:
     image_data = base64.b64encode(f.read()).decode("utf-8")
 
-response = client.chat.completions.create(
+response = client.responses.create(
     model=MODEL,
-    reasoning_effort="none",
-    messages=[{
+    reasoning={"effort": "none"},
+    input=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe this image in detail."},
-            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_data}"}},
+            {"type": "input_text", "text": "Describe this image in detail."},
+            {"type": "input_image", "image_url": f"data:image/png;base64,{image_data}"},
         ],
     }],
 )
-description = response.choices[0].message.content
+description = response.output_text
 ```
 
 The model responds with a text description like: "A schematic diagram showing the reactor cooling system with three primary loops connected to heat exchangers..."
@@ -85,7 +85,7 @@ Search results include a similarity score:
 ```python
 [
     {"id": "img-1", "type": "image", "text": "A schematic...", "score": 0.89, ...},
-    {"id": "doc-1", "type": "text", "text": "The reactor operates...", "score": 0.85, ...},
+    {"id": "doc-1", "type": "input_text", "text": "The reactor operates...", "score": 0.85, ...},
 ]
 ```
 
@@ -100,25 +100,25 @@ def describe_image(client: OpenAI, image_path: str) -> str:
     with open(image_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode("utf-8")
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": [
                 {
-                    "type": "text",
+                    "type": "input_text",
                     "text": "Describe this image in detail for a search index. "
                             "Include all visible objects, text, colors, and layout.",
                 },
                 {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/png;base64,{image_data}"},
+                    "type": "input_image",
+                    "image_url": f"data:image/png;base64,{image_data}",
                 },
             ],
         }],
     )
-    return response.choices[0].message.content
+    return response.output_text
 ```
 
 > **Important:** The description prompt matters. Ask for search-relevant details (objects, text, colors, layout) rather than artistic interpretation.

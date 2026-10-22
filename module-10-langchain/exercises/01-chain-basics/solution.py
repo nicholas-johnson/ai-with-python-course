@@ -52,7 +52,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 
 # Structured output: the model is constrained to the Classification schema.
 chain = prompt | model.with_structured_output(Classification)

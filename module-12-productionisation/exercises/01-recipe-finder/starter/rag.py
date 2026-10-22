@@ -78,7 +78,7 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
 
     Steps:
     1. Format candidates as numbered list with title and truncated text
-    2. Call client.chat.completions.parse with a schema such as
+    2. Call client.responses.parse with a schema such as
        class Ranking(BaseModel): order: list[int]  (candidate numbers, best first)
     3. Reorder results by ranking.order (ignore out-of-range numbers)
     4. Fall back to the original order if parsed is None (refusal)

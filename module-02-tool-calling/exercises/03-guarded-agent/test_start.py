@@ -65,21 +65,15 @@ class TestRateLimiter:
 # ---------------------------------------------------------------------------
 
 def _make_tool_call(tc_id, name, arguments):
-    tc = MagicMock()
-    tc.id = tc_id
-    tc.function.name = name
-    tc.function.arguments = json.dumps(arguments)
+    """Build a mock function_call output item (Responses API shape)."""
+    tc = MagicMock(type="function_call", call_id=tc_id, arguments=json.dumps(arguments))
+    tc.name = name  # set after construction: MagicMock(name=...) names the mock itself
     return tc
 
 
 def _make_response(content=None, tool_calls=None):
-    msg = MagicMock()
-    msg.content = content
-    msg.tool_calls = tool_calls
-    resp = MagicMock()
-    resp.choices = [MagicMock()]
-    resp.choices[0].message = msg
-    return resp
+    """Build a mock Responses API response."""
+    return MagicMock(output=list(tool_calls or []), output_text=content or "")
 
 
 class TestGuardedAgent:
@@ -90,7 +84,7 @@ class TestGuardedAgent:
 
     def test_allowed_tool_executes(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "scan_planet", {"planet_id": "TRAP-1e"}),
             ]),
@@ -106,7 +100,7 @@ class TestGuardedAgent:
 
     def test_blocked_tool_returns_error_to_model(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "log_discovery", {"planet_id": "TRAP-1e", "summary": "test"}),
             ]),
@@ -120,15 +114,15 @@ class TestGuardedAgent:
         assert result.audit_log[0].allowed is False
         assert "not permitted" in result.audit_log[0].result.lower()
 
-        second_call_messages = client.chat.completions.create.call_args_list[1]
-        messages = second_call_messages.kwargs.get("messages") or second_call_messages[1].get("messages", [])
-        tool_msgs = [m for m in messages if isinstance(m, dict) and m.get("role") == "tool"]
+        second_call_messages = client.responses.create.call_args_list[1]
+        messages = second_call_messages.kwargs.get("input") or second_call_messages[1].get("input", [])
+        tool_msgs = [m for m in messages if isinstance(m, dict) and m.get("type") == "function_call_output"]
         assert len(tool_msgs) == 1
-        assert "not permitted" in tool_msgs[0]["content"].lower()
+        assert "not permitted" in tool_msgs[0]["output"].lower()
 
     def test_rate_limit_blocks_after_threshold(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "scan_planet", {"planet_id": "TRAP-1e"}),
             ]),
@@ -147,7 +141,7 @@ class TestGuardedAgent:
 
     def test_audit_log_attached_to_result(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "scan_planet", {"planet_id": "KEP-442b"}),
             ]),
@@ -166,7 +160,7 @@ class TestGuardedAgent:
 
     def test_direct_answer_no_tools(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_response(content="Hello!")
+        client.responses.create.return_value = _make_response(content="Hello!")
         agent = self._make_agent(client)
         result = agent.run("Hi")
 
@@ -175,7 +169,7 @@ class TestGuardedAgent:
 
     def test_max_steps_respected(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_response(
+        client.responses.create.return_value = _make_response(
             tool_calls=[_make_tool_call("c1", "scan_planet", {"planet_id": "TRAP-1e"})]
         )
         agent = self._make_agent(client)

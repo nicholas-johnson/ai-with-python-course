@@ -42,11 +42,11 @@ class FactList(BaseModel):
 
 
 def extract_facts(text: str) -> list[Fact]:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=FactList,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=FactList,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -56,8 +56,7 @@ def extract_facts(text: str) -> list[Fact]:
             {"role": "user", "content": text},
         ],
     )
-    message = response.choices[0].message
-    facts = message.parsed.facts if message.parsed else []
+    facts = response.output_parsed.facts if response.output_parsed else []
     return [f for f in facts if f.confidence >= 0.7]
 
 

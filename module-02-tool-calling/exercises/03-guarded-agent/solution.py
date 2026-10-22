@@ -91,11 +91,9 @@ class ToolRegistry:
         return [
             {
                 "type": "function",
-                "function": {
-                    "name": t["name"],
-                    "description": t["description"],
-                    "parameters": t["parameters"],
-                },
+                "name": t["name"],
+                "description": t["description"],
+                "parameters": t["parameters"],
             }
             for t in self._tools.values()
         ]
@@ -220,33 +218,33 @@ class GuardedAgent:
     @staticmethod
     def _build_tool_error(tc_id: str, reason: str) -> dict:
         return {
-            "role": "tool",
-            "tool_call_id": tc_id,
-            "content": json.dumps({"error": reason}),
+            "type": "function_call_output",
+            "call_id": tc_id,
+            "output": json.dumps({"error": reason}),
         }
 
     def _handle_tool_call(self, tc, messages) -> AuditEntry:
-        name = tc.function.name
-        args = json.loads(tc.function.arguments)
+        name = tc.name
+        args = json.loads(tc.arguments)
 
         if not self.allow_list.check(name):
-            msg = self._build_tool_error(tc.id, f"Tool not permitted: {name}")
+            msg = self._build_tool_error(tc.call_id, f"Tool not permitted: {name}")
             messages.append(msg)
             return AuditEntry(
                 timestamp=time.time(), tool_name=name, arguments=args,
-                allowed=False, result=msg["content"],
+                allowed=False, result=msg["output"],
             )
 
         if not self.rate_limiter.allow():
-            msg = self._build_tool_error(tc.id, "Rate limit exceeded")
+            msg = self._build_tool_error(tc.call_id, "Rate limit exceeded")
             messages.append(msg)
             return AuditEntry(
                 timestamp=time.time(), tool_name=name, arguments=args,
-                allowed=False, result=msg["content"],
+                allowed=False, result=msg["output"],
             )
 
         result = self.registry.execute(name, args)
-        messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+        messages.append({"type": "function_call_output", "call_id": tc.call_id, "output": result})
         return AuditEntry(
             timestamp=time.time(), tool_name=name, arguments=args,
             allowed=True, result=result,
@@ -263,22 +261,22 @@ class GuardedAgent:
 
         for _ in range(max_steps):
             steps += 1
-            response = self.client.chat.completions.create(
+            response = self.client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=messages,
+                reasoning={"effort": "none"},
+                input=messages,
                 tools=self.registry.list_tools(),
             )
-            message = response.choices[0].message
+            calls = [item for item in response.output if item.type == "function_call"]
 
-            if message.tool_calls:
-                messages.append(message)
-                for tc in message.tool_calls:
-                    tool_calls_made.append(tc.function.name)
+            if calls:
+                messages += response.output
+                for tc in calls:
+                    tool_calls_made.append(tc.name)
                     audit_log.append(self._handle_tool_call(tc, messages))
-            elif message.content:
+            elif response.output_text:
                 return AgentResult(
-                    final_answer=message.content,
+                    final_answer=response.output_text,
                     tool_calls_made=tool_calls_made,
                     steps=steps,
                     audit_log=audit_log,

@@ -36,10 +36,9 @@ def load_logs() -> list[dict]:
 # TODO: Implement extract_facts(text, client) -> tuple[list[Fact], str]
 #   1. Write a system prompt asking the LLM to extract every factual claim
 #      (no need to describe the JSON format -- the schema does that)
-#   2. Call client.chat.completions.parse(..., response_format=FactList)
-#   3. message = response.choices[0].message
-#      If message.refusal is set, return [], ""
-#   Return (message.parsed.facts, message.content) -- validated Fact
+#   2. Call client.responses.parse(..., text_format=FactList)
+#   3. If response.output_parsed is None (the model refused), return [], ""
+#   Return (response.output_parsed.facts, response.output_text) -- validated Fact
 #   instances plus the raw JSON text for the /json command.
 
 

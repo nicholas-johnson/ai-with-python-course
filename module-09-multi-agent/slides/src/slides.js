@@ -268,7 +268,7 @@ def route(query, client):
 
     for hop in range(max_hops):
         msg = run_turn(dept, messages, tools=AGENT_TOOLS[dept])
-        if not msg.tool_calls:
+        if not calls:
             return msg.content, chain
 
         tool_msgs, transfer = handle_tools(msg)

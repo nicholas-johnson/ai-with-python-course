@@ -24,10 +24,8 @@ def _mock_client(summary_text="The user discussed various topics."):
     """Create a mock OpenAI client that returns a fixed summary."""
     mock = MagicMock()
     mock_response = MagicMock()
-    mock_response.choices = [
-        MagicMock(message=MagicMock(content=summary_text))
-    ]
-    mock.chat.completions.create.return_value = mock_response
+    mock_response.output_text = summary_text
+    mock.responses.create.return_value = mock_response
     return mock
 
 
@@ -61,7 +59,7 @@ def test_summarise_turns_calls_openai():
     ]
 
     mod.summarise_turns(turns, client)
-    assert client.chat.completions.create.called
+    assert client.responses.create.called
 
 
 # --- SmartSessionMemory tests ---
@@ -94,7 +92,7 @@ def test_smart_session_triggers_summarisation():
 
     msgs = session.get_messages()
     assert len(msgs) < 8
-    assert client.chat.completions.create.called
+    assert client.responses.create.called
 
 
 def test_smart_session_preserves_recent_messages():

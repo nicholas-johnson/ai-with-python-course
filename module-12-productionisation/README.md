@@ -63,11 +63,11 @@ Usage in a request handler:
 async def chat(request: ChatRequest):
     trace = TraceContext()
     sid = trace.start_span("llm_call", {"model": MODEL})
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=messages,
+    response = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=messages,
     )
     trace.end_span(sid, {"tokens": response.usage.total_tokens})
-    return {"reply": response.choices[0].message.content, "trace_id": trace.trace_id}
+    return {"reply": response.output_text, "trace_id": trace.trace_id}
 ```
 
 Every log line is structured JSON — no `print()`, no f-string logs. Structured logs feed directly into observability platforms (Datadog, Grafana, CloudWatch). When a user reports a problem, you search by `trace_id` and see every span in order.
@@ -111,8 +111,8 @@ import asyncio
 async def llm_call_with_timeout(messages, timeout_seconds: float = 30.0):
     try:
         return await asyncio.wait_for(
-            client.chat.completions.create(
-                model=MODEL, reasoning_effort="none", messages=messages,
+            client.responses.create(
+                model=MODEL, reasoning={"effort": "none"}, input=messages,
             ),
             timeout=timeout_seconds,
         )
@@ -121,7 +121,7 @@ async def llm_call_with_timeout(messages, timeout_seconds: float = 30.0):
         return None
 ```
 
-Set timeouts per call type — embedding calls are fast (5-10s), simple completions are moderate (15-30s), complex agent loops with tool calls need more room (60-120s). Too tight and you clip valid responses; too loose and you waste resources waiting.
+Set timeouts per call type — embedding calls are fast (5-10s), simple model calls are moderate (15-30s), complex agent loops with tool calls need more room (60-120s). Too tight and you clip valid responses; too loose and you waste resources waiting.
 
 ### Circuit breakers
 
@@ -222,7 +222,7 @@ class CostTracker:
                 and self.daily_spent < self.daily_budget)
 ```
 
-**Model tiering** — route simple tasks (classification, extraction) to cheap models (`gpt-6-luna`) and reserve expensive models (`gpt-6-sol`) for complex reasoning. Reasoning effort is a second lever: the same model at `reasoning_effort="none"` is far cheaper than at `"high"`, because reasoning tokens are billed as output. A routing layer that checks query complexity before choosing a model can cut costs by 60-80%.
+**Model tiering** — route simple tasks (classification, extraction) to cheap models (`gpt-6-luna`) and reserve expensive models (`gpt-6-sol`) for complex reasoning. Reasoning effort is a second lever: the same model at `reasoning={"effort": "none"}` is far cheaper than at `"high"`, because reasoning tokens are billed as output. A routing layer that checks query complexity before choosing a model can cut costs by 60-80%.
 
 **Caching** — identical prompts produce identical responses. Hash the prompt and cache the result. For RAG pipelines, cache at the retrieval layer too — vector search results for the same query do not change every second.
 

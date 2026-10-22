@@ -13,10 +13,10 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def extract_claims(client: OpenAI, answer: str) -> list[str]:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 "Extract each distinct factual claim from this text. "
@@ -26,15 +26,15 @@ def extract_claims(client: OpenAI, answer: str) -> list[str]:
         }],
         temperature=0,
     )
-    text = (response.choices[0].message.content or "").strip()
+    text = (response.output_text or "").strip()
     return [line.strip() for line in text.split("\n") if line.strip()]
 
 
 def check_support(client: OpenAI, claim: str, context: str) -> str:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 "Does this context support the following claim? "
@@ -45,7 +45,7 @@ def check_support(client: OpenAI, claim: str, context: str) -> str:
         }],
         temperature=0,
     )
-    verdict = (response.choices[0].message.content or "").strip().lower()
+    verdict = (response.output_text or "").strip().lower()
     if "unsupported" in verdict:
         return "unsupported"
     if "supported" in verdict:

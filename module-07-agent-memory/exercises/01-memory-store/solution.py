@@ -124,11 +124,11 @@ def extract_memories(
     user_msg: str, assistant_msg: str, client: OpenAI
 ) -> list[dict]:
     """Ask the LLM to identify memorable facts from an exchange."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=MemoryList,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=MemoryList,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -144,7 +144,7 @@ def extract_memories(
             },
         ],
     )
-    parsed = response.choices[0].message.parsed
+    parsed = response.output_parsed
     return [m.model_dump() for m in parsed.memories] if parsed else []
 
 
@@ -159,12 +159,12 @@ def chat(
     system_prompt = build_system_prompt(long_term)
     messages = [{"role": "system", "content": system_prompt}] + session.get_messages()
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
     )
-    assistant_msg = response.choices[0].message.content
+    assistant_msg = response.output_text
     session.add({"role": "assistant", "content": assistant_msg})
 
     new_memories = extract_memories(user_input, assistant_msg, client)

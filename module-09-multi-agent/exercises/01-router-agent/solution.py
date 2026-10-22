@@ -49,11 +49,11 @@ def classify_query(query: str, client: OpenAI) -> str:
 
     Returns one of: 'medical', 'tactical', 'comms'.
     """
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Route,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Route,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -69,22 +69,22 @@ def classify_query(query: str, client: OpenAI) -> str:
             {"role": "user", "content": query},
         ],
     )
-    route = response.choices[0].message.parsed
+    route = response.output_parsed
     return route.department if route else "medical"
 
 
 def specialist_agent(department: str, query: str, client: OpenAI) -> str:
     """Run a specialist agent for the given department."""
     system_prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["medical"])
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": query},
         ],
     )
-    return response.choices[0].message.content or ""
+    return response.output_text or ""
 
 
 def route_and_respond(query: str, client: OpenAI) -> dict:

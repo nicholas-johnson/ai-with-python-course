@@ -6,10 +6,11 @@
 
 **Talk about:**
 
-- Chat-completion API: message roles (system/user/assistant), sending a list, getting a response
+- The Responses API: `client.responses.create(input=..., instructions=...)`, message roles (system/user/assistant), `response.output_text`
+- Chat Completions as the older API: what it looks like (`messages=`, `choices[0].message.content`), why it's still everywhere, and that new work should use Responses (demo Part 4)
 - The chat loop pattern: while-loop, append user input, call API, append response
 - Why streaming matters: perceived latency, first token in 200ms vs 3s blank screen
-- Streaming with the OpenAI SDK: `stream=True`, iterating over chunks, `delta.content`
+- Streaming with the OpenAI SDK: `stream=True`, iterating over typed events, `response.output_text.delta` → `event.delta`
 - Prompt engineering: personas, format constraints, guardrails, few-shot examples
 
 **Demo:**
@@ -32,7 +33,7 @@
 
 **Talk about:**
 
-- The 4th role: `tool` — model requests actions via tool_calls, you execute and feed results back
+- Function-call items: the model returns `function_call` items in `response.output`; you execute them and send `function_call_output` items back, matched by `call_id`
 - The tool-calling loop: ask → tool? → execute → append result → ask again. Cap with max_steps.
 - Tool registry: JSON Schema per tool, decorator registration, validate-then-call, list_tools() output
 - Safety rails: allowlists, rate limits (sliding window), audit logging
@@ -86,7 +87,7 @@
 **Talk about:**
 
 - Prompt engineering: be specific, system prompts as standing orders, few-shot examples (2-3 pairs)
-- Structured outputs: `client.chat.completions.parse(response_format=PydanticModel)` → `message.parsed`; refusals; why it beats JSON mode (`json_object` + schema in the prompt)
+- Structured outputs: `client.responses.parse(text_format=PydanticModel)` → `response.output_parsed`; refusals (`output_parsed` is `None`); why it beats JSON mode (`json_object` + schema in the prompt)
 - Model selection trade-offs: quality vs cost vs latency, tiered routing
 - Token counting and budgets (lecture): tiktoken, truncate or summarise if over budget
 - Multimodal: Vision API (base64 image in message, content parts), gpt-transcribe for audio transcription
@@ -132,7 +133,7 @@ Multi-step walkthrough using persistent ChromaDB (Docker). Run from `module-05-r
 | ---- | ------- | ------------- |
 | 1 | `docker compose up -d` | Start ChromaDB server (port 8100) |
 | 2 | `python ingest.py` | Load ship logs, chunk, embed, store in ChromaDB |
-| 3 | `python -m mcp dev server.py` | (Optional) MCP Inspector — call RAG tools in browser |
+| 3 | `mcp dev server.py` | (Optional) MCP Inspector — call RAG tools in browser |
 | 4 | `python agent.py` | Chat with RAG agent — tool calls print inline |
 | 5 | `docker compose down` | Clean up |
 

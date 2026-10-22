@@ -15,44 +15,38 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 TOOLS: list[dict] = [
     {
         "type": "function",
-        "function": {
-            "name": "get_crew_count",
-            "description": "Get the number of crew members in a department.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "department": {"type": "string", "description": "Department name (command, science, engineering, medical)"},
-                },
-                "required": ["department"],
+        "name": "get_crew_count",
+        "description": "Get the number of crew members in a department.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "department": {"type": "string", "description": "Department name (command, science, engineering, medical)"},
             },
+            "required": ["department"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "get_ship_status",
-            "description": "Get the current status of a ship system.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "system": {"type": "string", "description": "System name (warp, shields, sensors, life_support)"},
-                },
-                "required": ["system"],
+        "name": "get_ship_status",
+        "description": "Get the current status of a ship system.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "system": {"type": "string", "description": "System name (warp, shields, sensors, life_support)"},
             },
+            "required": ["system"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "search_crew",
-            "description": "Search crew members by name or role.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Search term to match against crew names and roles"},
-                },
-                "required": ["query"],
+        "name": "search_crew",
+        "description": "Search crew members by name or role.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search term to match against crew names and roles"},
             },
+            "required": ["query"],
         },
     },
 ]
@@ -140,29 +134,29 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
 
     for _ in range(max_steps):
         steps += 1
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=TOOLS,
         )
-        message = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if message.tool_calls:
-            messages.append(message)
-            for tc in message.tool_calls:
-                name = tc.function.name
-                args = json.loads(tc.function.arguments)
+        if calls:
+            messages += response.output
+            for tc in calls:
+                name = tc.name
+                args = json.loads(tc.arguments)
                 result = TOOL_HANDLERS[name](**args)
                 tool_calls_made.append(name)
                 messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.id,
-                    "content": result,
+                    "type": "function_call_output",
+                    "call_id": tc.call_id,
+                    "output": result,
                 })
-        elif message.content:
+        elif response.output_text:
             return AgentResult(
-                final_answer=message.content,
+                final_answer=response.output_text,
                 tool_calls_made=tool_calls_made,
                 steps=steps,
             )

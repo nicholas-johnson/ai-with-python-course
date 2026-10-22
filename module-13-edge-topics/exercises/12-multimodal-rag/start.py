@@ -26,7 +26,7 @@ def describe_image(client: OpenAI, image_path: str) -> str:
     TODO:
     - Read and base64-encode the image file
     - Send to the model (MODEL) with a prompt asking for a detailed description
-    - Use the image_url content type with the base64 data
+    - Use an {"type": "input_image", "image_url": "data:image/png;base64,..."} content part with the base64 data
     - Return the description text
     """
     # TODO: implement image description

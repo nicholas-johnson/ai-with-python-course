@@ -23,7 +23,7 @@
 
 **Talk**
 
-- Chat-completion API: message roles, parameters, responses
+- OpenAI's Responses API: message roles, parameters, responses — and the older Chat Completions API
 - Conversation history and context windows
 - Streaming for perceived latency
 - Prompt engineering: persona, format constraints, guardrails, few-shot

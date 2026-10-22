@@ -9,10 +9,10 @@ client = OpenAI()
 
 def identify_ingredients(image_base64: str) -> str:
     """Use OpenAI vision to identify ingredients visible in a food photo."""
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=OPENAI_MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -25,12 +25,12 @@ def identify_ingredients(image_base64: str) -> str:
                 "role": "user",
                 "content": [
                     {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+                        "type": "input_image",
+                        "image_url": f"data:image/jpeg;base64,{image_base64}",
                     }
                 ],
             },
         ],
-        max_completion_tokens=150,
+        max_output_tokens=150,
     )
-    return response.choices[0].message.content.strip()
+    return response.output_text.strip()

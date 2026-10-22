@@ -22,7 +22,7 @@ prompt = ChatPromptTemplate.from_messages([
 ```python
 from langchain_openai import ChatOpenAI
 
-model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 ```
 
 **Structured output** — describe the result as a Pydantic model and let the model fill it in:
@@ -81,7 +81,7 @@ You don't need to describe the JSON format — the schema does that.
 ### 3. Build the chain
 
 ```python
-model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 chain = prompt | model.with_structured_output(Classification)
 ```
 

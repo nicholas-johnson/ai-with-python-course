@@ -36,8 +36,8 @@ class GroundedAnswer:
 # TODO: Implement extract_query_entities(question, client, graph) -> list[str]
 #   Identify entity names from the question that exist in the graph.
 #   Approach: define QueryEntities(BaseModel) with entities: list[str], call
-#   client.chat.completions.parse(..., response_format=QueryEntities), then
-#   match message.parsed.entities against graph nodes (case-insensitive).
+#   client.responses.parse(..., text_format=QueryEntities), then
+#   match response.output_parsed.entities against graph nodes (case-insensitive).
 #   Return a list of matching node names.
 # ---------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ def build_grounded_prompt(question: str, evidence: list[dict]) -> list[dict]:
 #   1. extract_query_entities to find relevant entities
 #   2. retrieve_evidence to get graph facts
 #   3. build_grounded_prompt
-#   4. Call OpenAI chat.completions.create
+#   4. Call client.responses.create
 #   5. Return a GroundedAnswer
 # ---------------------------------------------------------------------------
 
@@ -133,12 +133,12 @@ def handle_repl_command(
     if cmd == "/nograph":
         if last_question:
             print("  (Without graph)")
-            response = client.chat.completions.create(
+            response = client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=[{"role": "user", "content": last_question}],
+                reasoning={"effort": "none"},
+                input=[{"role": "user", "content": last_question}],
             )
-            print(f"  {response.choices[0].message.content}\n")
+            print(f"  {response.output_text}\n")
         else:
             print("  No previous query. Ask a question first.")
         return None

@@ -20,21 +20,21 @@ This lets the agent do multi-hop reasoning: search for one thing, read the resul
 You define available tools as JSON objects and pass them in the API call. The LLM responds with either a normal text message or a structured tool call request:
 
 ```python
-response = client.chat.completions.create(
+response = client.responses.create(
     model=MODEL,
-    reasoning_effort="none",
-    messages=messages,
+    reasoning={"effort": "none"},
+    input=messages,
     tools=[SEARCH_TOOL],  # tell the model what tools exist
 )
-message = response.choices[0].message
+calls = [item for item in response.output if item.type == "function_call"]
 
-if message.tool_calls:
+if calls:
     # The model wants to call a tool — execute it and feed results back
-    tool_call = message.tool_calls[0]
-    args = json.loads(tool_call.function.arguments)  # e.g. {"query": "reactor safety"}
+    tool_call = calls[0]
+    args = json.loads(tool_call.arguments)  # e.g. {"query": "reactor safety"}
 else:
-    # The model is done — message.content has the final answer
-    print(message.content)
+    # The model is done — response.output_text has the final answer
+    print(response.output_text)
 ```
 
 ### The tool definition format
@@ -44,19 +44,17 @@ A tool definition tells the model what the tool does and what parameters it acce
 ```python
 SEARCH_TOOL = {
     "type": "function",
-    "function": {
-        "name": "search_documents",
-        "description": "Search the document database for relevant information.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The search query to find relevant documents.",
-                },
+    "name": "search_documents",
+    "description": "Search the document database for relevant information.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "The search query to find relevant documents.",
             },
-            "required": ["query"],
         },
+        "required": ["query"],
     },
 }
 ```
@@ -80,13 +78,13 @@ def my_search(query: str) -> list[str]:
     return ["Result 1 text...", "Result 2 text..."]
 ```
 
-When feeding tool results back to the API, you add a message with `role: "tool"`:
+When feeding tool results back to the API, you add a `function_call_output` item (after adding the model's `response.output` to the messages, so the call it answers is in the history):
 
 ```python
 messages.append({
-    "role": "tool",
-    "tool_call_id": tool_call.id,   # links the result back to the request
-    "content": json.dumps(results),  # must be a string
+    "type": "function_call_output",
+    "call_id": tool_call.call_id,   # links the result back to the request
+    "output": json.dumps(results),  # must be a string
 })
 ```
 
@@ -102,11 +100,11 @@ Parse the tool call's arguments (they come as a JSON string), call `search_fn`, 
 
 ```python
 def handle_tool_call(tool_call, search_fn) -> str:
-    args = json.loads(tool_call.function.arguments)
-    if tool_call.function.name == "search_documents":
+    args = json.loads(tool_call.arguments)
+    if tool_call.name == "search_documents":
         results = search_fn(args["query"])
         return json.dumps(results)
-    return json.dumps({"error": f"Unknown tool: {tool_call.function.name}"})
+    return json.dumps({"error": f"Unknown tool: {tool_call.name}"})
 ```
 
 ### 3. Implement `agentic_rag`
@@ -115,25 +113,25 @@ This is the agent loop. Start with a system message and the user's question, the
 
 ```python
 for _ in range(max_turns):
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
         tools=[SEARCH_TOOL],
     )
-    message = response.choices[0].message
+    calls = [item for item in response.output if item.type == "function_call"]
 
-    if not message.tool_calls:
-        return message.content  # done — model gave a final answer
+    if not calls:
+        return response.output_text  # done — model gave a final answer
 
     # Model wants to search — execute each tool call
-    messages.append(message)  # include the assistant's tool-call message
-    for tool_call in message.tool_calls:
+    messages += response.output  # keep the model's function_call items in the history
+    for tool_call in calls:
         result = handle_tool_call(tool_call, search_fn)
         messages.append({
-            "role": "tool",
-            "tool_call_id": tool_call.id,
-            "content": result,
+            "type": "function_call_output",
+            "call_id": tool_call.call_id,
+            "output": result,
         })
 ```
 

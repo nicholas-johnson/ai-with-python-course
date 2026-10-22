@@ -60,9 +60,6 @@ def mock_openai():
         mock_rag.embeddings.create.side_effect = fake_embeddings
         mock_cache.embeddings.create.side_effect = fake_embeddings
 
-        rerank_message = MagicMock(parsed=MagicMock(order=[1, 2, 3]), refusal=None)
-        mock_rag.chat.completions.parse.return_value = MagicMock(
-            choices=[MagicMock(message=rerank_message)]
-        )
+        mock_rag.responses.parse.return_value = MagicMock(output_parsed=MagicMock(order=[1, 2, 3]))
 
         yield {"rag": mock_rag, "cache": mock_cache}

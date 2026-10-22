@@ -70,10 +70,10 @@ def test_rag_chat_returns_answer_and_passages():
 
     with patch.object(mod, "search", return_value=fake_passages) as mock_search:
         mock_response = MagicMock()
-        mock_response.choices = [MagicMock(message=MagicMock(content="The answer is 42."))]
+        mock_response.output_text = "The answer is 42."
 
         with patch.object(mod, "client", create=True) as mock_client:
-            mock_client.chat.completions.create.return_value = mock_response
+            mock_client.responses.create.return_value = mock_response
             answer, passages = mod.rag_chat("test?", mock_collection, k=3)
 
     assert isinstance(answer, str)

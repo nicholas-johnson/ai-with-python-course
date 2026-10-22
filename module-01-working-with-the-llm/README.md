@@ -4,7 +4,8 @@
 
 ## Learning goals
 
-- Call the **LLM chat-completion API** directly (message roles, parameters, responses).
+- Call the LLM directly with OpenAI's **Responses API** (instructions, input, message roles, the response object).
+- Recognise the older **Chat Completions API** — still supported and common in existing code, but being phased out.
 - Build a **CLI chat loop** with conversation history.
 - **Stream responses** token by token for real-time output.
 - Apply **prompting patterns** that hold up in production (personas, format constraints, guardrails, few-shot examples).
@@ -13,7 +14,7 @@
 
 ## The chat loop
 
-The core pattern is a function that calls the OpenAI API:
+The core pattern is a function that calls OpenAI's **Responses API**:
 
 ```python
 import os
@@ -23,13 +24,24 @@ client = OpenAI()
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 def chat(client, messages):
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text
 ```
 
-Every script in this course reads the model name from `OPENAI_MODEL` (set it in `.env`) and falls back to `gpt-6-luna`, a fast, cheap model. `gpt-6-luna` is a *reasoning* model: by default it thinks before it answers. `reasoning_effort="none"` turns that off, so it answers straight away like a classic chat model. Chat Completions also insists on it before it will accept function tools or a custom `temperature`, so you will see it on every call.
+`input` takes either a plain string or a list of messages (`{"role": "system" | "user" | "assistant", "content": ...}`). `response.output_text` is the model's reply as a string. For a single question you can also put the system prompt in `instructions` and the question straight into `input`:
 
-The model sees the full context every time — that is how it "remembers" the conversation. The catch is that the history grows with every turn. When it exceeds the model's context window you need to truncate or summarise (covered in Module 7).
+```python
+response = client.responses.create(
+    model=MODEL,
+    reasoning={"effort": "none"},
+    instructions="You are the DSS Pathfinder ship AI.",
+    input="What is our heading?",
+)
+```
+
+Every script in this course reads the model name from `OPENAI_MODEL` (set it in `.env`) and falls back to `gpt-6-luna`, a fast, cheap model. `gpt-6-luna` is a *reasoning* model: by default it thinks before it answers. `reasoning={"effort": "none"}` turns that off, so it answers straight away like a classic chat model — you will see it on every call in this course.
+
+The model sees the full context you send every time — that is how it "remembers" the conversation. The catch is that the history grows with every turn. When it exceeds the model's context window you need to truncate or summarise (covered in Module 7).
 
 Wrap this in an input loop:
 
@@ -54,21 +66,60 @@ With streaming, the first token appears in ~200ms and words flow in as they are 
 
 ```python
 def stream_response(client, messages):
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=messages, stream=True,
+    stream = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True,
     )
     tokens = []
-    for chunk in response:
-        content = chunk.choices[0].delta.content
-        if content:
-            sys.stdout.write(content)
+    for event in stream:
+        if event.type == "response.output_text.delta":
+            sys.stdout.write(event.delta)
             sys.stdout.flush()
-            tokens.append(content)
+            tokens.append(event.delta)
     print()
     return "".join(tokens)
 ```
 
-Each chunk contains a `delta` with a fragment of the response. Print it immediately and the user sees words appear as they are generated. Progressive rendering keeps the user engaged during generation.
+A stream is a sequence of typed **events**. Text arrives in `response.output_text.delta` events, each carrying a fragment in `event.delta`; other events (`response.created`, `response.completed`, ...) mark progress. Print each fragment immediately and the user sees words appear as they are generated. Progressive rendering keeps the user engaged during generation.
+
+---
+
+## Two APIs: Responses and Chat Completions
+
+OpenAI has two APIs for generating text. This course uses the **Responses API**. You will still meet the older **Chat Completions API** — in existing code, tutorials, and the "OpenAI-compatible" endpoints many other providers offer — so it is worth recognising:
+
+```python
+# Chat Completions (older)
+completion = client.chat.completions.create(
+    model=MODEL,
+    reasoning_effort="none",
+    messages=[
+        {"role": "system", "content": "You are the DSS Pathfinder ship AI."},
+        {"role": "user", "content": "What is our heading?"},
+    ],
+)
+text = completion.choices[0].message.content
+```
+
+| | Responses API (use this) | Chat Completions (older) |
+|-|--------------------------|--------------------------|
+| Call | `client.responses.create(...)` | `client.chat.completions.create(...)` |
+| Input | `input=` (string or messages) + optional `instructions=` | `messages=` only |
+| Reply text | `response.output_text` | `completion.choices[0].message.content` |
+| Reasoning | `reasoning={"effort": "none"}` | `reasoning_effort="none"` |
+| Streaming | typed events (`response.output_text.delta`) | chunks (`chunk.choices[0].delta.content`) |
+| Conversation state | you send the history, **or** pass `previous_response_id` and the API keeps it | you always send the full history |
+| Built-in tools | web search, file search, code interpreter, ... | not available |
+
+Chat Completions is still supported, but OpenAI builds new features for the Responses API first and recommends it for new projects — existing apps are being migrated across. If you need to port old code, see the [migration guide](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+
+**Server-side conversation state.** Instead of resending the whole history, you can chain calls:
+
+```python
+first = client.responses.create(model=MODEL, input="My call sign is Nova-7.")
+reply = client.responses.create(model=MODEL, previous_response_id=first.id, input="What is my call sign?")
+```
+
+The exercises keep the explicit message list, because seeing exactly what the model receives is the point of this module — and it is the pattern later modules build on for memory and agents.
 
 ---
 
@@ -118,7 +169,7 @@ The key insight is that prompts are **instructions, not wishes**. Vague prompts 
 
 ## Demo
 
-One script walks through the whole module — basic chat, streaming, and prompting patterns:
+One script walks through the whole module — basic chat, streaming, prompting patterns, and the Responses vs Chat Completions comparison:
 
 ```bash
 python module-01-working-with-the-llm/demo/demo.py
@@ -146,5 +197,8 @@ From repo root: `pnpm slides:01`, or `cd module-01-working-with-the-llm/slides &
 
 ## Reference
 
-- [OpenAI API — Chat completions](https://platform.openai.com/docs/guides/text-generation)
-- [OpenAI — Prompt engineering](https://platform.openai.com/docs/guides/prompt-engineering)
+- [OpenAI — Text generation with the Responses API](https://developers.openai.com/api/docs/guides/text)
+- [OpenAI — Streaming responses](https://developers.openai.com/api/docs/guides/streaming-responses)
+- [OpenAI — Conversation state](https://developers.openai.com/api/docs/guides/conversation-state)
+- [OpenAI — Migrating from Chat Completions to Responses](https://developers.openai.com/api/docs/guides/migrate-to-responses)
+- [OpenAI — Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)

@@ -81,14 +81,14 @@ def demo_cost_controls():
         print(f"\n  Query: {query[:60]}...")
         print(f"  Complexity: {complexity} → Model: {model}")
 
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=model,
-            reasoning_effort="none",
-            messages=[{"role": "user", "content": query}],
-            max_completion_tokens=150,
+            reasoning={"effort": "none"},
+            input=[{"role": "user", "content": query}],
+            max_output_tokens=150,
         )
-        answer = response.choices[0].message.content.strip()
-        tracker.record(model, response.usage.prompt_tokens, response.usage.completion_tokens)
+        answer = response.output_text.strip()
+        tracker.record(model, response.usage.input_tokens, response.usage.output_tokens)
 
         print(f"  Answer: {answer[:80]}...")
         print(f"  Tokens used: {response.usage.total_tokens} | {tracker.summary()}")

@@ -49,12 +49,12 @@ def classify_query(query: str, client: OpenAI) -> str:
         1. Define a Pydantic model (above this function):
                class Route(BaseModel):
                    department: Literal["medical", "tactical", "comms"]
-        2. Call client.chat.completions.parse with model=MODEL,
-           reasoning_effort="none", response_format=Route
+        2. Call client.responses.parse with model=MODEL,
+           reasoning={"effort": "none"}, text_format=Route
         3. System prompt: describe the three departments and ask the model
            to classify the query (no need to describe the JSON -- the
            Literal type limits the answer to valid departments)
-        4. route = response.choices[0].message.parsed
+        4. route = response.output_parsed
            Return route.department, or "medical" if route is None (refusal)
     """
     # TODO: implement LLM-based classification
@@ -67,7 +67,7 @@ def specialist_agent(department: str, query: str, client: OpenAI) -> str:
     Steps:
         1. Look up the system prompt from SPECIALIST_PROMPTS for the department
            (fall back to "medical" for unknown departments)
-        2. Call client.chat.completions.create with model=MODEL, reasoning_effort="none"
+        2. Call client.responses.create with model=MODEL, reasoning={"effort": "none"}
         3. Pass the system prompt and the user's query
         4. Return the response text
     """

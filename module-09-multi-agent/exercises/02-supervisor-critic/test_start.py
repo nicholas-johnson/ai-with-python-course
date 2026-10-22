@@ -34,20 +34,20 @@ def _import_start():
     raise FileNotFoundError("Neither start.py nor solution.py found")
 
 
-def _message(content: str, response_format=None):
-    """A fake completion message; structured calls also get .parsed like the SDK."""
-    parsed = response_format.model_validate_json(content) if response_format else None
-    return MagicMock(content=content, refusal=None, parsed=parsed)
+def _response(content: str, text_format=None):
+    """A fake Responses API result; structured calls also get .output_parsed like the SDK."""
+    parsed = text_format.model_validate_json(content) if text_format else None
+    return MagicMock(output=[], output_text=content, output_parsed=parsed)
 
 
 def _mock_client_json(content: dict):
     """Create a mock OpenAI client whose structured-output call returns this object."""
     mock = MagicMock()
 
-    def parse(*, response_format, **kwargs):
-        return MagicMock(choices=[MagicMock(message=_message(json.dumps(content), response_format))])
+    def parse(*, text_format, **kwargs):
+        return _response(json.dumps(content), text_format)
 
-    mock.chat.completions.parse.side_effect = parse
+    mock.responses.parse.side_effect = parse
     return mock
 
 
@@ -55,7 +55,7 @@ def _mock_client_sequence(responses: List[str]):
     """Create a mock client that returns the next response on each call.
 
     Plain calls (create) get the text; structured calls (parse) get it
-    validated against their response_format -- one shared order, as in a real run.
+    validated against their text_format -- one shared order, as in a real run.
     """
     mock = MagicMock()
     call_idx = 0
@@ -67,13 +67,13 @@ def _mock_client_sequence(responses: List[str]):
         return content
 
     def create(**kwargs):
-        return MagicMock(choices=[MagicMock(message=_message(next_content()))])
+        return _response(next_content())
 
-    def parse(*, response_format, **kwargs):
-        return MagicMock(choices=[MagicMock(message=_message(next_content(), response_format))])
+    def parse(*, text_format, **kwargs):
+        return _response(next_content(), text_format)
 
-    mock.chat.completions.create.side_effect = create
-    mock.chat.completions.parse.side_effect = parse
+    mock.responses.create.side_effect = create
+    mock.responses.parse.side_effect = parse
     return mock
 
 
@@ -118,8 +118,8 @@ def test_critic_defaults_on_refusal():
     """CriticAgent.review defaults to approved when the model refuses (parsed is None)."""
     mod = _import_start()
     mock = MagicMock()
-    message = MagicMock(parsed=None, refusal="I can't help with that.")
-    mock.chat.completions.parse.return_value = MagicMock(choices=[MagicMock(message=message)])
+    # The model refused: no parsed output.
+    mock.responses.parse.return_value = MagicMock(output_parsed=None, output_text="")
     critic = mod.CriticAgent(mock)
 
     result = critic.review("q", "r")

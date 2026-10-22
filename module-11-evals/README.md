@@ -30,7 +30,7 @@ Use cheap, deterministic checks (golden tests, retrieval metrics) in CI on every
 
 ## Golden-file testing
 
-Mock the LLM with **scripted responses**. The agent loop still runs: it sees `tool_calls`, executes handlers, appends tool results, and reads the final `content`. You assert the tools and the answer.
+Mock the LLM with **scripted responses**. The agent loop still runs: it sees `function_call` items, executes handlers, appends `function_call_output` items, and reads the final `output_text`. You assert the tools and the answer.
 
 Golden tests are fast (no network), free (no tokens), and deterministic (same result every run). They catch "the agent stopped calling `get_ship_status`" — not "the prose got slightly worse".
 

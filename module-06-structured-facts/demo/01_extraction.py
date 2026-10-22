@@ -42,11 +42,11 @@ class FactList(BaseModel):
 
 def extract_facts(text: str) -> tuple[list[Fact], str]:
     """Extract facts from text. Returns (facts, raw_json)."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=FactList,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=FactList,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -57,10 +57,9 @@ def extract_facts(text: str) -> tuple[list[Fact], str]:
             {"role": "user", "content": text},
         ],
     )
-    message = response.choices[0].message
-    if message.refusal:
+    if response.output_parsed is None:
         return [], ""
-    return message.parsed.facts, message.content
+    return response.output_parsed.facts, response.output_text
 
 
 def section(title: str):
@@ -78,7 +77,7 @@ def main():
 
     print("  We define a Fact model with typed fields:\n")
     print(json.dumps(Fact.model_json_schema(), indent=2))
-    print("\n  We pass the model itself as response_format. The SDK turns it into a")
+    print("\n  We pass the model itself as text_format. The SDK turns it into a")
     print("  strict JSON schema, the API constrains generation to that schema, and")
     print("  the SDK validates the reply back into Fact objects.")
 
@@ -91,7 +90,7 @@ def main():
     print(f"  Log: {log['id']} ({log['author']})")
     print(f"  Content: {log['content'][:200]}...\n")
 
-    print("  Calling client.chat.completions.parse(response_format=FactList)...")
+    print("  Calling client.responses.parse(text_format=FactList)...")
     facts, raw_json = extract_facts(log["content"])
 
     print(f"\n  Raw JSON response:\n")

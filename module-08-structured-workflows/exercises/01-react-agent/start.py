@@ -57,16 +57,14 @@ TOOL_SCHEMAS = [
     # Each entry should look like:
     # {
     #     "type": "function",
-    #     "function": {
-    #         "name": "search_web",
-    #         "description": "Search the web for information.",
-    #         "parameters": {
-    #             "type": "object",
-    #             "properties": {
-    #                 "query": {"type": "string", "description": "The search query"}
-    #             },
-    #             "required": ["query"],
+    #     "name": "search_web",
+    #     "description": "Search the web for information.",
+    #     "parameters": {
+    #         "type": "object",
+    #         "properties": {
+    #             "query": {"type": "string", "description": "The search query"}
     #         },
+    #         "required": ["query"],
     #     },
     # }
 ]
@@ -85,14 +83,15 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
     """Run a ReAct loop: send query, handle tool calls, return trace + answer."""
     # TODO: implement the ReAct loop
     # 1. Start with messages = [SYSTEM_PROMPT, {"role": "user", "content": query}]
-    # 2. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOL_SCHEMAS)
-    # 3. If response has tool_calls:
-    #    a. Append the assistant message to messages
-    #    b. For each tool_call: look up TOOLS[name], parse args, call it
-    #    c. Append {"role": "tool", "tool_call_id": ..., "content": result} to messages
+    # 2. Call client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOL_SCHEMAS)
+    # 3. calls = [item for item in response.output if item.type == "function_call"]
+    #    If there are calls:
+    #    a. Add the model's output to the history: messages += response.output
+    #    b. For each call: look up TOOLS[call.name], parse call.arguments, call it
+    #    c. Append {"type": "function_call_output", "call_id": ..., "output": result} to messages
     #    d. Add {"type": "tool", "name": name, "args": args, "result": result} to trace
     #    e. Loop back to step 2
-    # 4. If response has content (no tool_calls):
+    # 4. Otherwise (no calls), content = response.output_text:
     #    a. Add {"type": "answer", "content": content} to trace
     #    b. Return {"answer": content, "trace": trace}
     # 5. Stop after max_steps iterations

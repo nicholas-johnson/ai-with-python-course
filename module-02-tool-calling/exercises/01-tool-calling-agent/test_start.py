@@ -27,19 +27,19 @@ class TestToolSchemas:
     def test_each_tool_has_correct_structure(self):
         for tool in TOOLS:
             assert tool["type"] == "function"
-            fn = tool["function"]
+            fn = tool
             assert "name" in fn
             assert "description" in fn
             assert "parameters" in fn
             assert fn["parameters"]["type"] == "object"
 
     def test_tool_names(self):
-        names = {t["function"]["name"] for t in TOOLS}
+        names = {t["name"] for t in TOOLS}
         assert names == {"get_crew_count", "get_ship_status", "search_crew"}
 
     def test_required_fields_present(self):
         for tool in TOOLS:
-            params = tool["function"]["parameters"]
+            params = tool["parameters"]
             assert "required" in params
             assert len(params["required"]) > 0
 
@@ -50,7 +50,7 @@ class TestToolSchemas:
 
 class TestToolHandlers:
     def test_all_tools_have_handlers(self):
-        tool_names = {t["function"]["name"] for t in TOOLS}
+        tool_names = {t["name"] for t in TOOLS}
         assert set(TOOL_HANDLERS.keys()) == tool_names
 
     def test_get_crew_count_known_department(self):
@@ -87,29 +87,21 @@ class TestToolHandlers:
 # ---------------------------------------------------------------------------
 
 def _make_tool_call(tc_id, name, arguments):
-    """Build a mock tool_call object matching the OpenAI SDK shape."""
-    tc = MagicMock()
-    tc.id = tc_id
-    tc.function.name = name
-    tc.function.arguments = json.dumps(arguments)
+    """Build a mock function_call output item (Responses API shape)."""
+    tc = MagicMock(type="function_call", call_id=tc_id, arguments=json.dumps(arguments))
+    tc.name = name  # set after construction: MagicMock(name=...) names the mock itself
     return tc
 
 
 def _make_response(content=None, tool_calls=None):
-    """Build a mock chat completion response."""
-    msg = MagicMock()
-    msg.content = content
-    msg.tool_calls = tool_calls
-    resp = MagicMock()
-    resp.choices = [MagicMock()]
-    resp.choices[0].message = msg
-    return resp
+    """Build a mock Responses API response."""
+    return MagicMock(output=list(tool_calls or []), output_text=content or "")
 
 
 class TestRunAgent:
     def test_direct_answer_no_tools(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_response(
+        client.responses.create.return_value = _make_response(
             content="Hello, Commander."
         )
         result = run_agent(client, "Hi")
@@ -121,7 +113,7 @@ class TestRunAgent:
 
     def test_single_tool_call_then_answer(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "get_crew_count", {"department": "science"}),
             ]),
@@ -135,7 +127,7 @@ class TestRunAgent:
 
     def test_multiple_tool_calls_across_steps(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "get_ship_status", {"system": "warp"}),
             ]),
@@ -152,7 +144,7 @@ class TestRunAgent:
 
     def test_max_steps_prevents_infinite_loop(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_response(
+        client.responses.create.return_value = _make_response(
             tool_calls=[_make_tool_call("c1", "get_crew_count", {"department": "science"})]
         )
         result = run_agent(client, "loop forever", max_steps=3)
@@ -162,7 +154,7 @@ class TestRunAgent:
 
     def test_tool_results_passed_to_api(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _make_response(tool_calls=[
                 _make_tool_call("c1", "get_crew_count", {"department": "science"}),
             ]),
@@ -170,11 +162,11 @@ class TestRunAgent:
         ]
         run_agent(client, "test")
 
-        second_call_messages = client.chat.completions.create.call_args_list[1]
-        messages = second_call_messages.kwargs.get("messages") or second_call_messages[1].get("messages", [])
-        tool_msgs = [m for m in messages if isinstance(m, dict) and m.get("role") == "tool"]
+        second_call_messages = client.responses.create.call_args_list[1]
+        messages = second_call_messages.kwargs.get("input") or second_call_messages[1].get("input", [])
+        tool_msgs = [m for m in messages if isinstance(m, dict) and m.get("type") == "function_call_output"]
         assert len(tool_msgs) == 1
-        assert "science" in tool_msgs[0]["content"]
+        assert "science" in tool_msgs[0]["output"]
 
 
 # ---------------------------------------------------------------------------

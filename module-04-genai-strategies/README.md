@@ -37,7 +37,7 @@ Not every query needs a premium model. Simple classification tasks run fine on G
 | Latency | Slower | Faster |
 | Context | 1M+ tokens | 1M+ tokens |
 
-Both are reasoning models. `reasoning_effort` (`none` through `max`) is a second dial alongside model choice: more effort buys better answers on hard problems at the cost of latency and output tokens.
+Both are reasoning models. `reasoning={"effort": ...}` (`none` through `max`) is a second dial alongside model choice: more effort buys better answers on hard problems at the cost of latency and output tokens.
 
 ---
 
@@ -73,16 +73,14 @@ Modern models can process images and audio alongside text.
 **Vision** — send images as base64 data URIs or public URLs in the message content:
 
 ```python
-response = client.chat.completions.create(
+response = client.responses.create(
     model=MODEL,
-    reasoning_effort="none",
-    messages=[{
+    reasoning={"effort": "none"},
+    input=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe what you see."},
-            {"type": "image_url", "image_url": {
-                "url": f"data:image/png;base64,{img_b64}"
-            }},
+            {"type": "input_text", "text": "Describe what you see."},
+            {"type": "input_image", "image_url": f"data:image/png;base64,{img_b64}"},
         ],
     }],
 )

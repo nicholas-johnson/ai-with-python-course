@@ -6,7 +6,7 @@ Build a production-ready recipe search API that combines techniques from across 
 
 | Technique | Module | File |
 |---|---|---|
-| OpenAI chat completions | Module 1 — Working with the LLM | `vision.py`, `rag.py` |
+| OpenAI Responses API | Module 1 — Working with the LLM | `vision.py`, `rag.py` |
 | Tool calling patterns | Module 2 — Tool Calling | `app.py` |
 | RAG indexing & vector search | Module 5 — RAG Fundamentals | `rag.py` |
 | Hybrid search (BM25 + vector) | Module 13 — Edge Topics | `rag.py` |

@@ -10,16 +10,15 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
 def stream_response(client, messages: list[dict]) -> str:
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=messages, stream=True,
+    stream = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=messages, stream=True,
     )
     tokens = []
-    for chunk in response:
-        content = chunk.choices[0].delta.content
-        if content:
-            sys.stdout.write(content)
+    for event in stream:
+        if event.type == "response.output_text.delta":
+            sys.stdout.write(event.delta)
             sys.stdout.flush()
-            tokens.append(content)
+            tokens.append(event.delta)
     print()
     return "".join(tokens)
 

@@ -20,10 +20,10 @@ SERVER_SCRIPT = "server.py"
 
 
 def mcp_to_openai_tools(mcp_tools) -> list[dict]:
-    """Convert MCP tool definitions to OpenAI function-calling format.
+    """Convert MCP tool definitions to OpenAI function tools.
 
     Each MCP tool has .name, .description, .input_schema.
-    Return a list of {"type": "function", "function": {...}} dicts.
+    Return a list of {"type": "function", "name", "description", "parameters"} dicts.
     """
     raise NotImplementedError
 
@@ -32,10 +32,12 @@ async def run_turn(client, messages, session, openai_tools, max_steps: int = 10)
     """Execute one conversational turn: call the LLM, handle tool calls, return final text.
 
     Loop up to max_steps times:
-      1. Call client.chat.completions.create with messages + tools.
-      2. If no tool_calls, append assistant message and return the text.
-      3. Otherwise, append the assistant message, then for each tool call:
-         - Parse arguments, call session.call_tool(), append a tool result message.
+      1. Call client.responses.create with input=messages and tools=...
+      2. calls = [item for item in response.output if item.type == "function_call"]
+         If there are no calls, append the assistant message and return response.output_text.
+      3. Otherwise, extend messages with response.output, then for each call:
+         - Parse call.arguments, call session.call_tool(), append a
+           {"type": "function_call_output", "call_id": call.call_id, "output": text} item.
     """
     raise NotImplementedError
 

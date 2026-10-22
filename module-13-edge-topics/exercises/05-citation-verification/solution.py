@@ -15,10 +15,10 @@ def extract_claims(client: OpenAI, answer: str) -> list[str]:
     """
     Extract individual factual claims from an answer.
     """
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 f"Extract each distinct factual claim from this text. "
@@ -28,7 +28,7 @@ def extract_claims(client: OpenAI, answer: str) -> list[str]:
         }],
         temperature=0,
     )
-    lines = response.choices[0].message.content.strip().split("\n")
+    lines = response.output_text.strip().split("\n")
     return [line.strip() for line in lines if line.strip()]
 
 
@@ -40,10 +40,10 @@ def check_claim_support(
     """
     Check whether a passage supports a claim.
     """
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 f"Does this passage support the following claim? "
@@ -54,7 +54,7 @@ def check_claim_support(
         }],
         temperature=0,
     )
-    verdict = response.choices[0].message.content.strip().lower()
+    verdict = response.output_text.strip().lower()
     return "supported" if "supported" in verdict and "unsupported" not in verdict else "unsupported"
 
 

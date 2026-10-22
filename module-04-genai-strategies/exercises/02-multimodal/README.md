@@ -14,17 +14,17 @@ This is the fun one. Two small functions, two endpoints, and suddenly your assis
 Send images as base64 data URLs in the message content:
 
 ```python
-response = client.chat.completions.create(
+response = client.responses.create(
     model=MODEL,
-    reasoning_effort="none",
-    messages=[
+    reasoning={"effort": "none"},
+    input=[
         {
             "role": "user",
             "content": [
-                {"type": "text", "text": "Describe this image."},
+                {"type": "input_text", "text": "Describe this image."},
                 {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/png;base64,{image_b64}"},
+                    "type": "input_image",
+                    "image_url": f"data:image/png;base64,{image_b64}",
                 },
             ],
         }
@@ -66,23 +66,22 @@ return transcript.text
 
 ### 2. Implement `analyze_image`
 
-Build a chat completion with `MODEL` that includes the image as a base64 data URL. Describe the result you want as a Pydantic model and pass it to `client.chat.completions.parse` -- the API constrains the reply to that schema:
+Make a `client.responses.create` call with `MODEL` that includes the image as a base64 data URL. Describe the result you want as a Pydantic model and pass it to `client.responses.parse` -- the API constrains the reply to that schema:
 
 ```python
 class ImageAnalysis(BaseModel):
     description: str
     key_points: list[str]
 
-response = client.chat.completions.parse(
+response = client.responses.parse(
     model=MODEL,
-    reasoning_effort="none",
-    response_format=ImageAnalysis,
-    messages=[...],   # system prompt + user content with text and image_url parts
+    reasoning={"effort": "none"},
+    text_format=ImageAnalysis,
+    input=[...],   # system prompt + user content with text and image_url parts
 )
-message = response.choices[0].message
 ```
 
-Return `message.parsed.model_dump()`. If `message.parsed` is `None`, the model refused (`message.refusal` says why) -- raise `HTTPException(status_code=422, ...)`. Module 6 covers structured outputs in depth.
+Return `response.output_parsed.model_dump()`. If `response.output_parsed` is `None`, the model refused (`message.refusal` says why) -- raise `HTTPException(status_code=422, ...)`. Module 6 covers structured outputs in depth.
 
 ### 3. Add `POST /vision`
 

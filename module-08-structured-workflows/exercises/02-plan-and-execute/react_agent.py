@@ -80,65 +80,57 @@ TOOLS = {
 TOOL_SCHEMAS = [
     {
         "type": "function",
-        "function": {
-            "name": "search_web",
-            "description": "Search the web for information. Returns a text summary.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The search query",
-                    }
-                },
-                "required": ["query"],
+        "name": "search_web",
+        "description": "Search the web for information. Returns a text summary.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search query",
+                }
             },
+            "required": ["query"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "calculator",
-            "description": "Evaluate a mathematical expression. Returns the result as a string.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "expression": {
-                        "type": "string",
-                        "description": "The math expression to evaluate, e.g. '2 + 2' or '(10 * 5) / 3'",
-                    }
-                },
-                "required": ["expression"],
+        "name": "calculator",
+        "description": "Evaluate a mathematical expression. Returns the result as a string.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "The math expression to evaluate, e.g. '2 + 2' or '(10 * 5) / 3'",
+                }
             },
+            "required": ["expression"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "take_note",
-            "description": "Save a note for later reference. Returns confirmation.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "content": {
-                        "type": "string",
-                        "description": "The note content to save",
-                    }
-                },
-                "required": ["content"],
+        "name": "take_note",
+        "description": "Save a note for later reference. Returns confirmation.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "description": "The note content to save",
+                }
             },
+            "required": ["content"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "read_notes",
-            "description": "Read all saved notes. Returns notes as numbered list.",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": [],
-            },
+        "name": "read_notes",
+        "description": "Read all saved notes. Returns notes as numbered list.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": [],
         },
     },
 ]
@@ -159,19 +151,19 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
     trace: list[dict] = []
 
     for _step in range(max_steps):
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=TOOL_SCHEMAS,
         )
-        choice = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if choice.tool_calls:
-            messages.append(choice)
-            for tool_call in choice.tool_calls:
-                name = tool_call.function.name
-                args = json.loads(tool_call.function.arguments)
+        if calls:
+            messages += response.output
+            for tool_call in calls:
+                name = tool_call.name
+                args = json.loads(tool_call.arguments)
                 func = TOOLS.get(name)
                 if func:
                     result = func(**args)
@@ -185,12 +177,12 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
                     "result": result,
                 })
                 messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": result,
+                    "type": "function_call_output",
+                    "call_id": tool_call.call_id,
+                    "output": result,
                 })
         else:
-            content = choice.content or ""
+            content = response.output_text or ""
             trace.append({"type": "answer", "content": content})
             return {"answer": content, "trace": trace}
 

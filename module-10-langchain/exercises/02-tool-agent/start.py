@@ -54,7 +54,7 @@ _classify_prompt = ChatPromptTemplate.from_messages([
     ),
     ("human", "{report}"),
 ])
-_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 _classify_chain = _classify_prompt | _classify_model.with_structured_output(Classification)
 
 
@@ -93,7 +93,7 @@ def classify_report(report: str) -> dict:
 
 # tools = [classify, read_sensor, query_crew]
 # SYSTEM_PROMPT = "You are the CSS Horizon AI assistant. ..."
-# model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+# model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 # agent = create_agent(model, tools, system_prompt=SYSTEM_PROMPT)
 
 

@@ -26,8 +26,8 @@ A console app in **`start.py`** where three officers (comms, engineering, tactic
 | Function | Description |
 |---|---|
 | `build_agent_messages` | System prompt + user query for a department |
-| `run_agent_turn` | One `chat.completions.create` with that agent's `tools` |
-| `handle_tool_calls` | Run tools, build `role: tool` messages, detect transfers |
+| `run_agent_turn` | One `responses.create` with that agent's `tools` |
+| `handle_tool_calls` | Run tools, build `function_call_output` items, detect transfers |
 | `swarm_loop` | Loop: turn → tools → handoff or final answer |
 
 ## Step-by-step
@@ -45,28 +45,28 @@ Look up `AGENT_PROMPTS[department]` and return:
 
 ### 2. Implement `run_agent_turn`
 
-- Model: `MODEL` (`gpt-6-luna` unless `OPENAI_MODEL` is set), with `reasoning_effort="none"`
-- Pass `messages` and `tools=AGENT_TOOLS[department]`
+- Model: `MODEL` (`gpt-6-luna` unless `OPENAI_MODEL` is set), with `reasoning={"effort": "none"}`
+- Pass `input=messages` and `tools=AGENT_TOOLS[department]`
 - `tool_choice="auto"`
-- Return `response.choices[0].message` (the message object, not just text)
+- Return the whole `response` object (not just its text) — the next step needs its `output`
 
 ### 3. Implement `handle_tool_calls`
 
-For each `tool_call` on the assistant message:
+Start the returned list with `list(response.output)` (the model's `function_call` items), then for each call in `function_calls(response)`:
 
-1. Parse `tc.function.arguments` as JSON
-2. If name starts with `transfer_to_`, call `TOOL_FUNCTIONS[name]()`, parse JSON for `transfer_to`, set `transfer_target`
+1. Parse `call.arguments` as JSON
+2. If `call.name` starts with `transfer_to_`, call `TOOL_FUNCTIONS[name]()`, parse JSON for `transfer_to`, set `transfer_target`
 3. Else call `TOOL_FUNCTIONS[name](**args)` for domain tools
-4. Append an **assistant** message (with `tool_calls`) then **tool** messages with `tool_call_id`
+4. Append a `{"type": "function_call_output", "call_id": call.call_id, "output": result}` item
 
-Return `(tool_messages, transfer_target)`.
+Return `(new_items, transfer_target)`.
 
 ### 4. Implement `swarm_loop`
 
 1. Start at `start_dept` with `build_agent_messages`
 2. For each hop up to `max_hops`:
    - `run_agent_turn`
-   - If no `tool_calls`, return final `answer`, `chain`, `trace`
+   - If `function_calls(response)` is empty, return `response.output_text` as the `answer`, with `chain` and `trace`
    - `handle_tool_calls`, extend `messages`
    - If `transfer_target` is a valid other department, switch agent, append handoff user message, `continue`
    - Otherwise same agent gets another turn (more tools)

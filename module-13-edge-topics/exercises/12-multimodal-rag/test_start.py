@@ -10,15 +10,14 @@ def make_mock_client(chat_text="A detailed image description.", embedding=None):
     client = MagicMock()
 
     chat_response = MagicMock()
-    chat_response.choices = [MagicMock()]
-    chat_response.choices[0].message.content = chat_text
+    chat_response.output_text = chat_text
 
     emb_response = MagicMock()
     emb_data = MagicMock()
     emb_data.embedding = embedding
     emb_response.data = [emb_data]
 
-    client.chat.completions.create.return_value = chat_response
+    client.responses.create.return_value = chat_response
     client.embeddings.create.return_value = emb_response
     return client
 

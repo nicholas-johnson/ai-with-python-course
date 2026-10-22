@@ -14,7 +14,7 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 # ---------------------------------------------------------------------------
 
 TOOLS: list[dict] = [
-    # TODO: define 3 tools in OpenAI format:
+    # TODO: define 3 tools in the Responses API tool format:
     #   get_crew_count  — takes "department" (string), returns crew count
     #   get_ship_status — takes "system" (string), returns system status
     #   search_crew     — takes "query" (string), returns matching crew
@@ -22,14 +22,12 @@ TOOLS: list[dict] = [
     # Each tool looks like:
     # {
     #     "type": "function",
-    #     "function": {
-    #         "name": "...",
-    #         "description": "...",
-    #         "parameters": {
-    #             "type": "object",
-    #             "properties": { ... },
-    #             "required": [ ... ],
-    #         },
+    #     "name": "...",
+    #     "description": "...",
+    #     "parameters": {
+    #         "type": "object",
+    #         "properties": { ... },
+    #         "required": [ ... ],
     #     },
     # }
 ]
@@ -111,11 +109,12 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
     Run the tool-calling agent loop.
 
     1. Build messages: system prompt + user question.
-    2. Call client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS).
-    3. Check response.choices[0].message:
-       - If message.tool_calls: for each tool call, execute the handler from TOOL_HANDLERS,
-         append the assistant message and tool result message, then loop.
-       - If message.content (and no tool_calls): return it as the final answer.
+    2. Call client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOLS).
+    3. Collect calls = [item for item in response.output if item.type == "function_call"]:
+       - If calls: add response.output to messages, then for each call run
+         TOOL_HANDLERS[call.name](**json.loads(call.arguments)) and append
+         {"type": "function_call_output", "call_id": call.call_id, "output": result}; loop.
+       - Otherwise return response.output_text as the final answer.
     4. Stop after max_steps and return whatever you have.
 
     Return an AgentResult with the final answer, list of tool names called, and step count.

@@ -137,7 +137,7 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 1 — [Working with the LLM](module-01-working-with-the-llm/)
 
-**Topics:** LLM API integration (chat completions, message roles, parameters), streaming responses, prompting patterns (structured outputs, grounding, tool calling), building a simple chat interface, session storage.
+**Topics:** LLM API integration with OpenAI's Responses API (and the older Chat Completions API you'll still meet), message roles, parameters, streaming responses, prompting patterns (structured outputs, grounding, tool calling), building a simple chat interface, session storage.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |

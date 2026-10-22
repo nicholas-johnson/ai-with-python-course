@@ -4,63 +4,78 @@
 
 ## Learning goals
 
-- Understand the **message format** that drives an agent (system, user, assistant, tool messages).
+- Understand the **conversation items** that drive an agent (system, user and assistant messages; function calls and their outputs).
 - Build a **tool-calling loop** with real OpenAI API calls: schema in, action out, result back, repeat.
 - Implement a **tool registry** with decorator registration, routing, and error handling.
 - Add **safety rails**: allowlists, rate limits, audit logs.
 
 ---
 
-## Message roles — the conversation state
+## Conversation items — the agent's state
 
-Every agent conversation is a list of messages. Each message has a **role** that tells the model who said it:
+Every agent conversation is a list of **items** that you pass as `input`. Messages have a **role** that tells the model who said it; tool traffic has its own item types:
 
-- **system** — sets the agent's personality, constraints, and available tools. Sent once at the start.
-- **user** — the human (or upstream agent) input.
-- **assistant** — the model's response. Can contain text, tool calls, or both.
-- **tool** — the result of executing a tool, linked back to the call by `tool_call_id`.
+- **system** message — sets the agent's personality and constraints. Sent once at the start.
+- **user** message — the human (or upstream agent) input.
+- **assistant** message — the model's text reply.
+- **`function_call`** — the model asking to run one of your tools, with a `call_id`, the tool `name`, and JSON `arguments`.
+- **`function_call_output`** — your result for that call, linked back by the same `call_id`.
 
 ```python
-messages = [
+input_items = [
     {"role": "system", "content": "You are the Pathfinder AI..."},
     {"role": "user", "content": "Who is on the Kepler Sweep?"},
-    {"role": "assistant", "tool_calls": [
-        {"id": "c1", "name": "query_crew", "arguments": {"active_mission": "MSN-001"}}
-    ]},
-    {"role": "tool", "tool_call_id": "c1",
-     "content": '[{"name": "Voss"}, {"name": "Chen"}, {"name": "Morel"}, {"name": "Kwan"}]'},
+    {"type": "function_call", "call_id": "c1", "name": "query_crew",
+     "arguments": '{"active_mission": "MSN-001"}'},
+    {"type": "function_call_output", "call_id": "c1",
+     "output": '[{"name": "Voss"}, {"name": "Chen"}, {"name": "Morel"}, {"name": "Kwan"}]'},
     {"role": "assistant",
      "content": "4 crew assigned to Kepler Sweep: Voss, Chen, Morel, Kwan."},
 ]
 ```
 
-The model decides whether to call a tool or answer directly. Tool results come back as messages — the model interprets them, not us. This is the fundamental pattern behind every agent framework.
+The model decides whether to call a tool or answer directly. Tool results go back into the conversation — the model interprets them, not us. This is the fundamental pattern behind every agent framework.
 
 ---
 
 ## The tool-calling loop
 
-The core loop is deceptively simple. Ask the model. If it wants to call a tool, execute the tool, append the result, and ask again. If it replies with text, return it.
+The core loop is deceptively simple. Ask the model. If its output contains `function_call` items, execute each tool, append the model's output and your results, and ask again. If it replies with text, return it.
 
 ```python
 def run_agent(client, question, max_steps=5):
     messages = [system_msg, {"role": "user", "content": question}]
 
     for _ in range(max_steps):
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages, tools=TOOLS,
+        response = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOLS,
         )
-        message = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if message.tool_calls:
-            messages.append(message)
-            for tc in message.tool_calls:
-                result = execute_tool(tc.function.name, tc.function.arguments)
-                messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
-        elif message.content:
-            return message.content  # final answer
+        if calls:
+            messages += response.output
+            for tc in calls:
+                result = execute_tool(tc.name, tc.arguments)
+                messages.append({"type": "function_call_output", "call_id": tc.call_id, "output": result})
+        elif response.output_text:
+            return response.output_text  # final answer
 
     return None  # exhausted steps
+```
+
+`messages += response.output` keeps the model's `function_call` items in the history, so each `function_call_output` you add can be matched to its call by `call_id`. Tool schemas are plain dicts:
+
+```python
+TOOLS = [{
+    "type": "function",
+    "name": "query_crew",
+    "description": "Look up crew members by mission or department.",
+    "parameters": {
+        "type": "object",
+        "properties": {"active_mission": {"type": "string"}},
+        "required": ["active_mission"],
+    },
+}]
 ```
 
 `max_steps` is critical. Without it, a confused model can loop forever — calling tools that return unhelpful results, then calling them again with the same arguments. Always cap iterations.
@@ -93,7 +108,7 @@ The decorator pattern keeps the schema next to the handler — when you change t
 
 ```python
 tools_for_api = registry.list_tools()
-# [{"type": "function", "function": {"name": "ship_status", ...}}]
+# [{"type": "function", "name": "ship_status", ...}]
 ```
 
 When the model returns a tool call, the registry validates the arguments against the schema and routes to the correct handler. Unknown tool names and bad arguments return structured error messages instead of crashing.
@@ -156,7 +171,7 @@ python module-02-tool-calling/demo/demo.py
 ```
 
 Walks through all four topics interactively — press Enter between sections:
-1. **Message format** — live API call that triggers a tool call, traces all 4 roles
+1. **Conversation items** — live API call that triggers a tool call, traces every message and function-call item
 2. **Tool registry** — decorator registration, `list_tools()`, call routing, error handling
 3. **Safety rails** — allowlist blocks `delete_all_data`, rate limiter kicks in, redaction, audit log
 4. **Eval harness** — mock LLM, golden case, pass/fail checks (no API calls)
@@ -183,6 +198,6 @@ From repo root: `pnpm slides:02`, or `cd module-02-tool-calling/slides && pnpm d
 
 ## Reference
 
-- [OpenAI function calling](https://platform.openai.com/docs/guides/function-calling)
+- [OpenAI function calling](https://developers.openai.com/api/docs/guides/function-calling)
 - [JSON Schema](https://json-schema.org/)
 - [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/)

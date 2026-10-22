@@ -62,31 +62,31 @@ def demo_traced_request():
 
     # Span 1: classify the query
     span = trace.start_span("classify_query")
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": "Classify this query as one of: question, command, chitchat. Reply with one word."},
             {"role": "user", "content": "What's the weather like in Paris?"},
         ],
-        max_completion_tokens=10,
+        max_output_tokens=10,
     )
-    classification = response.choices[0].message.content.strip()
+    classification = response.output_text.strip()
     trace.end_span(span, metadata={"classification": classification, "tokens": response.usage.total_tokens})
     print(f"  Classify: {classification} ({span['duration_ms']}ms)")
 
     # Span 2: generate response
     span = trace.start_span("generate_response")
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": "You are a helpful assistant. Answer briefly."},
             {"role": "user", "content": "What's the weather like in Paris?"},
         ],
-        max_completion_tokens=100,
+        max_output_tokens=100,
     )
-    answer = response.choices[0].message.content.strip()
+    answer = response.output_text.strip()
     trace.end_span(span, metadata={"tokens": response.usage.total_tokens})
     print(f"  Generate: {span['duration_ms']}ms")
 

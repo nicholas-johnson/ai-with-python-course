@@ -41,11 +41,11 @@ class CriticAgent:
 
         Steps:
             1. Define a Pydantic model: class Review(BaseModel): approved: bool; feedback: str
-            2. Call client.chat.completions.parse with model=MODEL,
-               reasoning_effort="none", response_format=Review
+            2. Call client.responses.parse with model=MODEL,
+               reasoning={"effort": "none"}, text_format=Review
             3. System prompt: CRITIC_PROMPT
             4. User message: include both the original query and the specialist response
-            5. review = result.choices[0].message.parsed -- return review.model_dump()
+            5. review = result.output_parsed -- return review.model_dump()
                If it is None (the model refused), default to approved=True
         """
         # TODO: implement critic review

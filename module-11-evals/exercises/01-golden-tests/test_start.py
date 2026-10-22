@@ -6,27 +6,15 @@ from start import make_scripted_client, run_case, run_suite, score_case
 
 
 def _tool_message(name: str, arguments: dict, call_id: str = "call_1"):
-    tc = MagicMock()
-    tc.id = call_id
-    tc.function.name = name
-    tc.function.arguments = __import__("json").dumps(arguments)
-    msg = MagicMock()
-    msg.tool_calls = [tc]
-    msg.content = None
-    resp = MagicMock()
-    resp.choices = [MagicMock()]
-    resp.choices[0].message = msg
-    return resp
+    """A mock response whose output is one function_call item."""
+    tc = MagicMock(type="function_call", call_id=call_id, arguments=__import__("json").dumps(arguments))
+    tc.name = name  # MagicMock(name=...) would name the mock, not set .name
+    return MagicMock(output=[tc], output_text="")
 
 
 def _content_message(text: str):
-    msg = MagicMock()
-    msg.tool_calls = None
-    msg.content = text
-    resp = MagicMock()
-    resp.choices = [MagicMock()]
-    resp.choices[0].message = msg
-    return resp
+    """A mock response with a final text answer."""
+    return MagicMock(output=[], output_text=text)
 
 
 CASE_ENG = {
@@ -49,7 +37,7 @@ CASE_DIRECT = {
 class TestRunCase:
     def test_records_tool_and_answer(self):
         client = MagicMock()
-        client.chat.completions.create.side_effect = [
+        client.responses.create.side_effect = [
             _tool_message("get_crew_count", {"department": "engineering"}),
             _content_message("Engineering has 2 crew members."),
         ]
@@ -59,7 +47,7 @@ class TestRunCase:
 
     def test_direct_answer_no_tools(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _content_message(
+        client.responses.create.return_value = _content_message(
             "You are aboard the DSS Pathfinder."
         )
         result = run_case(client, CASE_DIRECT)
@@ -68,9 +56,9 @@ class TestRunCase:
 
     def test_calls_openai(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _content_message("ok")
+        client.responses.create.return_value = _content_message("ok")
         run_case(client, CASE_DIRECT)
-        client.chat.completions.create.assert_called()
+        client.responses.create.assert_called()
 
     def test_scripted_helper_drives_loop(self):
         client = make_scripted_client(
@@ -138,7 +126,7 @@ class TestScoreCase:
 class TestRunSuite:
     def test_counts_pass_and_fail(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _content_message(
+        client.responses.create.return_value = _content_message(
             "You are aboard the DSS Pathfinder."
         )
         summary = run_suite(client, [CASE_DIRECT, CASE_ENG])

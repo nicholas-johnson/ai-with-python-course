@@ -45,25 +45,20 @@ def _import_start():
 
 
 def _tool_call(tc_id: str, name: str, arguments: str):
-    tc = MagicMock()
-    tc.id = tc_id
-    tc.function.name = name
-    tc.function.arguments = arguments
+    """A mock function_call output item (Responses API shape)."""
+    tc = MagicMock(type="function_call", call_id=tc_id, arguments=arguments)
+    tc.name = name  # MagicMock(name=...) would name the mock, not set .name
     return tc
 
 
-def _assistant_message(content=None, tool_calls=None):
-    msg = MagicMock()
-    msg.content = content
-    msg.tool_calls = tool_calls
-    return msg
+def _agent_response(content=None, tool_calls=None):
+    """A mock Responses API result: function_call items in .output, text in .output_text."""
+    return MagicMock(output=list(tool_calls or []), output_text=content or "")
 
 
-def _mock_client_for_message(message):
+def _mock_client_for_response(response):
     mock = MagicMock()
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message=message)]
-    mock.chat.completions.create.return_value = mock_response
+    mock.responses.create.return_value = response
     return mock
 
 
@@ -91,13 +86,13 @@ def test_build_agent_messages_engineering_prompt():
 
 def test_run_agent_turn_passes_scoped_tools():
     mod = _import_start()
-    client = _mock_client_for_message(_assistant_message(content="Done."))
+    client = _mock_client_for_response(_agent_response(content="Done."))
     messages = mod.build_agent_messages("tactical", "Shields?")
     mod.run_agent_turn("tactical", messages, client)
 
-    call_kwargs = client.chat.completions.create.call_args.kwargs
+    call_kwargs = client.responses.create.call_args.kwargs
     tools = call_kwargs.get("tools", [])
-    tool_names = {t["function"]["name"] for t in tools}
+    tool_names = {t["name"] for t in tools}
     assert "check_shields" in tool_names
     assert "scan_threats" in tool_names
     assert "transfer_to_comms" in tool_names
@@ -107,9 +102,9 @@ def test_run_agent_turn_passes_scoped_tools():
 
 def test_run_agent_turn_calls_openai():
     mod = _import_start()
-    client = _mock_client_for_message(_assistant_message(content="OK"))
+    client = _mock_client_for_response(_agent_response(content="OK"))
     mod.run_agent_turn("comms", [{"role": "user", "content": "hi"}], client)
-    assert client.chat.completions.create.called
+    assert client.responses.create.called
 
 
 # --- handle_tool_calls ---
@@ -117,19 +112,21 @@ def test_run_agent_turn_calls_openai():
 
 def test_handle_tool_calls_domain_tool():
     mod = _import_start()
-    msg = _assistant_message(
+    msg = _agent_response(
         tool_calls=[_tool_call("tc1", "decrypt_signal", json.dumps({"signal_id": "X42"}))]
     )
     tool_msgs, transfer = mod.handle_tool_calls(msg, "comms")
     assert transfer is None
-    assert any(m.get("role") == "tool" for m in tool_msgs)
-    tool_content = next(m["content"] for m in tool_msgs if m.get("role") == "tool")
+    outputs = [m for m in tool_msgs if isinstance(m, dict) and m.get("type") == "function_call_output"]
+    assert len(outputs) == 1
+    assert outputs[0]["call_id"] == "tc1"
+    tool_content = outputs[0]["output"]
     assert "X42" in tool_content
 
 
 def test_handle_tool_calls_detects_transfer():
     mod = _import_start()
-    msg = _assistant_message(
+    msg = _agent_response(
         tool_calls=[_tool_call("tc1", "transfer_to_engineering", "{}")]
     )
     tool_msgs, transfer = mod.handle_tool_calls(msg, "comms")
@@ -138,7 +135,7 @@ def test_handle_tool_calls_detects_transfer():
 
 def test_handle_tool_calls_empty_when_no_tools():
     mod = _import_start()
-    msg = _assistant_message(content="Final.", tool_calls=None)
+    msg = _agent_response(content="Final.", tool_calls=None)
     tool_msgs, transfer = mod.handle_tool_calls(msg, "comms")
     assert tool_msgs == []
     assert transfer is None
@@ -149,11 +146,11 @@ def test_handle_tool_calls_empty_when_no_tools():
 
 def test_swarm_loop_final_answer_no_tools():
     mod = _import_start()
-    client = _mock_client_for_message(_assistant_message(content="All clear."))
+    client = _mock_client_for_response(_agent_response(content="All clear."))
     result = mod.swarm_loop("Status?", client, start_dept="tactical", max_hops=3)
     assert result["answer"] == "All clear."
     assert result["chain"] == ["tactical"]
-    assert client.chat.completions.create.call_count == 1
+    assert client.responses.create.call_count == 1
 
 
 def test_swarm_loop_follows_handoff():
@@ -163,27 +160,17 @@ def test_swarm_loop_follows_handoff():
 
     def side_effect(**kwargs):
         calls.append(kwargs)
-        messages = kwargs.get("messages", [])
+        messages = kwargs.get("input", [])
         # First turn: comms with transfer
         if len(calls) == 1:
-            return MagicMock(
-                choices=[
-                    MagicMock(
-                        message=_assistant_message(
-                            tool_calls=[
-                                _tool_call("tc1", "transfer_to_engineering", "{}")
-                            ]
-                        )
-                    )
-                ]
+            return _agent_response(
+                tool_calls=[_tool_call("tc1", "transfer_to_engineering", "{}")]
             )
         # Second turn: engineering final answer
-        return MagicMock(
-            choices=[MagicMock(message=_assistant_message(content="Reactor is fine."))]
-        )
+        return _agent_response(content="Reactor is fine.")
 
     client = MagicMock()
-    client.chat.completions.create.side_effect = side_effect
+    client.responses.create.side_effect = side_effect
 
     result = mod.swarm_loop(
         "Check reactor after decrypting X42",
@@ -193,34 +180,26 @@ def test_swarm_loop_follows_handoff():
     )
     assert "engineering" in result["chain"]
     assert result["answer"] == "Reactor is fine."
-    assert client.chat.completions.create.call_count >= 2
+    assert client.responses.create.call_count >= 2
 
 
 def test_swarm_loop_respects_max_hops():
     mod = _import_start()
 
     def always_tools(**kwargs):
-        return MagicMock(
-            choices=[
-                MagicMock(
-                    message=_assistant_message(
-                        tool_calls=[_tool_call("tc1", "scan_frequencies", "{}")]
-                    )
-                )
-            ]
-        )
+        return _agent_response(tool_calls=[_tool_call("tc1", "scan_frequencies", "{}")])
 
     client = MagicMock()
-    client.chat.completions.create.side_effect = always_tools
+    client.responses.create.side_effect = always_tools
 
     result = mod.swarm_loop("loop forever", client, start_dept="comms", max_hops=2)
     assert "max hops" in result["answer"].lower()
-    assert client.chat.completions.create.call_count <= 2
+    assert client.responses.create.call_count <= 2
 
 
 def test_swarm_loop_returns_trace_and_chain():
     mod = _import_start()
-    client = _mock_client_for_message(_assistant_message(content="Done."))
+    client = _mock_client_for_response(_agent_response(content="Done."))
     result = mod.swarm_loop("Hi", client, start_dept="comms", max_hops=4)
     assert "trace" in result
     assert "chain" in result

@@ -41,7 +41,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{report}"),
 ])
 
-model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 chain = prompt | model.with_structured_output(Classification)
 
 # Structured output arrives as one complete object, so the streaming route uses

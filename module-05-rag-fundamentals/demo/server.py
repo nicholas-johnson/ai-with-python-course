@@ -7,7 +7,7 @@ The collection must already be populated by ingest.py.
 
 Usage:
   python server.py                  # stdio transport (for agent.py)
-  python -m mcp dev server.py       # MCP Inspector web UI
+  mcp dev server.py       # MCP Inspector web UI
 
 Requires:
   - OPENAI_API_KEY environment variable
@@ -91,12 +91,12 @@ def _rag_answer(question: str, k: int = 5) -> tuple[str, list[dict]]:
         },
     ]
 
-    response = openai_client.chat.completions.create(
+    response = openai_client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
     )
-    return response.choices[0].message.content, passages
+    return response.output_text, passages
 
 
 @mcp.tool()

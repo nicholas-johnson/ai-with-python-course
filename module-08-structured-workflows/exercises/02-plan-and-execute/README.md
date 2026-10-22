@@ -69,7 +69,7 @@ class Plan(BaseModel):
     steps: list[PlannedStep]
 ```
 
-Call `client.chat.completions.parse(model=MODEL, reasoning_effort="none", response_format=Plan, messages=[...])` with a system prompt that describes *how* to plan (focused steps, logical order, finish with a summary step). `response.choices[0].message.parsed` is a `Plan` like:
+Call `client.responses.parse(model=MODEL, reasoning={"effort": "none"}, text_format=Plan, input=[...])` with a system prompt that describes *how* to plan (focused steps, logical order, finish with a summary step). `response.output_parsed` is a `Plan` like:
 
 ```python
 Plan(steps=[
@@ -97,7 +97,7 @@ When a step fails, send the LLM:
 - The failed step
 - Remaining steps
 
-Ask for a revised list of remaining steps with the same `response_format=Plan`, and convert them into `PlanStep` objects.
+Ask for a revised list of remaining steps with the same `text_format=Plan`, and convert them into `PlanStep` objects.
 
 ### 5. Implement `plan_and_execute`
 

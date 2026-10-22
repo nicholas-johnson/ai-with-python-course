@@ -39,10 +39,10 @@ def _advocate_turn(
             ),
         })
 
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=advocate_history
+    response = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=advocate_history
     )
-    arg = response.choices[0].message.content
+    arg = response.output_text
     advocate_history.append({"role": "assistant", "content": arg})
     return arg
 
@@ -73,10 +73,10 @@ def _skeptic_turn(
             ),
         })
 
-    response = client.chat.completions.create(
-        model=MODEL, reasoning_effort="none", messages=skeptic_history
+    response = client.responses.create(
+        model=MODEL, reasoning={"effort": "none"}, input=skeptic_history
     )
-    arg = response.choices[0].message.content
+    arg = response.output_text
     skeptic_history.append({"role": "assistant", "content": arg})
     return arg
 
@@ -135,11 +135,11 @@ def judge(
 
     Returns {"winner": "advocate"|"skeptic", "reasoning": str}.
     """
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=Judgment,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=Judgment,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -159,7 +159,7 @@ def judge(
             },
         ],
     )
-    judgment = response.choices[0].message.parsed
+    judgment = response.output_parsed
     if judgment is None:
         return {"winner": "advocate", "reasoning": "Judge refused to rule."}
     return judgment.model_dump()
@@ -175,11 +175,11 @@ def _collect_department_votes(
     votes: dict[str, int] = {dept: 0 for dept in DEPARTMENTS}
 
     for dept in DEPARTMENTS:
-        vote_result = client.chat.completions.parse(
+        vote_result = client.responses.parse(
             model=MODEL,
-            reasoning_effort="none",
-            response_format=Vote,
-            messages=[
+            reasoning={"effort": "none"},
+            text_format=Vote,
+            input=[
                 {
                     "role": "system",
                     "content": (
@@ -196,7 +196,7 @@ def _collect_department_votes(
                 },
             ],
         )
-        ballot = vote_result.choices[0].message.parsed
+        ballot = vote_result.output_parsed
         if ballot:
             votes[ballot.vote] += 1
 

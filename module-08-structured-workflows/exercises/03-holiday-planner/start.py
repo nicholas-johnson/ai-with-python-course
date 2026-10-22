@@ -36,7 +36,7 @@ client = OpenAI()
 _EXTRA_SCHEMAS = [
     # TODO: Define OpenAI-format tool schemas for:
     #   remember_preference, recall_preferences, search_flights, search_hotels
-    # Each needs: {"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}
+    # Each needs: {"type": "function", "name": ..., "description": ..., "parameters": ...}
 ]
 
 

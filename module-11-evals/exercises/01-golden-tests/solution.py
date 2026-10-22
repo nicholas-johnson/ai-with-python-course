@@ -16,38 +16,32 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 TOOLS: list[dict] = [
     {
         "type": "function",
-        "function": {
-            "name": "get_crew_count",
-            "description": "Count crew in a department.",
-            "parameters": {
-                "type": "object",
-                "properties": {"department": {"type": "string"}},
-                "required": ["department"],
-            },
+        "name": "get_crew_count",
+        "description": "Count crew in a department.",
+        "parameters": {
+            "type": "object",
+            "properties": {"department": {"type": "string"}},
+            "required": ["department"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "get_ship_status",
-            "description": "Status of a ship system (warp, shields, sensors, life_support).",
-            "parameters": {
-                "type": "object",
-                "properties": {"system": {"type": "string"}},
-                "required": ["system"],
-            },
+        "name": "get_ship_status",
+        "description": "Status of a ship system (warp, shields, sensors, life_support).",
+        "parameters": {
+            "type": "object",
+            "properties": {"system": {"type": "string"}},
+            "required": ["system"],
         },
     },
     {
         "type": "function",
-        "function": {
-            "name": "search_crew",
-            "description": "Search crew by name or role.",
-            "parameters": {
-                "type": "object",
-                "properties": {"query": {"type": "string"}},
-                "required": ["query"],
-            },
+        "name": "search_crew",
+        "description": "Search crew by name or role.",
+        "parameters": {
+            "type": "object",
+            "properties": {"query": {"type": "string"}},
+            "required": ["query"],
         },
     },
 ]
@@ -110,29 +104,30 @@ SYSTEM_PROMPT = (
 def make_scripted_client(scripted_responses: list[dict]):
     queue = list(scripted_responses)
 
-    def _to_message(item: dict):
+    def _to_response(item: dict):
         if "tool_calls" in item:
             calls = []
-            for tc in item["tool_calls"]:
+            for i, tc in enumerate(item["tool_calls"]):
                 args = tc["arguments"]
                 if not isinstance(args, str):
                     args = json.dumps(args)
                 calls.append(
                     SimpleNamespace(
-                        id=tc.get("id", "call_0"),
-                        function=SimpleNamespace(name=tc["name"], arguments=args),
+                        type="function_call",
+                        call_id=tc.get("id", f"call_{i}"),
+                        name=tc["name"],
+                        arguments=args,
                     )
                 )
-            return SimpleNamespace(content=None, tool_calls=calls)
-        return SimpleNamespace(content=item.get("content", ""), tool_calls=None)
+            return SimpleNamespace(output=calls, output_text="")
+        return SimpleNamespace(output=[], output_text=item.get("content", ""))
 
     def create(**kwargs):
         if not queue:
             raise RuntimeError("Scripted client has no more responses")
-        message = _to_message(queue.pop(0))
-        return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+        return _to_response(queue.pop(0))
 
-    return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    return SimpleNamespace(responses=SimpleNamespace(create=create))
 
 
 def run_case(client, case: dict, max_steps: int = 5) -> dict:
@@ -144,18 +139,18 @@ def run_case(client, case: dict, max_steps: int = 5) -> dict:
     answer = None
 
     for _ in range(max_steps):
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=TOOLS,
         )
-        message = response.choices[0].message
-        if message.tool_calls:
-            messages.append(message)
-            for tc in message.tool_calls:
-                name = tc.function.name
-                arguments = json.loads(tc.function.arguments)
+        calls = [item for item in response.output if item.type == "function_call"]
+        if calls:
+            messages += response.output
+            for tc in calls:
+                name = tc.name
+                arguments = json.loads(tc.arguments)
                 tools_used.append({"name": name, "arguments": arguments})
                 handler = HANDLERS.get(name)
                 if handler is None:
@@ -164,13 +159,13 @@ def run_case(client, case: dict, max_steps: int = 5) -> dict:
                     result = handler(**arguments)
                 messages.append(
                     {
-                        "role": "tool",
-                        "tool_call_id": tc.id,
-                        "content": result,
+                        "type": "function_call_output",
+                        "call_id": tc.call_id,
+                        "output": result,
                     }
                 )
-        elif message.content:
-            answer = message.content
+        elif response.output_text:
+            answer = response.output_text
             break
 
     return {"tools": tools_used, "answer": answer}

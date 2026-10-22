@@ -39,11 +39,11 @@ def extract_query_entities(question: str, client: OpenAI, graph: KnowledgeGraph)
     """Identify entity names from the question that exist in the graph."""
     graph_nodes = list(graph.graph.nodes())
 
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=QueryEntities,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=QueryEntities,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -55,8 +55,7 @@ def extract_query_entities(question: str, client: OpenAI, graph: KnowledgeGraph)
         ],
     )
 
-    message = response.choices[0].message
-    extracted = message.parsed.entities if message.parsed else []
+    extracted = response.output_parsed.entities if response.output_parsed else []
 
     matched = []
     nodes_lower = {n.lower(): n for n in graph_nodes}
@@ -150,12 +149,12 @@ def grounded_qa(
         )
 
     messages = build_grounded_prompt(question, evidence)
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
     )
-    answer = response.choices[0].message.content
+    answer = response.output_text
 
     avg_confidence = sum(e["confidence"] for e in evidence) / len(evidence)
 
@@ -210,12 +209,12 @@ def handle_repl_command(
     if cmd == "/nograph":
         if last_question:
             print("  (Without graph)")
-            response = client.chat.completions.create(
+            response = client.responses.create(
                 model=MODEL,
-                reasoning_effort="none",
-                messages=[{"role": "user", "content": last_question}],
+                reasoning={"effort": "none"},
+                input=[{"role": "user", "content": last_question}],
             )
-            print(f"  {response.choices[0].message.content}\n")
+            print(f"  {response.output_text}\n")
         else:
             print("  No previous query. Ask a question first.")
         return None

@@ -82,14 +82,12 @@ def app_client(data_dir):
             }
 
             rerank_response = MagicMock()
-            rerank_response.choices = [MagicMock()]
-            rerank_response.choices[0].message.content = "1,2"
-            mock_rag_client.chat.completions.create.return_value = rerank_response
+            rerank_response.output_text = "1,2"
+            mock_rag_client.responses.create.return_value = rerank_response
 
             sql_response = MagicMock()
-            sql_response.choices = [MagicMock()]
-            sql_response.choices[0].message.content = "SELECT title, year FROM movies"
-            mock_sql_client.chat.completions.create.return_value = sql_response
+            sql_response.output_text = "SELECT title, year FROM movies"
+            mock_sql_client.responses.create.return_value = sql_response
 
             with patch("solution.rag.build_index", return_value=mock_collection):
                 from solution.app import app

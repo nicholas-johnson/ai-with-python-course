@@ -4,7 +4,7 @@
 
 ## Recap
 
-The OpenAI chat-completion API takes a list of **messages** and returns a response. Each message has a **role** -- `system`, `user`, or `assistant` -- that tells the model who said it:
+OpenAI's **Responses API** takes your input -- here, a list of **messages** -- and returns a response. Each message has a **role** -- `system`, `user`, or `assistant` -- that tells the model who said it:
 
 ```python
 messages = [
@@ -23,11 +23,13 @@ from openai import OpenAI
 
 client = OpenAI()
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
-response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-text = response.choices[0].message.content
+response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+text = response.output_text
 ```
 
-`model` selects which model to use. `MODEL` reads `OPENAI_MODEL` from your environment and defaults to `gpt-6-luna`, which is fast and cheap for development. `gpt-6-luna` is a reasoning model, and `reasoning_effort="none"` tells it to answer directly without thinking first. The response object contains a `choices` list -- in normal usage there is one choice, and its `.message.content` holds the text.
+`model` selects which model to use. `MODEL` reads `OPENAI_MODEL` from your environment and defaults to `gpt-6-luna`, which is fast and cheap for development. `gpt-6-luna` is a reasoning model, and `reasoning={"effort": "none"}` tells it to answer directly without thinking first. `input` takes your messages list, and `response.output_text` gives you the reply as a plain string.
+
+> **You may also see `client.chat.completions.create(messages=...)`** with the reply in `response.choices[0].message.content`. That's the older Chat Completions API -- still supported, but OpenAI recommends the Responses API for new code. The module README compares the two.
 
 This exercise uses the `openai` package, which is already installed via the project's `pyproject.toml`.
 
@@ -40,11 +42,11 @@ This exercise uses the `openai` package, which is already installed via the proj
 
 ### 1. Implement `chat(client, messages) -> str`
 
-Call `client.chat.completions.create()` with `model=MODEL` and the `messages` list. Extract the text from the response and return it.
+Call `client.responses.create()` with `model=MODEL` and the `messages` list as `input`. Return the reply text.
 
 ```python
-response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-return response.choices[0].message.content
+response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+return response.output_text
 ```
 
 The tests check that `chat()` returns a non-empty string and that it passes the messages list to the API correctly.

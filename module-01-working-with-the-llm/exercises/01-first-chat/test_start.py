@@ -15,9 +15,7 @@ from start import MODEL, SYSTEM_PROMPT, chat
 class TestChat:
     def test_returns_response_text(self):
         client = MagicMock()
-        client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content="Hello, Commander."))
-        ]
+        client.responses.create.return_value.output_text = "Hello, Commander."
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": "Hi"},
@@ -28,27 +26,23 @@ class TestChat:
 
     def test_passes_messages_to_api(self):
         client = MagicMock()
-        client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content="ok"))
-        ]
+        client.responses.create.return_value.output_text = "ok"
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": "test"},
         ]
         chat(client, messages)
 
-        client.chat.completions.create.assert_called_once()
-        call_kwargs = client.chat.completions.create.call_args
-        assert call_kwargs.kwargs.get("messages") == messages or call_kwargs[1].get("messages") == messages
+        client.responses.create.assert_called_once()
+        call_kwargs = client.responses.create.call_args
+        assert call_kwargs.kwargs.get("input") == messages or call_kwargs[1].get("input") == messages
 
     def test_uses_correct_model(self):
         client = MagicMock()
-        client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content="ok"))
-        ]
+        client.responses.create.return_value.output_text = "ok"
         chat(client, [{"role": "user", "content": "test"}])
 
-        call_kwargs = client.chat.completions.create.call_args
+        call_kwargs = client.responses.create.call_args
         used_model = call_kwargs.kwargs.get("model") or call_kwargs[1].get("model")
         assert used_model == MODEL
 
@@ -61,9 +55,7 @@ class TestMainFlow:
     def test_messages_grow_with_conversation(self):
         """Verify that calling chat twice grows the messages list correctly."""
         client = MagicMock()
-        client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content="Response"))
-        ]
+        client.responses.create.return_value.output_text = "Response"
 
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 

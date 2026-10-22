@@ -44,11 +44,11 @@ def demo_vision(client: OpenAI):
     print(f"  Image: {image_path.name} ({image_path.stat().st_size} bytes)")
     print(f"  Sending to {MODEL} for analysis...\n")
 
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=ImageAnalysis,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=ImageAnalysis,
+        input=[
             {
                 "role": "system",
                 "content": "You are an image analysis assistant.",
@@ -56,26 +56,26 @@ def demo_vision(client: OpenAI):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Describe and analyse this image in detail."},
+                    {"type": "input_text", "text": "Describe and analyse this image in detail."},
                     {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/png;base64,{img_b64}"},
+                        "type": "input_image",
+                        "image_url": f"data:image/webp;base64,{img_b64}",
                     },
                 ],
             },
         ],
     )
 
-    result = response.choices[0].message.parsed
+    result = response.output_parsed
     if result is None:
-        print(f"  Model refused: {response.choices[0].message.refusal}")
+        print("  The model declined to analyse this image.")
         return
     print(f"  Description: {result.description}\n")
     print("  Key points:")
     for point in result.key_points:
         print(f"    • {point}")
 
-    print(f"\n  Tokens: {response.usage.prompt_tokens} prompt + {response.usage.completion_tokens} completion")
+    print(f"\n  Tokens: {response.usage.input_tokens} prompt + {response.usage.output_tokens} completion")
     print("\n  The same API call powers the /vision endpoint in Exercise 2.")
 
 

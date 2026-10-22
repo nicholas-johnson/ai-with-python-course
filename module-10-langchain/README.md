@@ -32,8 +32,10 @@ prompt = ChatPromptTemplate.from_messages([
 ```python
 from langchain_openai import ChatOpenAI
 
-model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0, use_responses_api=True)
 ```
+
+`use_responses_api=True` makes LangChain call OpenAI's Responses API — the API you used directly in Modules 1–9.
 
 `init_chat_model("openai:gpt-6-luna")` (from `langchain.chat_models`) does the same thing from a `provider:model` string, which makes switching providers a config change.
 
@@ -102,7 +104,7 @@ result = agent.invoke({"messages": [{"role": "user", "content": "What is the rea
 answer = result["messages"][-1].text
 ```
 
-Use `.text` rather than `.content` to read a reply. When you give `gpt-6-*` models tools, `ChatOpenAI` switches to the Responses API, and `.content` comes back as a list of content blocks. `.text` always gives you a plain string.
+Use `.text` rather than `.content` to read a reply. Every `ChatOpenAI` in this course passes `use_responses_api=True`, so LangChain talks to OpenAI's Responses API (the same API Modules 1–9 use directly), and a reply's `.content` is a list of content blocks. `.text` always gives you a plain string.
 
 The `@tool` decorator generates the JSON Schema from the function's type hints and docstring — same pattern as the `ToolRegistry` you built in Module 2, but standardised. `result["messages"]` contains every tool call and tool result, so you can print the full trace.
 

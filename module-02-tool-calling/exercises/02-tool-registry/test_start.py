@@ -31,7 +31,7 @@ class TestRegisterDecorator:
 
         tools = reg.list_tools()
         assert len(tools) == 1
-        assert tools[0]["function"]["name"] == "greet"
+        assert tools[0]["name"] == "greet"
 
 
 class TestAutoSchema:
@@ -42,7 +42,7 @@ class TestAutoSchema:
         def echo(message: str) -> str:
             return message
 
-        schema = reg.list_tools()[0]["function"]["parameters"]
+        schema = reg.list_tools()[0]["parameters"]
         assert schema["properties"]["message"]["type"] == "string"
         assert "message" in schema["required"]
 
@@ -53,7 +53,7 @@ class TestAutoSchema:
         def scale(factor: float) -> str:
             return str(factor)
 
-        schema = reg.list_tools()[0]["function"]["parameters"]
+        schema = reg.list_tools()[0]["parameters"]
         assert schema["properties"]["factor"]["type"] == "number"
 
     def test_int_param(self):
@@ -63,7 +63,7 @@ class TestAutoSchema:
         def repeat(n: int) -> str:
             return str(n)
 
-        schema = reg.list_tools()[0]["function"]["parameters"]
+        schema = reg.list_tools()[0]["parameters"]
         assert schema["properties"]["n"]["type"] == "integer"
 
     def test_bool_param(self):
@@ -73,7 +73,7 @@ class TestAutoSchema:
         def toggle(verbose: bool) -> str:
             return str(verbose)
 
-        schema = reg.list_tools()[0]["function"]["parameters"]
+        schema = reg.list_tools()[0]["parameters"]
         assert schema["properties"]["verbose"]["type"] == "boolean"
 
     def test_multiple_params(self):
@@ -83,7 +83,7 @@ class TestAutoSchema:
         def check(atmosphere: str, gravity: float) -> str:
             return "ok"
 
-        schema = reg.list_tools()[0]["function"]["parameters"]
+        schema = reg.list_tools()[0]["parameters"]
         assert schema["properties"]["atmosphere"]["type"] == "string"
         assert schema["properties"]["gravity"]["type"] == "number"
         assert set(schema["required"]) == {"atmosphere", "gravity"}
@@ -95,14 +95,14 @@ class TestAutoSchema:
         def greet(name: str, title: str = "Dr.") -> str:
             return f"{title} {name}"
 
-        schema = reg.list_tools()[0]["function"]["parameters"]
+        schema = reg.list_tools()[0]["parameters"]
         assert "name" in schema["required"]
         assert "title" not in schema["required"]
         assert "title" in schema["properties"]
 
 
 class TestListTools:
-    def test_format_matches_openai(self):
+    def test_format_matches_responses_api(self):
         reg = ToolRegistry()
 
         @reg.register("Ping test")
@@ -113,9 +113,9 @@ class TestListTools:
         assert len(tools) == 1
         tool = tools[0]
         assert tool["type"] == "function"
-        assert "name" in tool["function"]
-        assert "description" in tool["function"]
-        assert "parameters" in tool["function"]
+        assert "name" in tool
+        assert "description" in tool
+        assert "parameters" in tool
 
     def test_multiple_tools(self):
         reg = ToolRegistry()
@@ -129,7 +129,7 @@ class TestListTools:
             return "b"
 
         tools = reg.list_tools()
-        names = {t["function"]["name"] for t in tools}
+        names = {t["name"] for t in tools}
         assert names == {"tool_a", "tool_b"}
 
 
@@ -183,7 +183,7 @@ class TestPlanetaryToolsRegistered:
         assert len(tools) == 3
 
     def test_tool_names(self):
-        names = {t["function"]["name"] for t in registry.list_tools()}
+        names = {t["name"] for t in registry.list_tools()}
         assert names == {"scan_planet", "check_habitability", "log_discovery"}
 
     def test_scan_planet_known(self):
@@ -215,13 +215,13 @@ class TestPlanetaryToolsRegistered:
         assert MISSION_LOG[0]["planet_id"] == "TRAP-1e"
 
     def test_scan_planet_schema_auto_generated(self):
-        tool = next(t for t in registry.list_tools() if t["function"]["name"] == "scan_planet")
-        schema = tool["function"]["parameters"]
+        tool = next(t for t in registry.list_tools() if t["name"] == "scan_planet")
+        schema = tool["parameters"]
         assert schema["properties"]["planet_id"]["type"] == "string"
         assert "planet_id" in schema["required"]
 
     def test_check_habitability_schema_has_float(self):
-        tool = next(t for t in registry.list_tools() if t["function"]["name"] == "check_habitability")
-        schema = tool["function"]["parameters"]
+        tool = next(t for t in registry.list_tools() if t["name"] == "check_habitability")
+        schema = tool["parameters"]
         assert schema["properties"]["gravity"]["type"] == "number"
         assert schema["properties"]["atmosphere"]["type"] == "string"

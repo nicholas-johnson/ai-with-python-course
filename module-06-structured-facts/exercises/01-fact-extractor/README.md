@@ -2,7 +2,7 @@
 
 ## Recap
 
-LLMs produce free text, but production systems need **structured data** -- typed fields your code can validate, compare, and aggregate. OpenAI's **structured outputs** take a Pydantic model as `response_format` and constrain the model to return JSON that matches that exact schema.
+LLMs produce free text, but production systems need **structured data** -- typed fields your code can validate, compare, and aggregate. OpenAI's **structured outputs** take a Pydantic model as `text_format` and constrain the model to return JSON that matches that exact schema.
 
 **Pydantic** models define the exact shape you want:
 
@@ -51,24 +51,23 @@ class FactList(BaseModel):
 
 ### 3. Implement `extract_facts`
 
-Call `client.chat.completions.parse` with `response_format=FactList`. The prompt only needs to describe the *task* -- the schema handles the format:
+Call `client.responses.parse` with `text_format=FactList`. The prompt only needs to describe the *task* -- the schema handles the format:
 
 ```python
-response = client.chat.completions.parse(
+response = client.responses.parse(
     model=MODEL,
-    reasoning_effort="none",
-    response_format=FactList,
-    messages=[
+    reasoning={"effort": "none"},
+    text_format=FactList,
+    input=[
         {"role": "system", "content": "Extract every factual claim from the text. Rate confidence 0-1."},
         {"role": "user", "content": text},
     ],
 )
-message = response.choices[0].message
 ```
 
-`message.parsed` is a validated `FactList` (or `None` if `message.refusal` says the model declined). Return `(message.parsed.facts, message.content)` -- the facts, plus the raw JSON text for the `/json` command.
+`response.output_parsed` is a validated `FactList` (or `None` if the model declined). Return `(response.output_parsed.facts, response.output_text)` -- the facts, plus the raw JSON text for the `/json` command.
 
-> You may see older code use `response_format={"type": "json_object"}` with the schema pasted into the prompt. That only guarantees valid JSON, not *your* JSON -- keys can be missing or misnamed. Structured outputs constrain the model to the schema itself.
+> You may see older code use `text={"format": {"type": "json_object"}}` with the schema pasted into the prompt. That only guarantees valid JSON, not *your* JSON -- keys can be missing or misnamed. Structured outputs constrain the model to the schema itself.
 
 ### 4. Implement `validate_facts`
 

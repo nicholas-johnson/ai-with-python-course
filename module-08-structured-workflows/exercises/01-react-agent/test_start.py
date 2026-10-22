@@ -78,8 +78,7 @@ def test_tool_schemas_defined():
     assert len(mod.TOOL_SCHEMAS) > 0, "TOOL_SCHEMAS should not be empty"
     for schema in mod.TOOL_SCHEMAS:
         assert "type" in schema, "Each schema needs a 'type' key"
-        assert "function" in schema, "Each schema needs a 'function' key"
-        assert "name" in schema["function"], "Each function needs a 'name'"
+        assert "name" in schema, "Each function needs a 'name'"
 
 
 def test_run_react_returns_dict():
@@ -87,14 +86,7 @@ def test_run_react_returns_dict():
     mod = _import_start()
 
     mock_client = MagicMock()
-    mock_message = MagicMock()
-    mock_message.tool_calls = None
-    mock_message.content = "The answer is 42."
-    mock_choice = MagicMock()
-    mock_choice.message = mock_message
-    mock_response = MagicMock()
-    mock_response.choices = [mock_choice]
-    mock_client.chat.completions.create.return_value = mock_response
+    mock_client.responses.create.return_value = MagicMock(output=[], output_text="The answer is 42.")
 
     result = mod.run_react("What is 6 * 7?", mock_client, max_steps=3)
 
@@ -110,21 +102,14 @@ def test_run_react_handles_tool_calls():
 
     mock_client = MagicMock()
 
-    tool_call_msg = MagicMock()
-    tool_call = MagicMock()
-    tool_call.id = "call_123"
-    tool_call.function.name = "calculator"
-    tool_call.function.arguments = json.dumps({"expression": "2 + 2"})
-    tool_call_msg.tool_calls = [tool_call]
-    tool_call_msg.content = None
+    tool_call = MagicMock(
+        type="function_call", call_id="call_123", arguments=json.dumps({"expression": "2 + 2"})
+    )
+    tool_call.name = "calculator"  # MagicMock(name=...) would name the mock, not set .name
 
-    final_msg = MagicMock()
-    final_msg.tool_calls = None
-    final_msg.content = "The result is 4."
-
-    mock_client.chat.completions.create.side_effect = [
-        MagicMock(choices=[MagicMock(message=tool_call_msg)]),
-        MagicMock(choices=[MagicMock(message=final_msg)]),
+    mock_client.responses.create.side_effect = [
+        MagicMock(output=[tool_call], output_text=""),
+        MagicMock(output=[], output_text="The result is 4."),
     ]
 
     result = mod.run_react("What is 2 + 2?", mock_client, max_steps=5)

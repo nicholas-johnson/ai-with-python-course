@@ -46,11 +46,11 @@ class QueryEntities(BaseModel):
 
 
 def extract_facts(text: str) -> list[Fact]:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=FactList,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=FactList,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -60,8 +60,7 @@ def extract_facts(text: str) -> list[Fact]:
             {"role": "user", "content": text},
         ],
     )
-    message = response.choices[0].message
-    return message.parsed.facts if message.parsed else []
+    return response.output_parsed.facts if response.output_parsed else []
 
 
 def build_graph(facts: list[Fact]) -> nx.DiGraph:
@@ -111,16 +110,16 @@ def retrieve_evidence(G: nx.DiGraph, entities: list[str], max_hops: int = 2) -> 
 
 def grounded_qa(question: str, G: nx.DiGraph) -> tuple[str, list[dict]]:
     """Answer a question grounded in graph evidence."""
-    entity_resp = client.chat.completions.parse(
+    entity_resp = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=QueryEntities,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=QueryEntities,
+        input=[
             {"role": "system", "content": "Extract entity names from the question."},
             {"role": "user", "content": question},
         ],
     )
-    parsed = entity_resp.choices[0].message.parsed
+    parsed = entity_resp.output_parsed
     extracted = parsed.entities if parsed else []
 
     nodes_lower = {n.lower(): n for n in G.nodes()}
@@ -147,8 +146,8 @@ def grounded_qa(question: str, G: nx.DiGraph) -> tuple[str, list[dict]]:
         {"role": "system", "content": "Answer using ONLY the facts below. Cite as [Fact N]. If insufficient, say so."},
         {"role": "user", "content": "\n".join(fact_lines) + f"\n\nQuestion: {question}"},
     ]
-    resp = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return resp.choices[0].message.content, evidence
+    resp = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return resp.output_text, evidence
 
 
 def section(title: str):
@@ -197,12 +196,12 @@ def main():
     section("Part 2: Without Graph (Comparison)")
 
     print(f"  Same question without graph evidence:\n")
-    raw_resp = client.chat.completions.create(
+    raw_resp = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{"role": "user", "content": question}],
+        reasoning={"effort": "none"},
+        input=[{"role": "user", "content": question}],
     )
-    print(f"  {raw_resp.choices[0].message.content}\n")
+    print(f"  {raw_resp.output_text}\n")
     print("  Notice: no citations, no grounding, possibly hallucinated details.")
 
     pause()

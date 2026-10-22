@@ -74,7 +74,7 @@ export const slides = [
     content: {
       title: 'What is a golden test?',
       description:
-        'A **golden-file test** freezes one agent conversation. You mock the LLM with scripted `tool_calls` and a final `content` string, run the **real** agent loop (handlers still execute), and assert the tools and the answer. Used in CI because it is fast, free, and deterministic — it catches “we stopped calling `get_ship_status`”, not “the prose got slightly worse”.',
+        'A **golden-file test** freezes one agent conversation. You mock the LLM with scripted `function_call` items and a final text answer string, run the **real** agent loop (handlers still execute), and assert the tools and the answer. Used in CI because it is fast, free, and deterministic — it catches “we stopped calling `get_ship_status`”, not “the prose got slightly worse”.',
       icon: 'check-square',
       credit:
         'Same pattern as the Module 2 eval harness — now a graded lab.',
@@ -188,8 +188,8 @@ rerank = ["LOG-002", "LOG-011", "LOG-007"]
     relevance: int = Field(ge=1, le=5)
     explanation: str
 
-response = client.chat.completions.parse(
-    model=MODEL, response_format=JudgeScores, messages=[...])
+response = client.responses.parse(
+    model=MODEL, text_format=JudgeScores, input=[...])
 # JudgeScores(correctness=5, completeness=2, relevance=5,
 #             explanation="Only one of three causes.")`,
       highlights: [

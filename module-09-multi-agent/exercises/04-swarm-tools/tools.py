@@ -84,34 +84,28 @@ TOOL_FUNCTIONS: dict[str, callable] = {
 _TRANSFER_SCHEMAS = [
     {
         "type": "function",
-        "function": {
-            "name": "transfer_to_comms",
-            "description": (
-                "Hand off to the Communications Officer for signals, "
-                "decryption, and subspace relays."
-            ),
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
+        "name": "transfer_to_comms",
+        "description": (
+            "Hand off to the Communications Officer for signals, "
+            "decryption, and subspace relays."
+        ),
+        "parameters": {"type": "object", "properties": {}, "required": []},
     },
     {
         "type": "function",
-        "function": {
-            "name": "transfer_to_engineering",
-            "description": (
-                "Hand off to Engineering for reactor, diagnostics, and ship systems."
-            ),
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
+        "name": "transfer_to_engineering",
+        "description": (
+            "Hand off to Engineering for reactor, diagnostics, and ship systems."
+        ),
+        "parameters": {"type": "object", "properties": {}, "required": []},
     },
     {
         "type": "function",
-        "function": {
-            "name": "transfer_to_tactical",
-            "description": (
-                "Hand off to Tactical for shields, threats, and defense."
-            ),
-            "parameters": {"type": "object", "properties": {}, "required": []},
-        },
+        "name": "transfer_to_tactical",
+        "description": (
+            "Hand off to Tactical for shields, threats, and defense."
+        ),
+        "parameters": {"type": "object", "properties": {}, "required": []},
     },
 ]
 
@@ -119,73 +113,61 @@ _DOMAIN_SCHEMAS: dict[str, list[dict]] = {
     "comms": [
         {
             "type": "function",
-            "function": {
-                "name": "scan_frequencies",
-                "description": "Scan active subspace and radio frequencies.",
-                "parameters": {"type": "object", "properties": {}, "required": []},
-            },
+            "name": "scan_frequencies",
+            "description": "Scan active subspace and radio frequencies.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
         },
         {
             "type": "function",
-            "function": {
-                "name": "decrypt_signal",
-                "description": "Decrypt an encrypted signal by ID.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "signal_id": {
-                            "type": "string",
-                            "description": "Signal identifier, e.g. X42",
-                        }
-                    },
-                    "required": ["signal_id"],
+            "name": "decrypt_signal",
+            "description": "Decrypt an encrypted signal by ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "signal_id": {
+                        "type": "string",
+                        "description": "Signal identifier, e.g. X42",
+                    }
                 },
+                "required": ["signal_id"],
             },
         },
     ],
     "engineering": [
         {
             "type": "function",
-            "function": {
-                "name": "check_reactor",
-                "description": "Check reactor output and capacity margins.",
-                "parameters": {"type": "object", "properties": {}, "required": []},
-            },
+            "name": "check_reactor",
+            "description": "Check reactor output and capacity margins.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
         },
         {
             "type": "function",
-            "function": {
-                "name": "run_diagnostic",
-                "description": "Run diagnostics on a ship subsystem.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "system": {
-                            "type": "string",
-                            "description": "Subsystem name, e.g. life_support",
-                        }
-                    },
-                    "required": ["system"],
+            "name": "run_diagnostic",
+            "description": "Run diagnostics on a ship subsystem.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "system": {
+                        "type": "string",
+                        "description": "Subsystem name, e.g. life_support",
+                    }
                 },
+                "required": ["system"],
             },
         },
     ],
     "tactical": [
         {
             "type": "function",
-            "function": {
-                "name": "check_shields",
-                "description": "Report current shield strength.",
-                "parameters": {"type": "object", "properties": {}, "required": []},
-            },
+            "name": "check_shields",
+            "description": "Report current shield strength.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
         },
         {
             "type": "function",
-            "function": {
-                "name": "scan_threats",
-                "description": "Scan for hostile contacts nearby.",
-                "parameters": {"type": "object", "properties": {}, "required": []},
-            },
+            "name": "scan_threats",
+            "description": "Scan for hostile contacts nearby.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
         },
     ],
 }
@@ -197,7 +179,7 @@ def _tools_for_department(department: str) -> list[dict]:
     transfers = [
         t
         for t in _TRANSFER_SCHEMAS
-        if t["function"]["name"] != f"transfer_to_{department}"
+        if t["name"] != f"transfer_to_{department}"
     ]
     return domain + transfers
 

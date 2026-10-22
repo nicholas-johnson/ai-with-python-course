@@ -3,7 +3,7 @@ Exercise 3: RAG MCP Server -- server.py
 ==========================================
 A MCPServer server that wraps the RAG pipeline as discoverable tools.
 
-Run standalone:  python -m mcp dev server.py
+Run standalone:  mcp dev server.py
 """
 
 import json
@@ -136,8 +136,8 @@ def build_grounded_prompt(query: str, passages: list[dict]) -> list[dict]:
 def rag_chat(query: str, collection_ref, k: int = 5) -> tuple[str, list[dict]]:
     passages = search(collection_ref, query, k)
     messages = build_grounded_prompt(query, passages)
-    response = client.chat.completions.create(model=MODEL, reasoning_effort="none", messages=messages)
-    return response.choices[0].message.content, passages
+    response = client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages)
+    return response.output_text, passages
 
 
 # ---------------------------------------------------------------------------

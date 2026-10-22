@@ -99,10 +99,10 @@ class LongTermMemory:
 def summarise_turns(turns: list[dict], client: OpenAI) -> str:
     """Ask the LLM to compress a conversation into a short summary."""
     formatted = "\n".join(f"{t['role']}: {t['content']}" for t in turns)
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -113,7 +113,7 @@ def summarise_turns(turns: list[dict], client: OpenAI) -> str:
             {"role": "user", "content": formatted},
         ],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 
 # ---------------------------------------------------------------------------
@@ -150,12 +150,12 @@ def chat(
     system = build_system_prompt(long_term)
     messages = [system] + session.get_messages()
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=messages,
+        reasoning={"effort": "none"},
+        input=messages,
     )
-    reply = response.choices[0].message.content
+    reply = response.output_text
     session.add({"role": "assistant", "content": reply})
 
     _auto_remember(user_input, long_term, client)
@@ -170,11 +170,11 @@ class RememberDecision(BaseModel):
 
 def _auto_remember(user_input: str, long_term: LongTermMemory, client: OpenAI):
     """Ask the LLM if the user said anything worth remembering."""
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=RememberDecision,
-        messages=[
+        reasoning={"effort": "none"},
+        text_format=RememberDecision,
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -185,7 +185,7 @@ def _auto_remember(user_input: str, long_term: LongTermMemory, client: OpenAI):
             {"role": "user", "content": user_input},
         ],
     )
-    decision = response.choices[0].message.parsed
+    decision = response.output_parsed
     if decision and decision.remember and decision.key and decision.value:
         long_term.remember(decision.key, decision.value)
 

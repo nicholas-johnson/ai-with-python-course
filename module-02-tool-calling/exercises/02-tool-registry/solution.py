@@ -98,11 +98,9 @@ class ToolRegistry:
         return [
             {
                 "type": "function",
-                "function": {
-                    "name": t["name"],
-                    "description": t["description"],
-                    "parameters": t["parameters"],
-                },
+                "name": t["name"],
+                "description": t["description"],
+                "parameters": t["parameters"],
             }
             for t in self._tools.values()
         ]
@@ -181,29 +179,29 @@ def run_agent(client, question: str, max_steps: int = 5) -> AgentResult:
 
     for _ in range(max_steps):
         steps += 1
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=messages,
+            reasoning={"effort": "none"},
+            input=messages,
             tools=registry.list_tools(),
         )
-        message = response.choices[0].message
+        calls = [item for item in response.output if item.type == "function_call"]
 
-        if message.tool_calls:
-            messages.append(message)
-            for tc in message.tool_calls:
-                name = tc.function.name
-                args = json.loads(tc.function.arguments)
+        if calls:
+            messages += response.output
+            for tc in calls:
+                name = tc.name
+                args = json.loads(tc.arguments)
                 result = registry.execute(name, args)
                 tool_calls_made.append(name)
                 messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.id,
-                    "content": result,
+                    "type": "function_call_output",
+                    "call_id": tc.call_id,
+                    "output": result,
                 })
-        elif message.content:
+        elif response.output_text:
             return AgentResult(
-                final_answer=message.content,
+                final_answer=response.output_text,
                 tool_calls_made=tool_calls_made,
                 steps=steps,
             )
@@ -228,7 +226,7 @@ if __name__ == "__main__":
     load_dotenv()
     client = OpenAI()
     print("DSS Pathfinder Exploration Agent (with auto-schema registry) ready. Type a question (or 'quit').\n")
-    print(f"Registered tools: {', '.join(t['function']['name'] for t in registry.list_tools())}\n")
+    print(f"Registered tools: {', '.join(t['name'] for t in registry.list_tools())}\n")
 
     while True:
         q = input("You: ").strip()

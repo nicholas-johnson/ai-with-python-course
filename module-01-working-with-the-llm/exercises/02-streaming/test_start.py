@@ -12,17 +12,19 @@ from start import MODEL, stream_response
 # Helpers to build mock streaming responses
 # ---------------------------------------------------------------------------
 
-def _make_chunk(content=None):
-    """Build a mock chunk matching the OpenAI streaming shape."""
-    chunk = MagicMock()
-    chunk.choices = [MagicMock()]
-    chunk.choices[0].delta.content = content
-    return chunk
+def _make_event(delta=None):
+    """Build a mock Responses API stream event.
+
+    None stands for a non-text event (response.created, response.completed, ...).
+    """
+    if delta is None:
+        return MagicMock(type="response.in_progress")
+    return MagicMock(type="response.output_text.delta", delta=delta)
 
 
 def _make_stream(tokens: list[str | None]):
-    """Build a mock streaming response (iterable of chunks)."""
-    return [_make_chunk(t) for t in tokens]
+    """Build a mock streaming response (iterable of events)."""
+    return [_make_event(t) for t in tokens]
 
 
 # ---------------------------------------------------------------------------
@@ -32,16 +34,16 @@ def _make_stream(tokens: list[str | None]):
 class TestStreamResponse:
     def test_assembles_full_text(self, capsys):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_stream([
+        client.responses.create.return_value = _make_stream([
             "Hello", ", ", "Commander", ".",
         ])
         result = stream_response(client, [{"role": "user", "content": "Hi"}])
 
         assert result == "Hello, Commander."
 
-    def test_handles_none_chunks(self, capsys):
+    def test_skips_non_text_events(self, capsys):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_stream([
+        client.responses.create.return_value = _make_stream([
             None, "Hi", None, " there", None,
         ])
         result = stream_response(client, [{"role": "user", "content": "test"}])
@@ -50,7 +52,7 @@ class TestStreamResponse:
 
     def test_prints_tokens_to_stdout(self, capsys):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_stream([
+        client.responses.create.return_value = _make_stream([
             "Word1", " Word2",
         ])
         stream_response(client, [{"role": "user", "content": "test"}])
@@ -61,25 +63,25 @@ class TestStreamResponse:
 
     def test_calls_api_with_stream_true(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_stream(["ok"])
+        client.responses.create.return_value = _make_stream(["ok"])
         stream_response(client, [{"role": "user", "content": "test"}])
 
-        call_kwargs = client.chat.completions.create.call_args
+        call_kwargs = client.responses.create.call_args
         kw = call_kwargs.kwargs if call_kwargs.kwargs else call_kwargs[1]
         assert kw.get("stream") is True
 
     def test_uses_correct_model(self):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_stream(["ok"])
+        client.responses.create.return_value = _make_stream(["ok"])
         stream_response(client, [{"role": "user", "content": "test"}])
 
-        call_kwargs = client.chat.completions.create.call_args
+        call_kwargs = client.responses.create.call_args
         kw = call_kwargs.kwargs if call_kwargs.kwargs else call_kwargs[1]
         assert kw.get("model") == MODEL
 
     def test_empty_stream_returns_empty_string(self, capsys):
         client = MagicMock()
-        client.chat.completions.create.return_value = _make_stream([None, None])
+        client.responses.create.return_value = _make_stream([None, None])
         result = stream_response(client, [{"role": "user", "content": "test"}])
 
         assert result == ""

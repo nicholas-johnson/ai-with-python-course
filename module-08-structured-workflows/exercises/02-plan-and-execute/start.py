@@ -33,11 +33,11 @@ class PlanStep:
 
 def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
     """Ask the LLM to create a numbered plan. Returns list of PlanStep."""
-    # TODO: call client.chat.completions.parse with:
+    # TODO: call client.responses.parse with:
     #   model=MODEL
-    #   response_format=Plan
+    #   text_format=Plan
     #   A system prompt asking for a short, ordered plan (no need to describe JSON)
-    # plan = response.choices[0].message.parsed  (None if the model refused)
+    # plan = response.output_parsed  (None if the model refused)
     # Convert each PlannedStep into a PlanStep and return the list
     raise NotImplementedError("TODO")
 
@@ -66,7 +66,7 @@ def revise_plan(
     #   - The original query
     #   - Steps completed so far (with results)
     #   - Steps remaining
-    # Use client.chat.completions.parse(..., response_format=Plan) again
+    # Use client.responses.parse(..., text_format=Plan) again
     # Convert the parsed steps into a PlanStep list
     raise NotImplementedError("TODO")
 

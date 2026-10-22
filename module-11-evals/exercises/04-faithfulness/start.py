@@ -102,12 +102,11 @@ if __name__ == "__main__":
 
         def create(**kwargs):
             resp = MagicMock()
-            resp.choices = [MagicMock()]
-            resp.choices[0].message.content = queue.pop(0)
+            resp.output_text = queue.pop(0)
             return resp
 
         client = MagicMock()
-        client.chat.completions.create.side_effect = create
+        client.responses.create.side_effect = create
         result = score_faithfulness(client, case["answer"], case["context"])
         if result is None:
             print(f"  {case['id']}: not implemented")

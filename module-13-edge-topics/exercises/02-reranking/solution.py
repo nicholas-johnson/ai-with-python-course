@@ -18,10 +18,10 @@ def score_relevance(
     """
     Score the relevance of a passage to a query on a scale of 0-10.
     """
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 f"Rate how relevant this passage is to the query on a scale "
@@ -33,7 +33,7 @@ def score_relevance(
         temperature=0,
     )
     try:
-        return float(response.choices[0].message.content.strip())
+        return float(response.output_text.strip())
     except ValueError:
         return 0.0
 

@@ -79,7 +79,7 @@ def test_plan_endpoint(fake_parse):
     })
 
     with patch.object(mod, "client") as mock_openai:
-        mock_openai.chat.completions.parse.side_effect = fake_parse(plan_json)
+        mock_openai.responses.parse.side_effect = fake_parse(plan_json)
         resp = test_client.post("/plan", json={"message": "Trip to Tokyo"})
 
     assert resp.status_code == 200

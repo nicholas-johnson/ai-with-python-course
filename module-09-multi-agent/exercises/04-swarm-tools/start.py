@@ -35,24 +35,30 @@ def run_agent_turn(department: str, messages: list[dict], client: OpenAI):
 
     Steps:
         1. Get tools from AGENT_TOOLS[department]
-        2. Call client.chat.completions.create with model, messages, tools, tool_choice="auto"
-        3. Return response.choices[0].message
+        2. Call client.responses.create with model, input=messages, tools, tool_choice="auto"
+        3. Return the response object
     """
     # TODO: implement
     raise NotImplementedError("TODO")
 
 
-def handle_tool_calls(response_message, department: str) -> tuple[list[dict], str | None]:
-    """Execute tool calls; detect transfer_to_* handoffs.
+def function_calls(response) -> list:
+    """The function_call items in a response's output (empty if the model answered)."""
+    return [item for item in response.output if item.type == "function_call"]
+
+
+def handle_tool_calls(response, department: str) -> tuple[list, str | None]:
+    """Execute the response's function calls; detect transfer_to_* handoffs.
 
     Returns:
-        (tool_messages, transfer_target)
+        (new_items, transfer_target)
 
     Steps:
-        1. If no tool_calls, return ([], None)
-        2. Build assistant message dict with tool_calls list
-        3. For each tool_call: parse args, invoke TOOL_FUNCTIONS, append tool message
-        4. If transfer tool, parse JSON for transfer_to and set transfer_target
+        1. calls = function_calls(response); if empty, return ([], None)
+        2. Start new_items with list(response.output) (the model's function_call items)
+        3. For each call: parse call.arguments, invoke TOOL_FUNCTIONS[call.name], append
+           {"type": "function_call_output", "call_id": call.call_id, "output": result}
+        4. If it was a transfer tool, parse the JSON result for transfer_to and set transfer_target
     """
     # TODO: implement
     raise NotImplementedError("TODO")
@@ -71,7 +77,8 @@ def swarm_loop(
 
     Steps:
         1. Initialise department, messages, chain, trace
-        2. Loop up to max_hops: run_agent_turn, handle tools or return answer
+        2. Loop up to max_hops: run_agent_turn; if function_calls(response) is empty,
+           return response.output_text as the answer, otherwise handle the tools
         3. On handoff, switch department and append a short user nudge message
     """
     # TODO: implement
@@ -106,7 +113,7 @@ def main():
         if user_input == "/agents":
             print("[Swarm agents]")
             for dept in DEPARTMENTS:
-                names = [t["function"]["name"] for t in AGENT_TOOLS[dept]]
+                names = [t["name"] for t in AGENT_TOOLS[dept]]
                 print(f"  {dept}: {', '.join(names)}")
             print()
             continue

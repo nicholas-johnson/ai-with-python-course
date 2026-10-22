@@ -43,7 +43,7 @@ export const slides = [
         'Each tool is a JSON object describing its **name**, **description**, and **parameter schema** — the model never sees your code, only this specification.',
         'The model reads the descriptions to decide **which tool to call** and what arguments to pass — good descriptions are critical.',
         'Tools are **not persistent** — you send the full list with every request, just like the message history.',
-        'The model responds with a **`tool_calls` array** containing the tool name and arguments it chose, or with plain text if no tool is needed.',
+        'The response\'s **`output`** contains **`function_call` items** (tool name, JSON arguments, `call_id`) when the model wants a tool, or a text message if no tool is needed.',
       ],
     },
   },
@@ -54,17 +54,16 @@ export const slides = [
       code: `messages = [
     {"role": "system", "content": "You are a helpful assistant..."},
     {"role": "user", "content": "How many engineers are in the London office?"},
-    {"role": "assistant", "tool_calls": [
-        {"id": "c1", "name": "lookup_employees", "arguments": {...}}
-    ]},
-    {"role": "tool", "tool_call_id": "c1",
-     "content": '[{"name": "Alice"}, ...]'},
+    {"type": "function_call", "call_id": "c1",
+     "name": "lookup_employees", "arguments": '{"office": "London"}'},
+    {"type": "function_call_output", "call_id": "c1",
+     "output": '[{"name": "Alice"}, ...]'},
     {"role": "assistant",
      "content": "3 engineers found: Alice, Bob, Carol."},
 ]`,
       highlights: [
         'The LLM decides whether to call a tool or answer directly',
-        'Tool results come back as messages — the LLM interprets them',
+        'Tool results go back as function_call_output items, matched by call_id',
       ],
     },
   },
@@ -93,18 +92,21 @@ export const slides = [
     type: 'code',
     content: {
       title: 'The core loop',
-      code: `def run_tool_loop(llm, tools, user_input, max_steps=10):
+      code: `def run_tool_loop(client, tools, handlers, user_input, max_steps=10):
     messages = [system_msg, {"role": "user", "content": user_input}]
 
     for _ in range(max_steps):
-        response = llm.chat(messages)
+        response = client.responses.create(model=MODEL, input=messages, tools=tools)
+        calls = [i for i in response.output if i.type == "function_call"]
 
-        if response.tool_calls:
-            for tc in response.tool_calls:
-                result = tools[tc.name](**tc.arguments)
-                messages.append(...)  # assistant + tool messages
-        elif response.content:
-            return response.content  # final answer
+        if calls:
+            messages += response.output          # keep the model's calls
+            for tc in calls:
+                result = handlers[tc.name](**json.loads(tc.arguments))
+                messages.append({"type": "function_call_output",
+                                 "call_id": tc.call_id, "output": result})
+        elif response.output_text:
+            return response.output_text           # final answer
 
     return None  # exhausted steps`,
       highlights: [
@@ -122,7 +124,7 @@ export const slides = [
         'Tools declare a **JSON schema**: name, description, parameters.',
         'Registry **validates** arguments before calling the handler.',
         'Registry **routes** by name and **catches** handler exceptions.',
-        'OpenAI-compatible format: `{"type": "function", "function": {...}}`.',
+        'OpenAI-compatible format: `{"type": "function", ...}`.',
       ],
     },
   },

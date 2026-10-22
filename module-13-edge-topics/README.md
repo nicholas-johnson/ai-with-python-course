@@ -94,10 +94,10 @@ def rerank_with_llm(
 ) -> list[dict]:
     scored = []
     for passage in passages:
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=MODEL,
-            reasoning_effort="none",
-            messages=[{
+            reasoning={"effort": "none"},
+            input=[{
                 "role": "user",
                 "content": (
                     f"Rate the relevance of this passage to the query "
@@ -108,7 +108,7 @@ def rerank_with_llm(
                 ),
             }],
         )
-        score = float(response.choices[0].message.content.strip())
+        score = float(response.output_text.strip())
         scored.append({**passage, "rerank_score": score})
     scored.sort(key=lambda x: x["rerank_score"], reverse=True)
     return scored[:top_k]
@@ -144,10 +144,10 @@ HyDE works best for knowledge-intensive queries where the vocabulary gap between
 from openai import OpenAI
 
 def hyde_search(client: OpenAI, query: str, collection) -> list:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": (
                 f"Write a short paragraph that answers this question. "
@@ -157,7 +157,7 @@ def hyde_search(client: OpenAI, query: str, collection) -> list:
             ),
         }],
     )
-    hypothetical_doc = response.choices[0].message.content
+    hypothetical_doc = response.output_text
     embedding = client.embeddings.create(
         model="text-embedding-3-small",
         input=hypothetical_doc,
@@ -201,19 +201,17 @@ import json
 
 tools = [{
     "type": "function",
-    "function": {
-        "name": "search_documents",
-        "description": "Search the document database for relevant information.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The search query to find relevant documents.",
-                }
-            },
-            "required": ["query"],
+    "name": "search_documents",
+    "description": "Search the document database for relevant information.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "The search query to find relevant documents.",
+            }
         },
+        "required": ["query"],
     },
 }]
 
@@ -223,22 +221,22 @@ def agentic_rag(client: OpenAI, question: str, search_fn) -> str:
         {"role": "user", "content": question},
     ]
     while True:
-        response = client.chat.completions.create(
-            model=MODEL, reasoning_effort="none", messages=messages, tools=tools,
+        response = client.responses.create(
+            model=MODEL, reasoning={"effort": "none"}, input=messages, tools=tools,
         )
-        msg = response.choices[0].message
-        if msg.tool_calls:
-            messages.append(msg)
-            for tc in msg.tool_calls:
-                args = json.loads(tc.function.arguments)
+        calls = [item for item in response.output if item.type == "function_call"]
+        if calls:
+            messages += response.output
+            for tc in calls:
+                args = json.loads(tc.arguments)
                 results = search_fn(args["query"])
                 messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.id,
-                    "content": json.dumps(results),
+                    "type": "function_call_output",
+                    "call_id": tc.call_id,
+                    "output": json.dumps(results),
                 })
         else:
-            return msg.content
+            return response.output_text
 ```
 
 ### When to Use
@@ -294,15 +292,15 @@ def verify_claims(
     return results
 
 def extract_claims(client: OpenAI, answer: str) -> list[str]:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": f"Extract each factual claim as a separate line:\n\n{answer}",
         }],
     )
-    return [c.strip() for c in response.choices[0].message.content.split("\n") if c.strip()]
+    return [c.strip() for c in response.output_text.split("\n") if c.strip()]
 ```
 
 ### When to Use
@@ -383,10 +381,10 @@ import sqlite3
 from openai import OpenAI
 
 def text_to_sql(client: OpenAI, question: str, schema: str) -> str:
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {"role": "system", "content": (
                 f"Generate a SQLite SELECT query for the question. "
                 f"Return ONLY the SQL, no explanation.\n\nSchema:\n{schema}"
@@ -394,7 +392,7 @@ def text_to_sql(client: OpenAI, question: str, schema: str) -> str:
             {"role": "user", "content": question},
         ],
     )
-    return response.choices[0].message.content.strip().strip("```sql").strip("```").strip()
+    return response.output_text.strip().strip("```sql").strip("```").strip()
 
 def safe_execute(db_path: str, sql: str) -> list[dict]:
     forbidden = ["DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE"]
@@ -452,11 +450,11 @@ def llm_judge(
     answer: str,
     reference: str,
 ) -> dict:
-    response = client.chat.completions.parse(
+    response = client.responses.parse(
         model=MODEL,
-        reasoning_effort="none",
-        response_format=JudgeScores,
-        messages=[{
+        reasoning={"effort": "none"},
+        text_format=JudgeScores,
+        input=[{
             "role": "user",
             "content": (
                 f"Evaluate this answer against the reference.\n\n"
@@ -470,7 +468,7 @@ def llm_judge(
             ),
         }],
     )
-    return response.choices[0].message.parsed.model_dump()
+    return response.output_parsed.model_dump()
 ```
 
 ### When to Use
@@ -629,20 +627,18 @@ import base64
 def describe_image(client: OpenAI, image_path: str) -> str:
     with open(image_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode("utf-8")
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[{
+        reasoning={"effort": "none"},
+        input=[{
             "role": "user",
             "content": [
-                {"type": "text", "text": "Describe this image in detail for indexing."},
-                {"type": "image_url", "image_url": {
-                    "url": f"data:image/png;base64,{image_data}",
-                }},
+                {"type": "input_text", "text": "Describe this image in detail for indexing."},
+                {"type": "input_image", "image_url": f"data:image/png;base64,{image_data}"},
             ],
         }],
     )
-    return response.choices[0].message.content
+    return response.output_text
 
 def index_multimodal(client, items: list[dict], collection):
     for item in items:
@@ -735,7 +731,7 @@ Normally an LLM answers in one pass: prompt in, completion out. **Test-time comp
 
 That extra work might be: writing a visible or hidden chain-of-thought, generating several candidate answers and picking the best, or running a verify-and-revise loop. Models like OpenAI o1 and DeepSeek-R1 are built around this idea — you may see a “thinking” phase, then the final answer.
 
-The trade-off is clear: harder questions can improve a lot, but each query uses more tokens, time, and money than a single-shot chat completion.
+The trade-off is clear: harder questions can improve a lot, but each query uses more tokens, time, and money than a single-shot model call.
 
 ### When to Use
 

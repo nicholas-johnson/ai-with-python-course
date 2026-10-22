@@ -32,10 +32,10 @@ def text_to_sql(client: OpenAI, question: str, schema: str) -> str:
     """
     Generate a SQL SELECT query from a natural language question.
     """
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=MODEL,
-        reasoning_effort="none",
-        messages=[
+        reasoning={"effort": "none"},
+        input=[
             {
                 "role": "system",
                 "content": (
@@ -49,7 +49,7 @@ def text_to_sql(client: OpenAI, question: str, schema: str) -> str:
         ],
         temperature=0,
     )
-    sql = (response.choices[0].message.content or "").strip()
+    sql = (response.output_text or "").strip()
     if sql.startswith("```"):
         sql = sql.split("\n", 1)[-1]
     if sql.endswith("```"):

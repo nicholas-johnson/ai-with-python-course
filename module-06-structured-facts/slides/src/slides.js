@@ -69,17 +69,16 @@ class FactList(BaseModel):   # top level must be an object
     type: 'code',
     content: {
       title: 'Structured outputs — the schema is the format',
-      code: `response = client.chat.completions.parse(
+      code: `response = client.responses.parse(
     model=MODEL,
-    reasoning_effort="none",
-    response_format=FactList,
-    messages=[
+    reasoning={"effort": "none"},
+    text_format=FactList,
+    input=[
         {"role": "system", "content": "Extract every factual claim. Rate confidence 0-1."},
         {"role": "user", "content": text},
     ],
 )
-message = response.choices[0].message
-facts = message.parsed.facts if message.parsed else []   # None = refusal
+facts = response.output_parsed.facts if response.output_parsed else []   # None = refusal
 
 # Input:  "Alice manages the infrastructure team."
 # facts:  [Fact(subject='Alice', predicate='manages',
@@ -119,7 +118,7 @@ facts = message.parsed.facts if message.parsed else []   # None = refusal
         '**Confidence threshold**: drop facts below 0.7 (configurable).',
         '**Deduplication**: same (subject, predicate, object) → keep highest confidence.',
         '**Provenance**: every fact links back to the source sentence.',
-        'Handle refusals: `message.parsed` is `None` and `message.refusal` says why.',
+        'Handle refusals: `response.output_parsed` is `None` when the model declines.',
       ],
     },
   },

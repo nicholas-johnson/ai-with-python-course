@@ -157,7 +157,7 @@ The demo is a multi-step walkthrough using a persistent ChromaDB (via Docker). S
 cd module-05-rag-fundamentals/demo
 docker compose up -d              # start ChromaDB
 python ingest.py                  # load + chunk + embed + store
-python -m mcp dev server.py       # (optional) inspect tools in browser
+mcp dev server.py       # (optional) inspect tools in browser
 python agent.py                   # chat with the RAG agent
 docker compose down               # clean up
 ```
