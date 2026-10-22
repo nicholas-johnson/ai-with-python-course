@@ -23,7 +23,7 @@ def search_notes(query: str, collection: chromadb.Collection) -> str:
 
 
 def get_calendar(date_range: str | None = None) -> str:
-    """Read upcoming events from calendar.json. Optional date_range like '2025-03-17' or '2025-03-17:2025-03-19'."""
+    """Read upcoming events from calendar.json. Optional date_range like '2027-03-15' or '2027-03-15:2027-03-17'."""
     path = os.path.join(DATA_DIR, "calendar.json")
     with open(path) as f:
         events = json.load(f)

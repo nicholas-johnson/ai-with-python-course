@@ -98,7 +98,7 @@ def query_crew(department: str) -> str:
     ...
 ```
 
-**Important:** LangChain tools must return strings. Wrap dicts in `json.dumps()`.
+**Tip:** Return strings from your tools — wrap dicts in `json.dumps()` — so you control exactly what the model sees.
 
 ### 4. Build the agent
 
@@ -153,5 +153,6 @@ The tests check:
 ## Stretch goals
 
 - Add a `log_query` tool that searches ship logs by keyword
-- Add conversation memory so the agent remembers previous questions
-- Toggle `verbose` on/off with a `/verbose` command
+- Add conversation memory: pass `checkpointer=InMemorySaver()` (from `langgraph.checkpoint.memory`) to `create_agent`, then call `agent.invoke(..., {"configurable": {"thread_id": "crew"}})` so follow-up questions remember earlier ones
+- Add middleware: a `@wrap_tool_call` function (from `langchain.agents.middleware`) that prints each tool call, toggled by a `/trace` command, and `ToolCallLimitMiddleware(run_limit=5)` to stop runaway loops
+- Return a typed answer with `create_agent(..., response_format=SomeModel)` and read `result["structured_response"]`

@@ -7,10 +7,11 @@ Run:  python solution.py
 """
 from __future__ import annotations
 import os
-import json, time
+import time
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -110,24 +111,31 @@ def build_system_prompt(long_term: LongTermMemory) -> str:
     )
 
 
+class Memory(BaseModel):
+    key: str = Field(description="Short snake_case label, e.g. favourite_drink")
+    value: str = Field(description="The fact to remember")
+
+
+class MemoryList(BaseModel):
+    memories: list[Memory]
+
+
 def extract_memories(
     user_msg: str, assistant_msg: str, client: OpenAI
 ) -> list[dict]:
     """Ask the LLM to identify memorable facts from an exchange."""
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=MemoryList,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "Analyse this conversation exchange and extract facts worth "
-                    "remembering long-term about the user. Return a JSON object with "
-                    "a 'memories' array. Each item has 'key' (short label, snake_case) "
-                    "and 'value' (the fact). Only include genuinely useful personal facts, "
-                    "preferences, or context -- not chitchat. If nothing is worth "
-                    "remembering, return {\"memories\": []}."
+                    "remembering long-term about the user. Only include genuinely "
+                    "useful personal facts, preferences, or context -- not chitchat. "
+                    "If nothing is worth remembering, return an empty list."
                 ),
             },
             {
@@ -136,11 +144,8 @@ def extract_memories(
             },
         ],
     )
-    try:
-        data = json.loads(response.choices[0].message.content)
-        return data.get("memories", [])
-    except (json.JSONDecodeError, AttributeError):
-        return []
+    parsed = response.choices[0].message.parsed
+    return [m.model_dump() for m in parsed.memories] if parsed else []
 
 
 def chat(

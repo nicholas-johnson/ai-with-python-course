@@ -4,9 +4,9 @@
 
 ## Learning goals
 
-- Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.
-- Wrap functions as **LangChain tools** and run them with **`create_agent`** (LangChain 1.x).
-- Construct a **RAG chain** with a LangChain retriever and ChromaDB.
+- Build **LCEL chains**: prompt templates, the pipe operator, and **structured output** with Pydantic.
+- Wrap functions as **LangChain tools** and run them with **`create_agent`** (LangChain 1.x), adding **middleware** and **memory**.
+- Construct a **RAG chain** with a LangChain retriever and ChromaDB, then turn retrieval into an agent tool (**agentic RAG**).
 - Serve an LCEL chain as a REST API with **FastAPI** using the Runnable `ainvoke` / `astream` methods.
 - Know when to use LangChain and when to stay hand-rolled.
 
@@ -35,24 +35,36 @@ from langchain_openai import ChatOpenAI
 model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 ```
 
-**OutputParser** — transforms the model's raw text into structured data. `JsonOutputParser` extracts JSON, `StrOutputParser` passes text through.
+`init_chat_model("openai:gpt-6-luna")` (from `langchain.chat_models`) does the same thing from a `provider:model` string, which makes switching providers a config change.
+
+**Structured output** — describe the result as a Pydantic model, and the provider is constrained to return exactly that shape:
 
 ```python
-from langchain_core.output_parsers import JsonOutputParser
+from typing import Literal
+from pydantic import BaseModel, Field
 
-parser = JsonOutputParser()
+class Classification(BaseModel):
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary")
+    priority: Literal["low", "medium", "high", "critical"]
+
+structured_model = model.with_structured_output(Classification)
 ```
+
+**OutputParser** — transforms the model's raw text. `StrOutputParser` passes text through; `JsonOutputParser` parses JSON you asked for in the prompt. For structured data, prefer `with_structured_output` — the parser approach relies on the prompt, though it can stream a partial dict as the JSON arrives.
 
 ---
 
 ## LCEL — LangChain Expression Language
 
-LCEL lets you compose components with the pipe (`|`) operator. Data flows left to right: prompt → model → parser.
+LCEL lets you compose components with the pipe (`|`) operator. Data flows left to right.
 
 ```python
-chain = prompt | model | parser
+chain = prompt | model.with_structured_output(Classification)
 result = chain.invoke({"report": "Reactor coolant pressure dropped 15%."})
-# {"category": "engineering", "severity": "medium", "summary": "..."}
+# Classification(category='engineering', summary='...', priority='high')
+
+text_chain = prompt | model | StrOutputParser()   # same prompt, plain text out
 ```
 
 Under the hood, `|` creates a `RunnableSequence`. Each component receives the previous one's output. This is the same pipeline pattern you built by hand in earlier modules — LangChain standardises the interface.
@@ -94,6 +106,42 @@ Use `.text` rather than `.content` to read a reply. When you give `gpt-6-*` mode
 
 The `@tool` decorator generates the JSON Schema from the function's type hints and docstring — same pattern as the `ToolRegistry` you built in Module 2, but standardised. `result["messages"]` contains every tool call and tool result, so you can print the full trace.
 
+### Middleware
+
+Middleware hooks into the agent loop — before/after the model call, or around each tool call — without rewriting the loop:
+
+```python
+from langchain.agents.middleware import ToolCallLimitMiddleware, wrap_tool_call
+
+@wrap_tool_call
+def log_tool_calls(request, handler):
+    print("→", request.tool_call["name"], request.tool_call["args"])
+    return handler(request)
+
+agent = create_agent(model, tools, middleware=[log_tool_calls, ToolCallLimitMiddleware(run_limit=4)])
+```
+
+Built-ins cover the guardrails you wrote by hand in Module 2: `HumanInTheLoopMiddleware` (pause for approval), `PIIMiddleware`, `ModelRetryMiddleware` / `ToolRetryMiddleware`, `ModelFallbackMiddleware`, and `SummarizationMiddleware` for long conversations.
+
+### Memory
+
+Pass a checkpointer and the agent saves its state after every step. Calls that share a `thread_id` continue the same conversation:
+
+```python
+from langgraph.checkpoint.memory import InMemorySaver
+
+agent = create_agent(model, tools, checkpointer=InMemorySaver())
+config = {"configurable": {"thread_id": "bridge"}}
+agent.invoke({"messages": [{"role": "user", "content": "What is the shield integrity?"}]}, config)
+agent.invoke({"messages": [{"role": "user", "content": "Is that above 90%?"}]}, config)  # remembers
+```
+
+Swap `InMemorySaver` for a SQLite or Postgres checkpointer to persist conversations — the Module 7 memory ideas, as a framework feature.
+
+### Structured agent output
+
+`create_agent(..., response_format=Classification)` makes the agent finish with a typed object in `result["structured_response"]`, alongside the usual messages.
+
 > **Upgrading from LangChain 0.x?** `AgentExecutor`, `create_tool_calling_agent`, and the legacy chains (`RetrievalQA`, `LLMChain`) moved to the `langchain-classic` package in 1.0. Use `create_agent` for new code.
 
 ---
@@ -112,17 +160,37 @@ def format_docs(docs):
         for i, doc in enumerate(docs)
     )
 
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+answer_chain = (
+    RunnablePassthrough.assign(context=lambda x: format_docs(x["docs"]))
     | prompt
     | model
     | StrOutputParser()
 )
+rag_chain = (
+    {"docs": retriever, "question": RunnablePassthrough()}
+    | RunnablePassthrough.assign(answer=answer_chain)
+)
 
-answer = rag_chain.invoke("What caused the reactor anomaly?")
+result = rag_chain.invoke("What caused the reactor anomaly?")
+result["answer"], result["docs"]   # the answer and the sources it used
 ```
 
-`RunnablePassthrough` passes the input through unchanged (the question). The retriever runs in parallel, fetches documents, and `format_docs` formats them for the prompt. The chain reads naturally: retrieve context, build prompt, call model, parse output.
+`RunnablePassthrough` passes the input through unchanged (the question) while the retriever fetches documents. `.assign(answer=...)` adds the answer to the dict without dropping the docs, so you can cite sources from the same single retrieval.
+
+### Agentic RAG
+
+A chain always retrieves exactly once, with the user's words. Wrap the retriever as a tool and an agent decides *whether* to search, *what* to search for, and whether to search again:
+
+```python
+@tool
+def search_logs(query: str) -> str:
+    """Search the ship logs. Use for questions about past events or incidents."""
+    return format_docs(retriever.invoke(query))
+
+rag_agent = create_agent(model, [search_logs, read_sensor], system_prompt="...")
+```
+
+It can combine retrieval with live tools ("is the seal better now than after the patch?"), at the cost of more model calls. Use a chain when every question needs the same retrieval; use an agent when questions vary.
 
 ---
 
@@ -173,6 +241,7 @@ The recommendation: **know the pattern first, then use the framework**. You can 
 
 - **Know the pattern, then pick the tool.** LangChain is faster only if you know what it does underneath.
 - **Use LCEL for standard pipelines.** Prompt → model → parser is one line.
+- **Ask for structure with a schema, not a sentence.** `with_structured_output` beats "respond with ONLY JSON".
 - **Inspect `result["messages"]` during development** (or turn on LangSmith tracing). The trace shows every tool call and decision.
 - **Know when to eject.** If the framework fights you, go back to plain Python.
 
@@ -196,9 +265,9 @@ Exercises 01–03 chain together; exercise 04 is standalone (same LCEL pattern a
 
 | Folder | What you build |
 | ------ | -------------- |
-| [`exercises/01-chain-basics`](exercises/01-chain-basics/) | LCEL chain that classifies crew reports into category, summary, and priority. |
+| [`exercises/01-chain-basics`](exercises/01-chain-basics/) | LCEL chain with structured output that classifies crew reports into category, summary, and priority. |
 | [`exercises/02-tool-agent`](exercises/02-tool-agent/) | Tool agent that wraps the classifier from 01 + ship tools with `create_agent`. |
-| [`exercises/03-rag-chain`](exercises/03-rag-chain/) | RAG chain that adds retrieval over ship logs to the agent from 02. |
+| [`exercises/03-rag-chain`](exercises/03-rag-chain/) | RAG chain over ship logs that returns answer + sources, then agentic RAG: the agent from 02 with a `search_logs` tool. |
 | [`exercises/04-chain-api`](exercises/04-chain-api/) | FastAPI service exposing the classifier chain at `/classify/invoke`, plus a health check. |
 
 Run tests for this module:
@@ -213,8 +282,11 @@ From repo root: `pnpm slides:10`, or `cd module-10-langchain/slides && pnpm dev`
 
 ## Reference
 
-- [LangChain Python docs](https://python.langchain.com/)
-- [LCEL — LangChain Expression Language](https://python.langchain.com/docs/concepts/lcel/)
+- [LangChain Python docs](https://docs.langchain.com/oss/python/langchain/overview)
+- [Runnables / LCEL reference](https://reference.langchain.com/python/langchain-core/runnables)
 - [LangGraph](https://langchain-ai.github.io/langgraph/)
 - [LangSmith (tracing)](https://smith.langchain.com/)
 - [LangChain 1.0 agents (`create_agent`)](https://docs.langchain.com/oss/python/langchain/agents)
+- [Middleware](https://docs.langchain.com/oss/python/langchain/middleware/overview)
+- [Structured output](https://docs.langchain.com/oss/python/langchain/structured-output)
+- [Short-term memory (checkpointers)](https://docs.langchain.com/oss/python/langchain/short-term-memory)

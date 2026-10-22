@@ -37,31 +37,27 @@ def load_logs() -> list[dict]:
     return json.loads(DATA_PATH.read_text())
 
 
+class FactList(BaseModel):
+    facts: list[Fact]
+
+
 def extract_facts(text: str) -> list[Fact]:
-    schema_desc = json.dumps(Fact.model_json_schema(), indent=2)
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=FactList,
         messages=[
             {
                 "role": "system",
                 "content": (
-                    "Extract every factual claim. Return JSON with a 'facts' array.\n"
-                    f"Schema:\n{schema_desc}\nBe precise. Rate confidence 0-1."
+                    "Extract every factual claim. Be precise. Rate confidence 0-1."
                 ),
             },
             {"role": "user", "content": text},
         ],
     )
-    data = json.loads(response.choices[0].message.content)
-    facts_data = data.get("facts", []) if isinstance(data, dict) else data
-    facts = []
-    for item in facts_data:
-        try:
-            facts.append(Fact.model_validate(item))
-        except Exception:
-            continue
+    message = response.choices[0].message
+    facts = message.parsed.facts if message.parsed else []
     return [f for f in facts if f.confidence >= 0.7]
 
 

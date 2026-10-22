@@ -38,7 +38,7 @@ def test_plan_step_dataclass():
     assert "result" in field_names
 
 
-def test_generate_plan_returns_list():
+def test_generate_plan_returns_list(fake_parse):
     """generate_plan returns a list of PlanStep objects."""
     mod = _import_start()
 
@@ -50,11 +50,7 @@ def test_generate_plan_returns_list():
             {"step_number": 3, "description": "Summarize findings"},
         ]
     })
-    mock_message = MagicMock()
-    mock_message.content = plan_json
-    mock_client.chat.completions.create.return_value = MagicMock(
-        choices=[MagicMock(message=mock_message)]
-    )
+    mock_client.chat.completions.parse.side_effect = fake_parse(plan_json)
 
     plan = mod.generate_plan("test query", mock_client)
 
@@ -63,6 +59,7 @@ def test_generate_plan_returns_list():
     assert all(isinstance(s, mod.PlanStep) for s in plan)
     assert plan[0].description == "Search for info"
     assert plan[0].status == "pending"
+    assert mock_client.chat.completions.parse.call_args.kwargs["response_format"] is mod.Plan
 
 
 def test_execute_step_returns_result():
@@ -86,7 +83,7 @@ def test_execute_step_returns_result():
     assert "trace" in result, "Result should have 'trace' key"
 
 
-def test_plan_and_execute_returns_answer_and_plan():
+def test_plan_and_execute_returns_answer_and_plan(fake_parse):
     """plan_and_execute returns a dict with 'answer' and 'plan' keys."""
     mod = _import_start()
 
@@ -98,8 +95,7 @@ def test_plan_and_execute_returns_answer_and_plan():
         ]
     })
 
-    plan_message = MagicMock()
-    plan_message.content = plan_json
+    mock_client.chat.completions.parse.side_effect = fake_parse(plan_json)
 
     react_message = MagicMock()
     react_message.tool_calls = None
@@ -109,7 +105,6 @@ def test_plan_and_execute_returns_answer_and_plan():
     summary_message.content = "Final answer: the thing was done successfully."
 
     mock_client.chat.completions.create.side_effect = [
-        MagicMock(choices=[MagicMock(message=plan_message)]),
         MagicMock(choices=[MagicMock(message=react_message)]),
         MagicMock(choices=[MagicMock(message=summary_message)]),
     ]

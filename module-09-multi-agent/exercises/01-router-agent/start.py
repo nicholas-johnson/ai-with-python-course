@@ -7,8 +7,10 @@ Run:  python start.py
 """
 from __future__ import annotations
 import os
+from typing import Literal
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -44,12 +46,16 @@ def classify_query(query: str, client: OpenAI) -> str:
     Returns one of: 'medical', 'tactical', 'comms'.
 
     Steps:
-        1. Call client.chat.completions.create with model=MODEL, reasoning_effort="none"
-        2. Use response_format={"type": "json_object"}
-        3. System prompt: instruct the model to classify into one of the
-           three departments and return JSON: {"department": "<name>"}
-        4. Parse the JSON response and return the department string
-        5. If parsing fails or department is invalid, default to "medical"
+        1. Define a Pydantic model (above this function):
+               class Route(BaseModel):
+                   department: Literal["medical", "tactical", "comms"]
+        2. Call client.chat.completions.parse with model=MODEL,
+           reasoning_effort="none", response_format=Route
+        3. System prompt: describe the three departments and ask the model
+           to classify the query (no need to describe the JSON -- the
+           Literal type limits the answer to valid departments)
+        4. route = response.choices[0].message.parsed
+           Return route.department, or "medical" if route is None (refusal)
     """
     # TODO: implement LLM-based classification
     raise NotImplementedError("TODO")

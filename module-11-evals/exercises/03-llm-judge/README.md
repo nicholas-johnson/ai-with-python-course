@@ -33,11 +33,9 @@ Score each dimension from 1 (worst) to 5 (best):
 - Correctness: Are the facts accurate?
 - Completeness: Does it cover all key points from the reference?
 - Relevance: Does it directly address the question?
-
-Respond with JSON only: {"correctness": N, "completeness": N, "relevance": N, "explanation": "..."}
 ```
 
-The judge might respond: `{"correctness": 5, "completeness": 2, "relevance": 5, "explanation": "Correct but only mentions one of three causes."}`
+The scores come back through **structured outputs** (module 6): the judge's reply is constrained to a `JudgeScores` schema, so it might return `JudgeScores(correctness=5, completeness=2, relevance=5, explanation="Correct but only mentions one of three causes.")` -- never a missing score or a stray markdown fence.
 
 ### Why this matters
 
@@ -90,13 +88,20 @@ test_cases = [
 
 ### 1. Implement `llm_judge`
 
-Build the evaluation prompt and ask for JSON output:
+Define the score schema, build the evaluation prompt, and call `parse()` with `response_format=JudgeScores`:
 
 ```python
+class JudgeScores(BaseModel):
+    correctness: int = Field(ge=1, le=5)
+    completeness: int = Field(ge=1, le=5)
+    relevance: int = Field(ge=1, le=5)
+    explanation: str
+
 def llm_judge(client, question, answer, reference):
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
+        response_format=JudgeScores,
         messages=[{
             "role": "user",
             "content": (
@@ -107,18 +112,16 @@ def llm_judge(client, question, answer, reference):
                 f"Score each dimension from 1 (worst) to 5 (best):\n"
                 f"- Correctness: Are the facts accurate?\n"
                 f"- Completeness: Does it cover all key points from the reference?\n"
-                f"- Relevance: Does it directly address the question?\n\n"
-                f'Respond with JSON only: {{"correctness": N, "completeness": N, '
-                f'"relevance": N, "explanation": "..."}}'
+                f"- Relevance: Does it directly address the question?"
             ),
         }],
         temperature=0,
     )
-    text = response.choices[0].message.content.strip()
-    # Parse JSON from the response...
+    message = response.choices[0].message
+    return message.parsed.model_dump()
 ```
 
-> **Important:** The model sometimes wraps JSON in markdown code fences. Strip ` ```json ` and ` ``` ` if present before calling `json.loads()`. If parsing fails, return default scores of 1 with an error explanation rather than crashing.
+> **Important:** If the model refuses, `message.parsed` is `None` and `message.refusal` explains why. Return default scores of 1 with that explanation rather than crashing. The `ge=1, le=5` bounds are part of the schema, so an out-of-range score can't come back.
 
 ### 2. Implement `evaluate_dataset`
 

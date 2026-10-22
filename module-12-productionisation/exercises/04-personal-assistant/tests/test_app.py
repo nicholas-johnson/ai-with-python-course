@@ -24,7 +24,7 @@ def test_calendar_list(test_client):
 def test_calendar_create(test_client):
     new_event = {
         "title": "Test meeting",
-        "date": "2025-04-01",
+        "date": "2027-03-30",
         "time": "10:00",
         "duration": 30,
         "location": "Zoom",

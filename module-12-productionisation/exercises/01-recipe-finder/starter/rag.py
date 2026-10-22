@@ -78,9 +78,10 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
 
     Steps:
     1. Format candidates as numbered list with title and truncated text
-    2. Ask the LLM to return a JSON array of numbers ordered by relevance
-    3. Parse the JSON response and reorder results accordingly
-    4. Fall back to original order if parsing fails
+    2. Call client.chat.completions.parse with a schema such as
+       class Ranking(BaseModel): order: list[int]  (candidate numbers, best first)
+    3. Reorder results by ranking.order (ignore out-of-range numbers)
+    4. Fall back to the original order if parsed is None (refusal)
     """
     # TODO: implement LLM-based reranking
     return results[:top_k]

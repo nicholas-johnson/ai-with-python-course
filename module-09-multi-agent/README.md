@@ -223,8 +223,8 @@ From repo root: `pnpm slides:09`, or `cd module-09-multi-agent/slides && pnpm de
 ### Frameworks and documentation
 
 - [LangGraph — Multi-Agent](https://langchain-ai.github.io/langgraph/concepts/multi_agent/)
-- [OpenAI Swarm (experimental)](https://github.com/openai/swarm)
-- [AutoGen](https://microsoft.github.io/autogen/)
+- [OpenAI Agents SDK — handoffs](https://openai.github.io/openai-agents-python/handoffs/) — the production successor to the experimental Swarm library; handoffs are the swarm pattern from exercise 04
+- [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) — successor to AutoGen (now archived)
 
 ### Academic papers
 

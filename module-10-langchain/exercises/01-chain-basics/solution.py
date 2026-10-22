@@ -7,11 +7,13 @@ from __future__ import annotations
 
 import os
 import time
+from typing import Literal
 
 from dotenv import load_dotenv
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -25,33 +27,49 @@ SAMPLE_REPORTS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Chain
+# Schema
+# ---------------------------------------------------------------------------
+
+class Classification(BaseModel):
+    """Classification of a crew report."""
+
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary of the report")
+    priority: Literal["low", "medium", "high", "critical"]
+
+
+# ---------------------------------------------------------------------------
+# Chains
 # ---------------------------------------------------------------------------
 
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         "You are a ship incident classifier for the CSS Horizon.\n"
-        "Classify the crew report into exactly one category: "
-        "navigation, engineering, science, medical, or operations.\n"
-        "Respond with ONLY a JSON object (no markdown fences) containing:\n"
-        '  "category": one of the five categories,\n'
-        '  "summary": a one-sentence summary of the report,\n'
-        '  "priority": one of low, medium, high, critical.',
+        "Classify the crew report: pick the category, write a one-sentence "
+        "summary, and set the priority.",
     ),
     ("human", "{report}"),
 ])
 
 model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
-parser = JsonOutputParser()
 
-chain = prompt | model | parser
+# Structured output: the model is constrained to the Classification schema.
+chain = prompt | model.with_structured_output(Classification)
+
+# Parser-based chains for comparison. The JSON parser relies on the prompt
+# asking for JSON, so it gets its own instruction.
+json_prompt = prompt + (
+    "system",
+    'Respond with ONLY a JSON object with keys "category", "summary", "priority".',
+)
+json_chain = json_prompt | model | JsonOutputParser()
 raw_chain = prompt | model | StrOutputParser()
 
 
 def classify_report(report: str) -> dict:
     """Classify a crew report. Returns {category, summary, priority}."""
-    return chain.invoke({"report": report})
+    return chain.invoke({"report": report}).model_dump()
 
 
 # ---------------------------------------------------------------------------
@@ -82,10 +100,12 @@ def main():
             break
 
         if user_input == "/stream" and last_report:
+            # Structured output arrives as one complete object, so stream the
+            # JSON-parser chain instead: it yields the partial dict as it fills in.
             print()
-            for chunk in chain.stream({"report": last_report}):
-                print(chunk, end="", flush=True)
-            print("\n")
+            for partial in json_chain.stream({"report": last_report}):
+                print(f"  {partial}")
+            print()
             continue
 
         if user_input == "/raw" and last_report:
@@ -99,20 +119,19 @@ def main():
             t0 = time.perf_counter()
             results = chain.batch(inputs)
             elapsed = time.perf_counter() - t0
-            for i, (report, result) in enumerate(zip(SAMPLE_REPORTS, results), 1):
-                cat = result.get("category", "?")
-                pri = result.get("priority", "?")
-                summary = result.get("summary", "?")
-                print(f"  {i}. {cat:<12} | {pri:<8} | {summary}")
+            for i, result in enumerate(results, 1):
+                print(f"  {i}. {result.category:<12} | {result.priority:<8} | {result.summary}")
             print(f"\n  Done in {elapsed:.1f}s (batch sends all requests concurrently)\n")
             continue
 
         if user_input == "/compare" and last_report:
             structured = chain.invoke({"report": last_report})
+            parsed = json_chain.invoke({"report": last_report})
             raw = raw_chain.invoke({"report": last_report})
-            print(f"\n  JSON parser:   {structured}")
-            print(f"  String parser: {raw}")
-            print("\n  Same prompt, same model — swap the parser, change the output type.\n")
+            print(f"\n  Structured output: {structured!r}")
+            print(f"  JSON parser:       {parsed}")
+            print(f"  String parser:     {raw}")
+            print("\n  Same prompt, same model — swap the last step, change the output type.\n")
             continue
 
         last_report = user_input

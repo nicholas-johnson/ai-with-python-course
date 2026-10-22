@@ -8,8 +8,8 @@ An agentic travel planning API that uses RAG search, tool calling, and guardrail
 |-----------|-----------------|
 | Tool calling & agentic loops | Module 2 — Tool Calling |
 | RAG with ChromaDB embeddings | Module 5 — RAG Fundamentals |
-| Structured output (JSON itinerary) | Module 4 — Structured Output |
-| Guardrails & safety checks | Module 12 — Productionisation |
+| Structured output (JSON itinerary) | Module 6 — Structured Facts |
+| Guardrails & safety checks | Module 13 — Edge Topics |
 | Tracing & observability | Module 12 — Productionisation |
 | FastAPI backend | Module 12 — Productionisation |
 

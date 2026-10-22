@@ -6,10 +6,11 @@ and a combined pipeline with supervisor validation.
 Run:  python solution.py
 """
 from __future__ import annotations
-import json
 import os
+from typing import Literal
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from agents import DEPARTMENTS, specialist_agent
 from supervisor import run_supervised_query
@@ -118,6 +119,15 @@ def debate(question: str, client: OpenAI, rounds: int = 2) -> list[dict]:
     return debate_log
 
 
+class Judgment(BaseModel):
+    winner: Literal["advocate", "skeptic"]
+    reasoning: str
+
+
+class Vote(BaseModel):
+    vote: Literal["medical", "tactical", "comms"]
+
+
 def judge(
     question: str, advocate_arg: str, skeptic_arg: str, client: OpenAI
 ) -> dict:
@@ -125,18 +135,17 @@ def judge(
 
     Returns {"winner": "advocate"|"skeptic", "reasoning": str}.
     """
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Judgment,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "You are an impartial Judge aboard the DSS Pathfinder. "
                     "Review both arguments and decide which side made the "
-                    "stronger case. Return JSON: "
-                    '{"winner": "advocate" or "skeptic", "reasoning": "..."}.'
+                    "stronger case."
                 ),
             },
             {
@@ -150,14 +159,10 @@ def judge(
             },
         ],
     )
-    try:
-        data = json.loads(response.choices[0].message.content)
-        winner = data.get("winner", "advocate").lower().strip()
-        if winner not in ("advocate", "skeptic"):
-            winner = "advocate"
-        return {"winner": winner, "reasoning": str(data.get("reasoning", ""))}
-    except (json.JSONDecodeError, AttributeError):
-        return {"winner": "advocate", "reasoning": "Unable to parse judgment."}
+    judgment = response.choices[0].message.parsed
+    if judgment is None:
+        return {"winner": "advocate", "reasoning": "Judge refused to rule."}
+    return judgment.model_dump()
 
 
 def _collect_department_votes(
@@ -170,18 +175,16 @@ def _collect_department_votes(
     votes: dict[str, int] = {dept: 0 for dept in DEPARTMENTS}
 
     for dept in DEPARTMENTS:
-        vote_result = client.chat.completions.create(
+        vote_result = client.chat.completions.parse(
             model=MODEL,
             reasoning_effort="none",
-            response_format={"type": "json_object"},
+            response_format=Vote,
             messages=[
                 {
                     "role": "system",
                     "content": (
                         "You are a voting agent. Given multiple specialist responses "
-                        "to a question, pick the department that gave the BEST answer. "
-                        'Return JSON: {"vote": "<department_name>"}. '
-                        f"Valid departments: {', '.join(DEPARTMENTS)}."
+                        "to a question, pick the department that gave the BEST answer."
                     ),
                 },
                 {
@@ -193,13 +196,9 @@ def _collect_department_votes(
                 },
             ],
         )
-        try:
-            data = json.loads(vote_result.choices[0].message.content)
-            voted = data.get("vote", "").lower().strip()
-            if voted in DEPARTMENTS:
-                votes[voted] += 1
-        except (json.JSONDecodeError, AttributeError):
-            pass
+        ballot = vote_result.choices[0].message.parsed
+        if ballot:
+            votes[ballot.vote] += 1
 
     return votes
 

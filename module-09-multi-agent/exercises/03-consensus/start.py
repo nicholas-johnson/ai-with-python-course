@@ -6,8 +6,11 @@ and a combined pipeline with supervisor validation.
 Run:  python start.py
 """
 from __future__ import annotations
+from typing import Literal
+
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from agents import DEPARTMENTS, specialist_agent
 from supervisor import run_supervised_query
@@ -72,11 +75,12 @@ def judge(
     Returns {"winner": "advocate"|"skeptic", "reasoning": str}.
 
     Steps:
-        1. Call the LLM with response_format={"type": "json_object"}
-        2. System prompt: impartial judge, pick the stronger argument
-        3. User prompt: include the question and both final arguments
-        4. Parse JSON response for "winner" and "reasoning"
-        5. Default to "advocate" if parsing fails or winner is invalid
+        1. Define class Judgment(BaseModel) with
+           winner: Literal["advocate", "skeptic"] and reasoning: str
+        2. Call client.chat.completions.parse(..., response_format=Judgment)
+        3. System prompt: impartial judge, pick the stronger argument
+        4. User prompt: include the question and both final arguments
+        5. Return message.parsed.model_dump(); default to "advocate" if parsed is None
     """
     # TODO: implement
     raise NotImplementedError("TODO")
@@ -89,8 +93,9 @@ def _collect_department_votes(
 
     Steps:
         1. Format all responses into a single text block
-        2. For each department, ask a voting agent (LLM with JSON mode)
-           which department gave the best answer
+        2. For each department, ask a voting agent which department gave the
+           best answer, using parse() with
+           class Vote(BaseModel): vote: Literal["medical", "tactical", "comms"]
         3. Tally valid votes and return {dept: count, ...}
     """
     # TODO: implement

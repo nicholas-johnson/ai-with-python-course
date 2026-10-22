@@ -4,7 +4,7 @@
 
 ## Recap
 
-LangChain's core idea is **composable steps**. Instead of writing a function that builds a prompt string, calls the API, and parses the result, you snap three components together with the pipe (`|`) operator:
+LangChain's core idea is **composable steps**. Instead of writing a function that builds a prompt string, calls the API, and parses the result, you snap components together with the pipe (`|`) operator:
 
 **PromptTemplate** — a reusable prompt with `{variables}`:
 
@@ -25,23 +25,33 @@ from langchain_openai import ChatOpenAI
 model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 ```
 
-**OutputParser** — transforms the model's raw text into structured data:
+**Structured output** — describe the result as a Pydantic model and let the model fill it in:
 
 ```python
-from langchain_core.output_parsers import JsonOutputParser
+from typing import Literal
+from pydantic import BaseModel, Field
 
-parser = JsonOutputParser()
+class Classification(BaseModel):
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary of the report")
+    priority: Literal["low", "medium", "high", "critical"]
+
+structured_model = model.with_structured_output(Classification)
 ```
+
+`with_structured_output` sends the schema to the provider, which constrains the response to it. The `Literal` fields mean you can't get back a category that isn't on the list, and you don't need "respond with ONLY JSON" in your prompt.
 
 **LCEL chain** — compose them with `|`:
 
 ```python
-chain = prompt | model | parser
+chain = prompt | structured_model
 result = chain.invoke({"report": "Reactor coolant pressure dropped 15%."})
-# {"category": "engineering", "summary": "...", "priority": "..."}
+# Classification(category='engineering', summary='...', priority='high')
 ```
 
-Each step receives the previous step's output. `prompt.invoke()` returns a `ChatPromptValue`, the model returns an `AIMessage`, the parser returns a `dict`. The pipe operator wires it all together.
+Each step receives the previous step's output. `prompt.invoke()` returns a `ChatPromptValue`, and the structured model returns a `Classification` instance. The pipe operator wires it all together.
+
+**OutputParsers** — the older way to get structure is to *ask* for JSON in the prompt and parse the text: `prompt | model | JsonOutputParser()`. It still has one advantage: it streams a partial dict as the JSON arrives, whereas structured output arrives as one complete object. `StrOutputParser()` just returns the text.
 
 ## What you build
 
@@ -51,48 +61,52 @@ A console app in **`start.py`** that classifies crew reports using an LCEL chain
 
 | Function | Description |
 |---|---|
-| `classify_report(report)` | Run the LCEL chain, return `{category, summary, priority}` |
+| `Classification` | Pydantic model describing the result |
+| `classify_report(report)` | Run the LCEL chain, return `{category, summary, priority}` as a dict |
 
 ## Step-by-step
 
-### 1. Create the prompt template
+### 1. Define the schema
+
+Write the `Classification` Pydantic model shown above. Use `Literal` for `category` and `priority` so only the allowed values are accepted.
+
+### 2. Create the prompt template
 
 Build a `ChatPromptTemplate` with:
-- A **system message** that tells the model to classify reports into categories (`navigation`, `engineering`, `science`, `medical`, `operations`) and return JSON with `category`, `summary`, and `priority` (low/medium/high/critical).
+- A **system message** that tells the model to classify the crew report: choose a category, write a one-sentence summary, and set the priority.
 - A **human message** with a `{report}` placeholder.
 
-**Hint:** Tell the model to respond with *only* valid JSON — no markdown fences, no explanation.
+You don't need to describe the JSON format — the schema does that.
 
-### 2. Build the chain
-
-Pipe three steps together:
+### 3. Build the chain
 
 ```python
-chain = prompt | model | parser
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+chain = prompt | model.with_structured_output(Classification)
 ```
 
-Use `ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)` for deterministic output and `JsonOutputParser()` to parse the JSON.
+### 4. Implement `classify_report`
 
-### 3. Implement `classify_report`
+Call `chain.invoke({"report": report})`. It returns a `Classification`; return `result.model_dump()` so callers get a plain dict with `category`, `summary`, and `priority`.
 
-Call `chain.invoke({"report": report})` and return the resulting dict. The dict should have keys `category`, `summary`, and `priority`.
-
-### 4. Build the interactive loop
+### 5. Build the interactive loop
 
 Handle these commands:
 
 | Command | Action |
 |---|---|
 | any text | Classify the report, show the result |
-| `/stream` | Re-classify the last report with `.stream()` |
-| `/raw` | Show the raw model output (before parsing) |
+| `/stream` | Re-classify the last report with `.stream()` on a `JsonOutputParser` chain — watch the dict fill in |
+| `/raw` | Show the raw model output (`prompt \| model \| StrOutputParser()`) |
 | `/batch` | Classify all `SAMPLE_REPORTS` in parallel with `chain.batch()` — shows timing |
-| `/compare` | Run last report through both `JsonOutputParser` and `StrOutputParser` side-by-side |
+| `/compare` | Run the last report through structured output, `JsonOutputParser`, and `StrOutputParser` side-by-side |
 | `quit` | Exit |
 
-`/batch` demonstrates that LCEL chains are concurrency-ready out of the box — all reports are classified in a single batched call. `/compare` shows composability: same prompt, same model, swap the parser and the output type changes.
+`/batch` demonstrates that LCEL chains are concurrency-ready out of the box — all reports are classified in a single batched call. `/compare` shows composability: same prompt, same model, swap the last step and the output type changes.
 
-### 5. Show sample reports
+**Hint:** a parser chain needs the prompt to ask for JSON. You can extend a template with `json_prompt = prompt + ("system", "Respond with ONLY a JSON object ...")`.
+
+### 6. Show sample reports
 
 Define a `SAMPLE_REPORTS` list with a few hardcoded example reports and display them at startup so the learner can copy/paste them into the prompt.
 
@@ -112,10 +126,11 @@ pytest test_start.py -v
 ```
 
 The tests check:
-- `classify_report` returns a dict with keys `category`, `summary`, `priority`
+- `Classification` rejects a category that isn't in the list
+- `classify_report` returns a dict whose `category` and `priority` are allowed values (integration test — runs when `OPENAI_API_KEY` is set)
 
 ## Stretch goals
 
-- Add a confidence score to the JSON schema
+- Add a `confidence: float = Field(ge=0, le=1)` field to the schema
 - Try `chain.abatch()` with a custom `max_concurrency` limit
 - Add a `/time` command that compares sequential `invoke()` in a loop vs `batch()`

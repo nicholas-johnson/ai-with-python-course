@@ -437,6 +437,14 @@ The practical workflow is: build a test set of 50-100 question-answer pairs, run
 
 ```python
 from openai import OpenAI
+from pydantic import BaseModel, Field
+
+class JudgeScores(BaseModel):
+    correctness: int = Field(ge=1, le=5)
+    completeness: int = Field(ge=1, le=5)
+    relevance: int = Field(ge=1, le=5)
+    explanation: str
+
 
 def llm_judge(
     client: OpenAI,
@@ -444,9 +452,10 @@ def llm_judge(
     answer: str,
     reference: str,
 ) -> dict:
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
+        response_format=JudgeScores,
         messages=[{
             "role": "user",
             "content": (
@@ -457,12 +466,11 @@ def llm_judge(
                 f"Score each dimension 1-5:\n"
                 f"- Correctness: Is the answer factually correct?\n"
                 f"- Completeness: Does it cover all key points?\n"
-                f"- Relevance: Does it address the question?\n\n"
-                f"Respond as JSON: {{\"correctness\": N, \"completeness\": N, \"relevance\": N, \"explanation\": \"...\"}}"
+                f"- Relevance: Does it address the question?"
             ),
         }],
     )
-    return json.loads(response.choices[0].message.content)
+    return response.choices[0].message.parsed.model_dump()
 ```
 
 ### When to Use

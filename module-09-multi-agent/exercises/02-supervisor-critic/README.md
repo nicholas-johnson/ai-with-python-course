@@ -25,7 +25,7 @@ A console app in **`start.py`** that layers a critic review loop on top of the E
 
 | Component | Description |
 |---|---|
-| `CriticAgent` | Reviews a specialist response via JSON mode, returns approved/rejected with feedback |
+| `CriticAgent` | Reviews a specialist response with structured outputs, returns approved/rejected with feedback |
 | `SupervisorAgent` | Orchestrates classify → specialist → critic loop with revision cap |
 | `run_supervised_query` | Convenience function that creates a supervisor and runs a query |
 
@@ -35,11 +35,12 @@ A console app in **`start.py`** that layers a critic review loop on top of the E
 
 The critic evaluates a specialist's response and returns structured feedback:
 
-- Call `client.chat.completions.create` with `model=MODEL, reasoning_effort="none"` and JSON mode
+- Define `Review(BaseModel)` with `approved: bool` and `feedback: str`
+- Call `client.chat.completions.parse` with `model=MODEL, reasoning_effort="none", response_format=Review`
 - Use `CRITIC_PROMPT` as the system prompt
 - The user message should include both the original query and the specialist's response so the critic has full context
-- Parse the JSON response into `{"approved": bool, "feedback": str}`
-- If JSON parsing fails, default to `approved=True` (fail open)
+- Return `message.parsed.model_dump()` -- `{"approved": bool, "feedback": str}`
+- If `parsed` is `None` (the model refused), default to `approved=True` (fail open)
 
 ### 2. Implement `SupervisorAgent.run`
 

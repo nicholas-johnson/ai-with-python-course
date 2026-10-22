@@ -2,7 +2,7 @@
   {
     "id": "event-001",
     "title": "Team standup",
-    "date": "2025-03-17",
+    "date": "2027-03-15",
     "time": "09:00",
     "duration_minutes": 15,
     "location": "Zoom",
@@ -11,7 +11,7 @@
   {
     "id": "event-002",
     "title": "1:1 with Jordan",
-    "date": "2025-03-17",
+    "date": "2027-03-15",
     "time": "11:00",
     "duration_minutes": 30,
     "location": "Meeting Room B",
@@ -20,7 +20,7 @@
   {
     "id": "event-003",
     "title": "Gym — upper body",
-    "date": "2025-03-17",
+    "date": "2027-03-15",
     "time": "17:45",
     "duration_minutes": 60,
     "location": "PureGym Angel",
@@ -29,7 +29,7 @@
   {
     "id": "event-004",
     "title": "Team standup",
-    "date": "2025-03-18",
+    "date": "2027-03-16",
     "time": "09:00",
     "duration_minutes": 15,
     "location": "Zoom",
@@ -38,7 +38,7 @@
   {
     "id": "event-005",
     "title": "Interval run — half marathon training",
-    "date": "2025-03-18",
+    "date": "2027-03-16",
     "time": "07:00",
     "duration_minutes": 45,
     "location": "Regent's Canal",
@@ -47,7 +47,7 @@
   {
     "id": "event-006",
     "title": "Call Mum — birthday",
-    "date": "2025-03-18",
+    "date": "2027-03-16",
     "time": "18:00",
     "duration_minutes": 30,
     "location": "Home",
@@ -56,7 +56,7 @@
   {
     "id": "event-007",
     "title": "API rate limiting RFC review",
-    "date": "2025-03-19",
+    "date": "2027-03-17",
     "time": "14:00",
     "duration_minutes": 60,
     "location": "Meeting Room A",
@@ -65,7 +65,7 @@
   {
     "id": "event-008",
     "title": "Dentist check-up",
-    "date": "2025-03-19",
+    "date": "2027-03-17",
     "time": "10:30",
     "duration_minutes": 45,
     "location": "Islington Dental Care, Upper Street",
@@ -74,7 +74,7 @@
   {
     "id": "event-009",
     "title": "Team standup",
-    "date": "2025-03-20",
+    "date": "2027-03-18",
     "time": "09:00",
     "duration_minutes": 15,
     "location": "Zoom",
@@ -83,7 +83,7 @@
   {
     "id": "event-010",
     "title": "Tempo run",
-    "date": "2025-03-20",
+    "date": "2027-03-18",
     "time": "07:00",
     "duration_minutes": 40,
     "location": "Finsbury Park",
@@ -92,7 +92,7 @@
   {
     "id": "event-011",
     "title": "Date night with Sam",
-    "date": "2025-03-20",
+    "date": "2027-03-18",
     "time": "19:30",
     "duration_minutes": 120,
     "location": "Mildreds, King's Cross",
@@ -101,7 +101,7 @@
   {
     "id": "event-012",
     "title": "Sprint planning",
-    "date": "2025-03-21",
+    "date": "2027-03-19",
     "time": "10:00",
     "duration_minutes": 90,
     "location": "Zoom",
@@ -110,7 +110,7 @@
   {
     "id": "event-013",
     "title": "Long run — 14km",
-    "date": "2025-03-22",
+    "date": "2027-03-20",
     "time": "08:00",
     "duration_minutes": 80,
     "location": "Hampstead Heath",
@@ -119,7 +119,7 @@
   {
     "id": "event-014",
     "title": "Dinner at Sam's — cooking together",
-    "date": "2025-03-22",
+    "date": "2027-03-20",
     "time": "18:00",
     "duration_minutes": 180,
     "location": "Sam's flat",
@@ -128,7 +128,7 @@
   {
     "id": "event-015",
     "title": "Sunday meal prep",
-    "date": "2025-03-23",
+    "date": "2027-03-21",
     "time": "11:00",
     "duration_minutes": 120,
     "location": "Home",

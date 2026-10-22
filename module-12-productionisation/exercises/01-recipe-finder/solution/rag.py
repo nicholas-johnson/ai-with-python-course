@@ -1,10 +1,10 @@
 """RAG pipeline — indexing, hybrid search, and reranking."""
 
-import json
 from collections import defaultdict
 
 import chromadb
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 from .config import EMBEDDING_MODEL, OPENAI_MODEL
 
@@ -16,7 +16,7 @@ def build_index(recipes: list[dict]) -> tuple[chromadb.Collection, chromadb.Clie
     chroma = chromadb.Client()
     try:
         chroma.delete_collection("recipes")
-    except ValueError:
+    except chromadb.errors.NotFoundError:
         pass
     collection = chroma.create_collection("recipes")
 
@@ -121,6 +121,10 @@ def hybrid_search(query: str, collection: chromadb.Collection, k: int = 10) -> l
     return results
 
 
+class Ranking(BaseModel):
+    order: list[int] = Field(description="Candidate numbers, most relevant first")
+
+
 def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
     """Use the LLM to rerank search results by relevance."""
     if not results:
@@ -131,16 +135,16 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
         for i, r in enumerate(results[:10])
     )
 
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=OPENAI_MODEL,
         reasoning_effort="none",
+        response_format=Ranking,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "You are a recipe relevance ranker. Given a query and candidate recipes, "
-                    "return the numbers of the most relevant recipes in order of relevance. "
-                    "Return ONLY a JSON array of numbers, e.g. [3, 1, 5]."
+                    "return the numbers of the most relevant recipes in order of relevance."
                 ),
             },
             {
@@ -151,21 +155,11 @@ def rerank(query: str, results: list[dict], top_k: int = 5) -> list[dict]:
         max_completion_tokens=100,
     )
 
-    try:
-        raw = (response.choices[0].message.content or "").strip()
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[-1]
-        if raw.endswith("```"):
-            raw = raw[:-3]
-        raw = raw.strip()
-        ranking = json.loads(raw)
-        reranked = []
-        for idx in ranking[:top_k]:
-            if 1 <= idx <= len(results):
-                reranked.append(results[idx - 1])
-        return reranked if reranked else results[:top_k]
-    except (json.JSONDecodeError, TypeError):
+    ranking = response.choices[0].message.parsed
+    if ranking is None:
         return results[:top_k]
+    reranked = [results[i - 1] for i in ranking.order[:top_k] if 1 <= i <= len(results)]
+    return reranked if reranked else results[:top_k]
 
 
 def format_results(hits: list[dict]) -> list[dict]:

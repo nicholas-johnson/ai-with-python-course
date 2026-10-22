@@ -11,15 +11,17 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_chroma import Chroma
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -40,24 +42,29 @@ SENSOR_DATA = {
 # From Exercise 01 — classifier chain (complete)
 # ---------------------------------------------------------------------------
 
+class Classification(BaseModel):
+    """Classification of a crew report."""
+
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary of the report")
+    priority: Literal["low", "medium", "high", "critical"]
+
+
 _classify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         "You are a ship incident classifier for the CSS Horizon.\n"
-        "Classify the crew report into exactly one category: "
-        "navigation, engineering, science, medical, or operations.\n"
-        "Respond with ONLY a JSON object (no markdown fences) containing:\n"
-        '  "category": one of the five categories,\n'
-        '  "summary": a one-sentence summary of the report,\n'
-        '  "priority": one of low, medium, high, critical.',
+        "Classify the crew report: pick the category, write a one-sentence "
+        "summary, and set the priority.",
     ),
     ("human", "{report}"),
 ])
-_classify_chain = _classify_prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0) | JsonOutputParser()
+_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+_classify_chain = _classify_prompt | _classify_model.with_structured_output(Classification)
 
 
 def classify_report(report: str) -> dict:
-    return _classify_chain.invoke({"report": report})
+    return _classify_chain.invoke({"report": report}).model_dump()
 
 
 # ---------------------------------------------------------------------------
@@ -135,15 +142,32 @@ def build_rag_chain(vectorstore: Chroma):
     Steps:
         1. Create a retriever from vectorstore (k=5)
         2. Build a ChatPromptTemplate for RAG (cite sources)
-        3. Compose the LCEL chain: retriever | format | prompt | llm | parser
-        4. Return (chain, retriever)
+        3. Build answer_chain: format the docs into {context} | prompt | llm | parser
+        4. Compose the chain so chain.invoke(question) returns
+           {"question": ..., "docs": [...], "answer": "..."}
+           Hint: {"docs": retriever, "question": RunnablePassthrough()}
+                 | RunnablePassthrough.assign(answer=answer_chain)
+        5. Return (chain, retriever)
     """
     # TODO: implement
     raise NotImplementedError("TODO")
 
 
-def ask(chain, retriever, question: str) -> tuple[str, list]:
+def ask(chain, question: str) -> tuple[str, list]:
     """Run a RAG query. Returns (answer, retrieved_docs)."""
+    # TODO: implement — one chain.invoke(), then pull out "answer" and "docs"
+    raise NotImplementedError("TODO")
+
+
+def build_rag_agent(retriever):
+    """Agentic RAG: return a create_agent agent with the Exercise 02 tools plus
+    a search_logs(query) tool that returns format_docs(retriever.invoke(query))."""
+    # TODO: implement
+    raise NotImplementedError("TODO")
+
+
+def run_rag_agent(agent, question: str) -> str:
+    """Run the RAG agent and return its final answer."""
     # TODO: implement
     raise NotImplementedError("TODO")
 
@@ -163,6 +187,7 @@ def main():
     texts, metadatas = load_documents()
     vectorstore = build_vectorstore(texts, metadatas)
     chain, retriever = build_rag_chain(vectorstore)
+    rag_agent = build_rag_agent(retriever)
     print(f"Indexed {len(texts)} log entries.\n")
 
     print("=" * 60)
@@ -195,12 +220,12 @@ def main():
             print(f"\nNo-RAG> {ask_norag(last_question)}\n")
             continue
         if user_input == "/agent" and last_question:
-            print(f"\nAgent> {run_agent(last_question)}\n")
+            print(f"\nAgent> {run_rag_agent(rag_agent, last_question)}\n")
             continue
 
         last_question = user_input
         try:
-            answer, last_docs = ask(chain, retriever, user_input)
+            answer, last_docs = ask(chain, user_input)
             print(f"\nRAG> {answer}\n")
         except Exception as e:
             print(f"\n  Error: {e}\n")

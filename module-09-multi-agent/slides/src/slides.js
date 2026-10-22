@@ -71,7 +71,7 @@ def route(query, client):
 # "Why is the API slow?" → technical
 # "Review the contract terms" → legal`,
       highlights: [
-        'LLM-based classification with JSON mode — robust to ambiguous queries',
+        'LLM-based classification with structured outputs — a Literal schema means only valid departments come back',
         'Each specialist has its own system prompt and domain focus',
       ],
     },

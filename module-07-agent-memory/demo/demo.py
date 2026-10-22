@@ -9,12 +9,12 @@ Run:  python module-07-agent-memory/demo/demo.py
 """
 from __future__ import annotations
 
-import json
 import os
 import time
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -162,28 +162,32 @@ def chat(
     return reply
 
 
+class RememberDecision(BaseModel):
+    remember: bool
+    key: str | None = Field(description="Short snake_case key, or null if remember is false")
+    value: str | None = Field(description="What to remember, or null if remember is false")
+
+
 def _auto_remember(user_input: str, long_term: LongTermMemory, client: OpenAI):
     """Ask the LLM if the user said anything worth remembering."""
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=RememberDecision,
         messages=[
             {
                 "role": "system",
                 "content": (
-                    "Analyse the user message. If it contains a preference, fact, or "
-                    "instruction worth remembering long-term, return JSON: "
-                    '{"remember": true, "key": "short_key", "value": "what to remember"}. '
-                    'Otherwise return {"remember": false}.'
+                    "Analyse the user message. Decide whether it contains a preference, "
+                    "fact, or instruction worth remembering long-term."
                 ),
             },
             {"role": "user", "content": user_input},
         ],
     )
-    data = json.loads(response.choices[0].message.content)
-    if data.get("remember"):
-        long_term.remember(data["key"], data["value"])
+    decision = response.choices[0].message.parsed
+    if decision and decision.remember and decision.key and decision.value:
+        long_term.remember(decision.key, decision.value)
 
 
 # ---------------------------------------------------------------------------

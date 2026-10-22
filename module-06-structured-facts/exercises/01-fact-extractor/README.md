@@ -2,7 +2,7 @@
 
 ## Recap
 
-LLMs produce free text, but production systems need **structured data** -- typed fields your code can validate, compare, and aggregate. OpenAI supports structured outputs via `response_format={"type": "json_object"}`, which constrains the model to return valid JSON.
+LLMs produce free text, but production systems need **structured data** -- typed fields your code can validate, compare, and aggregate. OpenAI's **structured outputs** take a Pydantic model as `response_format` and constrain the model to return JSON that matches that exact schema.
 
 **Pydantic** models define the exact shape you want:
 
@@ -40,26 +40,35 @@ Load `data/derelict_logs.json` from the project root. Each entry has `id`, `cont
 
 ### 2. Define the `Fact` model
 
-Use Pydantic with `subject`, `predicate`, `object`, `source_text`, and `confidence` fields. Add `Field(description=...)` to each -- these descriptions help the LLM understand what you want.
+Use Pydantic with `subject`, `predicate`, `object`, `source_text`, and `confidence` fields. Add `Field(description=...)` to each -- the descriptions go into the JSON Schema the model sees, so they help it understand what you want.
+
+Structured outputs need an object at the top level, so also define a wrapper:
+
+```python
+class FactList(BaseModel):
+    facts: list[Fact]
+```
 
 ### 3. Implement `extract_facts`
 
-Build a prompt that instructs the model to extract factual claims as JSON. Use `response_format={"type": "json_object"}` with `MODEL`:
+Call `client.chat.completions.parse` with `response_format=FactList`. The prompt only needs to describe the *task* -- the schema handles the format:
 
 ```python
-response = client.chat.completions.create(
+response = client.chat.completions.parse(
     model=MODEL,
     reasoning_effort="none",
-    response_format={"type": "json_object"},
+    response_format=FactList,
     messages=[
-        {"role": "system", "content": "Extract facts as JSON..."},
+        {"role": "system", "content": "Extract every factual claim from the text. Rate confidence 0-1."},
         {"role": "user", "content": text},
     ],
 )
-raw = json.loads(response.choices[0].message.content)
+message = response.choices[0].message
 ```
 
-Parse the JSON array into `Fact` instances using `Fact.model_validate()`.
+`message.parsed` is a validated `FactList` (or `None` if `message.refusal` says the model declined). Return `(message.parsed.facts, message.content)` -- the facts, plus the raw JSON text for the `/json` command.
+
+> You may see older code use `response_format={"type": "json_object"}` with the schema pasted into the prompt. That only guarantees valid JSON, not *your* JSON -- keys can be missing or misnamed. Structured outputs constrain the model to the schema itself.
 
 ### 4. Implement `validate_facts`
 

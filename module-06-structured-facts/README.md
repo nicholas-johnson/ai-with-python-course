@@ -37,7 +37,28 @@ class ExtractionResult(BaseModel):
     raw_text: str
 ```
 
-Pass the schema as a JSON Schema string in the system prompt, or use the OpenAI structured output mode that constrains decoding directly. Either way, the model's output parses into a typed Python object you can work with programmatically.
+Pass the model class itself as `response_format` to `client.chat.completions.parse`. The SDK converts it to a strict JSON Schema, the API **constrains generation** to that schema (the model cannot produce a missing key or a wrong type), and the SDK validates the reply back into your Pydantic object:
+
+```python
+response = client.chat.completions.parse(
+    model=MODEL,
+    reasoning_effort="none",
+    response_format=ExtractionResult,
+    messages=[
+        {"role": "system", "content": "Extract every factual claim from the text."},
+        {"role": "user", "content": text},
+    ],
+)
+message = response.choices[0].message
+if message.refusal:          # the model declined -- parsed is None
+    ...
+result = message.parsed      # an ExtractionResult instance
+```
+
+Two things to know:
+
+- **The top level must be an object.** To get a list of facts, wrap it: `class FactList(BaseModel): facts: list[Fact]`.
+- **Older approach: JSON mode.** `response_format={"type": "json_object"}` only guarantees *some* valid JSON, so you have to paste the schema into the prompt, `json.loads` the text, and handle missing or misnamed keys yourself. Structured outputs replace all of that. You will still see JSON mode in older code.
 
 ---
 
@@ -45,17 +66,24 @@ Pass the schema as a JSON Schema string in the system prompt, or use the OpenAI 
 
 Extraction turns free text into structured facts. The pipeline has three stages:
 
-**Extract** — prompt the LLM with text and a schema. Ask it to identify every factual claim, the subject entity, and a confidence score.
+**Extract** — send the text with the schema as `response_format`. Ask the model to identify every factual claim, the subject entity, and a confidence score; the schema takes care of the format.
 
 ```python
-def extract_facts(text: str, llm) -> list[Fact]:
-    prompt = f"""Extract every factual claim from the following text.
-For each fact, return: claim, subject, confidence (0-1), and source.
-Return as a JSON array of objects.
+class FactList(BaseModel):
+    facts: list[Fact]
 
-Text: {text}"""
-    response = llm.complete(prompt)
-    return [Fact.model_validate(f) for f in json.loads(response)]
+def extract_facts(text: str, client: OpenAI) -> list[Fact]:
+    response = client.chat.completions.parse(
+        model=MODEL,
+        reasoning_effort="none",
+        response_format=FactList,
+        messages=[
+            {"role": "system", "content": "Extract every factual claim. Rate confidence 0-1."},
+            {"role": "user", "content": text},
+        ],
+    )
+    parsed = response.choices[0].message.parsed
+    return parsed.facts if parsed else []
 ```
 
 **Validate** — filter facts below a confidence threshold (0.7 is a good starting point). Drop duplicates by comparing claim text with fuzzy matching or exact subject+claim pairs.

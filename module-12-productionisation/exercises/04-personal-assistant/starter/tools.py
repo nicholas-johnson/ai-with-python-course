@@ -30,8 +30,8 @@ def get_calendar(date_range: str | None = None) -> str:
     """Read upcoming events from calendar.json.
 
     If date_range is provided, filter events:
-    - Single date: "2025-03-17"
-    - Range: "2025-03-17:2025-03-19"
+    - Single date: "2027-03-15"
+    - Range: "2027-03-15:2027-03-17"
 
     Format each event as:
     "- {date} {time} — {title} @ {location} ({duration}min)"

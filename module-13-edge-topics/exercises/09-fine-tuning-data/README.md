@@ -4,11 +4,13 @@
 
 ### What is fine-tuning?
 
-Fine-tuning takes a pre-trained model (like GPT-6 Luna) and trains it further on *your* examples so it learns your specific patterns, tone, or domain knowledge. After fine-tuning, the model behaves more like your examples without needing long prompts every time.
+Fine-tuning takes a pre-trained model and trains it further on *your* examples so it learns your specific patterns, tone, or domain knowledge. After fine-tuning, the model behaves more like your examples without needing long prompts every time.
+
+Today that usually means an **open-weight model** (Llama, Qwen, Mistral, Gemma) trained with **LoRA** on your own hardware or a rented GPU — see exercise 14 for a small local run and section 15 of the module README for LoRA and DPO. Hosted fine-tuning exists too, but availability changes: OpenAI, for example, closed its self-serve fine-tuning to new organisations in May 2026. The data preparation in this exercise is the same either way.
 
 ### The most important step: data preparation
 
-Fine-tuning is only as good as your training data. The process requires examples in a specific format — **JSONL** (JSON Lines), where each line is a complete training example in the chat message format.
+Fine-tuning is only as good as your training data. Almost every tool expects the same format — **JSONL** (JSON Lines), where each line is a complete training example in the chat message format. Hugging Face TRL's `SFTTrainer` reads it directly (a `"messages"` column), and so do hosted fine-tuning APIs.
 
 ### What is JSONL?
 
@@ -174,5 +176,5 @@ pytest module-13-edge-topics/exercises/09-fine-tuning-data/test_start.py -v
 ## Stretch Goals
 
 - Add deduplication to remove near-identical examples.
-- Add token counting to estimate fine-tuning cost (OpenAI charges per token).
+- Add token counting to estimate training size and cost (training time and hosted-training prices both scale with tokens).
 - Implement stratified train/validation splitting (equal label distribution in both sets).

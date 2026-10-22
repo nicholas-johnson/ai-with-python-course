@@ -1,12 +1,17 @@
 """Specialist agents — provided from Exercise 01 solution."""
 from __future__ import annotations
-import json
 import os
+from typing import Literal
 from openai import OpenAI
+from pydantic import BaseModel
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 DEPARTMENTS = ["medical", "tactical", "comms"]
+
+
+class Route(BaseModel):
+    department: Literal["medical", "tactical", "comms"]
 
 SPECIALIST_PROMPTS = {
     "medical": (
@@ -31,17 +36,16 @@ SPECIALIST_PROMPTS = {
 
 
 def classify_query(query: str, client: OpenAI) -> str:
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Route,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "You are a query router for a starship crew. "
                     "Classify the user's message into exactly one department. "
-                    'Return JSON: {"department": "<name>"}. '
                     "Valid departments: medical, tactical, comms. "
                     "medical = injuries, health, quarantine, radiation, bio-hazards. "
                     "tactical = threats, shields, weapons, evasive maneuvers, defense. "
@@ -52,12 +56,8 @@ def classify_query(query: str, client: OpenAI) -> str:
             {"role": "user", "content": query},
         ],
     )
-    try:
-        data = json.loads(response.choices[0].message.content)
-        dept = data.get("department", "medical").lower().strip()
-        return dept if dept in DEPARTMENTS else "medical"
-    except (json.JSONDecodeError, AttributeError):
-        return "medical"
+    route = response.choices[0].message.parsed
+    return route.department if route else "medical"
 
 
 def specialist_agent(department: str, query: str, client: OpenAI) -> str:

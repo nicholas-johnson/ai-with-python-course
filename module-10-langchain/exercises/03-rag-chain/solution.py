@@ -8,15 +8,17 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_chroma import Chroma
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -34,24 +36,29 @@ SENSOR_DATA = {
 
 # --- Classifier chain from Exercise 01 ---
 
+class Classification(BaseModel):
+    """Classification of a crew report."""
+
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary of the report")
+    priority: Literal["low", "medium", "high", "critical"]
+
+
 _classify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         "You are a ship incident classifier for the CSS Horizon.\n"
-        "Classify the crew report into exactly one category: "
-        "navigation, engineering, science, medical, or operations.\n"
-        "Respond with ONLY a JSON object (no markdown fences) containing:\n"
-        '  "category": one of the five categories,\n'
-        '  "summary": a one-sentence summary of the report,\n'
-        '  "priority": one of low, medium, high, critical.',
+        "Classify the crew report: pick the category, write a one-sentence "
+        "summary, and set the priority.",
     ),
     ("human", "{report}"),
 ])
-_classify_chain = _classify_prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0) | JsonOutputParser()
+_classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+_classify_chain = _classify_prompt | _classify_model.with_structured_output(Classification)
 
 
 def classify_report(report: str) -> dict:
-    return _classify_chain.invoke({"report": report})
+    return _classify_chain.invoke({"report": report}).model_dump()
 
 
 # --- Tools from Exercise 02 ---
@@ -122,7 +129,11 @@ def format_docs(docs) -> str:
 
 
 def build_rag_chain(vectorstore: Chroma):
-    """Create the LCEL RAG chain. Returns (chain, retriever)."""
+    """Create the LCEL RAG chain. Returns (chain, retriever).
+
+    chain.invoke(question) returns {"question", "docs", "answer"} — the answer
+    and the documents it was grounded on, from a single retrieval.
+    """
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 
     rag_prompt = ChatPromptTemplate.from_messages([
@@ -135,20 +146,43 @@ def build_rag_chain(vectorstore: Chroma):
         ("human", "Sources:\n{context}\n\nQuestion: {question}"),
     ])
 
-    chain = (
-        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    answer_chain = (
+        RunnablePassthrough.assign(context=lambda x: format_docs(x["docs"]))
         | rag_prompt
         | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
         | StrOutputParser()
     )
+    chain = (
+        {"docs": retriever, "question": RunnablePassthrough()}
+        | RunnablePassthrough.assign(answer=answer_chain)
+    )
     return chain, retriever
 
 
-def ask(chain, retriever, question: str) -> tuple[str, list]:
+def ask(chain, question: str) -> tuple[str, list]:
     """Run a RAG query. Returns (answer, retrieved_docs)."""
-    docs = retriever.invoke(question)
-    answer = chain.invoke(question)
-    return answer, docs
+    result = chain.invoke(question)
+    return result["answer"], result["docs"]
+
+
+def build_rag_agent(retriever):
+    """Agentic RAG: give the Exercise 02 agent a tool that searches the logs."""
+
+    @tool
+    def search_logs(query: str) -> str:
+        """Search the CSS Horizon ship logs. Use for questions about past events, surveys, or operations."""
+        return format_docs(retriever.invoke(query))
+
+    return create_agent(
+        ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0),
+        [*tools, search_logs],
+        system_prompt=SYSTEM_PROMPT + " Cite log sources as [Source N: id] when you use search_logs.",
+    )
+
+
+def run_rag_agent(agent, question: str) -> str:
+    result = agent.invoke({"messages": [{"role": "user", "content": question}]})
+    return result["messages"][-1].text
 
 
 def ask_norag(question: str) -> str:
@@ -162,6 +196,7 @@ def main():
     texts, metadatas = load_documents()
     vectorstore = build_vectorstore(texts, metadatas)
     chain, retriever = build_rag_chain(vectorstore)
+    rag_agent = build_rag_agent(retriever)
     print(f"Indexed {len(texts)} log entries.\n")
 
     print("=" * 60)
@@ -193,12 +228,12 @@ def main():
             print(f"\nNo-RAG> {ask_norag(last_question)}\n")
             continue
         if user_input == "/agent" and last_question:
-            print(f"\nAgent> {run_agent(last_question)}\n")
+            print(f"\nAgent> {run_rag_agent(rag_agent, last_question)}\n")
             continue
 
         last_question = user_input
         try:
-            answer, last_docs = ask(chain, retriever, user_input)
+            answer, last_docs = ask(chain, user_input)
             print(f"\nRAG> {answer}\n")
         except Exception as e:
             print(f"\n  Error: {e}\n")

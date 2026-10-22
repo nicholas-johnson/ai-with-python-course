@@ -181,17 +181,20 @@ rerank = ["LOG-002", "LOG-011", "LOG-007"]
   {
     type: 'code',
     content: {
-      title: 'Judge prompt → JSON',
-      code: `Score each dimension from 1 (worst) to 5 (best):
-- Correctness: Are the facts accurate?
-- Completeness: Does it cover all key points?
-- Relevance: Does it address the question?
+      title: 'Judge prompt → typed scores',
+      code: `class JudgeScores(BaseModel):
+    correctness: int = Field(ge=1, le=5)
+    completeness: int = Field(ge=1, le=5)
+    relevance: int = Field(ge=1, le=5)
+    explanation: str
 
-{"correctness": 5, "completeness": 2,
- "relevance": 5, "explanation": "Only one of three causes."}`,
+response = client.chat.completions.parse(
+    model=MODEL, response_format=JudgeScores, messages=[...])
+# JudgeScores(correctness=5, completeness=2, relevance=5,
+#             explanation="Only one of three causes.")`,
       highlights: [
-        'Temperature 0. Strip markdown fences before json.loads.',
-        'Parse failure → scores of 1, do not crash the suite.',
+        'Temperature 0. The schema rules out missing or out-of-range scores.',
+        'Refusal (parsed is None) → scores of 1, do not crash the suite.',
         'Treat scores as relative (A vs B), not absolute truth.',
       ],
     },

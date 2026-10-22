@@ -93,5 +93,6 @@ def app_client(data_dir):
 
             with patch("solution.rag.build_index", return_value=mock_collection):
                 from solution.app import app
-                client = TestClient(app)
-                yield client
+                # Entering the client runs the app's lifespan (load movies, build index).
+                with TestClient(app) as client:
+                    yield client

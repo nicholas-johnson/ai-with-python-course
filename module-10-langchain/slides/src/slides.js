@@ -13,9 +13,9 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Build **LCEL chains**: prompt templates, output parsers, and the pipe operator.',
-        'Wrap functions as **LangChain tools** and run them with **create_agent**.',
-        'Construct a **RAG chain** with a LangChain retriever and ChromaDB.',
+        'Build **LCEL chains**: prompt templates, the pipe operator, and **structured output**.',
+        'Wrap functions as **LangChain tools** and run them with **create_agent** — plus middleware and memory.',
+        'Construct a **RAG chain** with a retriever and ChromaDB, then make retrieval an agent tool.',
         'Know when to use LangChain and when to stay hand-rolled.',
       ],
     },
@@ -84,7 +84,8 @@ export const slides = [
       points: [
         '**PromptTemplate**: reusable prompts with variables.',
         '**ChatModel**: LLM wrapper (OpenAI, Anthropic, local models).',
-        '**OutputParser**: structured extraction from model responses.',
+        '**Structured output**: `model.with_structured_output(PydanticModel)` returns typed objects.',
+        '**OutputParser**: turn raw text into a string or parsed JSON.',
         '**Chain (LCEL)**: compose steps with the `|` pipe operator.',
       ],
     },
@@ -115,6 +116,31 @@ result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
       highlights: [
         'The pipe operator (|) chains steps: prompt → model → parser',
         'Each step is independently testable and swappable',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Structured output — a schema, not a sentence',
+      code: `from typing import Literal
+from pydantic import BaseModel, Field
+
+class Classification(BaseModel):
+    category: Literal["navigation", "engineering", "science",
+                      "medical", "operations"]
+    summary: str = Field(description="One-sentence summary")
+    priority: Literal["low", "medium", "high", "critical"]
+
+chain = prompt | model.with_structured_output(Classification)
+
+result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
+# Classification(category='engineering', summary='...', priority='critical')
+result.priority  # 'critical' — typed attribute access`,
+      highlights: [
+        'No "respond with ONLY JSON" — the provider is constrained to the schema',
+        'Literal fields mean an unknown category can\'t come back',
+        'JsonOutputParser still wins for streaming partial results',
       ],
     },
   },
@@ -205,6 +231,32 @@ print(result["messages"][-1].text)`,
       },
     },
   },
+  {
+    type: 'code',
+    content: {
+      title: 'Middleware and memory',
+      code: `from langchain.agents.middleware import ToolCallLimitMiddleware, wrap_tool_call
+from langgraph.checkpoint.memory import InMemorySaver
+
+@wrap_tool_call
+def log_tool_calls(request, handler):
+    print("→", request.tool_call["name"], request.tool_call["args"])
+    return handler(request)
+
+agent = create_agent(
+    model, tools,
+    middleware=[log_tool_calls, ToolCallLimitMiddleware(run_limit=4)],
+    checkpointer=InMemorySaver(),
+)
+config = {"configurable": {"thread_id": "bridge"}}
+agent.invoke({"messages": [{"role": "user", "content": "Shield integrity?"}]}, config)
+agent.invoke({"messages": [{"role": "user", "content": "Above 90%?"}]}, config)`,
+      highlights: [
+        'Middleware hooks the loop: logging, limits, human approval, PII, retries',
+        'A checkpointer + thread_id = conversation memory, no manual history list',
+      ],
+    },
+  },
   // ---- Demo: LangChain agents ----
   {
     type: 'title',
@@ -233,7 +285,7 @@ print(result["messages"][-1].text)`,
         '**Retriever**: `.invoke(query)` returns documents. Wraps ChromaDB, FAISS, etc.',
         '**format_docs**: formats retrieved passages with source labels.',
         '**RunnablePassthrough**: passes the question through unchanged.',
-        'The chain: retriever | format → prompt → model → parser.',
+        '**.assign(answer=...)**: adds the answer while keeping the docs — sources from one retrieval.',
       ],
     },
   },
@@ -254,13 +306,32 @@ def format_docs(docs):
         for i, d in enumerate(docs)
     )
 
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+answer_chain = (
+    RunnablePassthrough.assign(context=lambda x: format_docs(x["docs"]))
     | prompt | model | StrOutputParser()
-)`,
+)
+rag_chain = (
+    {"docs": retriever, "question": RunnablePassthrough()}
+    | RunnablePassthrough.assign(answer=answer_chain)
+)
+result = rag_chain.invoke("What caused the reactor anomaly?")
+result["answer"], result["docs"]`,
       highlights: [
         'Chroma.from_texts() — embed and store in one call',
         'Same RAG pattern as Module 5, wired up with LCEL',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Agentic RAG — retrieval as a tool',
+      icon: 'bot',
+      points: [
+        'A chain **always** retrieves once, with the user\'s exact words.',
+        'Wrap the retriever in a `@tool` (`search_logs`) and give it to `create_agent`.',
+        'The agent decides **whether** to search, **what** to search for, and whether to search again.',
+        'It can combine logs with live tools — at the cost of more model calls.',
       ],
     },
   },
@@ -394,9 +465,9 @@ async def classify_invoke(req: InvokeRequest):
     content: {
       title: 'Exercises',
       points: [
-        '01 — Chain basics: LCEL chain that classifies crew reports',
+        '01 — Chain basics: LCEL chain with structured output that classifies crew reports',
         '02 — Tool agent: wraps the classifier + ship tools with create_agent (builds on 01)',
-        '03 — RAG chain: adds retrieval to the agent over ship logs (builds on 02)',
+        '03 — RAG chain: answer + sources chain, then agentic RAG with a search_logs tool (builds on 02)',
         '04 — Chain API: expose the Horizon classifier as a FastAPI service',
       ],
     },

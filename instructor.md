@@ -86,7 +86,7 @@
 **Talk about:**
 
 - Prompt engineering: be specific, system prompts as standing orders, few-shot examples (2-3 pairs)
-- Structured outputs: `response_format={"type": "json_object"}`, Pydantic validation, schema in system prompt
+- Structured outputs: `client.chat.completions.parse(response_format=PydanticModel)` → `message.parsed`; refusals; why it beats JSON mode (`json_object` + schema in the prompt)
 - Model selection trade-offs: quality vs cost vs latency, tiered routing
 - Token counting and budgets (lecture): tiktoken, truncate or summarise if over budget
 - Multimodal: Vision API (base64 image in message, content parts), gpt-transcribe for audio transcription
@@ -267,9 +267,11 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 **Talk about:**
 
 - What LangChain provides vs building from scratch
-- Chains, prompt templates, output parsers, LCEL
+- Chains, prompt templates, LCEL
+- Structured output: `model.with_structured_output(PydanticModel)` vs output parsers (`JsonOutputParser` still wins for streaming partial results)
 - Tool-calling agents: `create_agent` (LangChain 1.x, runs on LangGraph; replaces `AgentExecutor`)
-- LCEL RAG chains with a retriever
+- Agent middleware (`@wrap_tool_call`, `ToolCallLimitMiddleware`; built-ins for human approval, PII, retries) and memory via a checkpointer + `thread_id`
+- LCEL RAG chains that return answer + sources from one retrieval (`RunnablePassthrough.assign`), then agentic RAG: the retriever as a tool
 - Serving a chain: FastAPI routes that call `ainvoke` / `abatch` / `astream` (LangServe is unmaintained)
 - Trade-offs: convenience vs control, debugging, vendor lock-in
 
@@ -277,18 +279,18 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-10-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain for classification |
-| `module-10-langchain/demo/02_langchain_agents.py` | Wrap tools, run via `create_agent` |
-| `module-10-langchain/demo/03_langchain_rag.py` | LCEL RAG chain over knowledge base |
+| `module-10-langchain/demo/01_chains_and_prompts.py` | Prompt template + chain; structured output with a Pydantic schema; swap the last step (structured vs JSON parser vs string, incl. streaming partial JSON) |
+| `module-10-langchain/demo/02_langchain_agents.py` | Wrap tools, run via `create_agent`; middleware part (tool-call logging + call limit); memory part (checkpointer, two threads) |
+| `module-10-langchain/demo/03_langchain_rag.py` | LCEL RAG chain returning answer + sources; agentic RAG part with a `search_logs` tool |
 | `module-10-langchain/demo/04_serving_chains.py` | Serve the classification chain with FastAPI (invoke / batch / stream); httpx in-process invoke |
 
 **Exercises:**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-chain-basics` | Prompt template + chain for crew report classification |
+| `exercises/01-chain-basics` | Structured-output chain (`Classification` schema) for crew report classification; /stream, /raw, /batch, /compare |
 | `exercises/02-tool-agent` | Wrap ship tools as LangChain tools, run via `create_agent` |
-| `exercises/03-rag-chain` | LCEL RAG chain over the Horizon ship logs |
+| `exercises/03-rag-chain` | LCEL RAG chain returning answer + sources, then agentic RAG (agent from 02 + `search_logs` tool) |
 | `exercises/04-chain-api` | FastAPI `/classify/invoke` route over the chain; health check; httpx tests |
 
 ---

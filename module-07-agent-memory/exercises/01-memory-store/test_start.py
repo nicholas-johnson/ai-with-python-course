@@ -172,3 +172,23 @@ def test_build_system_prompt_includes_memories():
 
     prompt = mod.build_system_prompt(lt)
     assert "Alice" in prompt
+
+
+# --- Memory extraction (structured outputs) ---
+
+def test_extract_memories_returns_key_value_dicts(fake_parse):
+    """extract_memories parses the model's MemoryList into plain dicts."""
+    from unittest.mock import MagicMock
+
+    import pytest
+
+    mod = _import_start()
+    if not hasattr(mod, "extract_memories"):
+        pytest.skip("extract_memories is a bonus in the solution")
+    client = MagicMock()
+    client.chat.completions.parse.side_effect = fake_parse(
+        '{"memories": [{"key": "favourite_drink", "value": "Nebula Sour"}]}'
+    )
+    memories = mod.extract_memories("I'll have a Nebula Sour", "Coming right up.", client)
+    assert memories == [{"key": "favourite_drink", "value": "Nebula Sour"}]
+    assert client.chat.completions.parse.call_args.kwargs["response_format"] is mod.MemoryList

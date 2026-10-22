@@ -19,7 +19,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -158,11 +158,16 @@ async def analyze_image(image_b64: str, prompt: str) -> dict:
     """Send a base64 image to the chat model and return {description, key_points}.
 
     Steps:
-      1. Build messages with a system prompt requesting JSON output
-         with "description" (str) and "key_points" (list[str])
-      2. Include the image as a data URL: data:image/png;base64,{image_b64}
-      3. Call client.chat.completions.create with response_format={"type": "json_object"}
-      4. Parse and return the JSON dict
+      1. Define a Pydantic model (above this function):
+             class ImageAnalysis(BaseModel):
+                 description: str
+                 key_points: list[str]
+      2. Build messages: a short system prompt, and a user message with the
+         prompt text plus the image as a data URL: data:image/png;base64,{image_b64}
+      3. Call client.chat.completions.parse(..., response_format=ImageAnalysis)
+      4. message = response.choices[0].message
+         If message.parsed is None (refusal), raise HTTPException(422, message.refusal)
+         Otherwise return message.parsed.model_dump()
     """
     # TODO: implement
     raise NotImplementedError

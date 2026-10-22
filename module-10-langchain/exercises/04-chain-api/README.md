@@ -9,7 +9,7 @@ You built an LCEL classifier in exercise 01. Every LCEL chain is a **Runnable**,
 ```python
 @app.post("/classify/invoke")
 async def classify_invoke(req: InvokeRequest):
-    return {"output": await chain.ainvoke(req.input.model_dump())}
+    return InvokeResponse(output=await chain.ainvoke(req.input.model_dump()))
 ```
 
 > **Why not LangServe?** Older tutorials use `langserve.add_routes`. LangServe is no longer maintained and is incompatible with current dependencies (it pins `sse-starlette<2`). Writing the routes yourself is a few lines of FastAPI and gives you full control over validation, auth, and response shape. For agent deployments, LangChain now points to LangGraph/LangSmith deployment instead.
@@ -20,8 +20,8 @@ A FastAPI app in **`start.py`** that:
 
 | Piece | Detail |
 |-------|--------|
-| LCEL chain | Horizon crew report classifier (same prompt/parser pattern as exercise 01) |
-| Pydantic models | `ReportInput` and `InvokeRequest` validate the request body |
+| LCEL chain | Horizon crew report classifier (same `Classification` structured-output chain as exercise 01) |
+| Pydantic models | `ReportInput` / `InvokeRequest` validate the request; `InvokeResponse` types the response |
 | `GET /health` | Returns `{"status": "ok"}` |
 | `POST /classify/invoke` | Runs the chain and returns `{"output": {...}}` |
 
@@ -29,13 +29,14 @@ A FastAPI app in **`start.py`** that:
 
 ### 1. Build the chain
 
-Copy the `ChatPromptTemplate`, `ChatOpenAI`, and `JsonOutputParser` pattern from exercise 01 (Horizon system message).
+Copy the `Classification` model, prompt, and structured-output chain from exercise 01.
 
 ```python
-chain = prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0) | JsonOutputParser()
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+chain = prompt | model.with_structured_output(Classification)
 ```
 
-### 2. Define request models
+### 2. Define request and response models
 
 ```python
 from pydantic import BaseModel
@@ -45,9 +46,12 @@ class ReportInput(BaseModel):
 
 class InvokeRequest(BaseModel):
     input: ReportInput
+
+class InvokeResponse(BaseModel):
+    output: Classification
 ```
 
-FastAPI rejects a body without `input.report` with a `422` before your chain ever runs.
+FastAPI rejects a body without `input.report` with a `422` before your chain ever runs. Because the chain already returns a Pydantic `Classification`, the same model types your response — and shows up in the OpenAPI docs with the allowed `category` and `priority` values.
 
 ### 3. Implement `create_app()`
 
@@ -62,8 +66,8 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     @app.post("/classify/invoke")
-    async def classify_invoke(req: InvokeRequest):
-        return {"output": await chain.ainvoke(req.input.model_dump())}
+    async def classify_invoke(req: InvokeRequest) -> InvokeResponse:
+        return InvokeResponse(output=await chain.ainvoke(req.input.model_dump()))
 
     return app
 ```
@@ -110,11 +114,11 @@ pytest test_start.py -v -m integration
 ## Stretch goals
 
 - Add `POST /classify/batch` that takes `{"inputs": [...]}` and calls `chain.abatch(...)`
-- Add `POST /classify/stream` that returns a `StreamingResponse` of NDJSON from `chain.astream(...)` — `JsonOutputParser` yields the partial object as it fills in
+- Add `POST /classify/stream` that returns a `StreamingResponse` of NDJSON. Structured output arrives as one complete object, so stream a `prompt | model | JsonOutputParser()` chain instead (with a prompt that asks for JSON) — it yields the partial object as it fills in
 - Add CORS middleware for a future frontend
 
 ## Reference
 
-- [LangChain Runnable interface](https://python.langchain.com/docs/concepts/runnables/)
+- [LangChain Runnable reference](https://reference.langchain.com/python/langchain-core/runnables)
 - [FastAPI request bodies](https://fastapi.tiangolo.com/tutorial/body/)
 - Module demo: `module-10-langchain/demo/04_serving_chains.py`

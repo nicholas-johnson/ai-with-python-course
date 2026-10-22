@@ -35,21 +35,21 @@ def load_logs() -> list[dict]:
     return json.loads(DATA_PATH.read_text())
 
 
+class FactList(BaseModel):
+    facts: list[Fact]
+
+
 def extract_facts(text: str, client: OpenAI) -> tuple[list[Fact], str]:
     """Extract structured facts from text using OpenAI. Returns (facts, raw_json)."""
-    schema_desc = json.dumps(Fact.model_json_schema(), indent=2)
-
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=FactList,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "Extract every factual claim from the text. "
-                    "Return a JSON object with a 'facts' key containing an array of objects.\n"
-                    f"Each object must match this schema:\n{schema_desc}\n"
                     "Be precise with subject/predicate/object triples. "
                     "Include the exact source sentence. "
                     "Rate confidence from 0.0 to 1.0."
@@ -59,20 +59,10 @@ def extract_facts(text: str, client: OpenAI) -> tuple[list[Fact], str]:
         ],
     )
 
-    raw_json = response.choices[0].message.content
-    data = json.loads(raw_json)
-    facts_data = data.get("facts", data) if isinstance(data, dict) else data
-    if isinstance(facts_data, dict):
-        facts_data = [facts_data]
-
-    facts = []
-    for item in facts_data:
-        try:
-            facts.append(Fact.model_validate(item))
-        except Exception:
-            continue
-
-    return facts, raw_json
+    message = response.choices[0].message
+    if message.refusal:
+        return [], ""
+    return message.parsed.facts, message.content
 
 
 def validate_facts(facts: list[Fact], min_confidence: float = 0.7) -> list[Fact]:

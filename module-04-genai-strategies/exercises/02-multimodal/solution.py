@@ -11,12 +11,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
 from openai import OpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 load_dotenv()
@@ -142,19 +142,21 @@ async def transcribe_audio(audio_bytes: bytes) -> str:
     return transcript.text
 
 
+class ImageAnalysis(BaseModel):
+    description: str = Field(description="A detailed description of the image")
+    key_points: list[str] = Field(description="The most important observations")
+
+
 async def analyze_image(image_b64: str, prompt: str) -> dict:
     """Send a base64 image to the chat model and return {description, key_points}."""
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
+        response_format=ImageAnalysis,
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "You are an image analysis assistant. Respond with a JSON object "
-                    'containing "description" (string) and "key_points" (list of strings). '
-                    "Only output valid JSON, no markdown."
-                ),
+                "content": "You are an image analysis assistant.",
             },
             {
                 "role": "user",
@@ -169,9 +171,11 @@ async def analyze_image(image_b64: str, prompt: str) -> dict:
                 ],
             },
         ],
-        response_format={"type": "json_object"},
     )
-    return json.loads(response.choices[0].message.content)
+    message = response.choices[0].message
+    if message.parsed is None:
+        raise HTTPException(status_code=422, detail=message.refusal or "No analysis returned")
+    return message.parsed.model_dump()
 
 
 @app.get("/health")

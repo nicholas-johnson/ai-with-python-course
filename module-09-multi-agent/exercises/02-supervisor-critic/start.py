@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from agents import classify_query, specialist_agent, DEPARTMENTS, SPECIALIST_PROMPTS
 
@@ -20,8 +21,7 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 CRITIC_PROMPT = (
     "You are a quality-assurance critic aboard the DSS Pathfinder. "
     "Review the specialist's response for accuracy, completeness, and "
-    "potential hallucination. Return JSON: "
-    '{"approved": true/false, "feedback": "<explanation>"}. '
+    "potential hallucination. "
     "Approve if the response is accurate and reasonably complete. "
     "Reject with specific feedback if you find errors, gaps, or "
     "unsupported claims."
@@ -40,11 +40,13 @@ class CriticAgent:
         Returns {"approved": bool, "feedback": str}.
 
         Steps:
-            1. Call client.chat.completions.create with model=MODEL, reasoning_effort="none" and JSON mode
-            2. System prompt: CRITIC_PROMPT
-            3. User message: include both the original query and the specialist response
-            4. Parse the JSON result into {"approved": bool, "feedback": str}
-            5. On parse failure, default to approved=True
+            1. Define a Pydantic model: class Review(BaseModel): approved: bool; feedback: str
+            2. Call client.chat.completions.parse with model=MODEL,
+               reasoning_effort="none", response_format=Review
+            3. System prompt: CRITIC_PROMPT
+            4. User message: include both the original query and the specialist response
+            5. review = result.choices[0].message.parsed -- return review.model_dump()
+               If it is None (the model refused), default to approved=True
         """
         # TODO: implement critic review
         raise NotImplementedError("TODO")

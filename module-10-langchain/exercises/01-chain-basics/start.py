@@ -14,9 +14,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # TODO: Import LangChain components
+# from typing import Literal
+# from pydantic import BaseModel, Field
 # from langchain_core.prompts import ChatPromptTemplate
 # from langchain_openai import ChatOpenAI
-# from langchain_core.output_parsers import JsonOutputParser
+# from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
@@ -32,13 +34,19 @@ SAMPLE_REPORTS = [
 # TODO: Build your chain
 # ---------------------------------------------------------------------------
 
-# 1. Create a ChatPromptTemplate with:
-#    - system message: instruct the model to classify reports and return JSON
+# 1. Define a Pydantic model `Classification` with:
+#    - category: Literal["navigation", "engineering", "science", "medical", "operations"]
+#    - summary: str
+#    - priority: Literal["low", "medium", "high", "critical"]
+
+# 2. Create a ChatPromptTemplate with:
+#    - system message: instruct the model to classify the report
 #    - human message: {report} placeholder
 
-# 2. Build the LCEL chain: prompt | model | parser
+# 3. Build the LCEL chain: prompt | model.with_structured_output(Classification)
 
-# 3. Implement classify_report using chain.invoke()
+# 4. Implement classify_report using chain.invoke() — it returns a Classification;
+#    return it as a dict with .model_dump()
 
 
 def classify_report(report: str) -> dict:
@@ -74,15 +82,16 @@ def main():
             break
 
         # TODO: handle /stream and /raw commands
-        # if user_input == "/stream": ...
-        # if user_input == "/raw": ...
+        # if user_input == "/stream": ...  stream a JsonOutputParser chain (partial dicts)
+        # if user_input == "/raw": ...     prompt | model | StrOutputParser()
 
         # TODO: handle /batch — use chain.batch() to classify all SAMPLE_REPORTS
         #   in parallel; wrap in time.perf_counter() to show wall-clock time
         # if user_input == "/batch": ...
 
-        # TODO: handle /compare — invoke both JsonOutputParser chain and
-        #   StrOutputParser chain on the last report to show composability
+        # TODO: handle /compare — invoke the structured-output chain, a
+        #   JsonOutputParser chain, and a StrOutputParser chain on the last
+        #   report to show composability
         # if user_input == "/compare" and last_report: ...
 
         last_report = user_input

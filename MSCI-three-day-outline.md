@@ -311,27 +311,27 @@ By end of day, attendees can ground answers in **RAG and knowledge graphs**, giv
 
 **Talk**
 
-- LangChain building blocks: prompts, models, parsers
+- LangChain building blocks: prompts, models, parsers, structured output
 - LCEL (`|`) for composable, streamable, batchable chains
-- Tool agents via `create_agent` (LangChain 1.x)
-- RAG chains with retrievers
+- Tool agents via `create_agent` (LangChain 1.x), with middleware and checkpointer memory
+- RAG chains with retrievers, and agentic RAG (retrieval as a tool)
 - Serving chains with FastAPI
 - When to use the framework vs stay hand-rolled
 
 **Demo**
 
-- Chains & prompts → agents → RAG → serving a chain with FastAPI
+- Chains & structured output → agents with middleware and memory → RAG and agentic RAG → serving a chain with FastAPI
 
 **Exercises** *(CSS Horizon scenario — apply patterns, not copy Pathfinder demos)*
 
-1. **Chain basics** — LCEL report classifier (category, summary, priority)
+1. **Chain basics** — LCEL report classifier with a Pydantic schema (category, summary, priority)
 2. **Tool agent** — Classifier + ship tools with `create_agent`
-3. **RAG chain** — Retrieval over ship logs on top of the agent
+3. **RAG chain** — Retrieval over ship logs with sources, then agentic RAG on top of the agent
 4. **Chain API** — Expose the classifier via FastAPI
 
 **After this module, attendees can**
 
-- Assemble LCEL chains, tool agents, and RAG with LangChain
+- Assemble LCEL chains, tool agents (with middleware and memory), and RAG — chain or agentic — with LangChain
 - Deploy a chain as a REST API with FastAPI
 - Judge when LangChain speeds them up vs when plain Python is clearer
 

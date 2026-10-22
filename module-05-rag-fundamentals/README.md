@@ -42,6 +42,8 @@ def chunk_fixed(text: str, size: int = 500, overlap: int = 50) -> list[str]:
     while start < len(text):
         end = start + size
         chunks.append(text[start:end])
+        if end >= len(text):
+            break  # last chunk reached the end; another would sit inside its overlap
         start = end - overlap
     return chunks
 ```

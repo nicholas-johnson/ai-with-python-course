@@ -15,12 +15,10 @@ from fastapi import FastAPI
 load_dotenv()
 
 # TODO: Import LangChain + Pydantic components
-# import json
-# from fastapi.responses import StreamingResponse
+# from typing import Literal
 # from langchain_core.prompts import ChatPromptTemplate
-# from langchain_core.output_parsers import JsonOutputParser
 # from langchain_openai import ChatOpenAI
-# from pydantic import BaseModel
+# from pydantic import BaseModel, Field
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
@@ -29,8 +27,10 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 # TODO: Build the classification chain (same pattern as exercise 01)
 # ---------------------------------------------------------------------------
 
+# class Classification(BaseModel): ...   (same schema as exercise 01)
 # prompt = ChatPromptTemplate.from_messages([...])
-# chain = prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0) | JsonOutputParser()
+# model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+# chain = prompt | model.with_structured_output(Classification)
 
 
 # ---------------------------------------------------------------------------
@@ -42,6 +42,9 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 #
 # class InvokeRequest(BaseModel):
 #     input: ReportInput
+#
+# class InvokeResponse(BaseModel):
+#     output: Classification
 
 
 def create_app() -> FastAPI:
@@ -52,7 +55,7 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok"}
 
-    # TODO: POST /classify/invoke — await chain.ainvoke(...) and return {"output": ...}
+    # TODO: POST /classify/invoke — await chain.ainvoke(...) and return InvokeResponse(output=...)
     # TODO (stretch): POST /classify/stream — stream chain.astream(...) as NDJSON
 
     return app

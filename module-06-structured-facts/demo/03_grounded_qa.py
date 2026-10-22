@@ -37,26 +37,31 @@ def load_logs() -> list[dict]:
     return json.loads(DATA_PATH.read_text())
 
 
+class FactList(BaseModel):
+    facts: list[Fact]
+
+
+class QueryEntities(BaseModel):
+    entities: list[str]
+
+
 def extract_facts(text: str) -> list[Fact]:
-    schema_desc = json.dumps(Fact.model_json_schema(), indent=2)
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=FactList,
         messages=[
             {
                 "role": "system",
                 "content": (
-                    "Extract factual claims. Return JSON with 'facts' array.\n"
-                    f"Schema:\n{schema_desc}\nBe precise. Rate confidence 0-1."
+                    "Extract factual claims. Be precise. Rate confidence 0-1."
                 ),
             },
             {"role": "user", "content": text},
         ],
     )
-    data = json.loads(response.choices[0].message.content)
-    facts_data = data.get("facts", []) if isinstance(data, dict) else data
-    return [Fact.model_validate(item) for item in facts_data if isinstance(item, dict)]
+    message = response.choices[0].message
+    return message.parsed.facts if message.parsed else []
 
 
 def build_graph(facts: list[Fact]) -> nx.DiGraph:
@@ -106,16 +111,17 @@ def retrieve_evidence(G: nx.DiGraph, entities: list[str], max_hops: int = 2) -> 
 
 def grounded_qa(question: str, G: nx.DiGraph) -> tuple[str, list[dict]]:
     """Answer a question grounded in graph evidence."""
-    entity_resp = client.chat.completions.create(
+    entity_resp = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=QueryEntities,
         messages=[
-            {"role": "system", "content": "Extract entity names from the question. Return JSON: {\"entities\": [...]}"},
+            {"role": "system", "content": "Extract entity names from the question."},
             {"role": "user", "content": question},
         ],
     )
-    extracted = json.loads(entity_resp.choices[0].message.content).get("entities", [])
+    parsed = entity_resp.choices[0].message.parsed
+    extracted = parsed.entities if parsed else []
 
     nodes_lower = {n.lower(): n for n in G.nodes()}
     matched = []

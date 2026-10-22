@@ -10,9 +10,9 @@ A full-stack AI movie recommendation app combining **RAG** (mood-based search) w
 | Tool calling (structured output) | `sql.py` text-to-SQL | Module 2 — Tool Calling |
 | Embeddings & vector search | `rag.py` ChromaDB index + search | Module 5 — RAG Fundamentals |
 | RAG pipeline | `rag.py` build → search → rerank | Module 5 — RAG Fundamentals |
-| Prompt engineering | System prompts in `rag.py`, `sql.py` | Module 7 — Prompt Engineering |
-| Guardrails & safety | `guardrails.py` SQL validation | Module 8 — Guardrails |
-| Semantic caching | `cache.py` cosine similarity cache | Module 12 — Productionisation |
+| Prompt engineering | System prompts in `rag.py`, `sql.py` | Module 4 — GenAI Strategies |
+| Guardrails & safety | `guardrails.py` SQL validation | Module 13 — Edge Topics |
+| Semantic caching | `cache.py` cosine similarity cache | Module 13 — Edge Topics |
 | Tracing / observability | `tracing.py` span-based tracing | Module 12 — Productionisation |
 
 ## Project Structure

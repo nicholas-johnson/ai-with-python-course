@@ -76,24 +76,20 @@ def test_build_grounded_prompt_has_fact_labels():
     assert "Vasquez" in messages[1]["content"]
 
 
-def test_grounded_qa_returns_answer():
+def test_grounded_qa_returns_answer(fake_parse):
     """grounded_qa returns a GroundedAnswer with citations."""
     mod = _import_start()
     graph = _make_graph()
 
     mock_client = MagicMock()
-
-    entity_response = MagicMock()
-    entity_response.choices = [MagicMock(message=MagicMock(
-        content='{"entities": ["Vasquez"]}'
-    ))]
+    mock_client.chat.completions.parse.side_effect = fake_parse('{"entities": ["Vasquez"]}')
 
     answer_response = MagicMock()
     answer_response.choices = [MagicMock(message=MagicMock(
         content="Vasquez repaired the port thruster [Fact 1] and inspected the warp core [Fact 2]."
     ))]
 
-    mock_client.chat.completions.create.side_effect = [entity_response, answer_response]
+    mock_client.chat.completions.create.return_value = answer_response
 
     result = mod.grounded_qa("What did Vasquez do?", graph, mock_client)
 
@@ -102,17 +98,13 @@ def test_grounded_qa_returns_answer():
     assert len(result.evidence) > 0
 
 
-def test_grounded_qa_no_entities():
+def test_grounded_qa_no_entities(fake_parse):
     """grounded_qa returns low confidence when no entities found."""
     mod = _import_start()
     graph = _make_graph()
 
     mock_client = MagicMock()
-    entity_response = MagicMock()
-    entity_response.choices = [MagicMock(message=MagicMock(
-        content='{"entities": []}'
-    ))]
-    mock_client.chat.completions.create.return_value = entity_response
+    mock_client.chat.completions.parse.side_effect = fake_parse('{"entities": []}')
 
     result = mod.grounded_qa("What is the meaning of life?", graph, mock_client)
 

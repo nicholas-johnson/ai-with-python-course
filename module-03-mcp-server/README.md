@@ -173,4 +173,4 @@ From repo root: `pnpm slides:03`, or `cd module-03-mcp-server/slides && pnpm dev
 
 - [Model Context Protocol spec](https://modelcontextprotocol.io/)
 - [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) — [v1 → v2 migration guide](https://py.sdk.modelcontextprotocol.io/migration/)
-- [MCP — Cursor integration](https://docs.cursor.com/context/model-context-protocol)
+- [MCP — Cursor integration](https://cursor.com/docs/mcp)

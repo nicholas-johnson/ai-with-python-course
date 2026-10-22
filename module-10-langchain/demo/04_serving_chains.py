@@ -19,6 +19,7 @@ import asyncio
 import json
 import os
 from pathlib import Path
+from typing import Literal
 
 import httpx
 from dotenv import load_dotenv
@@ -27,7 +28,7 @@ from fastapi.responses import StreamingResponse
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -41,21 +42,35 @@ SAMPLE_REPORT = LOGS[0]["content"]
 # Chain (same as demo 01)
 # ---------------------------------------------------------------------------
 
+class Classification(BaseModel):
+    """Classification of a crew report."""
+
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary of the report")
+    priority: Literal["low", "medium", "high", "critical"]
+
+
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         "You are a ship incident classifier for the DSS Pathfinder.\n"
-        "Classify the crew report into exactly one category: "
-        "navigation, engineering, science, medical, or operations.\n"
-        "Respond with ONLY a JSON object (no markdown fences) containing:\n"
-        '  "category": one of the five categories,\n'
-        '  "summary": a one-sentence summary,\n'
-        '  "priority": one of low, medium, high, critical.',
+        "Classify the crew report: pick the category, write a one-sentence "
+        "summary, and set the priority.",
     ),
     ("human", "{report}"),
 ])
 
-chain = prompt | ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0) | JsonOutputParser()
+model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
+chain = prompt | model.with_structured_output(Classification)
+
+# Structured output arrives in one piece; for token-by-token streaming use a
+# JSON-parser chain, which yields the partial dict as it fills in.
+stream_chain = (
+    prompt
+    + ("system", 'Respond with ONLY a JSON object with keys "category", "summary", "priority".')
+    | model
+    | JsonOutputParser()
+)
 
 
 class ReportInput(BaseModel):
@@ -66,8 +81,16 @@ class InvokeRequest(BaseModel):
     input: ReportInput
 
 
+class InvokeResponse(BaseModel):
+    output: Classification
+
+
 class BatchRequest(BaseModel):
     inputs: list[ReportInput]
+
+
+class BatchResponse(BaseModel):
+    output: list[Classification]
 
 
 def create_app() -> FastAPI:
@@ -75,17 +98,17 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Pathfinder Report API")
 
     @app.post("/classify/invoke")
-    async def classify_invoke(req: InvokeRequest):
-        return {"output": await chain.ainvoke(req.input.model_dump())}
+    async def classify_invoke(req: InvokeRequest) -> InvokeResponse:
+        return InvokeResponse(output=await chain.ainvoke(req.input.model_dump()))
 
     @app.post("/classify/batch")
-    async def classify_batch(req: BatchRequest):
-        return {"output": await chain.abatch([i.model_dump() for i in req.inputs])}
+    async def classify_batch(req: BatchRequest) -> BatchResponse:
+        return BatchResponse(output=await chain.abatch([i.model_dump() for i in req.inputs]))
 
     @app.post("/classify/stream")
     async def classify_stream(req: InvokeRequest):
         async def events():
-            async for partial in chain.astream(req.input.model_dump()):
+            async for partial in stream_chain.astream(req.input.model_dump()):
                 yield json.dumps(partial) + "\n"
 
         return StreamingResponse(events(), media_type="application/x-ndjson")
@@ -114,11 +137,11 @@ def demo_build_chain():
     print("=" * 60)
 
     print("\n  Same LCEL chain as demo 01:")
-    print("    chain = prompt | ChatOpenAI(...) | JsonOutputParser()\n")
+    print("    chain = prompt | model.with_structured_output(Classification)\n")
 
     result = chain.invoke({"report": SAMPLE_REPORT})
     print(f"  Sample report: {SAMPLE_REPORT[:80]}...")
-    print(f"  chain.invoke() → {json.dumps(result, indent=2)}\n")
+    print(f"  chain.invoke() → {result!r}\n")
 
     pause()
 
@@ -251,7 +274,7 @@ def main():
     print("RECAP")
     print("=" * 60)
     print()
-    print("  chain = prompt | model | parser   — same as demo 01")
+    print("  chain = prompt | model.with_structured_output(...)  — same as demo 01")
     print("  await chain.ainvoke(...) inside a FastAPI route — REST API")
     print("  chain.astream(...) + StreamingResponse         — streaming")
     print("  POST /classify/invoke  {\"input\": {\"report\": \"...\"}}")

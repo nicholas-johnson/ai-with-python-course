@@ -6,10 +6,10 @@ The critic validates each response before it reaches the user.
 Run:  python solution.py
 """
 from __future__ import annotations
-import json
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from agents import classify_query, specialist_agent, DEPARTMENTS, SPECIALIST_PROMPTS
 
@@ -21,12 +21,16 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 CRITIC_PROMPT = (
     "You are a quality-assurance critic aboard the DSS Pathfinder. "
     "Review the specialist's response for accuracy, completeness, and "
-    "potential hallucination. Return JSON: "
-    '{"approved": true/false, "feedback": "<explanation>"}. '
+    "potential hallucination. "
     "Approve if the response is accurate and reasonably complete. "
     "Reject with specific feedback if you find errors, gaps, or "
     "unsupported claims."
 )
+
+
+class Review(BaseModel):
+    approved: bool
+    feedback: str
 
 
 class CriticAgent:
@@ -35,10 +39,10 @@ class CriticAgent:
 
     def review(self, query: str, response: str) -> dict:
         """Return {"approved": bool, "feedback": str}."""
-        result = self.client.chat.completions.create(
+        result = self.client.chat.completions.parse(
             model=MODEL,
             reasoning_effort="none",
-            response_format={"type": "json_object"},
+            response_format=Review,
             messages=[
                 {"role": "system", "content": CRITIC_PROMPT},
                 {
@@ -51,14 +55,10 @@ class CriticAgent:
                 },
             ],
         )
-        try:
-            data = json.loads(result.choices[0].message.content)
-            return {
-                "approved": bool(data.get("approved", False)),
-                "feedback": str(data.get("feedback", "")),
-            }
-        except (json.JSONDecodeError, AttributeError):
-            return {"approved": True, "feedback": "Unable to parse review."}
+        review = result.choices[0].message.parsed
+        if review is None:
+            return {"approved": True, "feedback": "Model refused to review."}
+        return review.model_dump()
 
 
 class SupervisorAgent:

@@ -67,7 +67,7 @@ Word-overlap metrics (BLEU, ROUGE) punish paraphrase. A judge model reads the qu
 - **Completeness** — does it cover the key points in the reference?
 - **Relevance** — does it address the question?
 
-Ask for JSON, parse defensively (strip markdown fences), and average across a set of 20–100 triples. Temperature 0. Judge bias is real — use a rubric, multiple dimensions, and treat scores as *relative* (config A vs B) more than absolute truth.
+Get the scores back with structured outputs (a `JudgeScores` Pydantic model with `Field(ge=1, le=5)`), so there are no fences to strip or keys to guess, and average across a set of 20–100 triples. Temperature 0. Judge bias is real — use a rubric, multiple dimensions, and treat scores as *relative* (config A vs B) more than absolute truth.
 
 ---
 

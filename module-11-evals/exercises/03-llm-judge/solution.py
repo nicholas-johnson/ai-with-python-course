@@ -7,12 +7,19 @@ correctness, completeness, and relevance.
 
 from __future__ import annotations
 
-import json
 import os
 
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
+
+class JudgeScores(BaseModel):
+    correctness: int = Field(ge=1, le=5, description="Are the facts accurate?")
+    completeness: int = Field(ge=1, le=5, description="Does it cover all key points from the reference?")
+    relevance: int = Field(ge=1, le=5, description="Does it directly address the question?")
+    explanation: str
 
 
 def llm_judge(
@@ -22,9 +29,10 @@ def llm_judge(
     reference: str,
 ) -> dict:
     """Use an LLM to evaluate an answer against a reference."""
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
+        response_format=JudgeScores,
         messages=[{
             "role": "user",
             "content": (
@@ -35,29 +43,20 @@ def llm_judge(
                 f"Score each dimension from 1 (worst) to 5 (best):\n"
                 f"- Correctness: Are the facts accurate?\n"
                 f"- Completeness: Does it cover all key points from the reference?\n"
-                f"- Relevance: Does it directly address the question?\n\n"
-                f'Respond with JSON only: {{"correctness": N, "completeness": N, '
-                f'"relevance": N, "explanation": "..."}}'
+                f"- Relevance: Does it directly address the question?"
             ),
         }],
         temperature=0,
     )
-    text = (response.choices[0].message.content or "").strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[-1]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-    try:
-        result = json.loads(text)
-    except json.JSONDecodeError:
-        result = {
+    message = response.choices[0].message
+    if message.parsed is None:
+        return {
             "correctness": 1,
             "completeness": 1,
             "relevance": 1,
-            "explanation": f"Failed to parse judge response: {text}",
+            "explanation": f"Judge refused: {message.refusal}",
         }
-    return result
+    return message.parsed.model_dump()
 
 
 def evaluate_dataset(

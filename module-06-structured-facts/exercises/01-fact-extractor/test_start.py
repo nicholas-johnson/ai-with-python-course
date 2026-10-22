@@ -73,14 +73,12 @@ def test_fact_model_rejects_bad_confidence():
         )
 
 
-def test_extract_facts_returns_facts():
+def test_extract_facts_returns_facts(fake_parse):
     """extract_facts returns a list of Fact objects."""
     mod = _import_start()
 
     mock_client = MagicMock()
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message=MagicMock(content=MOCK_FACTS_JSON))]
-    mock_client.chat.completions.create.return_value = mock_response
+    mock_client.chat.completions.parse.side_effect = fake_parse(MOCK_FACTS_JSON)
 
     result = mod.extract_facts("Some ship log text.", mock_client)
     if isinstance(result, tuple):
@@ -88,8 +86,16 @@ def test_extract_facts_returns_facts():
     else:
         facts = result
 
-    assert len(facts) >= 2
+    assert len(facts) == 3
     assert all(isinstance(f, mod.Fact) for f in facts)
+    assert mock_client.chat.completions.parse.call_args.kwargs["response_format"] is mod.FactList
+
+
+def test_fact_list_wraps_facts():
+    """FactList is the top-level object the model must return."""
+    mod = _import_start()
+    facts = mod.FactList.model_validate_json(MOCK_FACTS_JSON).facts
+    assert [f.subject for f in facts][:1] == ["Chief Engineer Vasquez"]
 
 
 def test_validate_facts_filters_low_confidence():

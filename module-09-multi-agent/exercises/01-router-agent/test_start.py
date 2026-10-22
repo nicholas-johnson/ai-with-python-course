@@ -22,7 +22,7 @@ def _import_start():
 
 
 def _mock_client(content: str = "Mock response"):
-    """Create a mock OpenAI client returning fixed content."""
+    """Create a mock OpenAI client whose plain completions return fixed content."""
     mock = MagicMock()
     mock_response = MagicMock()
     mock_response.choices = [MagicMock(message=MagicMock(content=content))]
@@ -30,38 +30,49 @@ def _mock_client(content: str = "Mock response"):
     return mock
 
 
+def _refusing_client():
+    """A mock client whose structured-output call comes back as a refusal."""
+    mock = MagicMock()
+    message = MagicMock(parsed=None, refusal="I can't help with that.")
+    mock.chat.completions.parse.return_value = MagicMock(choices=[MagicMock(message=message)])
+    return mock
+
+
 # --- classify_query tests ---
 
-def test_classify_returns_valid_department():
-    """classify_query returns one of the three valid departments."""
+def test_classify_returns_valid_department(fake_parse):
+    """classify_query returns the department from the parsed Route."""
     mod = _import_start()
-    client = _mock_client(json.dumps({"department": "tactical"}))
+    client = MagicMock()
+    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "tactical"}))
     result = mod.classify_query("Raise shields!", client)
-    assert result in mod.DEPARTMENTS
+    assert result == "tactical"
 
 
-def test_classify_defaults_on_bad_json():
-    """classify_query defaults to 'medical' on unparseable JSON."""
+def test_classify_uses_route_schema(fake_parse):
+    """classify_query asks for structured output with the Route model."""
     mod = _import_start()
-    client = _mock_client("not json at all")
-    result = mod.classify_query("random query", client)
+    client = MagicMock()
+    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "comms"}))
+    mod.classify_query("Any signals?", client)
+    assert client.chat.completions.parse.call_args.kwargs["response_format"] is mod.Route
+
+
+def test_route_schema_rejects_unknown_department():
+    """The Literal type means an unknown department can't be parsed."""
+    mod = _import_start()
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        mod.Route(department="catering")
+
+
+def test_classify_defaults_on_refusal():
+    """classify_query defaults to 'medical' when the model refuses."""
+    mod = _import_start()
+    result = mod.classify_query("random query", _refusing_client())
     assert result == "medical"
-
-
-def test_classify_defaults_on_unknown_department():
-    """classify_query defaults to 'medical' for unrecognised departments."""
-    mod = _import_start()
-    client = _mock_client(json.dumps({"department": "catering"}))
-    result = mod.classify_query("what's for dinner", client)
-    assert result == "medical"
-
-
-def test_classify_calls_openai():
-    """classify_query calls the OpenAI client."""
-    mod = _import_start()
-    client = _mock_client(json.dumps({"department": "tactical"}))
-    mod.classify_query("shield status?", client)
-    assert client.chat.completions.create.called
 
 
 # --- specialist_agent tests ---
@@ -109,53 +120,24 @@ def test_specialist_fallback_for_unknown_department():
 
 # --- route_and_respond tests ---
 
-def test_route_and_respond_returns_dict():
+def test_route_and_respond_returns_dict(fake_parse):
     """route_and_respond returns a dict with department and response."""
     mod = _import_start()
-    client = _mock_client(json.dumps({"department": "tactical"}))
-
-    def side_effect(**kwargs):
-        messages = kwargs.get("messages", [])
-        if any("router" in m.get("content", "").lower() for m in messages):
-            return MagicMock(
-                choices=[MagicMock(
-                    message=MagicMock(content=json.dumps({"department": "tactical"}))
-                )]
-            )
-        return MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Shields at full power."))]
-        )
-
-    client.chat.completions.create.side_effect = side_effect
+    client = _mock_client("Shields at full power.")
+    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "tactical"}))
 
     result = mod.route_and_respond("Raise shields!", client)
     assert isinstance(result, dict)
-    assert "department" in result
-    assert "response" in result
-    assert result["department"] in mod.DEPARTMENTS
+    assert result["department"] == "tactical"
+    assert result["response"] == "Shields at full power."
 
 
-def test_route_and_respond_calls_openai_twice():
-    """route_and_respond makes at least 2 OpenAI calls (classify + specialist)."""
+def test_route_and_respond_classifies_then_answers(fake_parse):
+    """route_and_respond makes a structured call (classify) and a text call (specialist)."""
     mod = _import_start()
-
-    call_count = 0
-
-    def side_effect(**kwargs):
-        nonlocal call_count
-        call_count += 1
-        if call_count == 1:
-            return MagicMock(
-                choices=[MagicMock(
-                    message=MagicMock(content=json.dumps({"department": "medical"}))
-                )]
-            )
-        return MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Crew vitals are stable."))]
-        )
-
-    client = MagicMock()
-    client.chat.completions.create.side_effect = side_effect
+    client = _mock_client("Crew vitals are stable.")
+    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"department": "medical"}))
 
     mod.route_and_respond("Crew health report", client)
-    assert call_count >= 2
+    assert client.chat.completions.parse.call_count == 1
+    assert client.chat.completions.create.call_count >= 1

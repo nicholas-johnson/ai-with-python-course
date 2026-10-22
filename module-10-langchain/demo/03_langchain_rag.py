@@ -5,8 +5,9 @@ Run:  python module-10-langchain/demo/03_langchain_rag.py
 DSS Pathfinder: answer crew questions by retrieving from the ship's knowledge base.
 
 Part 1: Build the vectorstore — embed ship logs into ChromaDB via LangChain
-Part 2: Build the RAG chain — retriever | format_docs | prompt | model | parser
-Part 3: Interactive — ask questions with /sources and /norag comparison
+Part 2: Build the RAG chain — returns the answer *and* the docs it used
+Part 3: Agentic RAG — the retriever as a tool for create_agent
+Part 4: Interactive — ask questions with /sources, /norag, and /agent comparison
 
 Requires: OPENAI_API_KEY environment variable.
 """
@@ -16,10 +17,12 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from langchain.agents import create_agent
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 load_dotenv()
@@ -68,11 +71,38 @@ rag_prompt = ChatPromptTemplate.from_messages([
 model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 norag_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
 
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+answer_chain = (
+    RunnablePassthrough.assign(context=lambda x: format_docs(x["docs"]))
     | rag_prompt
     | model
     | StrOutputParser()
+)
+
+# invoke(question) -> {"question", "docs", "answer"}: one retrieval, answer + sources
+rag_chain = (
+    {"docs": retriever, "question": RunnablePassthrough()}
+    | RunnablePassthrough.assign(answer=answer_chain)
+)
+
+
+# ---------------------------------------------------------------------------
+# Agentic RAG
+# ---------------------------------------------------------------------------
+
+@tool
+def search_logs(query: str) -> str:
+    """Search the DSS Pathfinder ship logs. Use for questions about past events or incidents."""
+    return format_docs(retriever.invoke(query))
+
+
+rag_agent = create_agent(
+    model,
+    [search_logs],
+    system_prompt=(
+        "You are the DSS Pathfinder knowledge assistant. Search the ship logs when a "
+        "question needs them — rephrase or search more than once if the first results "
+        "miss. Cite sources as [Source N: id]."
+    ),
 )
 
 last_docs: list = []
@@ -136,30 +166,58 @@ def demo_rag_chain():
     formatted = format_docs(docs)
     print(f"  → {formatted[:200]}...\n")
 
-    print("  Step 3: Full chain — retrieve | format | prompt | model | parse")
-    answer = rag_chain.invoke(question)
-    print(f"  → {answer}\n")
+    print("  Step 3: Full chain — retrieve, then assign the answer")
+    result = rag_chain.invoke(question)
+    print(f"  → keys: {sorted(result)}")
+    print(f"  → answer: {result['answer']}\n")
 
     print("  The whole pipeline is one LCEL expression:")
-    print('    {"context": retriever | format_docs, "question": RunnablePassthrough()}')
-    print("    | prompt | model | StrOutputParser()")
+    print('    {"docs": retriever, "question": RunnablePassthrough()}')
+    print("    | RunnablePassthrough.assign(answer=answer_chain)")
+    print("  .assign() keeps the docs in the output, so you can show sources")
+    print("  without retrieving a second time.")
 
     pause()
 
 
 # ---------------------------------------------------------------------------
-# Part 3: Interactive
+# Part 3: Agentic RAG
+# ---------------------------------------------------------------------------
+
+def demo_agentic_rag():
+    print("=" * 60)
+    print("PART 3: AGENTIC RAG")
+    print("=" * 60)
+
+    print("\n  A chain always retrieves once, with the user's exact words.")
+    print("  Wrap the retriever as a tool and an agent decides when and what to search.\n")
+
+    question = "Have there been any problems with life support or the medical bay?"
+    print(f"  Question: {question}\n")
+    result = rag_agent.invoke({"messages": [{"role": "user", "content": question}]})
+    for msg in result["messages"]:
+        if msg.type == "ai" and msg.tool_calls:
+            for call in msg.tool_calls:
+                print(f"  → {call['name']}({json.dumps(call['args'])})")
+    print(f"\n  Answer: {result['messages'][-1].text}\n")
+
+    print("  Trade-off: more flexible, but more model calls (cost + latency).")
+    pause()
+
+
+# ---------------------------------------------------------------------------
+# Part 4: Interactive
 # ---------------------------------------------------------------------------
 
 def demo_interactive():
     global last_docs
 
     print("=" * 60)
-    print("PART 3: INTERACTIVE RAG")
+    print("PART 4: INTERACTIVE RAG")
     print("=" * 60)
 
     print("\nAsk questions about the ship logs.")
-    print("Commands: /sources, /norag, quit\n")
+    print("Commands: /sources, /norag, /agent, quit\n")
 
     last_question = None
 
@@ -189,12 +247,17 @@ def demo_interactive():
             print(f"\nNo-RAG> {answer}\n")
             continue
 
+        if user_input == "/agent" and last_question:
+            result = rag_agent.invoke({"messages": [{"role": "user", "content": last_question}]})
+            print(f"\nAgent> {result['messages'][-1].text}\n")
+            continue
+
         last_question = user_input
-        last_docs = retriever.invoke(user_input)
 
         try:
-            answer = rag_chain.invoke(user_input)
-            print(f"\nRAG> {answer}\n")
+            result = rag_chain.invoke(user_input)
+            last_docs = result["docs"]
+            print(f"\nRAG> {result['answer']}\n")
         except Exception as e:
             print(f"\n  Error: {e}\n")
 
@@ -206,7 +269,8 @@ def demo_interactive():
 DEMOS = {
     "1": ("Build the vectorstore", demo_vectorstore),
     "2": ("Build the RAG chain",   demo_rag_chain),
-    "3": ("Interactive RAG",       demo_interactive),
+    "3": ("Agentic RAG",           demo_agentic_rag),
+    "4": ("Interactive RAG",       demo_interactive),
 }
 
 
@@ -242,7 +306,8 @@ def main():
     print()
     print("  Chroma.from_texts()   — embed and store in one call")
     print("  .as_retriever()       — turn any vectorstore into a retriever")
-    print("  retriever | format    — LCEL wires retrieval into the chain")
+    print("  .assign(answer=...)   — answer + sources from one retrieval")
+    print("  @tool search_logs     — agentic RAG: the agent decides when to search")
     print("  /norag                — compare to see how grounding helps")
     print("=" * 60)
 

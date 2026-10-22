@@ -9,10 +9,10 @@ Build **Compass**, a personalised AI assistant that manages your calendar, searc
 | Tool calling & agent loop | Module 2 — Tool Calling | `agent.py` |
 | RAG over personal notes | Module 5 — RAG Fundamentals | `rag.py` |
 | Vector embeddings (ChromaDB) | Module 5 — RAG Fundamentals | `rag.py` |
-| Structured output (JSON) | Module 4 — Structured Output | `tools.py` |
+| Structured output (JSON) | Module 6 — Structured Facts | `tools.py` |
 | SSE streaming | Module 1 — Working with the LLM | `app.py` |
-| Semantic caching | Module 12 — Productionisation | `cache.py` |
-| PII redaction / guardrails | Module 12 — Productionisation | `guardrails.py` |
+| Semantic caching | Module 13 — Edge Topics | `cache.py` |
+| PII redaction / guardrails | Module 13 — Edge Topics | `guardrails.py` |
 | Request tracing | Module 12 — Productionisation | `tracing.py` |
 | Token budget tracking | Module 12 — Productionisation | `guardrails.py` |
 

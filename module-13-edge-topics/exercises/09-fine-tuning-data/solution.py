@@ -1,8 +1,8 @@
 """
 Exercise 09 — Fine-tuning Data Preparation (Solution)
 
-Prepare training data in the JSONL chat format required
-by OpenAI's fine-tuning API.
+Prepare training data in the JSONL chat-messages format used by
+fine-tuning tools (Hugging Face TRL, hosted fine-tuning APIs).
 """
 
 import json

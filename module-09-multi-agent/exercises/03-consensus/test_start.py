@@ -77,10 +77,11 @@ def test_debate_calls_openai():
 # --- judge tests ---
 
 
-def test_judge_returns_winner_and_reasoning():
+def test_judge_returns_winner_and_reasoning(fake_parse):
     """judge returns a dict with 'winner' and 'reasoning' keys."""
     mod = _import_start()
-    client = _mock_client(
+    client = MagicMock()
+    client.chat.completions.parse.side_effect = fake_parse(
         json.dumps({"winner": "skeptic", "reasoning": "More evidence cited."})
     )
     result = mod.judge(
@@ -91,15 +92,17 @@ def test_judge_returns_winner_and_reasoning():
     )
 
     assert isinstance(result, dict)
-    assert result["winner"] in ("advocate", "skeptic")
+    assert result["winner"] == "skeptic"
     assert "reasoning" in result
     assert isinstance(result["reasoning"], str)
 
 
-def test_judge_defaults_on_bad_json():
-    """judge defaults to 'advocate' when JSON parsing fails."""
+def test_judge_defaults_on_refusal():
+    """judge defaults to 'advocate' when the model refuses (parsed is None)."""
     mod = _import_start()
-    client = _mock_client("not valid json")
+    client = MagicMock()
+    message = MagicMock(parsed=None, refusal="I can't help with that.")
+    client.chat.completions.parse.return_value = MagicMock(choices=[MagicMock(message=message)])
     result = mod.judge("Question?", "For.", "Against.", client)
 
     assert result["winner"] == "advocate"
@@ -108,32 +111,12 @@ def test_judge_defaults_on_bad_json():
 # --- consensus_vote tests ---
 
 
-def test_consensus_vote_returns_correct_structure():
+def test_consensus_vote_returns_correct_structure(fake_parse):
     """consensus_vote returns responses, winner, and votes."""
     mod = _import_start()
 
-    call_count = [0]
-
-    def side_effect(**kwargs):
-        call_count[0] += 1
-        messages = kwargs.get("messages", [])
-        is_vote = any("voting agent" in m.get("content", "").lower() for m in messages)
-        if is_vote:
-            return MagicMock(
-                choices=[
-                    MagicMock(
-                        message=MagicMock(
-                            content=json.dumps({"vote": "medical"})
-                        )
-                    )
-                ]
-            )
-        return MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Specialist answer."))]
-        )
-
-    client = MagicMock()
-    client.chat.completions.create.side_effect = side_effect
+    client = _mock_client("Specialist answer.")
+    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"vote": "medical"}))
 
     result = mod.consensus_vote("What caused the power surge?", client)
 
@@ -143,37 +126,16 @@ def test_consensus_vote_returns_correct_structure():
     assert "votes" in result
     assert isinstance(result["responses"], list)
     assert len(result["responses"]) == len(mod.DEPARTMENTS)
-    assert result["winner"] in mod.DEPARTMENTS
-    assert isinstance(result["votes"], dict)
+    assert result["winner"] == "medical"
+    assert result["votes"]["medical"] == len(mod.DEPARTMENTS)
 
 
-def test_consensus_vote_responses_have_department_and_response():
+def test_consensus_vote_responses_have_department_and_response(fake_parse):
     """Each response entry has department and response keys."""
     mod = _import_start()
-    client = _mock_client("Response text.")
 
-    client.chat.completions.create.side_effect = None
-    responses = []
-
-    def side_effect(**kwargs):
-        messages = kwargs.get("messages", [])
-        is_vote = any("voting agent" in m.get("content", "").lower() for m in messages)
-        if is_vote:
-            return MagicMock(
-                choices=[
-                    MagicMock(
-                        message=MagicMock(
-                            content=json.dumps({"vote": "tactical"})
-                        )
-                    )
-                ]
-            )
-        return MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Specialist says..."))]
-        )
-
-    client = MagicMock()
-    client.chat.completions.create.side_effect = side_effect
+    client = _mock_client("Specialist says...")
+    client.chat.completions.parse.side_effect = fake_parse(json.dumps({"vote": "tactical"}))
 
     result = mod.consensus_vote("Status report", client)
 

@@ -228,13 +228,13 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 10 — [LangChain with Python](module-10-langchain/)
 
-**Topics:** LangChain vs hand-rolled (chains, agents, tools, memory, output parsers), prompt templates and LCEL, rewriting agent loops with LangChain, connecting to MCP and RAG pipelines.
+**Topics:** LangChain vs hand-rolled, prompt templates and LCEL, structured output with Pydantic, tool agents with `create_agent` (middleware, checkpointer memory), RAG chains and agentic RAG, serving chains with FastAPI.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Chain basics | [`exercises/01-chain-basics`](module-10-langchain/exercises/01-chain-basics/) | Prompt template + chain for crew report classification |
+| Chain basics | [`exercises/01-chain-basics`](module-10-langchain/exercises/01-chain-basics/) | Structured-output chain for crew report classification |
 | Tool agent | [`exercises/02-tool-agent`](module-10-langchain/exercises/02-tool-agent/) | Wrap ship tools as LangChain tools, run via `create_agent` |
-| RAG chain | [`exercises/03-rag-chain`](module-10-langchain/exercises/03-rag-chain/) | LCEL RAG chain over the Horizon ship logs |
+| RAG chain | [`exercises/03-rag-chain`](module-10-langchain/exercises/03-rag-chain/) | RAG chain with sources, then agentic RAG with a `search_logs` tool |
 | Chain API | [`exercises/04-chain-api`](module-10-langchain/exercises/04-chain-api/) | Expose the Horizon classifier as a FastAPI service |
 
 ### Module 11 — [Evals](module-11-evals/)

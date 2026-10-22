@@ -4,7 +4,7 @@ import importlib
 import json
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -64,7 +64,7 @@ def test_health_endpoint():
     assert data["status"] == "ok"
 
 
-def test_plan_endpoint():
+def test_plan_endpoint(fake_parse):
     """POST /plan returns JSON with a plan."""
     from fastapi.testclient import TestClient
 
@@ -78,13 +78,8 @@ def test_plan_endpoint():
         ]
     })
 
-    mock_message = MagicMock()
-    mock_message.content = plan_json
-
     with patch.object(mod, "client") as mock_openai:
-        mock_openai.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=mock_message)]
-        )
+        mock_openai.chat.completions.parse.side_effect = fake_parse(plan_json)
         resp = test_client.post("/plan", json={"message": "Trip to Tokyo"})
 
     assert resp.status_code == 200
@@ -124,7 +119,7 @@ def test_mcp_server_has_preferences():
 def test_search_flights_returns_results():
     """search_flights returns a string with flight information."""
     mod = _import_server()
-    result = mod.search_flights("London", "Tokyo", "2025-04-15")
+    result = mod.search_flights("London", "Tokyo", "2027-04-13")
     assert isinstance(result, str)
     assert "London" in result or "Tokyo" in result
     assert "$" in result
@@ -133,7 +128,7 @@ def test_search_flights_returns_results():
 def test_search_hotels_returns_results():
     """search_hotels returns a string with hotel information."""
     mod = _import_server()
-    result = mod.search_hotels("Tokyo", "2025-04-15", "2025-04-22")
+    result = mod.search_hotels("Tokyo", "2027-04-13", "2027-04-20")
     assert isinstance(result, str)
     assert "Tokyo" in result
     assert "$" in result

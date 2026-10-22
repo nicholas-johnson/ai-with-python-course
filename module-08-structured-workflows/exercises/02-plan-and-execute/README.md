@@ -36,7 +36,7 @@ A console app in **`start.py`** that orchestrates a plan-and-execute workflow. I
 
 | Function | Description |
 |---|---|
-| `generate_plan(query, client)` | Ask the LLM to create a numbered plan as JSON |
+| `generate_plan(query, client)` | Ask the LLM for a numbered plan using structured outputs |
 | `execute_step(step, context, client)` | Use ReAct to execute a single plan step |
 | `revise_plan(plan, results, query, client)` | Ask the LLM to revise remaining steps |
 | `plan_and_execute(query, client)` | Full orchestration: plan → execute → revise loop |
@@ -58,19 +58,28 @@ class PlanStep:
 
 ### 2. Implement `generate_plan`
 
-Call the model (`MODEL`) with `response_format={"type": "json_object"}` and a system prompt asking for a JSON object like:
+Describe the plan the LLM must return as Pydantic models. `PlanStep` stays a dataclass because it also holds runtime state (`status`, `result`) that the model shouldn't invent:
 
-```json
-{
-    "steps": [
-        {"step_number": 1, "description": "Search for the population of France"},
-        {"step_number": 2, "description": "Search for the area of France in km²"},
-        {"step_number": 3, "description": "Calculate population density"}
-    ]
-}
+```python
+class PlannedStep(BaseModel):
+    step_number: int
+    description: str
+
+class Plan(BaseModel):
+    steps: list[PlannedStep]
 ```
 
-Parse the response and return a list of `PlanStep` objects.
+Call `client.chat.completions.parse(model=MODEL, reasoning_effort="none", response_format=Plan, messages=[...])` with a system prompt that describes *how* to plan (focused steps, logical order, finish with a summary step). `response.choices[0].message.parsed` is a `Plan` like:
+
+```python
+Plan(steps=[
+    PlannedStep(step_number=1, description="Search for the population of France"),
+    PlannedStep(step_number=2, description="Search for the area of France in km²"),
+    PlannedStep(step_number=3, description="Calculate population density"),
+])
+```
+
+Convert each `PlannedStep` into a `PlanStep` and return the list (return `[]` if `parsed` is `None`, which means the model refused).
 
 ### 3. Implement `execute_step`
 
@@ -88,7 +97,7 @@ When a step fails, send the LLM:
 - The failed step
 - Remaining steps
 
-Ask it to return a revised list of remaining steps as JSON. Parse into `PlanStep` objects.
+Ask for a revised list of remaining steps with the same `response_format=Plan`, and convert them into `PlanStep` objects.
 
 ### 5. Implement `plan_and_execute`
 

@@ -36,36 +36,31 @@ def load_logs() -> list[dict]:
     return json.loads(DATA_PATH.read_text())
 
 
+class FactList(BaseModel):
+    facts: list[Fact]
+
+
 def extract_facts(text: str) -> tuple[list[Fact], str]:
     """Extract facts from text. Returns (facts, raw_json)."""
-    schema_desc = json.dumps(Fact.model_json_schema(), indent=2)
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=FactList,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "Extract every factual claim from the text. "
-                    "Return a JSON object with a 'facts' key containing an array.\n"
-                    f"Schema:\n{schema_desc}\n"
                     "Be precise. Include the exact source sentence. Rate confidence 0-1."
                 ),
             },
             {"role": "user", "content": text},
         ],
     )
-    raw = response.choices[0].message.content
-    data = json.loads(raw)
-    facts_data = data.get("facts", []) if isinstance(data, dict) else data
-    facts = []
-    for item in facts_data:
-        try:
-            facts.append(Fact.model_validate(item))
-        except Exception:
-            continue
-    return facts, raw
+    message = response.choices[0].message
+    if message.refusal:
+        return [], ""
+    return message.parsed.facts, message.content
 
 
 def section(title: str):
@@ -83,8 +78,9 @@ def main():
 
     print("  We define a Fact model with typed fields:\n")
     print(json.dumps(Fact.model_json_schema(), indent=2))
-    print("\n  This schema tells the LLM exactly what structure to return.")
-    print("  Pydantic validates the response -- malformed data raises errors.")
+    print("\n  We pass the model itself as response_format. The SDK turns it into a")
+    print("  strict JSON schema, the API constrains generation to that schema, and")
+    print("  the SDK validates the reply back into Fact objects.")
 
     pause()
 
@@ -95,7 +91,7 @@ def main():
     print(f"  Log: {log['id']} ({log['author']})")
     print(f"  Content: {log['content'][:200]}...\n")
 
-    print("  Calling OpenAI with response_format='json_object'...")
+    print("  Calling client.chat.completions.parse(response_format=FactList)...")
     facts, raw_json = extract_facts(log["content"])
 
     print(f"\n  Raw JSON response:\n")

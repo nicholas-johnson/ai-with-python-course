@@ -6,11 +6,11 @@ Separate planning from execution: LLM plans, ReAct executes each step.
 Run:  python solution.py
 """
 from __future__ import annotations
-import json
 from dataclasses import dataclass
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from react_agent import run_react, TOOLS, print_trace
 
@@ -27,11 +27,20 @@ class PlanStep:
     result: str = ""
 
 
+class PlannedStep(BaseModel):
+    step_number: int
+    description: str
+
+
+class Plan(BaseModel):
+    """What the LLM returns. PlanStep adds the runtime status and result."""
+
+    steps: list[PlannedStep]
+
+
 PLAN_SYSTEM = (
     "You are a planning assistant. Given a user query, break it down into a numbered "
     "list of concrete steps that a research agent can execute one at a time.\n\n"
-    "Return a JSON object with a single key 'steps' containing an array.\n"
-    "Each element: {\"step_number\": int, \"description\": str}\n\n"
     "Rules:\n"
     "- Each step should be a single, focused action\n"
     "- Steps should be in logical order\n"
@@ -42,36 +51,27 @@ PLAN_SYSTEM = (
 REVISE_SYSTEM = (
     "You are a planning assistant. A multi-step plan is partially complete. "
     "Some steps succeeded and some failed. Revise the remaining steps to account "
-    "for what happened.\n\n"
-    "Return a JSON object with a single key 'steps' containing an array.\n"
-    "Each element: {\"step_number\": int, \"description\": str}\n"
+    "for what happened. "
     "Number the steps starting from where you left off."
 )
 
 
 def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
     """Ask the LLM to create a numbered plan. Returns list of PlanStep."""
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Plan,
         messages=[
             {"role": "system", "content": PLAN_SYSTEM},
             {"role": "user", "content": query},
         ],
     )
 
-    raw = response.choices[0].message.content or "{}"
-    data = json.loads(raw)
-    steps_data = data.get("steps", [])
-
-    return [
-        PlanStep(
-            step_number=s.get("step_number", i + 1),
-            description=s["description"],
-        )
-        for i, s in enumerate(steps_data)
-    ]
+    plan = response.choices[0].message.parsed
+    if plan is None:
+        return []
+    return [PlanStep(step_number=s.step_number, description=s.description) for s in plan.steps]
 
 
 def execute_step(
@@ -115,28 +115,20 @@ def revise_plan(
         for s in remaining:
             context += f"  Step {s.step_number}: {s.description} (status: {s.status})\n"
 
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Plan,
         messages=[
             {"role": "system", "content": REVISE_SYSTEM},
             {"role": "user", "content": context},
         ],
     )
 
-    raw = response.choices[0].message.content or "{}"
-    data = json.loads(raw)
-    steps_data = data.get("steps", [])
-
-    start_num = max((s.step_number for s in completed), default=0) + 1
-    return [
-        PlanStep(
-            step_number=s.get("step_number", start_num + i),
-            description=s["description"],
-        )
-        for i, s in enumerate(steps_data)
-    ]
+    plan = response.choices[0].message.parsed
+    if plan is None:
+        return []
+    return [PlanStep(step_number=s.step_number, description=s.description) for s in plan.steps]
 
 
 def plan_and_execute(query: str, client: OpenAI) -> dict:

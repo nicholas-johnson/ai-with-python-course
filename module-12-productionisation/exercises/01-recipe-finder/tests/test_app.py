@@ -20,8 +20,9 @@ def client(mock_openai, tmp_path):
     with patch("solution.config.DATA_DIR", str(data_dir)):
         with patch("solution.app.DATA_DIR", str(data_dir)):
             from solution.app import app
-            test_client = TestClient(app)
-            yield test_client
+            # Entering the client runs the app's lifespan (load recipes, build index).
+            with TestClient(app) as test_client:
+                yield test_client
 
 
 def test_health_endpoint(client):

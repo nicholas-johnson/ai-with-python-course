@@ -4,21 +4,24 @@
 
 In a multi-agent system, a **router** is the front door. It classifies an incoming message and dispatches it to the right **specialist agent**. Each specialist has its own focused system prompt and domain expertise, which produces higher-quality answers than a single generalist prompt.
 
-The classification step can be simple keyword matching, but using an LLM with JSON mode is more robust -- it handles ambiguous queries and understands intent:
+The classification step can be simple keyword matching, but using an LLM is more robust -- it handles ambiguous queries and understands intent. With **structured outputs**, a `Literal` type means the model can only answer with a valid department:
 
 ```python
+class Route(BaseModel):
+    department: Literal["medical", "tactical", "comms"]
+
 def classify_query(query: str, client: OpenAI) -> str:
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Route,
         messages=[
-            {"role": "system", "content": "Classify into a department. Return JSON."},
+            {"role": "system", "content": "Classify the query into a department."},
             {"role": "user", "content": query},
         ],
     )
-    data = json.loads(response.choices[0].message.content)
-    return data["department"]
+    route = response.choices[0].message.parsed
+    return route.department if route else "medical"
 ```
 
 Each specialist agent is a simple function: it takes a query, runs it through the LLM with a domain-specific system prompt, and returns the response.
@@ -31,7 +34,7 @@ A console app in **`start.py`** with three specialist agents (medical, tactical,
 
 | Function | Description |
 |---|---|
-| `classify_query` | LLM call with JSON mode to classify a query into a department |
+| `classify_query` | Structured-output LLM call that classifies a query into a department |
 | `specialist_agent` | Runs a specialist with the right system prompt |
 | `route_and_respond` | Pipeline: classify then dispatch, returning both the routing decision and response |
 
@@ -39,12 +42,14 @@ A console app in **`start.py`** with three specialist agents (medical, tactical,
 
 ### 1. Implement `classify_query`
 
-Use `client.chat.completions.create` with JSON mode to classify a query:
+Use `client.chat.completions.parse` to classify a query:
 
-- Set `response_format={"type": "json_object"}`
-- System prompt: instruct the model to classify into one of three departments (`medical`, `tactical`, `comms`) and return `{"department": "<name>"}`
-- Parse the response JSON and return the department string
-- If parsing fails or the department is not in the valid list, default to `"medical"`
+- Define `Route(BaseModel)` with `department: Literal["medical", "tactical", "comms"]` and pass it as `response_format`
+- System prompt: describe what each department handles (you don't need to describe the JSON -- the schema does)
+- Return `response.choices[0].message.parsed.department`
+- If `parsed` is `None` (the model refused), default to `"medical"`
+
+You no longer need to check for an invalid department name: the `Literal` constrains the model's output, and Pydantic would reject anything else.
 
 ### 2. Implement `specialist_agent`
 

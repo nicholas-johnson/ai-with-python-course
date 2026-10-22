@@ -7,10 +7,10 @@ correctness, completeness, and relevance.
 
 from __future__ import annotations
 
-import json
 import os
 
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
@@ -38,10 +38,12 @@ def llm_judge(
         - "explanation": str
 
     TODO:
-    - Prompt the model (MODEL) to evaluate the answer on three dimensions
-    - Ask for JSON output with the four keys above
-    - Parse and return the result
-    - Strip markdown fences if present; on JSON failure return scores of 1
+    - Define a Pydantic model JudgeScores (above this function) with
+      correctness/completeness/relevance: int = Field(ge=1, le=5) and explanation: str
+    - Prompt the model (MODEL) to evaluate the answer on three dimensions,
+      using client.chat.completions.parse(..., response_format=JudgeScores)
+    - Return message.parsed.model_dump()
+    - If message.parsed is None (the model refused), return scores of 1
     """
     # TODO: implement LLM judge
     pass

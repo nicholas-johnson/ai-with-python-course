@@ -6,12 +6,12 @@ Grounded QA from a knowledge graph with citations.
 Run:  python solution.py
 """
 
-import json
 from dataclasses import dataclass, field
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from fact_extractor import load_logs, extract_facts, validate_facts
 from graph_builder import build_graph, KnowledgeGraph
@@ -31,20 +31,23 @@ class GroundedAnswer:
     confidence: float
 
 
+class QueryEntities(BaseModel):
+    entities: list[str]
+
+
 def extract_query_entities(question: str, client: OpenAI, graph: KnowledgeGraph) -> list[str]:
     """Identify entity names from the question that exist in the graph."""
     graph_nodes = list(graph.graph.nodes())
 
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=QueryEntities,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "Extract entity names from the question that might appear in a knowledge graph. "
-                    "Return a JSON object with an 'entities' key containing an array of strings. "
                     "Be generous -- include people, systems, locations, events, and concepts."
                 ),
             },
@@ -52,8 +55,8 @@ def extract_query_entities(question: str, client: OpenAI, graph: KnowledgeGraph)
         ],
     )
 
-    data = json.loads(response.choices[0].message.content)
-    extracted = data.get("entities", [])
+    message = response.choices[0].message
+    extracted = message.parsed.entities if message.parsed else []
 
     matched = []
     nodes_lower = {n.lower(): n for n in graph_nodes}

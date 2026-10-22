@@ -15,10 +15,13 @@ def make_mock_client(judge_response=None):
             "explanation": "Good answer overall.",
         }
     client = MagicMock()
-    response = MagicMock()
-    response.choices = [MagicMock()]
-    response.choices[0].message.content = json.dumps(judge_response)
-    client.chat.completions.create.return_value = response
+
+    def parse(*, response_format, **kwargs):
+        text = json.dumps(judge_response)
+        message = MagicMock(content=text, refusal=None, parsed=response_format.model_validate_json(text))
+        return MagicMock(choices=[MagicMock(message=message)])
+
+    client.chat.completions.parse.side_effect = parse
     return client
 
 
@@ -60,7 +63,16 @@ class TestLLMJudge:
     def test_calls_openai(self):
         client = make_mock_client()
         llm_judge(client, "q", "a", "r")
-        client.chat.completions.create.assert_called_once()
+        client.chat.completions.parse.assert_called_once()
+
+
+    def test_defaults_on_refusal(self):
+        client = MagicMock()
+        message = MagicMock(parsed=None, refusal="I can't evaluate this.")
+        client.chat.completions.parse.return_value = MagicMock(choices=[MagicMock(message=message)])
+        result = llm_judge(client, "q", "a", "r")
+        assert result["correctness"] == 1
+        assert "refused" in result["explanation"].lower()
 
 
 class TestEvaluateDataset:

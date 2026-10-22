@@ -160,4 +160,4 @@ From repo root: `pnpm slides:07`, or `cd module-07-agent-memory/slides && pnpm d
 ## Reference
 
 - [MemGPT (Packer et al. 2023)](https://arxiv.org/abs/2310.08560)
-- [LangChain Memory](https://python.langchain.com/docs/concepts/memory/)
+- [LangChain memory (short-term)](https://docs.langchain.com/oss/python/langchain/short-term-memory) and [long-term](https://docs.langchain.com/oss/python/langchain/long-term-memory)

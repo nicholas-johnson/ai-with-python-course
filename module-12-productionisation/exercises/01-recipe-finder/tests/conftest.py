@@ -52,14 +52,17 @@ def mock_openai():
     with patch("solution.rag.client") as mock_rag, \
          patch("solution.cache.client") as mock_cache:
 
-        mock_response = MagicMock()
-        mock_response.data = [MagicMock(embedding=mock_embedding)]
-        mock_rag.embeddings.create.return_value = mock_response
-        mock_cache.embeddings.create.return_value = mock_response
+        def fake_embeddings(*, input, **kwargs):
+            # One vector per input text, like the real API.
+            texts = [input] if isinstance(input, str) else input
+            return MagicMock(data=[MagicMock(embedding=mock_embedding) for _ in texts])
 
-        rerank_response = MagicMock()
-        rerank_response.choices = [MagicMock()]
-        rerank_response.choices[0].message.content = "[1, 2, 3]"
-        mock_rag.chat.completions.create.return_value = rerank_response
+        mock_rag.embeddings.create.side_effect = fake_embeddings
+        mock_cache.embeddings.create.side_effect = fake_embeddings
+
+        rerank_message = MagicMock(parsed=MagicMock(order=[1, 2, 3]), refusal=None)
+        mock_rag.chat.completions.parse.return_value = MagicMock(
+            choices=[MagicMock(message=rerank_message)]
+        )
 
         yield {"rag": mock_rag, "cache": mock_cache}

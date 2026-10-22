@@ -36,15 +36,27 @@ def test_vision_endpoint_exists(client):
     assert resp.status_code in (422, 400), "Should reject empty body"
 
 
+
+def _solid_png(width: int, height: int, rgb: tuple[int, int, int]) -> bytes:
+    """Build a valid solid-colour PNG (the API rejects malformed images)."""
+    import struct
+    import zlib
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        body = kind + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+
+    row = b"\x00" + bytes(rgb) * width
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(row * height))
+        + chunk(b"IEND", b"")
+    )
+
 def test_vision_accepts_image(client):
     """Check /vision accepts a base64 image and returns structured data."""
-    tiny_png = (
-        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
-        b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
-        b"\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00"
-        b"\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82"
-    )
-    img_b64 = base64.b64encode(tiny_png).decode()
+    img_b64 = base64.b64encode(_solid_png(32, 32, (40, 90, 200))).decode()
 
     resp = client.post(
         "/vision",

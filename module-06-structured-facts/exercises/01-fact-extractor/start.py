@@ -29,12 +29,18 @@ def load_logs() -> list[dict]:
     return json.loads(DATA_PATH.read_text())
 
 
-# TODO: Implement extract_facts(text, client) -> list[Fact]
-#   1. Build a prompt instructing the LLM to extract facts as JSON
-#      matching the Fact schema (subject, predicate, object, source_text, confidence)
-#   2. Call client.chat.completions.create with response_format={"type": "json_object"}
-#   3. Parse the JSON response into a list of Fact objects
-#   Return a list of validated Fact instances.
+# TODO: Define FactList(BaseModel) with one field: facts: list[Fact]
+#   (structured outputs need an object at the top level, so wrap the list)
+
+
+# TODO: Implement extract_facts(text, client) -> tuple[list[Fact], str]
+#   1. Write a system prompt asking the LLM to extract every factual claim
+#      (no need to describe the JSON format -- the schema does that)
+#   2. Call client.chat.completions.parse(..., response_format=FactList)
+#   3. message = response.choices[0].message
+#      If message.refusal is set, return [], ""
+#   Return (message.parsed.facts, message.content) -- validated Fact
+#   instances plus the raw JSON text for the /json command.
 
 
 # TODO: Implement validate_facts(facts, min_confidence) -> list[Fact]

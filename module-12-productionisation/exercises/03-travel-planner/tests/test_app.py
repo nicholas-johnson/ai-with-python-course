@@ -76,19 +76,18 @@ class TestGuardrails:
 
 class TestHealthEndpoint:
     def test_health(self):
-        with patch("solution.app.startup"):
-            from solution.app import app, destinations, collection
-            import solution.app as app_module
-            app_module.destinations = [{"id": "test"}]
-            app_module.collection = MagicMock()
+        from solution.app import app, destinations, collection
+        import solution.app as app_module
+        app_module.destinations = [{"id": "test"}]
+        app_module.collection = MagicMock()
 
-            client = TestClient(app, raise_server_exceptions=False)
-            response = client.get("/api/health")
-            assert response.status_code == 200
-            data = response.json()
-            assert data["status"] == "healthy"
-            assert data["destinations_loaded"] == 1
-            assert data["index_ready"] is True
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.get("/api/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "healthy"
+        assert data["destinations_loaded"] == 1
+        assert data["index_ready"] is True
 
 
 class TestSearchEndpoint:
@@ -101,8 +100,7 @@ class TestSearchEndpoint:
             "distances": [[0.2]],
         }
 
-        with patch("solution.app.startup"), \
-             patch("solution.app.collection", mock_collection), \
+        with patch("solution.app.collection", mock_collection), \
              patch("solution.rag.get_embedding", return_value=[0.1] * 1536):
             from solution.app import app
             client = TestClient(app, raise_server_exceptions=False)
@@ -119,19 +117,17 @@ class TestDestinationEndpoint:
             {"id": "tokyo", "name": "Tokyo", "country": "Japan"},
         ]
 
-        with patch("solution.app.startup"):
-            from solution.app import app
-            client = TestClient(app, raise_server_exceptions=False)
-            response = client.get("/api/destination/tokyo")
-            assert response.status_code == 200
-            assert response.json()["name"] == "Tokyo"
+        from solution.app import app
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.get("/api/destination/tokyo")
+        assert response.status_code == 200
+        assert response.json()["name"] == "Tokyo"
 
     def test_destination_not_found(self):
         import solution.app as app_module
         app_module.destinations = []
 
-        with patch("solution.app.startup"):
-            from solution.app import app
-            client = TestClient(app, raise_server_exceptions=False)
-            response = client.get("/api/destination/nonexistent")
-            assert response.status_code == 404
+        from solution.app import app
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.get("/api/destination/nonexistent")
+        assert response.status_code == 404

@@ -66,7 +66,23 @@ return transcript.text
 
 ### 2. Implement `analyze_image`
 
-Build a chat completion with `MODEL` that includes the image as a base64 data URL. Ask the model to respond in JSON with `description` and `key_points` fields. Use `response_format={"type": "json_object"}` to enforce JSON output.
+Build a chat completion with `MODEL` that includes the image as a base64 data URL. Describe the result you want as a Pydantic model and pass it to `client.chat.completions.parse` -- the API constrains the reply to that schema:
+
+```python
+class ImageAnalysis(BaseModel):
+    description: str
+    key_points: list[str]
+
+response = client.chat.completions.parse(
+    model=MODEL,
+    reasoning_effort="none",
+    response_format=ImageAnalysis,
+    messages=[...],   # system prompt + user content with text and image_url parts
+)
+message = response.choices[0].message
+```
+
+Return `message.parsed.model_dump()`. If `message.parsed` is `None`, the model refused (`message.refusal` says why) -- raise `HTTPException(status_code=422, ...)`. Module 6 covers structured outputs in depth.
 
 ### 3. Add `POST /vision`
 

@@ -22,17 +22,22 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+answer_chain = (
+    RunnablePassthrough.assign(context=lambda x: format_docs(x["docs"]))
     | prompt
     | model
     | StrOutputParser()
 )
+rag_chain = (
+    {"docs": retriever, "question": RunnablePassthrough()}
+    | RunnablePassthrough.assign(answer=answer_chain)
+)
 
-answer = rag_chain.invoke("What caused the reactor anomaly?")
+result = rag_chain.invoke("What caused the reactor anomaly?")
+# {"question": "...", "docs": [Document, ...], "answer": "..."}
 ```
 
-`RunnablePassthrough()` passes the input string through unchanged (the question). The retriever fetches documents, `format_docs` formats them with source labels. The chain reads naturally: retrieve context, build prompt, call model, parse output.
+`RunnablePassthrough()` passes the input string through unchanged (the question). `RunnablePassthrough.assign(...)` keeps everything already in the dict and adds a new key — so the result carries both the answer *and* the documents it was grounded on, from one retrieval. The chain reads naturally: retrieve context, build prompt, call model, parse output.
 
 ## What you build
 
@@ -47,7 +52,9 @@ The Exercise 1 and 2 code (classifier chain, tools, agent) is already inlined at
 | `load_documents()` | Load ship logs, return `(texts, metadatas)` |
 | `build_vectorstore(texts, metadatas)` | Embed and store logs in ChromaDB |
 | `build_rag_chain(vectorstore)` | Create the LCEL RAG chain, return `(chain, retriever)` |
-| `ask(chain, retriever, question)` | Run a RAG query, return `(answer, retrieved_docs)` |
+| `ask(chain, question)` | Run a RAG query, return `(answer, retrieved_docs)` |
+| `build_rag_agent(retriever)` | The Exercise 2 agent plus a `search_logs` tool — agentic RAG |
+| `run_rag_agent(agent, question)` | Run the RAG agent, return its final answer |
 
 ## Step-by-step
 
@@ -89,34 +96,44 @@ def format_docs(docs):
 
 ### 4. Build the RAG chain
 
-Create a prompt that instructs the model to answer from the provided sources only, then pipe it all together:
+Create a prompt that instructs the model to answer from the provided sources only, then compose the chain from the recap above so it returns the docs and the answer together:
 
 ```python
 prompt = ChatPromptTemplate.from_messages([
     ("system", "Answer using ONLY the sources below. Cite sources as [Source N]. ..."),
     ("human", "Sources:\n{context}\n\nQuestion: {question}"),
 ])
-
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    | prompt
-    | model
-    | StrOutputParser()
-)
 ```
 
 ### 5. Implement `ask`
 
-Invoke the retriever separately to capture the source documents, then invoke the chain for the answer:
+One call to the chain gives you everything:
 
 ```python
-def ask(chain, retriever, question: str) -> tuple[str, list]:
-    docs = retriever.invoke(question)
-    answer = chain.invoke(question)
-    return answer, docs
+def ask(chain, question: str) -> tuple[str, list]:
+    result = chain.invoke(question)
+    return result["answer"], result["docs"]
 ```
 
-### 6. Build the interactive loop
+(A common mistake is calling `retriever.invoke()` and then `chain.invoke()` — that retrieves twice and the docs you show might not be the ones the answer used.)
+
+### 6. Agentic RAG
+
+A chain *always* retrieves, once, with the user's exact words. An agent can decide whether to search, rewrite the query, or search several times. Wrap the retriever as a tool and add it to the Exercise 2 agent:
+
+```python
+def build_rag_agent(retriever):
+    @tool
+    def search_logs(query: str) -> str:
+        """Search the CSS Horizon ship logs. Use for questions about past events, surveys, or operations."""
+        return format_docs(retriever.invoke(query))
+
+    return create_agent(model, [*tools, search_logs], system_prompt=SYSTEM_PROMPT)
+```
+
+Compare the two with `/agent`: ask something that needs logs *and* a live sensor reading ("Is the docking seal better now than after the L5-Prime patch?") — only the agent can combine them.
+
+### 7. Build the interactive loop
 
 Handle these commands:
 
@@ -125,7 +142,7 @@ Handle these commands:
 | any text | RAG chain — retrieve, ground, generate |
 | `/sources` | Show the retrieved documents from the last query |
 | `/norag` | Re-ask the last question without retrieval (compare quality) |
-| `/agent` | Send the last question to the tool agent from Exercise 2 |
+| `/agent` | Send the last question to the RAG agent (tools + `search_logs`) |
 | `quit` | Exit |
 
 ## Try it
@@ -144,10 +161,12 @@ pytest test_start.py -v
 ```
 
 The tests check:
-- `ask` returns a `(str, list)` tuple with a non-empty answer
+- `load_documents` returns matching texts and metadata with `source`, `author`, `category`
+- `ask` returns a non-empty answer and the retrieved documents (integration — needs `OPENAI_API_KEY`)
+- the RAG agent has a `search_logs` tool (integration)
 
 ## Stretch goals
 
 - Add a reranker step between retrieval and generation
-- Implement streaming output with `rag_chain.stream()`
+- Stream just the answer: `answer_chain.stream({"docs": docs, "question": q})`
 - Add metadata filters (e.g., only search engineering logs)

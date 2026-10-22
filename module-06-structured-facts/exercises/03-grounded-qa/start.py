@@ -12,6 +12,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from fact_extractor import load_logs, extract_facts, validate_facts
 from graph_builder import build_graph, KnowledgeGraph
@@ -34,7 +35,9 @@ class GroundedAnswer:
 # ---------------------------------------------------------------------------
 # TODO: Implement extract_query_entities(question, client, graph) -> list[str]
 #   Identify entity names from the question that exist in the graph.
-#   Approach: ask OpenAI to extract entity names, then match against graph nodes.
+#   Approach: define QueryEntities(BaseModel) with entities: list[str], call
+#   client.chat.completions.parse(..., response_format=QueryEntities), then
+#   match message.parsed.entities against graph nodes (case-insensitive).
 #   Return a list of matching node names.
 # ---------------------------------------------------------------------------
 

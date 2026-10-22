@@ -57,33 +57,36 @@ class Fact(BaseModel):
     source_text: str = Field(description="Original sentence")
     confidence: float = Field(ge=0.0, le=1.0)
 
-# LLM returns JSON → Pydantic validates it
-fact = Fact.model_validate_json(llm_response)`,
+class FactList(BaseModel):   # top level must be an object
+    facts: list[Fact]`,
       highlights: [
-        'Field constraints (ge, le) catch out-of-range values automatically',
-        'model_validate_json raises ValidationError on bad data',
+        'Field descriptions go into the JSON Schema the model sees',
+        'Field constraints (ge, le) are part of the schema and re-checked by Pydantic',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Extraction prompt',
-      code: `def build_extraction_prompt(text: str) -> str:
-    return (
-        "Extract every factual claim from the text below. "
-        "Return a JSON array of objects with keys: "
-        "subject, predicate, object, source_text, "
-        "confidence (0-1).\\n\\n"
-        f"Text:\\n{text}"
-    )
+      title: 'Structured outputs — the schema is the format',
+      code: `response = client.chat.completions.parse(
+    model=MODEL,
+    reasoning_effort="none",
+    response_format=FactList,
+    messages=[
+        {"role": "system", "content": "Extract every factual claim. Rate confidence 0-1."},
+        {"role": "user", "content": text},
+    ],
+)
+message = response.choices[0].message
+facts = message.parsed.facts if message.parsed else []   # None = refusal
 
 # Input:  "Alice manages the infrastructure team."
-# Output: [{"subject": "Alice", "predicate": "manages",
-#           "object": "infrastructure team", ...}]`,
+# facts:  [Fact(subject='Alice', predicate='manages',
+#               object='infrastructure team', ...)]`,
       highlights: [
-        'Explicit schema in the prompt keeps the output predictable',
-        'Confidence lets you filter low-quality extractions downstream',
+        'The API constrains generation to the schema — no missing keys, no wrong types',
+        'Older code used JSON mode (json_object) + schema in the prompt: valid JSON, but not necessarily yours',
       ],
     },
   },
@@ -116,7 +119,7 @@ fact = Fact.model_validate_json(llm_response)`,
         '**Confidence threshold**: drop facts below 0.7 (configurable).',
         '**Deduplication**: same (subject, predicate, object) → keep highest confidence.',
         '**Provenance**: every fact links back to the source sentence.',
-        'Retry on parse failure: ask the LLM to fix its own JSON.',
+        'Handle refusals: `message.parsed` is `None` and `message.refusal` says why.',
       ],
     },
   },

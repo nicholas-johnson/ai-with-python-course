@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -87,17 +88,27 @@ class PlanStep:
     result: str = ""
 
 
+class PlannedStep(BaseModel):
+    number: int
+    description: str
+
+
+class Plan(BaseModel):
+    """What the LLM returns. PlanStep adds the runtime status and result."""
+
+    steps: list[PlannedStep]
+
+
 def generate_plan(goal: str, client: OpenAI) -> list[PlanStep]:
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Plan,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "You are a planning assistant. Given a goal, break it into 3-6 concrete steps. "
-                    "Return JSON: {\"steps\": [{\"number\": 1, \"description\": \"...\"}]}. "
                     "Each step should be a single, actionable task that can use web search, "
                     "calculation, or note-taking tools."
                 ),
@@ -105,8 +116,8 @@ def generate_plan(goal: str, client: OpenAI) -> list[PlanStep]:
             {"role": "user", "content": goal},
         ],
     )
-    data = json.loads(response.choices[0].message.content)
-    return [PlanStep(number=s["number"], description=s["description"]) for s in data["steps"]]
+    plan = response.choices[0].message.parsed
+    return [PlanStep(number=s.number, description=s.description) for s in plan.steps] if plan else []
 
 
 def execute_step(step: PlanStep, client: OpenAI) -> str:
@@ -158,16 +169,15 @@ def revise_plan(
         f"  {s.number}. {s.description}" for s in remaining
     )
 
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Plan,
         messages=[
             {
                 "role": "system",
                 "content": (
-                    "A step in a plan failed. Revise the remaining steps based on what happened. "
-                    "Return JSON: {\"steps\": [{\"number\": N, \"description\": \"...\"}]}"
+                    "A step in a plan failed. Revise the remaining steps based on what happened."
                 ),
             },
             {
@@ -180,11 +190,11 @@ def revise_plan(
             },
         ],
     )
-    data = json.loads(response.choices[0].message.content)
+    plan = response.choices[0].message.parsed
     start_num = len(completed) + 1
     return [
-        PlanStep(number=start_num + i, description=s["description"])
-        for i, s in enumerate(data["steps"])
+        PlanStep(number=start_num + i, description=s.description)
+        for i, s in enumerate(plan.steps if plan else [])
     ]
 
 

@@ -4,7 +4,6 @@ import os
 
 import httpx
 import pytest
-
 from start import create_app
 
 

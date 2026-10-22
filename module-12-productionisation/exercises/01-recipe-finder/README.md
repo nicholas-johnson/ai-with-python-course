@@ -9,12 +9,12 @@ Build a production-ready recipe search API that combines techniques from across 
 | OpenAI chat completions | Module 1 — Working with the LLM | `vision.py`, `rag.py` |
 | Tool calling patterns | Module 2 — Tool Calling | `app.py` |
 | RAG indexing & vector search | Module 5 — RAG Fundamentals | `rag.py` |
-| Hybrid search (BM25 + vector) | Module 6 — RAG Optimisation | `rag.py` |
-| LLM reranking | Module 6 — RAG Optimisation | `rag.py` |
-| Semantic caching | Module 12 — Productionisation | `cache.py` |
+| Hybrid search (BM25 + vector) | Module 13 — Edge Topics | `rag.py` |
+| LLM reranking | Module 13 — Edge Topics | `rag.py` |
+| Semantic caching | Module 13 — Edge Topics | `cache.py` |
 | Structured tracing | Module 12 — Productionisation | `tracing.py` |
-| Input/output guardrails | Module 12 — Productionisation | `guardrails.py` |
-| Vision API | Module 1 — Working with the LLM | `vision.py` |
+| Input/output guardrails | Module 13 — Edge Topics | `guardrails.py` |
+| Vision API | Module 4 — GenAI Strategies | `vision.py` |
 
 ## Project Structure
 
@@ -75,7 +75,7 @@ Work through the starter files in this order:
 - **`_bm25_search`**: Get all documents from the collection, score each by counting matching query terms, return top k.
 - **`_vector_search`**: Embed the query, call `collection.query`, return results as a list of dicts.
 - **`hybrid_search`**: Run both searches, merge with Reciprocal Rank Fusion (RRF score = 1/(60 + rank + 1)).
-- **`rerank`**: Format candidates for the LLM, ask it to return a JSON array of ranked numbers, reorder results.
+- **`rerank`**: Format candidates for the LLM, get the ranking back with structured outputs (`class Ranking(BaseModel): order: list[int]`), reorder results.
 
 ### Step 2: `cache.py` — Add Semantic Caching
 - **`get`**: Embed the query, compare against cached entries using cosine similarity. Return cached result if similarity >= threshold and entry hasn't expired.

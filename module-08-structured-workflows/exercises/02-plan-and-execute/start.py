@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from react_agent import run_react, TOOLS, print_trace
 
@@ -24,14 +25,20 @@ class PlanStep:
     result: str = ""
 
 
+# TODO: define the schema the LLM must return (structured outputs):
+#   class PlannedStep(BaseModel): step_number: int, description: str
+#   class Plan(BaseModel): steps: list[PlannedStep]
+# PlanStep (above) adds runtime status/result; the LLM only produces the plan.
+
+
 def generate_plan(query: str, client: OpenAI) -> list[PlanStep]:
     """Ask the LLM to create a numbered plan. Returns list of PlanStep."""
-    # TODO: call client.chat.completions.create with:
+    # TODO: call client.chat.completions.parse with:
     #   model=MODEL
-    #   response_format={"type": "json_object"}
-    #   A system prompt asking for a JSON object with a "steps" array
-    #   Each step: {"step_number": int, "description": str}
-    # Parse the JSON and return a list of PlanStep objects
+    #   response_format=Plan
+    #   A system prompt asking for a short, ordered plan (no need to describe JSON)
+    # plan = response.choices[0].message.parsed  (None if the model refused)
+    # Convert each PlannedStep into a PlanStep and return the list
     raise NotImplementedError("TODO")
 
 
@@ -59,8 +66,8 @@ def revise_plan(
     #   - The original query
     #   - Steps completed so far (with results)
     #   - Steps remaining
-    # Ask it to return revised remaining steps as JSON
-    # Parse and return as PlanStep list
+    # Use client.chat.completions.parse(..., response_format=Plan) again
+    # Convert the parsed steps into a PlanStep list
     raise NotImplementedError("TODO")
 
 

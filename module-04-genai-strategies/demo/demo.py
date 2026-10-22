@@ -11,12 +11,12 @@ Requires: OPENAI_API_KEY environment variable.
 
 import base64
 import io
-import json
 import os
 import wave
 from pathlib import Path
 
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 TRANSCRIBE_MODEL = "gpt-transcribe"
@@ -30,6 +30,11 @@ def section(title: str):
     print(f"{'='*60}\n")
 
 
+class ImageAnalysis(BaseModel):
+    description: str = Field(description="A detailed description of the image")
+    key_points: list[str] = Field(description="The most important observations")
+
+
 def demo_vision(client: OpenAI):
     section("Part 1: Vision — Image Analysis")
 
@@ -39,17 +44,14 @@ def demo_vision(client: OpenAI):
     print(f"  Image: {image_path.name} ({image_path.stat().st_size} bytes)")
     print(f"  Sending to {MODEL} for analysis...\n")
 
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
+        response_format=ImageAnalysis,
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "You are an image analysis assistant. Respond with a JSON object "
-                    'containing "description" (string) and "key_points" (list of strings). '
-                    "Only output valid JSON, no markdown."
-                ),
+                "content": "You are an image analysis assistant.",
             },
             {
                 "role": "user",
@@ -62,13 +64,15 @@ def demo_vision(client: OpenAI):
                 ],
             },
         ],
-        response_format={"type": "json_object"},
     )
 
-    result = json.loads(response.choices[0].message.content or "{}")
-    print(f"  Description: {result.get('description', '(none)')}\n")
+    result = response.choices[0].message.parsed
+    if result is None:
+        print(f"  Model refused: {response.choices[0].message.refusal}")
+        return
+    print(f"  Description: {result.description}\n")
     print("  Key points:")
-    for point in result.get("key_points", []):
+    for point in result.key_points:
         print(f"    • {point}")
 
     print(f"\n  Tokens: {response.usage.prompt_tokens} prompt + {response.usage.completion_tokens} completion")

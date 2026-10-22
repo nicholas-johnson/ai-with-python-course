@@ -11,11 +11,12 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
-from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -36,27 +37,30 @@ SENSOR_DATA = {
 # From Exercise 01 — classifier chain (complete)
 # ---------------------------------------------------------------------------
 
+class Classification(BaseModel):
+    """Classification of a crew report."""
+
+    category: Literal["navigation", "engineering", "science", "medical", "operations"]
+    summary: str = Field(description="One-sentence summary of the report")
+    priority: Literal["low", "medium", "high", "critical"]
+
+
 _classify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         "You are a ship incident classifier for the CSS Horizon.\n"
-        "Classify the crew report into exactly one category: "
-        "navigation, engineering, science, medical, or operations.\n"
-        "Respond with ONLY a JSON object (no markdown fences) containing:\n"
-        '  "category": one of the five categories,\n'
-        '  "summary": a one-sentence summary of the report,\n'
-        '  "priority": one of low, medium, high, critical.',
+        "Classify the crew report: pick the category, write a one-sentence "
+        "summary, and set the priority.",
     ),
     ("human", "{report}"),
 ])
-
 _classify_model = ChatOpenAI(model=MODEL, reasoning_effort="none", temperature=0)
-_classify_chain = _classify_prompt | _classify_model | JsonOutputParser()
+_classify_chain = _classify_prompt | _classify_model.with_structured_output(Classification)
 
 
 def classify_report(report: str) -> dict:
     """Classify a crew report. Returns {category, summary, priority}."""
-    return _classify_chain.invoke({"report": report})
+    return _classify_chain.invoke({"report": report}).model_dump()
 
 
 # ---------------------------------------------------------------------------

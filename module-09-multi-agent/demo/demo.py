@@ -9,12 +9,13 @@ Run:  python module-09-multi-agent/demo/demo.py
 """
 from __future__ import annotations
 
-import json
 import os
 import sys
 from pathlib import Path
+from typing import Literal
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 # Exercise 04 swarm implementation (reused for Part 5)
 _EX04 = Path(__file__).resolve().parent.parent / "exercises" / "04-swarm-tools"
@@ -46,28 +47,36 @@ SPECIALIST_PROMPTS = {
 
 DEPARTMENTS = list(SPECIALIST_PROMPTS.keys())
 
+
+class Route(BaseModel):
+    department: Literal["navigation", "engineering", "science"]
+
+
+class Review(BaseModel):
+    approved: bool
+    feedback: str
+
+
+class Ballot(BaseModel):
+    vote: Literal["reroute", "maintain course"]
+    reasoning: str
+
+
 def classify_query(query: str, client: OpenAI) -> str:
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Route,
         messages=[
             {
                 "role": "system",
-                "content": (
-                    f"Classify the user query into exactly one department: "
-                    f"{', '.join(DEPARTMENTS)}. "
-                    'Return JSON: {"department": "<name>"}'
-                ),
+                "content": "Classify the user query into exactly one department.",
             },
             {"role": "user", "content": query},
         ],
     )
-    try:
-        dept = json.loads(response.choices[0].message.content)["department"]
-        return dept if dept in DEPARTMENTS else "science"
-    except (json.JSONDecodeError, KeyError):
-        return "science"
+    route = response.choices[0].message.parsed
+    return route.department if route else "science"
 
 def specialist_respond(department: str, query: str, client: OpenAI) -> str:
     prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
@@ -83,18 +92,17 @@ def specialist_respond(department: str, query: str, client: OpenAI) -> str:
 
 def critic_review(query: str, answer: str, client: OpenAI) -> dict:
     """Returns {"approved": bool, "feedback": str}."""
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         reasoning_effort="none",
-        response_format={"type": "json_object"},
+        response_format=Review,
         messages=[
             {
                 "role": "system",
                 "content": (
                     "You are a senior reviewer aboard the DSS Pathfinder. "
                     "Evaluate the specialist's answer for accuracy, completeness, "
-                    "and safety. Return JSON: "
-                    '{"approved": true/false, "feedback": "your feedback"}. '
+                    "and safety. "
                     "Only reject if the answer is clearly wrong, dangerous, or incomplete."
                 ),
             },
@@ -104,10 +112,10 @@ def critic_review(query: str, answer: str, client: OpenAI) -> dict:
             },
         ],
     )
-    try:
-        return json.loads(response.choices[0].message.content)
-    except (json.JSONDecodeError, KeyError):
-        return {"approved": True, "feedback": "Unable to parse review."}
+    review = response.choices[0].message.parsed
+    if review is None:
+        return {"approved": True, "feedback": "Reviewer refused."}
+    return review.model_dump()
 
 def revise_answer(department: str, query: str, previous: str, feedback: str, client: OpenAI) -> str:
     prompt = SPECIALIST_PROMPTS.get(department, SPECIALIST_PROMPTS["science"])
@@ -257,29 +265,24 @@ def main():
 
     votes: dict[str, str] = {}
     for dept in DEPARTMENTS:
-        response = client.chat.completions.create(
+        response = client.chat.completions.parse(
             model=MODEL,
             reasoning_effort="none",
-            response_format={"type": "json_object"},
+            response_format=Ballot,
             messages=[
                 {
                     "role": "system",
                     "content": (
                         f"{SPECIALIST_PROMPTS[dept]} "
-                        f"You must vote on the best course of action. "
-                        f'Return JSON: {{"vote": "<option>", "reasoning": "brief rationale"}} '
-                        f"where option is one of: {', '.join(options)}."
+                        "You must vote on the best course of action, with a brief rationale."
                     ),
                 },
                 {"role": "user", "content": question},
             ],
         )
-        try:
-            data = json.loads(response.choices[0].message.content)
-        except json.JSONDecodeError:
-            data = {"vote": options[0], "reasoning": "Parse error — defaulted."}
-        vote = data.get("vote", options[0])
-        reasoning = data.get("reasoning", "")
+        ballot = response.choices[0].message.parsed
+        vote = ballot.vote if ballot else options[0]
+        reasoning = ballot.reasoning if ballot else "Abstained."
         votes[dept] = vote
         print(f"  {dept:>12}:  {vote}")
         print(f"               {reasoning}\n")
