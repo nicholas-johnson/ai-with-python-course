@@ -1,7 +1,7 @@
 import { InlineMarkdown } from "./InlineMarkdown";
 
 export function ComparisonSlide({ content }) {
-  const renderPanel = (panel, color) => {
+  const renderPanel = (panel) => {
     // Support both code blocks and item lists
     if (panel.code) {
       return (

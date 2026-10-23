@@ -1,5 +1,3 @@
-import React from "react";
-
 const INLINE_PATTERN = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
 
 export function parseInlineMarkdown(text) {
