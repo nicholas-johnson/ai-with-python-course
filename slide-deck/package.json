@@ -4,11 +4,11 @@
   "type": "module",
   "main": "src/index.js",
   "dependencies": {
-    "lucide-react": "^0.469.0"
+    "lucide-react": "^1.61.0"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router": "^8.5.0"
   }
 }

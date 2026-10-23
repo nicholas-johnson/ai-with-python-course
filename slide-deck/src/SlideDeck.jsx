@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Home } from "lucide-react";
+import { House } from "lucide-react";
 import {
   BrowserRouter,
   Routes,
@@ -7,7 +7,7 @@ import {
   useParams,
   useNavigate,
   Navigate,
-} from "react-router-dom";
+} from "react-router";
 import {
   TitleSlide,
   StandardSlide,
@@ -102,7 +102,7 @@ function SlideViewer({ slides }) {
           className="p-2 text-slate-400 hover:text-slate-200 transition-colors rounded-lg"
           aria-label="Go to first slide"
         >
-          <Home className="w-5 h-5" />
+          <House className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-8">
           <button

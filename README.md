@@ -18,7 +18,7 @@
 
 - **Python** 3.12 or newer — check with `python3 --version` or `py --version`
 - **pip** (bundled with Python — used inside a virtual environment)
-- **Node.js** v20+ and **pnpm** v10+ (for slides only) — `corepack enable && corepack prepare pnpm@latest --activate`
+- **Node.js** v22.22+ and **pnpm** v10+ (for slides only) — `corepack enable && corepack prepare pnpm@latest --activate`
 - A code editor (VS Code / Cursor recommended)
 - An OpenAI API key (or compatible provider) in your environment
 

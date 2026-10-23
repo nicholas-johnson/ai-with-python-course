@@ -456,6 +456,6 @@ By end of day, attendees can coordinate **multi-agent** systems, accelerate with
 ## Prerequisites (for MSCI delivery)
 
 - Python 3.12+, pip, virtualenv
-- Node.js v20+ and pnpm (slides / frontends)
+- Node.js v22.22+ and pnpm (slides / frontends)
 - OpenAI API key (or compatible provider)
 - Code editor (VS Code / Cursor recommended)
