@@ -151,11 +151,12 @@ python module-03-mcp-server/demo/demo.py
 uv run python module-03-mcp-server/demo/demo.py
 ```
 
-Walks through all three topics interactively — press Enter between sections:
+Menu. Parts 3 and 4 need `http_server.py` running in another terminal.
 
-1. **MCP concepts** — tool discovery, schemas, calling conventions (data walkthrough, no server)
-2. **`MCPServer`** — decorator pattern, type hints to JSON Schema, auto-generated tool definitions
-3. **Connecting a client** — spawns a real MCP server, discovers tools, converts to OpenAI format, runs a live tool-calling agent loop
+1. **List tools** — connect to the ship server, print the names
+2. **Ship server (stdio)** — discovery, then call each tool
+3. **Navigation server (HTTP)** — the same, over a URL
+4. **Multi-server agent** — one model, both servers
 
 ## Exercises
 

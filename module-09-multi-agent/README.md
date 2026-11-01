@@ -203,6 +203,13 @@ python module-09-multi-agent/demo/demo.py
 uv run python module-09-multi-agent/demo/demo.py
 ```
 
+Menu:
+1. **Route** — one question, one specialist
+2. **Critic** — review and revise
+3. **Debate** — advocate, skeptic, judge
+4. **Consensus** — three departments vote
+5. **Swarm** — handoffs with scoped tools
+
 ## Exercises
 
 | Folder | Mission |

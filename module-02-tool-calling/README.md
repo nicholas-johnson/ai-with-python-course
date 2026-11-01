@@ -175,11 +175,11 @@ python module-02-tool-calling/demo/demo.py
 uv run python module-02-tool-calling/demo/demo.py
 ```
 
-Walks through all four topics interactively — press Enter between sections:
-1. **Conversation items** — live API call that triggers a tool call, traces every message and function-call item
-2. **Tool registry** — decorator registration, `list_tools()`, call routing, error handling
-3. **Safety rails** — allowlist blocks `delete_all_data`, rate limiter kicks in, redaction, audit log
-4. **Eval harness** — mock LLM, golden case, pass/fail checks (no API calls)
+Menu:
+1. **One tool call** — one question, print the `function_call`, run it
+2. **Message flow** — live chat that traces every item
+3. **Tool registry** — decorator registration, `list_tools()`, call routing
+4. **Guarded agent** — allowlist, rate limiter, redaction, audit log
 
 ## Exercises
 

@@ -13,7 +13,7 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Regression-test a tool-calling agent with **golden files** and a mock LLM.',
+        'Catch agent regressions with **golden tests**: frozen reference, exact-match tools, judged prose.',
         'Score retrieval with **recall@k**, **precision@k**, and **MRR**.',
         'Grade answers with an **LLM-as-judge** (correctness, completeness, relevance).',
         'Measure **faithfulness**: every claim grounded in retrieved context.',
@@ -51,7 +51,7 @@ export const slides = [
       title: 'Five layers',
       icon: 'layers',
       points: [
-        '**Agent behaviour** — did it call the right tools? Golden tests.',
+        '**Agent behaviour** — did it call the right tools? Golden tests vs a frozen reference.',
         '**Retrieval** — did we fetch the right logs? Recall, precision, MRR.',
         '**Generation** — is the answer good? LLM-as-judge.',
         '**Grounding** — did it invent facts? Faithfulness.',
@@ -65,7 +65,7 @@ export const slides = [
     type: 'title',
     content: {
       title: '1. Golden tests',
-      subtitle: 'Mock the model, run the real loop',
+      subtitle: 'Freeze the outcome, swap the build, catch the drift',
       icon: 'check-square',
     },
   },
@@ -74,27 +74,26 @@ export const slides = [
     content: {
       title: 'What is a golden test?',
       description:
-        'A **golden-file test** freezes one agent conversation. You mock the LLM with scripted `function_call` items and a final text answer string, run the **real** agent loop (handlers still execute), and assert the tools and the answer. Used in CI because it is fast, free, and deterministic — it catches “we stopped calling `get_ship_status`”, not “the prose got slightly worse”.',
+        'A **golden test** freezes the question and the outcome you accept, then re-runs it and compares. The golden file holds **only** the reference — what the agent does comes from the build under test. That separation is the point: a fixture that also scripts the agent just confirms the script matched itself and passes forever. Keep them apart and “we stopped calling `get_ship_status`” becomes a failing case.',
       icon: 'check-square',
       credit:
-        'Same pattern as the Module 2 eval harness — now a graded lab.',
+        'Demo: two builds, one reference. Build A passes, build B drifted — the suite says where.',
     },
   },
   {
     type: 'code',
     content: {
       title: 'run_case → score_case',
-      code: `actual = run_case(client, case)
-# {"tools": [{"name": "get_crew_count",
-#             "arguments": {"department": "engineering"}}],
-#  "answer": "Engineering has 2 crew members."}
+      code: `actual = run_case(client, question)  # what the build did
+score_case(actual, case)             # vs the frozen reference
 
-score_case(actual, case)
-# {"id": "crew-count-engineering", "passed": True, "mismatches": []}`,
+# {"id": "warp-status", "passed": False, "mismatches": ["tools"]}
+#   expected  get_ship_status(system=warp)
+#   actual    (no tools called)`,
       highlights: [
-        'Script the model; execute real handlers.',
-        'Exact match on tool names, arguments, and answer.',
-        'No API key in pytest.',
+        'Tool calls are structured — exact match, cheap, every commit.',
+        'Prose is not: “Voss is the captain” vs “the captain is Voss”.',
+        'So exact-match the tools and judge the answer (part 3).',
       ],
     },
   },
@@ -280,8 +279,8 @@ gate(scorecard, {"avg_recall": 0.6, "overall": 0.55})
       rules: [
         {
           icon: 'zap',
-          rule: 'Mock for CI',
-          example: 'Golden tests and retrieval metrics on every commit.',
+          rule: 'Separate reference from behaviour',
+          example: 'A fixture that scripts the agent cannot catch the agent changing.',
         },
         {
           icon: 'timer',
@@ -306,7 +305,7 @@ gate(scorecard, {"avg_recall": 0.6, "overall": 0.55})
     content: {
       title: 'Exercises — five labs',
       points: [
-        '01 Golden tests — mock LLM, score tools + answer, run a suite',
+        '01 Golden tests — frozen reference, score tools + answer, run a suite',
         '02 Retrieval metrics — recall@k, precision@k, MRR on ship logs',
         '03 LLM-as-judge — correctness, completeness, relevance',
         '04 Faithfulness — claims vs retrieved context',

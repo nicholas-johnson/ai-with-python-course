@@ -1,328 +1,72 @@
 """
-Module 7 — Agent Memory Demo
-
-Interactive walkthrough of memory patterns for AI agents.
-Covers session memory, long-term memory with decay, summarisation,
-and a memory-enhanced chatbot.
-
+Module 7 Demo — Agent Memory
 Run:  python module-07-agent-memory/demo/demo.py
-"""
-from __future__ import annotations
 
-import os
-import time
-from dataclasses import dataclass, field
+  Part 1: Session memory — a capped message list
+  Part 2: Long-term memory — importance decay
+  Part 3: Summarise a long conversation
+  Part 4: An agent that writes memories as you talk
+
+Requires: OPENAI_API_KEY for Parts 3 and 4.
+"""
+
+from importlib import import_module
+
 from dotenv import load_dotenv
 from openai import OpenAI
-from pydantic import BaseModel, Field
 
-load_dotenv()
+demo_session_memory = import_module("01_session_memory").demo_session_memory
+demo_long_term_memory = import_module("02_long_term_memory").demo_long_term_memory
+demo_summarise = import_module("03_summarise").demo_summarise
+demo_memory_agent = import_module("04_memory_agent").demo_memory_agent
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
-
-
-# ---------------------------------------------------------------------------
-# Part 1 — Session Memory
-# ---------------------------------------------------------------------------
-
-class SessionMemory:
-    """Capped message buffer — oldest messages are evicted first."""
-
-    def __init__(self, max_turns: int = 20):
-        self.max_turns = max_turns
-        self.messages: list[dict] = []
-
-    def add(self, message: dict) -> None:
-        self.messages.append(message)
-        while len(self.messages) > self.max_turns:
-            self.messages.pop(0)
-
-    def get_messages(self) -> list[dict]:
-        return list(self.messages)
-
-    def clear(self) -> None:
-        self.messages.clear()
-
-
-# ---------------------------------------------------------------------------
-# Part 2 — Long-Term Memory
-# ---------------------------------------------------------------------------
-
-@dataclass
-class MemoryEntry:
-    value: str
-    importance: float = 1.0
-    timestamp: float = field(default_factory=time.time)
-    forgotten: bool = False
-
-
-class LongTermMemory:
-    """Key-value store with importance decay and explicit forget."""
-
-    def __init__(self):
-        self._store: dict[str, MemoryEntry] = {}
-
-    def remember(self, key: str, value: str, importance: float = 1.0) -> None:
-        self._store[key] = MemoryEntry(value=value, importance=importance)
-
-    def recall(self, prefix: str = "") -> list[tuple[str, MemoryEntry]]:
-        results = [
-            (k, v) for k, v in self._store.items()
-            if not v.forgotten and (not prefix or k.startswith(prefix))
-        ]
-        return sorted(results, key=lambda x: x[1].importance, reverse=True)
-
-    def forget(self, key: str) -> bool:
-        if key in self._store:
-            self._store[key].forgotten = True
-            return True
-        return False
-
-    def tick_decay(self, factor: float = 0.9) -> int:
-        removed = 0
-        to_delete = []
-        for key, entry in self._store.items():
-            if not entry.forgotten:
-                entry.importance *= factor
-                if entry.importance < 0.1:
-                    to_delete.append(key)
-        for key in to_delete:
-            del self._store[key]
-            removed += 1
-        return removed
-
-
-# ---------------------------------------------------------------------------
-# Part 3 — Summarisation
-# ---------------------------------------------------------------------------
-
-def summarise_turns(turns: list[dict], client: OpenAI) -> str:
-    """Ask the LLM to compress a conversation into a short summary."""
-    formatted = "\n".join(f"{t['role']}: {t['content']}" for t in turns)
-    response = client.responses.create(
-        model=MODEL,
-        reasoning={"effort": "none"},
-        input=[
-            {
-                "role": "system",
-                "content": (
-                    "Summarise the following conversation in 2-3 sentences. "
-                    "Preserve key facts, decisions, and any action items."
-                ),
-            },
-            {"role": "user", "content": formatted},
-        ],
-    )
-    return response.output_text
-
-
-# ---------------------------------------------------------------------------
-# Part 4 — Memory-Enhanced Agent
-# ---------------------------------------------------------------------------
-
-def build_system_prompt(long_term: LongTermMemory) -> dict:
-    memories = long_term.recall()
-    memory_block = ""
-    if memories:
-        lines = [f"- {k}: {e.value}" for k, e in memories[:10]]
-        memory_block = (
-            "\n\nYou have the following long-term memories about the user:\n"
-            + "\n".join(lines)
-        )
-    return {
-        "role": "system",
-        "content": (
-            "You are a helpful AI assistant on the DSS Pathfinder. "
-            "You remember things the user tells you and use that context "
-            "in your responses. Be concise and helpful."
-            + memory_block
-        ),
-    }
-
-
-def chat(
-    user_input: str,
-    session: SessionMemory,
-    long_term: LongTermMemory,
-    client: OpenAI,
-) -> str:
-    session.add({"role": "user", "content": user_input})
-    system = build_system_prompt(long_term)
-    messages = [system] + session.get_messages()
-
-    response = client.responses.create(
-        model=MODEL,
-        reasoning={"effort": "none"},
-        input=messages,
-    )
-    reply = response.output_text
-    session.add({"role": "assistant", "content": reply})
-
-    _auto_remember(user_input, long_term, client)
-    return reply
-
-
-class RememberDecision(BaseModel):
-    remember: bool
-    key: str | None = Field(description="Short snake_case key, or null if remember is false")
-    value: str | None = Field(description="What to remember, or null if remember is false")
-
-
-def _auto_remember(user_input: str, long_term: LongTermMemory, client: OpenAI):
-    """Ask the LLM if the user said anything worth remembering."""
-    response = client.responses.parse(
-        model=MODEL,
-        reasoning={"effort": "none"},
-        text_format=RememberDecision,
-        input=[
-            {
-                "role": "system",
-                "content": (
-                    "Analyse the user message. Decide whether it contains a preference, "
-                    "fact, or instruction worth remembering long-term."
-                ),
-            },
-            {"role": "user", "content": user_input},
-        ],
-    )
-    decision = response.output_parsed
-    if decision and decision.remember and decision.key and decision.value:
-        long_term.remember(decision.key, decision.value)
-
-
-# ---------------------------------------------------------------------------
-# Demo runner
-# ---------------------------------------------------------------------------
-
-def wait():
-    input("\n--- Press Enter to continue ---\n")
+DEMOS = {
+    "1": ("Session memory", demo_session_memory),
+    "2": ("Long-term memory", demo_long_term_memory),
+    "3": ("Summarise", demo_summarise),
+    "4": ("Memory-enhanced agent", demo_memory_agent),
+}
 
 
 def main():
+    load_dotenv()
     client = OpenAI()
 
+    print("\n" + "=" * 60)
+    print("  MODULE 7 DEMO — AGENT MEMORY")
     print("=" * 60)
-    print("  MODULE 7 DEMO — Agent Memory")
-    print("=" * 60)
 
-    # ---- Part 1: Session Memory ----
-    print("\n## Part 1: Session Memory\n")
-    print("Session memory is a capped buffer of recent messages.")
-    print("When it fills up, the oldest messages are evicted.\n")
-
-    session = SessionMemory(max_turns=4)
-    messages = [
-        {"role": "user", "content": "What's the reactor status?"},
-        {"role": "assistant", "content": "Reactor is at 98% efficiency."},
-        {"role": "user", "content": "Any anomalies?"},
-        {"role": "assistant", "content": "No anomalies detected."},
-        {"role": "user", "content": "Check the navigation array."},
-    ]
-
-    for msg in messages:
-        session.add(msg)
-        print(f"  Added: {msg['role']}: {msg['content'][:60]}")
-        print(f"  Buffer size: {len(session.get_messages())} / {session.max_turns}")
-
-    print(f"\n  Final buffer ({len(session.get_messages())} messages):")
-    for m in session.get_messages():
-        print(f"    {m['role']}: {m['content']}")
-
-    wait()
-
-    # ---- Part 2: Long-Term Memory ----
-    print("## Part 2: Long-Term Memory\n")
-    print("Long-term memory persists across sessions.")
-    print("Entries have importance scores that decay over time.\n")
-
-    ltm = LongTermMemory()
-    ltm.remember("user_name", "Commander Voss", importance=1.0)
-    ltm.remember("briefing_style", "Prefers concise bullet points", importance=0.8)
-    ltm.remember("reactor_history", "Ion storm caused 15% drop last month", importance=0.6)
-
-    print("  Stored 3 memories:")
-    for key, entry in ltm.recall():
-        print(f"    {key}: {entry.value} (importance: {entry.importance:.2f})")
-
-    print("\n  Applying decay (factor=0.7) three times...")
-    for i in range(3):
-        removed = ltm.tick_decay(factor=0.7)
-        remaining = ltm.recall()
-        print(f"    Round {i+1}: {removed} removed, {len(remaining)} remaining")
-        for key, entry in remaining:
-            print(f"      {key}: importance={entry.importance:.3f}")
-
-    print("\n  Forgetting 'user_name'...")
-    ltm.forget("user_name")
-    print(f"  Recall 'user_name': {[k for k, _ in ltm.recall('user_name')]}")
-
-    wait()
-
-    # ---- Part 3: Summarisation ----
-    print("## Part 3: Summarisation\n")
-    print("When conversations get long, we summarise old turns")
-    print("to save tokens while preserving key information.\n")
-
-    conversation = [
-        {"role": "user", "content": "I need a full status report on all ship systems."},
-        {"role": "assistant", "content": "Reactor: 98% efficiency. Navigation: Online, course locked to Kepler-442b. Life support: Nominal. Shields: 85% charge."},
-        {"role": "user", "content": "Why are shields below 100%?"},
-        {"role": "assistant", "content": "The ion storm on stardate 2287.3 depleted shield reserves. Recharge rate is 2% per hour — full charge expected in 7.5 hours."},
-        {"role": "user", "content": "Prioritise shield recharge. Divert auxiliary power."},
-        {"role": "assistant", "content": "Acknowledged. Diverting auxiliary power to shields. New recharge rate: 5% per hour. Full charge in 3 hours."},
-        {"role": "user", "content": "What about the sensor array maintenance scheduled for tomorrow?"},
-        {"role": "assistant", "content": "Sensor array maintenance is scheduled for 0800 tomorrow. It requires 2 hours downtime. Recommend completing before shield recharge finishes."},
-    ]
-
-    print(f"  Original conversation: {len(conversation)} messages")
-    total_chars = sum(len(m['content']) for m in conversation)
-    print(f"  Total characters: {total_chars}\n")
-
-    print("  Summarising with OpenAI...\n")
-    summary = summarise_turns(conversation, client)
-    print(f"  Summary ({len(summary)} chars):")
-    print(f"  {summary}")
-    print(f"\n  Compression ratio: {len(summary)}/{total_chars} = {len(summary)/total_chars:.0%}")
-
-    wait()
-
-    # ---- Part 4: Memory-Enhanced Agent ----
-    print("## Part 4: Memory-Enhanced Agent\n")
-    print("Now let's chat with an agent that remembers things.\n")
-    print("Try telling it your name, preferences, or facts.")
-    print("Then ask it to recall them. Type 'quit' to end.\n")
-
-    session = SessionMemory(max_turns=20)
-    long_term = LongTermMemory()
-
-    demo_messages = [
-        "My name is Commander Voss and I prefer concise briefings.",
-        "What's the reactor status? I like detailed numbers.",
-        "Remember that the Kepler mission launches on stardate 2288.1.",
-    ]
-
-    for msg in demo_messages:
-        print(f"  You: {msg}")
-        reply = chat(msg, session, long_term, client)
-        print(f"  Agent: {reply}\n")
-
-    print("  Long-term memories auto-detected:")
-    for key, entry in long_term.recall():
-        print(f"    {key}: {entry.value}")
-
-    print("\n  Now try it yourself (type 'quit' to end):\n")
     while True:
-        user_input = input("  You: ").strip()
-        if not user_input or user_input.lower() == "quit":
+        print("\nPick a section:\n")
+        for key, (label, _) in DEMOS.items():
+            print(f"  {key}. {label}")
+        print("  q. Quit\n")
+
+        try:
+            choice = input("Enter choice> ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print()
             break
-        reply = chat(user_input, session, long_term, client)
-        print(f"  Agent: {reply}\n")
 
-    print("\n  Final long-term memories:")
-    for key, entry in long_term.recall():
-        print(f"    {key}: {entry.value} (importance: {entry.importance:.2f})")
+        if choice in ("q", "quit", ""):
+            break
+        elif choice in DEMOS:
+            _, fn = DEMOS[choice]
+            print()
+            fn(client)
+        else:
+            print(f"Unknown option: {choice}")
 
-    print("\n✓ Demo complete.")
+    print("\n" + "=" * 60)
+    print("  RECAP")
+    print("=" * 60)
+    print()
+    print("  1. Session memory   — a capped list; the oldest turn falls off")
+    print("  2. Long-term memory — keys with importance that decays")
+    print("  3. Summarise        — compress old turns before they blow the window")
+    print("  4. Memory agent     — the model decides what is worth keeping")
+    print()
+    print("=" * 60)
 
 
 if __name__ == "__main__":

@@ -134,14 +134,19 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-04-genai-strategies/demo/demo.py
+python module-04-genai-strategies/demo/04_tiktoken.py
 
 # Option B - uv (no activation needed):
 uv run python module-04-genai-strategies/demo/demo.py
+uv run python module-04-genai-strategies/demo/04_tiktoken.py
 ```
 
-A quick multimodal demo — press Enter between sections:
-1. **Vision** — sends a sample image to the chat model and prints the structured analysis
-2. **Audio** — sends a sample WAV to `gpt-transcribe` and prints the transcript
+Menu:
+1. **Vision** — one image, one sentence
+2. **Structured vision** — the same image, parsed into a schema
+3. **Audio** — `sample.wav` (or the microphone) to `gpt-transcribe`
+
+`04_tiktoken.py` counts tokens and estimates cost. No API key.
 
 ## Exercises
 

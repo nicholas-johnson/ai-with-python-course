@@ -1,6 +1,6 @@
 """
 Module 4 Demo — tiktoken: Token Counting & Cost Estimation
-Run:  python module-04-genai-strategies/demo/demo_tiktoken.py
+Run:  python module-04-genai-strategies/demo/04_tiktoken.py
 
 Shows how OpenAI tokenizers work: encode/decode, count chat messages,
 trim history to a budget, and estimate cost across models.

@@ -1,7 +1,9 @@
 """
 Exercise 01 — Golden Tests (Solution)
 
-Regression-test a tool-calling agent with a mock LLM.
+Agent-loop regression test: a mock LLM scripts the tool call and the answer,
+so this verifies the loop dispatches and round-trips — not the model's choice.
+A real golden eval runs the live model (exact-match tools + judge) — see README.
 """
 
 from __future__ import annotations
@@ -201,7 +203,7 @@ def run_suite(client, cases: list[dict]) -> dict:
 if __name__ == "__main__":
     data_path = Path(__file__).parent / "data" / "golden_cases.json"
     cases = json.loads(data_path.read_text())
-    print("Golden suite — scripted LLM, no API key\n")
+    print("Golden suite — agent-loop regression, scripted LLM, no API key\n")
     scored = []
     for case in cases:
         client = make_scripted_client(case["scripted_responses"])

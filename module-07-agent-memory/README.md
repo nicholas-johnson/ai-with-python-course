@@ -136,7 +136,7 @@ python module-07-agent-memory/demo/demo.py
 uv run python module-07-agent-memory/demo/demo.py
 ```
 
-All-in-one interactive walkthrough covering:
+Menu:
 1. Session memory — capped buffer, FIFO eviction
 2. Long-term memory — remember, recall, decay, forget
 3. Summarisation — compress a long conversation

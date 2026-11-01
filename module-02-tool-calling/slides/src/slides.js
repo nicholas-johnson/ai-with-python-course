@@ -73,7 +73,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Demo — Tool-call message flow',
-      subtitle: 'Switch to terminal: python demo/demo.py → Part 1',
+      subtitle: 'Switch to terminal: python demo/demo.py → Part 2',
       icon: 'rocket',
     },
   },
@@ -159,7 +159,7 @@ def check_inventory(product: str) -> dict:
     type: 'title',
     content: {
       title: 'Demo — Tool registry',
-      subtitle: 'Switch to terminal: python demo/demo.py → Part 2',
+      subtitle: 'Switch to terminal: python demo/demo.py → Part 3',
       icon: 'rocket',
     },
   },
@@ -258,7 +258,7 @@ def check_inventory(product: str) -> dict:
     type: 'title',
     content: {
       title: 'Demo — Guarded agent',
-      subtitle: 'Switch to terminal: python demo/demo.py → Part 3',
+      subtitle: 'Switch to terminal: python demo/demo.py → Part 4',
       icon: 'rocket',
     },
   },

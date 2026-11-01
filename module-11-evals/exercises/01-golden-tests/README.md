@@ -2,11 +2,21 @@
 
 ## Recap
 
-A live chat with the Pathfinder agent is not a test. The model might call `get_crew_count` today and skip it tomorrow. **Golden-file tests** freeze a conversation: you mock the LLM with scripted `tool_calls` and a final `content` string, run the real agent loop (handlers still execute), and check that the tools and the answer match a fixture.
+A live chat with the Pathfinder agent is not a test. But there are two different things to test, and it helps to keep them apart.
 
-They are fast (no network), free (no tokens), and deterministic. Use them in CI for "did the agent still call the right tool?" — not for "is the prose nicer?"
+**This lab builds an agent-loop regression test.** You mock the LLM with scripted `tool_calls` and a final `content` string, run the real agent loop (handlers still execute), and check that the tools and the answer match a fixture. Because the script already contains the tool call and the answer, this is really a test of *your loop* — did it parse arguments, dispatch the right handler, round-trip `call_id`, and stop on the final text? It is fast (no network), free (no tokens), and deterministic, so it belongs in CI on every commit.
+
+**A real golden test is the other thing.** It freezes the questions and the outputs you accept as correct, then runs the **real** model and compares. Tool calls exact-match; the prose is graded by an LLM-as-judge or a human. That is what catches "the agent stopped calling `get_ship_status`" — a regression the scripted mock cannot see, because no model runs. See [Real golden eval](#real-golden-eval-optional-needs-a-key) below.
 
 This is the Module 2 eval-harness demo, promoted to a graded lab.
+
+### What this catches / what it doesn't
+
+| The scripted mock catches | Only a live golden eval catches |
+|---|---|
+| A broken dispatcher (wrong handler for a tool name) | The model choosing the wrong tool |
+| A handler that returns the wrong count/data | The model skipping a tool call it used to make |
+| A loop that drops `call_id` or never stops | Prose quality drifting on a prompt change |
 
 ### What a golden case looks like
 
@@ -99,6 +109,31 @@ pytest module-11-evals/exercises/01-golden-tests/test_start.py -v
 # Option B - uv (no activation needed):
 uv run --extra dev pytest module-11-evals/exercises/01-golden-tests/test_start.py -v
 ```
+
+## Real golden eval (optional, needs a key)
+
+The functions you just built are half of a real golden eval. Swap the scripted client for a live one and `run_case` now reports what the **model** actually did — keep the exact-match on tool calls, and hand the prose to the judge from [exercise 03](../03-llm-judge/) instead of comparing strings. No new graded function; this stays out of CI because it spends tokens.
+
+```python
+from openai import OpenAI
+from start import run_case  # exact-match tool calls against a live client
+# llm_judge lives in exercises/03-llm-judge/solution.py
+
+client = OpenAI()  # real model, not make_scripted_client
+
+def golden_eval(case):
+    actual = run_case(client, case)                      # live tool calls + answer
+    tools_ok = actual["tools"] == case["expected_tools"] # structured → exact match
+    verdict = llm_judge(                                 # prose → judge, not ==
+        client,
+        question=case["question"],
+        answer=actual["answer"],
+        reference=case["expected_answer"],
+    )
+    return {"tools_ok": tools_ok, "judge": verdict}
+```
+
+Run the scripted harness test on every commit; run this on a schedule or a PR label.
 
 ## Stretch Goals
 

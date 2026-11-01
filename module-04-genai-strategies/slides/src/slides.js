@@ -229,7 +229,7 @@ print(transcript.text)  # "Hello, this is a voice memo about..."`,
     type: 'title',
     content: {
       title: 'Demo — Multimodal',
-      subtitle: 'Switch to terminal: python demo/demo.py',
+      subtitle: 'Switch to terminal: python demo/demo.py — Parts 1–3',
       icon: 'rocket',
     },
   },

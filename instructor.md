@@ -48,7 +48,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-02-tool-calling/demo/demo.py` | All four topics in one interactive walkthrough — press Enter between sections. Part 1: live tool call tracing 4 message roles. Part 2: decorator registry, list/call/error handling. Part 3: allowlist, rate limiter, redaction, audit log. Part 4: mock LLM golden tests. |
+| `module-02-tool-calling/demo/demo.py` | Menu. 1 One tool call. 2 Message flow. 3 Tool registry. 4 Guarded agent (allowlist, rate limit, redaction, audit). |
 
 **Exercises (chained — each builds on the previous):**
 
@@ -75,7 +75,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-03-mcp-server/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: MCP protocol as data — discovery, call, result. Part 2: MCPServer decorator pattern and auto-generated schemas. Part 3: live agent connecting to an MCP server, discovering tools, calling them via OpenAI. |
+| `module-03-mcp-server/demo/demo.py` | Menu. 1 List tools on the ship server. 2 Explore that server over stdio. 3 Explore the navigation server over HTTP (`http_server.py` in another terminal). 4 One agent, both servers. |
 
 **Exercises (chained — each builds on the previous):**
 
@@ -103,7 +103,8 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-04-genai-strategies/demo/demo.py` | All three topics in one interactive walkthrough. Part 1: vague vs specific prompts, response_format, few-shot classification. Part 2: same task on GPT-6 Sol vs GPT-6 Luna — latency, tokens, quality. Part 3: Pydantic guardrails chain — schema validation, content filter, confidence gate with 4 test cases + live LLM. |
+| `module-04-genai-strategies/demo/demo.py` | Menu. 1 One image, one sentence. 2 The same image parsed into a schema. 3 Speech to text. |
+| `module-04-genai-strategies/demo/04_tiktoken.py` | Token counting and cost, no API key. |
 
 **Exercises (chained — delegates build a Research Assistant web app):**
 
@@ -193,7 +194,7 @@ Each demo is a separate interactive script with real OpenAI calls:
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-07-agent-memory/demo/demo.py` | All-in-one walkthrough: session memory, long-term memory with decay, summarisation, memory-enhanced agent |
+| `module-07-agent-memory/demo/demo.py` | Menu. 1 Capped message list. 2 Long-term memory with decay. 3 Summarise a conversation. 4 Agent that writes memories as you talk. |
 
 **Exercises:**
 
@@ -247,11 +248,11 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 - Shared context and tools across agents
 - Consensus and conflict resolution
 
-**Demo:** `python module-09-multi-agent/demo/demo.py` (single interactive file, five parts)
+**Demo:** `python module-09-multi-agent/demo/demo.py`
 
 | Part | What it shows |
 | ---- | ------------- |
-| Part 1 | Specialist agents + LLM router |
+| Part 1 | One question, routed to one specialist |
 | Part 2 | Supervisor-critic pipeline with revision loop |
 | Part 3 | Structured debate with a judge |
 | Part 4 | Consensus voting across specialists |
@@ -306,7 +307,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 **Talk about:**
 
 - Why a live demo is not an eval: frozen test sets, CI vs token spend
-- Golden-file tests: mock the LLM, run the real agent loop, assert tools + answer
+- Golden tests: freeze the question + accepted outcome, then re-run and compare. The key point to land — the golden file holds *only* the reference; what the agent does comes from the build under test. A fixture that also scripts the agent just confirms the script matched itself and passes forever. Demo makes this concrete with two builds against one reference. Then: tool calls exact-match cleanly, prose does not (same facts, different words), so exact-match tools and judge the answer.
 - Retrieval metrics: recall@k, precision@k, MRR on a labelled query set
 - LLM-as-judge: correctness, completeness, relevance (JSON, temperature 0)
 - Faithfulness: claims grounded in retrieved context, not the gold answer
@@ -317,13 +318,13 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-11-evals/demo/demo.py` | Five parts, no API key: golden tests, retrieval metrics, judge, faithfulness, scorecard + gate |
+| `module-11-evals/demo/demo.py` | Menu, no API key. 1 Golden tests (two agent builds vs one frozen reference; build B drops a tool call and paraphrases an answer). 2 Retrieval metrics. 3 Judge scores. 4 Faithfulness. 5 Scorecard + gate. `a` runs all five. |
 
 **Exercises (chained — each adds a measurement the next one can consume):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-golden-tests` | Mock-LLM agent loop, score tools + answer, run a golden suite |
+| `exercises/01-golden-tests` | Mock-LLM agent-loop regression (score tools + answer, run a suite); README wires `run_case` + the ex03 judge into a live golden eval |
 | `exercises/02-retrieval-metrics` | recall@k, precision@k, MRR on labelled ship-log queries |
 | `exercises/03-llm-judge` | LLM-as-judge: correctness, completeness, relevance |
 | `exercises/04-faithfulness` | Claim extraction + support check + faithfulness ratio |
@@ -368,7 +369,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-13-edge-topics/demo/demo.py` | Interactive walkthrough of hybrid search, agentic RAG, citation verification, semantic caching |
+| `module-13-edge-topics/demo/demo.py` | Menu. 1 RRF on two short lists (no API). 2 Hybrid search. 3 Agentic RAG. 4 Citation verification. 5 Semantic cache. |
 | `module-13-edge-topics/demo/13_*.py`, `14_*.py` | Local ML on CPU: train a classifier, fine-tune SmolLM2, run Hub models |
 
 **Exercises (standalone labs; exercise numbers match topic numbers 1–14 in the README and slides; eval lives in Module 11):**

@@ -4,7 +4,7 @@
 
 ## Learning goals
 
-- Regression-test a tool-calling agent with **golden files** and a mock LLM (no API key, no flakiness).
+- Catch agent regressions with **golden tests**: a frozen reference, exact-match tool calls, and a judged answer.
 - Score retrieval with **recall@k**, **precision@k**, and **MRR** against a labelled query set.
 - Grade answers with an **LLM-as-judge** on correctness, completeness, and relevance.
 - Measure **faithfulness**: every claim in an answer must be grounded in retrieved context.
@@ -18,7 +18,7 @@ A live chat is a sample of size one. Production systems need a frozen test set y
 
 | Layer | Question it answers | Typical method |
 | ----- | ------------------- | -------------- |
-| Agent behaviour | Did it call the right tools with the right args? | Golden tests (mock LLM) |
+| Agent behaviour | Did it call the right tools with the right args? | Golden tests against a frozen reference |
 | Retrieval | Did we fetch the right documents? | Recall@k, precision@k, MRR |
 | Generation | Is the answer correct, complete, relevant? | LLM-as-judge |
 | Grounding | Did it invent facts not in the sources? | Faithfulness / claim support |
@@ -30,16 +30,21 @@ Use cheap, deterministic checks (golden tests, retrieval metrics) in CI on every
 
 ## Golden-file testing
 
-Mock the LLM with **scripted responses**. The agent loop still runs: it sees `function_call` items, executes handlers, appends `function_call_output` items, and reads the final `output_text`. You assert the tools and the answer.
+A **golden test** freezes a known-good outcome for a question — the tool calls and the answer you accept as correct — and re-checks a later run against it. The golden file holds *only* the question and the accepted outcome. What the agent does comes from the build under test, so when the agent changes, the suite says so.
 
-Golden tests are fast (no network), free (no tokens), and deterministic (same result every run). They catch "the agent stopped calling `get_ship_status`" — not "the prose got slightly worse".
+That separation is the whole trick. If the fixture also scripts the agent's behaviour, the test just confirms the script matched itself and passes forever. Keep the reference and the behaviour apart and a real regression — "the agent stopped calling `get_ship_status`" — turns into a failing case.
 
 ```python
-actual = run_case(client, case)
-# actual == {"tools": [{"name": "get_crew_count", "arguments": {"department": "engineering"}}],
-#            "answer": "Engineering has 2 crew members."}
-score = score_case(actual, case)  # {"passed": True, "mismatches": []}
+actual = run_case(client, question)   # what the build actually did
+score = score_case(actual, case)      # vs the frozen reference
+# {"id": "warp-status", "passed": False, "mismatches": ["tools"]}
+#   expected  get_ship_status(system=warp)
+#   actual    (no tools called)
 ```
+
+Tool calls are structured, so they exact-match cleanly. Prose does not: "Commander Elara Voss is the captain." and "The captain is Commander Elara Voss." are the same answer and a string comparison fails one of them. Exact-match the tools, and send the answer to an **LLM-as-judge** (below) or a human.
+
+The demo swaps in two simulated agent builds instead of calling the API, so it runs with no key: build A matches the reference, build B has had its prompt changed and drifts. Point the same loop at a real client and nothing about the test changes — only the cost. Run the structured checks often; spend tokens on the judged pass when prompts or retrieval change.
 
 ---
 
@@ -98,7 +103,8 @@ The capstones in `extras/` can reuse this as a release check, not a slide.
 
 ## Field rules
 
-- **Mock for CI, live for exploration.** Golden tests and retrieval metrics belong in pytest. Judge and faithfulness cost tokens — run them on a schedule or on PR labels, not on every save.
+- **Keep the reference and the behaviour apart.** A fixture that scripts what the agent does cannot catch the agent changing. Freeze the outcome you accept; let the build under test supply the rest.
+- **Cheap checks often, token checks on a trigger.** Exact-match tool calls and retrieval metrics belong in pytest on every commit. The judged pass and faithfulness cost tokens — run them on a schedule or on PR labels, not on every save.
 - **Label a small set well.** Twenty queries with real relevant doc IDs beat two hundred guessed ones.
 - **Never trust a single number.** Look at mismatches and unsupported claims, not only the average.
 - **Gate on a floor, compare on a delta.** "Did we get worse?" is a different question from "which config wins?"
@@ -116,9 +122,9 @@ python module-11-evals/demo/demo.py
 uv run python module-11-evals/demo/demo.py
 ```
 
-Five parts, no API key — press Enter / pick a number:
+Menu, no API key. `a` runs all five:
 
-1. **Golden tests** — scripted tool calls, pass/fail on a Pathfinder agent
+1. **Golden tests** — two agent builds against one frozen reference; the drifted build fails
 2. **Retrieval metrics** — recall@k, precision@k, MRR on labelled ship-log queries
 3. **LLM-as-judge** — canned judge JSON, dataset summary
 4. **Faithfulness** — claims vs context, supported ratio
@@ -130,7 +136,7 @@ The exercises chain: each one adds a measurement the next one can consume.
 
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-golden-tests`](exercises/01-golden-tests/) | Mock-LLM agent loop, score tools + answer, run a golden suite |
+| [`exercises/01-golden-tests`](exercises/01-golden-tests/) | Agent-loop regression test with a mock LLM; wire `run_case` + the ex03 judge for a live golden eval |
 | [`exercises/02-retrieval-metrics`](exercises/02-retrieval-metrics/) | recall@k, precision@k, MRR on labelled ship-log queries |
 | [`exercises/03-llm-judge`](exercises/03-llm-judge/) | LLM-as-judge: correctness, completeness, relevance |
 | [`exercises/04-faithfulness`](exercises/04-faithfulness/) | Claim extraction + support check + faithfulness ratio |

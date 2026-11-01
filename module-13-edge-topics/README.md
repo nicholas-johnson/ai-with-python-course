@@ -816,7 +816,7 @@ Topics **15–18** (test-time compute, speculative decoding, GraphRAG, MoE) are 
 
 | Script | Topic |
 |--------|--------|
-| `demo/demo.py` | Hybrid search, agentic RAG, citation verification, semantic cache (OpenAI API) |
+| `demo/demo.py` | Menu: RRF hello world, hybrid search, agentic RAG, citation verification, semantic cache |
 | `demo/13_train_local.py` | Local training — urgent vs routine (CPU) |
 | `demo/13_finetune_generate.py` | Local training — fine-tune SmolLM2 to write duty-officer summaries (CPU) |
 | `demo/14_huggingface_run.py` | Hugging Face Hub — sentiment pipeline (CPU) |
