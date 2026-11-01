@@ -53,3 +53,18 @@ def format_roster(crew: list[CrewMember]) -> str:
         for m in crew
     ]
     return "\n".join(lines)
+
+
+def main() -> None:
+    """Load the crew manifest and print a couple of rosters."""
+    data_path = Path(__file__).resolve().parents[3] / "data" / "crew.json"
+    crew = load_crew(data_path)
+    print(f"Loaded {len(crew)} crew members\n")
+    print("Full roster:")
+    print(format_roster(crew))
+    print("\nScience department, clearance >= 3:")
+    print(format_roster(filter_crew(crew, department="science", min_clearance=3)))
+
+
+if __name__ == "__main__":
+    main()

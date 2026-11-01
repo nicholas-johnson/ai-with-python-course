@@ -9,6 +9,21 @@ Parse JSON records into typed dataclasses, filter by field values, and produce f
 3. Implement `filter_crew(crew, department, min_clearance)` — filter the list by department (optional) and minimum clearance level.
 4. Implement `format_roster(crew)` — return a formatted multi-line string with name, role, and clearance for each member.
 
+## Run it
+
+Once the functions are implemented, `main()` loads the crew manifest and prints the roster:
+
+```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-00-python-fundamentals/exercises/01-dataclass-filtering
+python start.py
+
+# Option B - uv (no activation needed):
+cd module-00-python-fundamentals/exercises/01-dataclass-filtering
+uv run python start.py
+```
+
 ## Run the tests
 
 ```bash

@@ -146,6 +146,21 @@ for ranked_list in ranked_lists:
 
 Call `bm25_search` and `vector_search`, then pass both ranked lists to `reciprocal_rank_fusion`. Return the top-k fused results.
 
+## Run it
+
+Once the functions are implemented, `main()` runs hybrid search over a small sample corpus and prints the fused ranking:
+
+```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-13-edge-topics/exercises/01-hybrid-search
+python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/01-hybrid-search
+uv run python start.py
+```
+
 ## Running Tests
 
 ```bash

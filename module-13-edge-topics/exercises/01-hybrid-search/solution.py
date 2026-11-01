@@ -110,3 +110,33 @@ def hybrid_search(
     semantic_results = vector_search(query_embedding, document_embeddings)
     fused = reciprocal_rank_fusion([keyword_results, semantic_results], k=rrf_k)
     return fused[:top_k]
+
+
+def main() -> None:
+    """Run hybrid search over a small sample corpus and print fused results."""
+    documents = [
+        {"id": "doc1", "text": "The reactor core temperature is rising rapidly"},
+        {"id": "doc2", "text": "Hull integrity on deck 5 shows minor damage"},
+        {"id": "doc3", "text": "Navigation systems are operating normally"},
+        {"id": "doc4", "text": "The reactor cooling system needs maintenance"},
+        {"id": "doc5", "text": "Emergency protocols for hull breach on deck 7"},
+    ]
+    document_embeddings = {
+        "doc1": [0.9, 0.1, 0.0, 0.0],
+        "doc2": [0.0, 0.8, 0.2, 0.0],
+        "doc3": [0.0, 0.0, 0.9, 0.1],
+        "doc4": [0.8, 0.2, 0.0, 0.0],
+        "doc5": [0.1, 0.7, 0.1, 0.1],
+    }
+    query = "reactor temperature"
+    query_embedding = [0.9, 0.1, 0.0, 0.0]
+
+    results = hybrid_search(query, documents, query_embedding, document_embeddings)
+    print(f"Query: {query!r}\n")
+    for doc_id, score in results:
+        text = next(d["text"] for d in documents if d["id"] == doc_id)
+        print(f"{doc_id}  {score:.4f}  {text}")
+
+
+if __name__ == "__main__":
+    main()

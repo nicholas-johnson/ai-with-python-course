@@ -8,9 +8,10 @@
 
 **Talk about:**
 
-- The Responses API: `client.responses.create(input=..., instructions=...)`, message roles (system/user/assistant), `response.output_text`
-- Chat Completions as the older API: what it looks like (`messages=`, `choices[0].message.content`), why it's still everywhere, and that new work should use Responses (demo Part 4)
-- The chat loop pattern: while-loop, append user input, call API, append response
+- Chat Completions, the older API: `client.chat.completions.create(messages=...)`, reply at `choices[0].message.content`. Still everywhere — old code, tutorials, and "OpenAI-compatible" providers.
+- The Responses API: `client.responses.create(input=..., instructions=...)`, reply at `response.output_text`. `instructions` stays separate from the conversation.
+- Why Responses: one reply field, optional `previous_response_id` so you need not resend history, built-in tools, and where new features ship.
+- The chat loop: a chatbot is a loop. `while True` because the number of turns is not known ahead of time — append user input, call the API, append the response.
 - Why streaming matters: perceived latency, first token in 200ms vs 3s blank screen
 - Streaming with the OpenAI SDK: `stream=True`, iterating over typed events, `response.output_text.delta` → `event.delta`
 - Prompt engineering: personas, format constraints, guardrails, few-shot examples
@@ -19,7 +20,9 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-01-working-with-the-llm/demo/demo.py` | All-in-one walkthrough. Part 1: basic chat call, message list growing. Part 2: streaming tokens live. Part 3: same question through different system prompts (persona, bullets, JSON, guardrails, few-shot). |
+| `module-01-working-with-the-llm/demo/completions.py` | One Chat Completions call, print the reply, exit. |
+| `module-01-working-with-the-llm/demo/responses.py` | One Responses API call, print the reply, exit. Same question as the Completions script. |
+| `module-01-working-with-the-llm/demo/demo.py` | The same walkthrough from a menu. 1 Chat Completions. 2 Responses. 3 The chat loop. 4 Streaming. 5 Prompt engineering. |
 
 **Exercises (chained — each builds on the previous):**
 

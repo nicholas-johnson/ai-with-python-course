@@ -51,3 +51,20 @@ async def relay_with_timeout(
         return await consumer_task
 
     return await asyncio.wait_for(_run(), timeout=timeout)
+
+
+def main() -> None:
+    """Run the sensor relay on a small sample batch and print classifications."""
+    readings = [
+        SensorReading("SEN-000", 50.0, "2347-03-18T10:00:00Z"),
+        SensorReading("SEN-001", 95.0, "2347-03-18T11:00:00Z"),
+        SensorReading("SEN-002", 72.0, "2347-03-18T12:00:00Z"),
+        SensorReading("SEN-003", 88.0, "2347-03-18T13:00:00Z"),
+    ]
+    results = asyncio.run(relay_with_timeout(readings, threshold=80.0))
+    for sensor_id, classification in results:
+        print(f"{sensor_id}: {classification}")
+
+
+if __name__ == "__main__":
+    main()

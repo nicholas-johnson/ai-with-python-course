@@ -9,6 +9,21 @@ Build an async producer/consumer pipeline with `asyncio.Queue`, backpressure, se
 3. Implement `consume_readings(queue, threshold)` — an async consumer that pulls readings, classifies them as `"ALERT"` (value > threshold) or `"OK"`, and returns a list of `(sensor_id, classification)` tuples. Stops when it receives `None`.
 4. Implement `relay_with_timeout(readings, threshold, timeout)` — runs producer and consumer concurrently with an overall timeout. Returns the consumer's results, or raises `TimeoutError` if the pipeline exceeds the deadline.
 
+## Run it
+
+Once the functions are implemented, `main()` runs the relay on a sample batch and prints each reading's classification:
+
+```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-00-python-fundamentals/exercises/02-async-queue-processing
+python start.py
+
+# Option B - uv (no activation needed):
+cd module-00-python-fundamentals/exercises/02-async-queue-processing
+uv run python start.py
+```
+
 ## Run the tests
 
 ```bash

@@ -12,6 +12,46 @@
 
 ---
 
+## Two APIs: Responses and Chat Completions
+
+OpenAI has two APIs for generating text. This course uses the **Responses API**. You will still meet the older **Chat Completions API** — in existing code, tutorials, and the "OpenAI-compatible" endpoints many other providers offer — so it is worth recognising:
+
+```python
+# Chat Completions (older)
+completion = client.chat.completions.create(
+    model=MODEL,
+    reasoning_effort="none",
+    messages=[
+        {"role": "system", "content": "You are the DSS Pathfinder ship AI."},
+        {"role": "user", "content": "What is our heading?"},
+    ],
+)
+text = completion.choices[0].message.content
+```
+
+| | Responses API (use this) | Chat Completions (older) |
+|-|--------------------------|--------------------------|
+| Call | `client.responses.create(...)` | `client.chat.completions.create(...)` |
+| Input | `input=` (string or messages) + optional `instructions=` | `messages=` only |
+| Reply text | `response.output_text` | `completion.choices[0].message.content` |
+| Reasoning | `reasoning={"effort": "none"}` | `reasoning_effort="none"` |
+| Streaming | typed events (`response.output_text.delta`) | chunks (`chunk.choices[0].delta.content`) |
+| Conversation state | you send the history, **or** pass `previous_response_id` and the API keeps it | you always send the full history |
+| Built-in tools | web search, file search, code interpreter, ... | not available |
+
+Chat Completions is still supported, but OpenAI builds new features for the Responses API first and recommends it for new projects — existing apps are being migrated across. If you need to port old code, see the [migration guide](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+
+**Server-side conversation state.** Instead of resending the whole history, you can chain calls:
+
+```python
+first = client.responses.create(model=MODEL, input="My call sign is Nova-7.")
+reply = client.responses.create(model=MODEL, previous_response_id=first.id, input="What is my call sign?")
+```
+
+The exercises keep the explicit message list, because seeing exactly what the model receives is the point of this module — and it is the pattern later modules build on for memory and agents.
+
+---
+
 ## The chat loop
 
 The core pattern is a function that calls OpenAI's **Responses API**:
@@ -83,46 +123,6 @@ A stream is a sequence of typed **events**. Text arrives in `response.output_tex
 
 ---
 
-## Two APIs: Responses and Chat Completions
-
-OpenAI has two APIs for generating text. This course uses the **Responses API**. You will still meet the older **Chat Completions API** — in existing code, tutorials, and the "OpenAI-compatible" endpoints many other providers offer — so it is worth recognising:
-
-```python
-# Chat Completions (older)
-completion = client.chat.completions.create(
-    model=MODEL,
-    reasoning_effort="none",
-    messages=[
-        {"role": "system", "content": "You are the DSS Pathfinder ship AI."},
-        {"role": "user", "content": "What is our heading?"},
-    ],
-)
-text = completion.choices[0].message.content
-```
-
-| | Responses API (use this) | Chat Completions (older) |
-|-|--------------------------|--------------------------|
-| Call | `client.responses.create(...)` | `client.chat.completions.create(...)` |
-| Input | `input=` (string or messages) + optional `instructions=` | `messages=` only |
-| Reply text | `response.output_text` | `completion.choices[0].message.content` |
-| Reasoning | `reasoning={"effort": "none"}` | `reasoning_effort="none"` |
-| Streaming | typed events (`response.output_text.delta`) | chunks (`chunk.choices[0].delta.content`) |
-| Conversation state | you send the history, **or** pass `previous_response_id` and the API keeps it | you always send the full history |
-| Built-in tools | web search, file search, code interpreter, ... | not available |
-
-Chat Completions is still supported, but OpenAI builds new features for the Responses API first and recommends it for new projects — existing apps are being migrated across. If you need to port old code, see the [migration guide](https://developers.openai.com/api/docs/guides/migrate-to-responses).
-
-**Server-side conversation state.** Instead of resending the whole history, you can chain calls:
-
-```python
-first = client.responses.create(model=MODEL, input="My call sign is Nova-7.")
-reply = client.responses.create(model=MODEL, previous_response_id=first.id, input="What is my call sign?")
-```
-
-The exercises keep the explicit message list, because seeing exactly what the model receives is the point of this module — and it is the pattern later modules build on for memory and agents.
-
----
-
 ## Prompt engineering
 
 Everything the model does starts with the **system prompt**. A good prompt tells the model who it is, how it should respond, and what it should refuse.
@@ -169,14 +169,18 @@ The key insight is that prompts are **instructions, not wishes**. Vague prompts 
 
 ## Demo
 
-One script walks through the whole module — basic chat, streaming, prompting patterns, and the Responses vs Chat Completions comparison:
+Two scripts call each API once, print the reply, and exit. The menu script walks through the module — both one-shot calls, the chat loop, streaming, and prompting patterns:
 
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python module-01-working-with-the-llm/demo/completions.py
+python module-01-working-with-the-llm/demo/responses.py
 python module-01-working-with-the-llm/demo/demo.py
 
 # Option B - uv (no activation needed):
+uv run python module-01-working-with-the-llm/demo/completions.py
+uv run python module-01-working-with-the-llm/demo/responses.py
 uv run python module-01-working-with-the-llm/demo/demo.py
 ```
 

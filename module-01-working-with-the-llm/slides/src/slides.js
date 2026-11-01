@@ -151,24 +151,113 @@ export const slides = [
       ],
     },
   },
+  // ---- Section: Two APIs ----
+  {
+    type: 'title',
+    content: {
+      title: 'Two APIs',
+      subtitle: 'Chat Completions, then the Responses API',
+      icon: 'message-square',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Chat Completions',
+      code: `completion = client.chat.completions.create(
+    model="gpt-6-luna",
+    reasoning_effort="none",
+    messages=[
+        {"role": "system", "content": "You are the DSS Pathfinder ship AI."},
+        {"role": "user", "content": "What is our heading?"},
+    ],
+)
+print(completion.choices[0].message.content)`,
+      highlights: [
+        'messages= is the whole conversation — system, user, and assistant',
+        'The reply is buried at completion.choices[0].message.content',
+        'The API you still meet in older code and "OpenAI-compatible" providers',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Chat Completions',
+      subtitle: 'Switch to terminal: python demo/completions.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The Responses API',
+      code: `response = client.responses.create(
+    model="gpt-6-luna",
+    reasoning={"effort": "none"},
+    instructions="You are the DSS Pathfinder ship AI.",
+    input="What is our heading?",
+)
+print(response.output_text)`,
+      highlights: [
+        'instructions= is the system prompt, kept separate from the conversation',
+        'input= is the question — a string, or a list of messages',
+        'response.output_text is the reply as a plain string',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Responses',
+      subtitle: 'Switch to terminal: python demo/responses.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Why Responses is better',
+      left: {
+        label: 'Responses API (use this)',
+        items: [
+          'One reply field: `response.output_text`',
+          '`instructions` stays separate from the conversation',
+          'Optional server-side state: `previous_response_id`',
+          'Built-in tools: web search, file search, code interpreter',
+          'New features ship here first',
+        ],
+      },
+      right: {
+        label: 'Chat Completions (older)',
+        items: [
+          'Reply: `completion.choices[0].message.content`',
+          'The system prompt is just another message',
+          'You always resend the full message list',
+          'No built-in tools',
+          'Still supported, and still everywhere',
+        ],
+      },
+    },
+  },
   // ---- Section: The chat loop ----
   {
     type: 'title',
     content: {
-      title: 'The Chat Loop',
-      subtitle: 'Conversation history and the message array',
+      title: 'A chatbot is a loop',
+      subtitle: 'Read, append, call, append, repeat',
       icon: 'message-square',
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'How chat works',
+      title: 'How the loop works',
       icon: 'message-square',
       points: [
+        'A chatbot is a loop: read input, append it, call the model, append the reply, repeat.',
         'LLMs are **stateless** — they have no memory between calls.',
-        'You create memory by sending the **full conversation history** with every request.',
-        'A chat is essentially a **loop**: read input → append to history → call the model → append the response → repeat.',
+        'The loop builds memory by sending the **full conversation history** with every request.',
         'Messages are an array of objects: **system**, **user**, and **assistant** roles.',
         'The system prompt sets persona and rules. User and assistant messages alternate.',
         'As the conversation grows, you hit the **context window limit** — then you truncate or summarise.',
@@ -179,74 +268,28 @@ export const slides = [
     type: 'code',
     content: {
       title: 'The chat loop',
-      code: `class ChatBot:
-    def __init__(self, llm, system_prompt):
-        self.messages = [{"role": "system", "content": system_prompt}]
+      code: `messages = [{"role": "system", "content": "You are the DSS Pathfinder ship AI."}]
 
-    def chat(self, user_input: str) -> str:
-        self.messages.append({"role": "user", "content": user_input})
-        response = self.llm.chat(self.messages)
-        self.messages.append({"role": "assistant", "content": response})
-        return response`,
+while True:
+    user_input = input("You: ").strip()
+    if user_input.lower() in ("quit", "exit"):
+        break
+    messages.append({"role": "user", "content": user_input})
+    response = chat(client, messages)
+    messages.append({"role": "assistant", "content": response})
+    print(f"AI: {response}")`,
       highlights: [
-        'History grows with every turn — the LLM sees full context',
-        'Clear/truncate to manage token budgets',
+        'A while loop — the number of turns is not known ahead of time',
+        'History grows with every turn — the model sees the full list',
       ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Calling the model — the Responses API',
-      code: `from openai import OpenAI
-
-client = OpenAI()
-
-response = client.responses.create(
-    model="gpt-6-luna",
-    reasoning={"effort": "none"},     # answer directly, no thinking step
-    instructions="You are the DSS Pathfinder ship AI.",
-    input="What is our heading?",      # a string, or a list of messages
-)
-print(response.output_text)`,
-      highlights: [
-        'input= takes a string or the full message list',
-        'response.output_text is the reply as a plain string',
-      ],
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Two APIs — Responses vs Chat Completions',
-      left: {
-        label: 'Responses API (use this)',
-        items: [
-          '`client.responses.create(input=..., instructions=...)`',
-          'Reply: `response.output_text`',
-          'Streaming: typed events (`response.output_text.delta`)',
-          'Optional server-side state: `previous_response_id`',
-          'Built-in tools: web search, file search, code interpreter',
-        ],
-      },
-      right: {
-        label: 'Chat Completions (older)',
-        items: [
-          '`client.chat.completions.create(messages=...)`',
-          'Reply: `completion.choices[0].message.content`',
-          'Streaming: chunks (`chunk.choices[0].delta.content`)',
-          'You always resend the full history',
-          'Still supported and widely copied — but new features land in Responses first',
-        ],
-      },
     },
   },
   // ---- Demo: Basic chat ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Basic chat',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      title: 'Demo — The chat loop',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
       icon: 'rocket',
     },
   },
@@ -301,15 +344,6 @@ async def chat(request: ChatRequest):
     type: 'title',
     content: {
       title: 'Demo — Streaming',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 2',
-      icon: 'rocket',
-    },
-  },
-
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Responses vs Chat Completions',
       subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
       icon: 'rocket',
     },
@@ -448,7 +482,7 @@ async def chat(request: ChatRequest):
     type: 'title',
     content: {
       title: 'Demo — Prompt engineering',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 5',
       icon: 'rocket',
     },
   },
