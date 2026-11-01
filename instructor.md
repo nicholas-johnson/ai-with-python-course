@@ -1,5 +1,7 @@
 # Instructor Guide
 
+> **Running commands:** every `python …` and `pytest …` command below assumes students set up with **Option A** (pip + venv) and have the repo-root venv active (`source .venv/bin/activate`). If they chose **Option B** (uv), the same commands work prefixed with `uv run` — e.g. `uv run python start.py`, `uv run --extra dev pytest`. See the root [README](README.md#setup) for both setup paths.
+
 ## Day 1 — Build a working agent
 
 ### Module 1 — Working with the LLM
@@ -306,7 +308,7 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 - LLM-as-judge: correctness, completeness, relevance (JSON, temperature 0)
 - Faithfulness: claims grounded in retrieved context, not the gold answer
 - Scorecard + gate: pick a winner, fail a release below a floor
-- Capstone (Module 12) can reuse the harness as a release check
+- The capstones in `extras/` can reuse the harness as a release check
 
 **Demo:**
 
@@ -335,7 +337,6 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 - Reliability: retries with exponential backoff + jitter, timeouts, circuit breakers, fallbacks
 - Cost controls: token budgets (per-session, per-day), model tiering, caching, batching
 - Deployment: Docker, health checks, environment config, secrets management
-- Then hand off to capstone exercises — learners choose one app and build it
 
 **Demo:**
 
@@ -345,15 +346,6 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | `module-12-productionisation/demo/02_circuit_breaker.py` | Circuit breaker states, failure handling, recovery |
 | `module-12-productionisation/demo/03_cost_controls.py` | Token budgets, model tiering, cost tracking |
 
-**Exercises (choose one):**
-
-| Folder | What you build |
-| ------ | -------------- |
-| `exercises/01-recipe-finder` | RAG + hybrid search + multimodal vision + allergen guardrails |
-| `exercises/02-movie-night` | RAG + text-to-SQL + reranking + chart data |
-| `exercises/03-travel-planner` | Agentic RAG + tool calling + structured itineraries |
-| `exercises/04-personal-assistant` | Chat + tools + MCP + RAG notes + calendar management |
-
 ---
 
 ### Module 13 — Edge Topics
@@ -362,10 +354,11 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 
 - Advanced retrieval patterns: hybrid search, re-ranking, HyDE
 - Agentic RAG: agent-driven retrieval with self-critique and citation verification
-- Fine-tuning data pipelines (eval lives in Module 11)
+- Local ML: fine-tuning data, CPU training, running Hugging Face models (eval lives in Module 11)
 - Guardrails: input/output validation, safety filters
 - Caching: semantic similarity caching for LLM responses
 - And more: web search backends, text-to-SQL, multimodal RAG, contextual chunking
+- Concepts only (slides 15–18): test-time compute, speculative decoding, GraphRAG, MoE
 - This is a pick-and-choose module — delegates work on topics that interest them most
 
 **Demo:**
@@ -373,8 +366,9 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | Script | What it shows |
 | ------ | ------------- |
 | `module-13-edge-topics/demo/demo.py` | Interactive walkthrough of hybrid search, agentic RAG, citation verification, semantic caching |
+| `module-13-edge-topics/demo/13_*.py`, `14_*.py` | Local ML on CPU: train a classifier, fine-tune SmolLM2, run Hub models |
 
-**Exercises (standalone labs, one per topic; LLM eval moved to Module 11):**
+**Exercises (standalone labs; exercise numbers match topic numbers 1–14 in the README and slides; eval lives in Module 11):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
@@ -385,8 +379,29 @@ A Svelte frontend is provided. Delegates focus on the backend logic.
 | `exercises/05-citation-verification` | Verify and ground citations in source documents |
 | `exercises/06-web-search-backend` | Integrate web search as a retrieval source |
 | `exercises/07-text-to-sql` | Natural language to SQL query generation |
-| `exercises/09-fine-tuning-data` | Build datasets for fine-tuning |
-| `exercises/10-guardrails` | Input/output validation and safety filters |
-| `exercises/11-semantic-cache` | Cache LLM responses by semantic similarity |
-| `exercises/12-multimodal-rag` | RAG with images and text |
-| `exercises/13-contextual-chunking` | Context-aware document chunking strategies |
+| `exercises/08-guardrails` | Input/output validation and safety filters |
+| `exercises/09-semantic-cache` | Cache LLM responses by semantic similarity |
+| `exercises/10-multimodal-rag` | RAG with images and text |
+| `exercises/11-contextual-chunking` | Context-aware document chunking strategies |
+| `exercises/12-fine-tuning-data` | Build datasets for fine-tuning |
+| `exercises/13-local-training` | Fine-tune a small classifier on CPU |
+| `exercises/14-huggingface-run` | Run a Hub model with tokenizer + model, no `pipeline` |
+
+---
+
+### Extras — Capstones
+
+**Talk about:**
+
+- Learners pick one full-stack app and build its FastAPI backend against a provided SvelteKit frontend
+- Each capstone combines Module 12 production patterns (tracing, retries, cost tracking) with Module 13 techniques
+- Module 11's eval harness can serve as each capstone's release check
+
+**Capstones (choose one; after Module 13):**
+
+| Folder | What you build |
+| ------ | -------------- |
+| `extras/01-recipe-finder` | RAG + hybrid search + multimodal vision + allergen guardrails |
+| `extras/02-movie-night` | RAG + text-to-SQL + reranking + chart data |
+| `extras/03-travel-planner` | Agentic RAG + tool calling + structured itineraries |
+| `extras/04-personal-assistant` | Chat + tools + MCP + RAG notes + calendar management |

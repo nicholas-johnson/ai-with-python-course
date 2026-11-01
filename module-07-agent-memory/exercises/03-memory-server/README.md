@@ -67,7 +67,10 @@ Implement all five tools: `remember`, `recall`, `forget`, `list_memories`, `get_
 **Test the server standalone:**
 
 ```bash
+# Option A (venv active):
 mcp dev server.py
+# Option B (uv):
+uv run mcp dev server.py
 ```
 
 This opens the MCP Inspector where you can call each tool and see raw responses.
@@ -109,8 +112,14 @@ The agent should:
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-07-agent-memory/exercises/03-memory-server
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-07-agent-memory/exercises/03-memory-server
+uv run python start.py
 ```
 
 Chat with BARKEEP and share your drink order, your name, or a secret. The agent will use the `remember` tool to store them. Ask "what's my usual?" and watch it call `recall`. Use `/tools` to see the available memory tools.
@@ -118,7 +127,14 @@ Chat with BARKEEP and share your drink order, your name, or a secret. The agent 
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-07-agent-memory/exercises/03-memory-server
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-07-agent-memory/exercises/03-memory-server
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

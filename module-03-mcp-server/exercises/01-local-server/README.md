@@ -39,11 +39,22 @@ The power grid data is already defined in `server.py`:
 ## Run it
 
 ```bash
+# Option A - pip + venv (activate the repo-root venv, then cd in):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-03-mcp-server/exercises/01-local-server
+
 # Run tests
 pytest test_start.py -v
-
 # Chat with the agent
 python starter/agent.py
+
+# Option B - uv (no activation needed):
+cd module-03-mcp-server/exercises/01-local-server
+
+# Run tests
+uv run --extra dev pytest test_start.py -v
+# Chat with the agent
+uv run python starter/agent.py
 ```
 
 ## Try it

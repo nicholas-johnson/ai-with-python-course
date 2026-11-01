@@ -123,8 +123,14 @@ Handle these commands:
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-08-structured-workflows/exercises/01-react-agent
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-08-structured-workflows/exercises/01-react-agent
+uv run python start.py
 ```
 
 Try queries that require multiple tool calls:
@@ -135,7 +141,14 @@ Try queries that require multiple tool calls:
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-08-structured-workflows/exercises/01-react-agent
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-08-structured-workflows/exercises/01-react-agent
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

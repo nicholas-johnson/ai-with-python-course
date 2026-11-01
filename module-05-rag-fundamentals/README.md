@@ -154,6 +154,7 @@ The `[Source N]` format lets you trace every claim back to a chunk. Post-process
 The demo is a multi-step walkthrough using a persistent ChromaDB (via Docker). See [`demo/README.md`](demo/README.md) for full instructions.
 
 ```bash
+# Option A: venv active. Option B: prefix python/mcp commands with 'uv run' (see demo/README.md).
 cd module-05-rag-fundamentals/demo
 docker compose up -d              # start ChromaDB
 python ingest.py                  # load + chunk + embed + store
@@ -175,7 +176,12 @@ The three exercises chain together into a complete RAG system. Each builds on th
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-05-rag-fundamentals/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-05-rag-fundamentals/
 ```
 
 ## Slides

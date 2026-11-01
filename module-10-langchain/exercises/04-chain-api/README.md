@@ -78,7 +78,12 @@ Use `ainvoke` (not `invoke`) inside an `async def` route so the server is not bl
 
 ```bash
 cd module-10-langchain/exercises/04-chain-api
+
+# Option A (venv active):
 uvicorn start:create_app --factory --reload
+
+# Option B (uv):
+uv run uvicorn start:create_app --factory --reload
 ```
 
 Open the API docs at http://127.0.0.1:8000/docs and try the endpoint from the browser.
@@ -96,7 +101,14 @@ Response shape: `{"output": {"category": "...", "summary": "...", "priority": ".
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-10-langchain/exercises/04-chain-api
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-10-langchain/exercises/04-chain-api
+uv run --extra dev pytest test_start.py -v
 ```
 
 Tests without an API key:
@@ -108,7 +120,14 @@ Tests without an API key:
 Integration test (requires `OPENAI_API_KEY`):
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-10-langchain/exercises/04-chain-api
 pytest test_start.py -v -m integration
+
+# Option B - uv (no activation needed):
+cd module-10-langchain/exercises/04-chain-api
+uv run --extra dev pytest test_start.py -v -m integration
 ```
 
 ## Stretch goals

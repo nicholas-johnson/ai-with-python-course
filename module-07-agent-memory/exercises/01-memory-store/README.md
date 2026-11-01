@@ -104,8 +104,14 @@ The `main()` function and command handling are already provided. Once you implem
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-07-agent-memory/exercises/01-memory-store
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-07-agent-memory/exercises/01-memory-store
+uv run python start.py
 ```
 
 Chat with BARKEEP and tell it your drink order, your name, or a secret. Use `/memories` to see what it stored. Apply `/decay` a few times and watch importance scores drop. Use `/forget` to ask it to forget something specific.
@@ -113,7 +119,14 @@ Chat with BARKEEP and tell it your drink order, your name, or a secret. Use `/me
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-07-agent-memory/exercises/01-memory-store
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-07-agent-memory/exercises/01-memory-store
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

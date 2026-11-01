@@ -113,8 +113,14 @@ Define a `SAMPLE_REPORTS` list with a few hardcoded example reports and display 
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-10-langchain/exercises/01-chain-basics
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-10-langchain/exercises/01-chain-basics
+uv run python start.py
 ```
 
 Try classifying different types of reports — engineering faults, navigation updates, medical emergencies, science observations.
@@ -122,7 +128,14 @@ Try classifying different types of reports — engineering faults, navigation up
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-10-langchain/exercises/01-chain-basics
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-10-langchain/exercises/01-chain-basics
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

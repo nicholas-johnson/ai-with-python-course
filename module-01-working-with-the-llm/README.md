@@ -172,7 +172,12 @@ The key insight is that prompts are **instructions, not wishes**. Vague prompts 
 One script walks through the whole module — basic chat, streaming, prompting patterns, and the Responses vs Chat Completions comparison:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-01-working-with-the-llm/demo/demo.py
+
+# Option B - uv (no activation needed):
+uv run python module-01-working-with-the-llm/demo/demo.py
 ```
 
 ## Exercises
@@ -188,7 +193,12 @@ The exercises chain — each one builds on the previous. Run them with `python s
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-01-working-with-the-llm/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-01-working-with-the-llm/
 ```
 
 ## Slides

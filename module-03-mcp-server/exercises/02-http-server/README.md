@@ -38,6 +38,10 @@ Already defined in `server.py`:
 ## Run it
 
 ```bash
+# Option A - pip + venv (activate the repo-root venv first):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-03-mcp-server/exercises/02-http-server
+
 # Run tests (these test the server directly, no HTTP needed)
 pytest test_start.py -v
 
@@ -46,6 +50,12 @@ python starter/server.py
 
 # In another terminal, run the agent (connects to both servers)
 python starter/agent.py
+
+# Option B - uv (no activation needed):
+cd module-03-mcp-server/exercises/02-http-server
+uv run --extra dev pytest test_start.py -v   # run tests (no HTTP needed)
+uv run python starter/server.py              # start the HTTP server
+uv run python starter/agent.py               # in another terminal, run the agent
 ```
 
 ## Try it

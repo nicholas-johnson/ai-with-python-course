@@ -7,8 +7,20 @@ export const slides = [
       icon: 'sparkles',
     },
   },
-
-  // --- 1. Hybrid Search ---
+  {
+    type: 'standard',
+    content: {
+      title: 'What this module covers',
+      icon: 'compass',
+      points: [
+        'A **toolbox**, not a sequence — each topic stands alone, so pick what your system needs.',
+        'Topics **1–11**: retrieval, grounding, safety and cost techniques — each with an exercise of the same number.',
+        'Topics **12–14**: local ML on a laptop CPU — fine-tuning data, training, and running Hub models.',
+        'Topics **15–18**: concepts to recognise — test-time compute, speculative decoding, GraphRAG, MoE.',
+        'Evals (LLM-as-judge, retrieval metrics) have their own module — **Module 11**.',
+      ],
+    },
+  },
   {
     type: 'title',
     content: {
@@ -28,7 +40,6 @@ export const slides = [
         'Cormack, Clarke & Büttcher (2009). "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods." SIGIR.',
     },
   },
-
   {
     type: 'equation',
     content: {
@@ -119,8 +130,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 2. Re-ranking ---
   {
     type: 'title',
     content: {
@@ -152,8 +161,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 3. HyDE ---
   {
     type: 'title',
     content: {
@@ -186,8 +193,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 4. Agentic RAG ---
   {
     type: 'title',
     content: {
@@ -220,8 +225,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 5. Citation Verification ---
   {
     type: 'title',
     content: {
@@ -254,12 +257,40 @@ export const slides = [
       ],
     },
   },
-
-  // --- 6. Text-to-SQL ---
   {
     type: 'title',
     content: {
-      title: '6. Text-to-SQL',
+      title: '6. Web Search Backend',
+      subtitle: 'When the answer is not in your corpus',
+      icon: 'globe',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'What is a web search backend?',
+      description: 'A **web search backend** adds live internet search as a fallback retrieval source. It is used when users ask about things your index does not cover — current events, other products, general knowledge. You search internally first; if the best score is below a threshold, you query a web search API and normalise the results (title, snippet, URL) into the same passage format, so generation does not care where they came from.',
+      icon: 'globe',
+      credit: 'Nakano et al. (2021). "WebGPT: Browser-assisted question-answering with human feedback." arXiv:2112.09332',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Web search backend',
+      icon: 'globe',
+      points: [
+        'Internal search first — your curated corpus stays the **authority**.',
+        '**Fall back** to web search when the top internal score is below a threshold.',
+        'Normalise web hits to the same `{text, source}` shape as internal passages.',
+        'Trade-off: web results are unvetted, and add latency and an external dependency.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: '7. Text-to-SQL',
       subtitle: 'Natural language over structured data',
       icon: 'database',
     },
@@ -288,65 +319,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 7. Eval / LLM-as-judge ---
-  {
-    type: 'title',
-    content: {
-      title: '7. Eval / LLM-as-Judge',
-      subtitle: 'Measure retrieval and generation quality',
-      icon: 'trending-up',
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'What is LLM-as-judge eval?',
-      description:
-        "**LLM-as-judge** evaluation uses a strong model to grade your RAG system's answers. It is used to measure quality before shipping and to compare prompt or retrieval changes. You run questions through the pipeline, then ask the judge to score **correctness**, **faithfulness**, and **relevance** against references or context. You get repeatable scores and explanations — so you know what to fix.",
-      icon: 'trending-up',
-      credit:
-        'Zheng et al. (2023). "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena." arXiv:2306.05685',
-    },
-  },
-  {
-    type: 'equation',
-    content: {
-      title: 'Retrieval metrics',
-      mathml: `<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-  <mi>Precision</mi>
-  <mo>=</mo>
-  <mfrac>
-    <mrow><mi>TP</mi></mrow>
-    <mrow><mi>TP</mi><mo>+</mo><mi>FP</mi></mrow>
-  </mfrac>
-  <mspace width="2em"/>
-  <mi>Recall</mi>
-  <mo>=</mo>
-  <mfrac>
-    <mrow><mi>TP</mi></mrow>
-    <mrow><mi>TP</mi><mo>+</mo><mi>FN</mi></mrow>
-  </mfrac>
-</math>`,
-      description:
-        'Precision: what fraction of retrieved documents are relevant? Recall: what fraction of relevant documents were retrieved? Both require a labelled test set. — TP: retrieved & relevant · FP: retrieved but not relevant · FN: relevant but not retrieved.',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Eval / LLM-as-judge',
-      icon: 'trending-up',
-      points: [
-        'You cannot improve what you cannot **measure**.',
-        'Evaluate: **retrieval** quality (precision, recall) + **generation** quality.',
-        'LLM-as-judge scores correctness, completeness, relevance, faithfulness.',
-        'Hands-on is **Module 11 — Evals** (golden tests, metrics, judge, gate).',
-      ],
-    },
-  },
-
-  // --- 8. Advanced Guardrails ---
   {
     type: 'title',
     content: {
@@ -379,8 +351,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 9. Semantic Caching ---
   {
     type: 'title',
     content: {
@@ -434,8 +404,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 10. Multimodal RAG ---
   {
     type: 'title',
     content: {
@@ -468,8 +436,6 @@ export const slides = [
       ],
     },
   },
-
-  // --- 11. Contextual Chunking ---
   {
     type: 'title',
     content: {
@@ -502,80 +468,10 @@ export const slides = [
       ],
     },
   },
-
-  // --- 12. Test-Time Compute Scaling ---
   {
     type: 'title',
     content: {
-      title: '12. Test-Time Compute Scaling',
-      subtitle: 'Think longer, not bigger',
-      icon: 'brain',
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'What is test-time compute scaling?',
-      description:
-        'Normally an LLM answers in **one shot**: your question goes in, tokens come out. **Test-time compute scaling** means the model uses **more work at answer time** — extra tokens, steps, or attempts before you see the final reply. It is used for hard problems (math, logic, planning) where a quick first guess is often wrong. The system might write hidden reasoning, try several approaches, or check its own draft — like giving the model more exam time, not a bigger brain. You pay more latency and cost per question; you often get a better answer.',
-      icon: 'brain',
-      credit:
-        'Snell et al. (2024). "Scaling LLM Test-Time Compute Optimally." arXiv:2408.03314',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Test-time compute scaling',
-      icon: 'brain',
-      points: [
-        '**Train-time**: make the model bigger (more parameters, more GPU weeks).',
-        '**Test-time**: same model, but **more inference steps** per user question.',
-        'Examples: chain-of-thought, self-check, multiple samples + pick best (o1, DeepSeek-R1).',
-        'Trade-off: answers can improve a lot; each query costs more time and money.',
-      ],
-    },
-  },
-
-  // --- 14. GraphRAG ---
-  {
-    type: 'title',
-    content: {
-      title: '14. GraphRAG',
-      subtitle: 'Knowledge graphs meet retrieval',
-      icon: 'share-2',
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'What is GraphRAG?',
-      description:
-        '**GraphRAG** is retrieval built on a knowledge graph, not just vector chunks. It is used for corpus-wide questions ("what are the main themes across these reports?"). You extract entities and links, group them into communities, and pre-summarise each cluster. A query can hit local chunks *or* those cluster summaries. You get both precise facts and big-picture answers.',
-      icon: 'share-2',
-      credit:
-        'Edge et al. (2024). "From Local to Global: A Graph RAG Approach to Query-Focused Summarization." arXiv:2404.16130',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'GraphRAG',
-      icon: 'share-2',
-      points: [
-        'Extract entities + relationships → build a **knowledge graph**.',
-        '**Community detection** + pre-summarise each cluster.',
-        'Global queries answered at the cluster level, not chunk level.',
-        'Combines local vector precision with global understanding.',
-      ],
-    },
-  },
-
-  // --- 15. DPO + LoRA ---
-  {
-    type: 'title',
-    content: {
-      title: '15. DPO + LoRA',
+      title: '12. DPO + LoRA',
       subtitle: 'Preference alignment + efficient training',
       icon: 'sliders',
     },
@@ -619,15 +515,206 @@ export const slides = [
         '**DPO**: one loss on (chosen, rejected) preference pairs.',
         '**LoRA**: train only B and A adapters — same alignment, far less memory.',
         'Standard pipeline for open-source preference fine-tunes (Mixtral, Llama).',
+        'Exercise `12-fine-tuning-data`: prepare the chat JSONL a fine-tune needs.',
       ],
     },
   },
-
-  // --- 16. Mixture of Experts (MoE) ---
   {
     type: 'title',
     content: {
-      title: '16. Mixture of Experts',
+      title: '13. Train a Model Locally',
+      subtitle: 'CPU only — no GPU required',
+      icon: 'cpu',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'What is local training?',
+      description:
+        '**Local training** means updating a small neural network on your own machine instead of calling a cloud API. It is used when you have labelled examples and want a cheap, repeatable classifier (intent, urgency, department). You prepare text + label pairs, fine-tune a base model like DistilBERT with Hugging Face **Trainer**, save weights to disk, then call **predict** on new text. You end up with a model file you own — no API key at inference time.',
+      icon: 'cpu',
+      credit:
+        'Wolf et al. (2020). "Transformers: State-of-the-Art Natural Language Processing." EMNLP System Demonstrations.',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Local training workflow',
+      icon: 'cpu',
+      points: [
+        'Install: `pip install -e ".[local-ml]"` (~2–4 GB RAM on CPU).',
+        'Prepare labelled JSON: `{text, label}` pairs (demo: urgent/routine; exercise: department).',
+        'Tokenise → **Trainer** with `max_steps=30` → save to `models/`.',
+        'First run downloads **distilbert-base-uncased** (~250MB).',
+        'Demo: `python demo/13_train_local.py` · Exercise: `exercises/13-local-training/`',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Local training',
+      subtitle: 'python module-13-edge-topics/demo/13_train_local.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: '14. Run a Hugging Face Model',
+      subtitle: 'Download once, run on CPU',
+      icon: 'package',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'What is running a Hub model?',
+      description:
+        'The **Hugging Face Hub** hosts thousands of pre-trained models you download and run locally. It is used when you need a capability (sentiment, classification, translation) without training from scratch. You load a model id (e.g. DistilBERT fine-tuned on reviews), pass text through a **pipeline** or tokenizer + model, and read scores or labels. The model stays on disk in a cache — later runs start instantly.',
+      icon: 'package',
+      credit:
+        'Lhoest et al. (2021). "Datasets: A Community Library for Natural Language Processing." NeurIPS.',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Hugging Face run workflow',
+      icon: 'package',
+      points: [
+        'Install: `pip install -e ".[local-ml]"`.',
+        'Demo: **`pipeline("sentiment-analysis")`** on ship logs — fastest path.',
+        'Exercise: **AutoTokenizer** + **AutoModel** + softmax — see what the pipeline hides.',
+        'Model: `distilbert-base-uncased-finetuned-sst-2-english` (~250MB download).',
+        'Demo: `python demo/14_huggingface_run.py` · Exercise: `exercises/14-huggingface-run/`',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Small models to try on CPU',
+      icon: 'package',
+      points: [
+        '`distilbert-base-uncased-finetuned-sst-2-english` — sentiment (66M, ~250MB).',
+        '`cardiffnlp/twitter-roberta-base-sentiment-latest` — 3-class sentiment (125M, ~500MB).',
+        '`sentence-transformers/all-MiniLM-L6-v2` — sentence embeddings (22M, ~90MB).',
+        '`facebook/bart-large-mnli` — zero-shot classification (407M, ~1.6GB).',
+        '`Helsinki-NLP/opus-mt-en-fr` — English→French translation (74M, ~300MB).',
+        '`google/flan-t5-small` — instruction-tuned text generation (77M, ~300MB).',
+        'Rule of thumb: <500M params, "base"/"small"/"distil"/"mini" in the name → fine on CPU.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Hugging Face run',
+      subtitle: 'python module-13-edge-topics/demo/14_huggingface_run.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: '15. Test-Time Compute Scaling',
+      subtitle: 'Think longer, not bigger',
+      icon: 'brain',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'What is test-time compute scaling?',
+      description:
+        'Normally an LLM answers in **one shot**: your question goes in, tokens come out. **Test-time compute scaling** means the model uses **more work at answer time** — extra tokens, steps, or attempts before you see the final reply. It is used for hard problems (math, logic, planning) where a quick first guess is often wrong. The system might write hidden reasoning, try several approaches, or check its own draft — like giving the model more exam time, not a bigger brain. You pay more latency and cost per question; you often get a better answer.',
+      icon: 'brain',
+      credit:
+        'Snell et al. (2024). "Scaling LLM Test-Time Compute Optimally." arXiv:2408.03314',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Test-time compute scaling',
+      icon: 'brain',
+      points: [
+        '**Train-time**: make the model bigger (more parameters, more GPU weeks).',
+        '**Test-time**: same model, but **more inference steps** per user question.',
+        'Examples: chain-of-thought, self-check, multiple samples + pick best (o1, DeepSeek-R1).',
+        'Trade-off: answers can improve a lot; each query costs more time and money.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: '16. Speculative Decoding',
+      subtitle: 'Draft fast, verify once',
+      icon: 'zap',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'What is speculative decoding?',
+      description: '**Speculative decoding** speeds up generation without changing the output. A small, fast **draft** model proposes several tokens; the large model checks them all in one forward pass and keeps the ones it agrees with. It is used in production serving where latency matters. Accepted tokens arrive in bulk — typically **2–4× faster** — and the final text is distributed exactly as if the large model had written it alone.',
+      icon: 'zap',
+      credit: 'Leviathan, Kalman & Matias (2023). "Fast Inference from Transformers via Speculative Decoding." ICML.',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Speculative decoding',
+      icon: 'zap',
+      points: [
+        'Draft model guesses **k tokens**; target model verifies them in **one pass**.',
+        'Keep the agreed prefix, resample at the first mismatch, repeat.',
+        'Same output distribution as the large model — only faster.',
+        'Trade-off: memory for a second model; more complex serving stack.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: '17. GraphRAG',
+      subtitle: 'Knowledge graphs meet retrieval',
+      icon: 'share-2',
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'What is GraphRAG?',
+      description:
+        '**GraphRAG** is retrieval built on a knowledge graph, not just vector chunks. It is used for corpus-wide questions ("what are the main themes across these reports?"). You extract entities and links, group them into communities, and pre-summarise each cluster. A query can hit local chunks *or* those cluster summaries. You get both precise facts and big-picture answers.',
+      icon: 'share-2',
+      credit:
+        'Edge et al. (2024). "From Local to Global: A Graph RAG Approach to Query-Focused Summarization." arXiv:2404.16130',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'GraphRAG',
+      icon: 'share-2',
+      points: [
+        'Extract entities + relationships → build a **knowledge graph**.',
+        '**Community detection** + pre-summarise each cluster.',
+        'Global queries answered at the cluster level, not chunk level.',
+        'Combines local vector precision with global understanding.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: '18. Mixture of Experts',
       subtitle: 'Massive parameters, selective compute',
       icon: 'layers',
     },
@@ -655,117 +742,14 @@ export const slides = [
       ],
     },
   },
-
-  // --- Section: Train locally (CPU) ---
   {
     type: 'title',
     content: {
-      title: 'Section — Train a Model Locally',
-      subtitle: 'CPU only — no GPU required',
-      icon: 'cpu',
+      title: 'Putting it all together',
+      subtitle: 'Choosing techniques for your system',
+      icon: 'puzzle',
     },
   },
-  {
-    type: 'description',
-    content: {
-      title: 'What is local training?',
-      description:
-        '**Local training** means updating a small neural network on your own machine instead of calling a cloud API. It is used when you have labelled examples and want a cheap, repeatable classifier (intent, urgency, department). You prepare text + label pairs, fine-tune a base model like DistilBERT with Hugging Face **Trainer**, save weights to disk, then call **predict** on new text. You end up with a model file you own — no API key at inference time.',
-      icon: 'cpu',
-      credit:
-        'Wolf et al. (2020). "Transformers: State-of-the-Art Natural Language Processing." EMNLP System Demonstrations.',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Local training workflow',
-      icon: 'cpu',
-      points: [
-        'Install: `pip install -e ".[local-ml]"` (~2–4 GB RAM on CPU).',
-        'Prepare labelled JSON: `{text, label}` pairs (demo: urgent/routine; exercise: department).',
-        'Tokenise → **Trainer** with `max_steps=30` → save to `models/`.',
-        'First run downloads **distilbert-base-uncased** (~250MB).',
-        'Demo: `python demo/14_train_local.py` · Exercise: `exercises/14-local-training/`',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Local training',
-      subtitle: 'python module-13-edge-topics/demo/14_train_local.py',
-      icon: 'rocket',
-    },
-  },
-
-  // --- Section: Hugging Face Hub ---
-  {
-    type: 'title',
-    content: {
-      title: 'Section — Run a Hugging Face Model',
-      subtitle: 'Download once, run on CPU',
-      icon: 'package',
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'What is running a Hub model?',
-      description:
-        'The **Hugging Face Hub** hosts thousands of pre-trained models you download and run locally. It is used when you need a capability (sentiment, classification, translation) without training from scratch. You load a model id (e.g. DistilBERT fine-tuned on reviews), pass text through a **pipeline** or tokenizer + model, and read scores or labels. The model stays on disk in a cache — later runs start instantly.',
-      icon: 'package',
-      credit:
-        'Lhoest et al. (2021). "Datasets: A Community Library for Natural Language Processing." NeurIPS.',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Hugging Face run workflow',
-      icon: 'package',
-      points: [
-        'Install: `pip install -e ".[local-ml]"`.',
-        'Demo: **`pipeline("sentiment-analysis")`** on ship logs — fastest path.',
-        'Exercise: **AutoTokenizer** + **AutoModel** + softmax — see what the pipeline hides.',
-        'Model: `distilbert-base-uncased-finetuned-sst-2-english` (~250MB download).',
-        'Demo: `python demo/15_huggingface_run.py` · Exercise: `exercises/15-huggingface-run/`',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Small models to try on CPU',
-      icon: 'package',
-      points: [
-        '`distilbert-base-uncased-finetuned-sst-2-english` — sentiment (66M, ~250MB).',
-        '`cardiffnlp/twitter-roberta-base-sentiment-latest` — 3-class sentiment (125M, ~500MB).',
-        '`sentence-transformers/all-MiniLM-L6-v2` — sentence embeddings (22M, ~90MB).',
-        '`facebook/bart-large-mnli` — zero-shot classification (407M, ~1.6GB).',
-        '`Helsinki-NLP/opus-mt-en-fr` — English→French translation (74M, ~300MB).',
-        '`google/flan-t5-small` — instruction-tuned text generation (77M, ~300MB).',
-        'Rule of thumb: <500M params, "base"/"small"/"distil"/"mini" in the name → fine on CPU.',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Hugging Face run',
-      subtitle: 'python module-13-edge-topics/demo/15_huggingface_run.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Exercise 15 — Hugging Face run',
-      subtitle: 'exercises/15-huggingface-run/',
-      icon: 'clipboard-list',
-    },
-  },
-
   {
     type: 'comparison',
     content: {
@@ -775,7 +759,7 @@ export const slides = [
         items: [
           'Hybrid search',
           'Re-ranking',
-          'Evaluation',
+          'Evaluation (Module 11)',
           'Guardrails',
           'Good chunking strategy',
         ],
@@ -789,6 +773,7 @@ export const slides = [
           'Test-time compute (hard reasoning)',
           'Speculative decoding (latency)',
           'MoE awareness (model selection)',
+          'Web search (out-of-corpus questions)',
           'Text-to-SQL (structured data)',
           'Semantic caching (high traffic)',
           'Multimodal (images in corpus)',
@@ -799,13 +784,74 @@ export const slides = [
   {
     type: 'welcome',
     content: {
-      title: 'Exercises — 15 hands-on topics',
+      title: 'Exercises — 14 hands-on topics',
       points: [
-        '01-05: Hybrid search, re-ranking, HyDE, agentic RAG, citation verification',
-        '06-07: Text-to-SQL, guardrails (06 web search optional). Eval is Module 11.',
-        '09-13: Semantic cache, multimodal RAG, contextual chunking, fine-tuning data prep',
-        '14-15: **Local training (CPU)** and **Hugging Face run** — see demos in slides above',
-        'Slides 12-16 (edge concepts): test-time compute, speculative decoding, GraphRAG, DPO+LoRA, MoE',
+        '01–05: Hybrid search, re-ranking, HyDE, agentic RAG, citation verification',
+        '06–07: Web search backend, text-to-SQL',
+        '08–11: Advanced guardrails, semantic cache, multimodal RAG, contextual chunking',
+        '12–14: Fine-tuning data prep, **local training (CPU)**, **Hugging Face run**',
+        'Exercise numbers match topic numbers. Topics 15–18 are concepts only.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Capstone projects',
+      subtitle: 'extras/ — choose one, build it production-ready',
+      icon: 'pen-tool',
+    },
+  },
+  {
+    type: 'cards',
+    content: {
+      title: 'Pick your capstone',
+      cards: [
+        {
+          heading: 'AI Recipe Finder',
+          points: [
+            'Photo your fridge, get recipe suggestions.',
+            'RAG + hybrid search + multimodal vision.',
+            'Allergen guardrails + semantic caching.',
+          ],
+        },
+        {
+          heading: 'AI Movie Night',
+          points: [
+            'Describe your mood, get movie picks.',
+            'RAG + reranking + text-to-SQL for data questions.',
+            'Charts and structured output.',
+          ],
+        },
+        {
+          heading: 'AI Travel Planner',
+          points: [
+            'Describe your dream trip, get a day-by-day itinerary.',
+            'Agentic RAG + tool calling + web fallback.',
+            'Budget tracking + structured itineraries.',
+          ],
+        },
+        {
+          heading: 'AI Personal Assistant',
+          points: [
+            'Friendly companion with calendar, notes, reminders.',
+            'Chat + tool calling + MCP + RAG over notes.',
+            'Session memory + cost controls.',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'How the capstones work',
+      icon: 'pen-tool',
+      points: [
+        'Each capstone in **`extras/`** has a **frontend/** (SvelteKit — provided), a **starter/** (your code), and a **solution/**.',
+        'You build the **FastAPI backend** in `starter/` — the frontend connects automatically.',
+        'Combine **Module 12** patterns (tracing, retries, cost tracking) with **Module 13** techniques (hybrid search, caching, guardrails).',
+        'Run with `uvicorn starter.app:app --reload --port 8000` and `cd frontend && pnpm dev`.',
       ],
     },
   },
@@ -813,7 +859,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 13 — Complete',
-      subtitle: 'Next: capstone project',
+      subtitle: 'Next: pick a capstone in extras/',
       icon: 'check-circle',
     },
   },

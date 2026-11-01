@@ -1,6 +1,6 @@
 # Module 12 — Productionisation
 
-Your prototype works on your laptop — now make it production-ready. This module teaches the patterns that turn AI prototypes into reliable, cost-effective, traceable production systems. Then pick one of four capstone apps and build it.
+Your prototype works on your laptop — now make it production-ready. This module teaches the patterns that turn AI prototypes into reliable, cost-effective, traceable production systems.
 
 ## Learning goals
 
@@ -315,16 +315,9 @@ Check every dependency: database, vector store, LLM API reachability. Return 200
 
 ---
 
-## Exercises
+## Capstones
 
-| # | App | Directory | Key techniques |
-|---|-----|-----------|----------------|
-| 01 | AI Recipe Finder | [`exercises/01-recipe-finder/`](exercises/01-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
-| 02 | AI Movie Night | [`exercises/02-movie-night/`](exercises/02-movie-night/) | RAG, hybrid search, text-to-SQL, structured output |
-| 03 | AI Travel Planner | [`exercises/03-travel-planner/`](exercises/03-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
-| 04 | AI Personal Assistant | [`exercises/04-personal-assistant/`](exercises/04-personal-assistant/) | Chat + tools + MCP, RAG notes, calendar, cost controls |
-
-Choose one exercise. Each provides a SvelteKit frontend — you build the FastAPI backend.
+The four full-stack capstone apps (Recipe Finder, Movie Night, Travel Planner, Personal Assistant) live in [`extras/`](../extras/). They combine this module's patterns with techniques from **Module 13 — Edge Topics**, so do them after Module 13.
 
 ---
 
@@ -333,7 +326,12 @@ Choose one exercise. Each provides a SvelteKit frontend — you build the FastAP
 ### Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-12-productionisation/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-12-productionisation/
 ```
 
 ### Slides

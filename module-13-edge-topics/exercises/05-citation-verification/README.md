@@ -145,8 +145,14 @@ for claim in claims:
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-13-edge-topics/exercises/05-citation-verification
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/05-citation-verification
+uv run python start.py
 ```
 
 Try verifying answers that mix real facts with made-up ones: "The ship travels at warp 9 and has a crew of 50,000. The captain is named Kirk."
@@ -154,7 +160,12 @@ Try verifying answers that mix real facts with made-up ones: "The ship travels a
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/05-citation-verification/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/05-citation-verification/test_start.py -v
 ```
 
 ## Stretch Goals

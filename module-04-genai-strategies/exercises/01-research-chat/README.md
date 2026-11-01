@@ -115,7 +115,8 @@ Start the backend, then the frontend:
 ```bash
 # Terminal 1 — backend
 cd module-04-genai-strategies/exercises/01-research-chat
-uvicorn solution:app --reload --port 8000
+uvicorn solution:app --reload --port 8000           # Option A (venv active)
+# Option B (uv): uv run uvicorn solution:app --reload --port 8000
 
 # Terminal 2 — frontend
 cd module-04-genai-strategies/frontend
@@ -129,7 +130,14 @@ You should see tool calls and results appearing in the chat, followed by the str
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-04-genai-strategies/exercises/01-research-chat
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-04-genai-strategies/exercises/01-research-chat
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

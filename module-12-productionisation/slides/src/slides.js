@@ -366,7 +366,7 @@ Cost: Billing budgets, quotas`,
     content: {
       title: 'When teams choose AWS',
       description:
-        '**AWS** is used when an organisation already runs on Amazon infrastructure or needs broad service coverage and compliance programs. For AI production you keep the same patterns from this module — trace IDs, retries, budgets — but wire them to **CloudWatch**, **Secrets Manager**, and optionally **Bedrock** instead of calling OpenAI directly. You deploy the capstone FastAPI image to **App Runner** or **Fargate** and inject secrets at runtime, not in the Docker image.',
+        '**AWS** is used when an organisation already runs on Amazon infrastructure or needs broad service coverage and compliance programs. For AI production you keep the same patterns from this module — trace IDs, retries, budgets — but wire them to **CloudWatch**, **Secrets Manager**, and optionally **Bedrock** instead of calling OpenAI directly. You deploy your FastAPI image to **App Runner** or **Fargate** and inject secrets at runtime, not in the Docker image.',
       icon: 'server',
     },
   },
@@ -376,7 +376,7 @@ Cost: Billing budgets, quotas`,
       title: 'AWS service mapping',
       icon: 'server',
       points: [
-        '**Run container** — App Runner (simplest) or ECS Fargate for the capstone FastAPI image.',
+        '**Run container** — App Runner (simplest) or ECS Fargate for a FastAPI image.',
         '**Secrets** — Secrets Manager or SSM Parameter Store for `OPENAI_API_KEY`; never bake into the image.',
         '**Tracing** — JSON logs with `trace_id` → CloudWatch Logs; optional X-Ray or ADOT OpenTelemetry.',
         '**Managed LLM** — Amazon Bedrock when policy requires models inside your AWS account.',
@@ -397,7 +397,7 @@ Cost: Billing budgets, quotas`,
     content: {
       title: 'When teams choose Azure',
       description:
-        '**Azure** fits Microsoft-centric enterprises: Entra ID, existing subscriptions, and **Azure OpenAI Service** for GPT models behind a private endpoint. Production AI apps use **Container Apps** or **App Service** for the FastAPI container, **Key Vault** for API keys, and **Application Insights** for the same span JSON you log in `TraceContext`. Capstones still teach portable Python; on Azure you swap the OpenAI client endpoint and deployment name while keeping tracing and cost patterns unchanged.',
+        '**Azure** fits Microsoft-centric enterprises: Entra ID, existing subscriptions, and **Azure OpenAI Service** for GPT models behind a private endpoint. Production AI apps use **Container Apps** or **App Service** for the FastAPI container, **Key Vault** for API keys, and **Application Insights** for the same span JSON you log in `TraceContext`. The course code stays portable Python; on Azure you swap the OpenAI client endpoint and deployment name while keeping tracing and cost patterns unchanged.',
       icon: 'globe',
     },
   },
@@ -428,7 +428,7 @@ Cost: Billing budgets, quotas`,
     content: {
       title: 'When teams choose GCP',
       description:
-        '**GCP** is strong for container-native AI APIs: **Cloud Run** runs a single Docker image with minimal ops, and **Vertex AI** hosts Gemini and other models in-region. Teams on Google Cloud map `TraceContext` JSON to **Cloud Logging**, store secrets in **Secret Manager**, and use **Cloud Trace** for latency breakdowns. The capstone Dockerfile maps cleanly to Cloud Run — one service, env-based config, `/health` for readiness probes.',
+        '**GCP** is strong for container-native AI APIs: **Cloud Run** runs a single Docker image with minimal ops, and **Vertex AI** hosts Gemini and other models in-region. Teams on Google Cloud map `TraceContext` JSON to **Cloud Logging**, store secrets in **Secret Manager**, and use **Cloud Trace** for latency breakdowns. The module's Dockerfile maps cleanly to Cloud Run — one service, env-based config, `/health` for readiness probes.',
       icon: 'database',
     },
   },
@@ -485,67 +485,12 @@ Cost: Billing budgets, quotas`,
     },
   },
 
-  // --- Capstone exercises ---
-
   {
     type: 'title',
     content: {
-      title: 'Capstone exercises',
-      subtitle: 'Choose one. Build it production-ready.',
-      icon: 'pen-tool',
-    },
-  },
-  {
-    type: 'cards',
-    content: {
-      title: 'Pick your capstone',
-      cards: [
-        {
-          heading: 'AI Recipe Finder',
-          points: [
-            'Photo your fridge, get recipe suggestions.',
-            'RAG + hybrid search + multimodal vision.',
-            'Allergen guardrails + semantic caching.',
-          ],
-        },
-        {
-          heading: 'AI Movie Night',
-          points: [
-            'Describe your mood, get movie picks.',
-            'RAG + reranking + text-to-SQL for data questions.',
-            'Charts and structured output.',
-          ],
-        },
-        {
-          heading: 'AI Travel Planner',
-          points: [
-            'Describe your dream trip, get a day-by-day itinerary.',
-            'Agentic RAG + tool calling + web fallback.',
-            'Budget tracking + structured itineraries.',
-          ],
-        },
-        {
-          heading: 'AI Personal Assistant',
-          points: [
-            'Friendly companion with calendar, notes, reminders.',
-            'Chat + tool calling + MCP + RAG over notes.',
-            'Session memory + cost controls.',
-          ],
-        },
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'How the capstones work',
-      icon: 'pen-tool',
-      points: [
-        'Each exercise has a **frontend/** (SvelteKit — provided), a **starter/** (your code), and a **solution/**.',
-        'You build the **FastAPI backend** in `starter/` — the frontend connects automatically.',
-        'Apply the production patterns from this module: **tracing**, **retries**, **cost tracking**.',
-        'Run with `uvicorn app:app --reload --port 8000` and `cd frontend && pnpm dev`.',
-      ],
+      title: 'Module 12 — Complete',
+      subtitle: 'Next: Module 13 — Edge Topics',
+      icon: 'check-circle',
     },
   },
 ];

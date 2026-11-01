@@ -77,8 +77,14 @@ For each case: `run_case` then `score_case`. Return `total`, `passed`, `failed`,
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-11-evals/exercises/01-golden-tests
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-11-evals/exercises/01-golden-tests
+uv run python start.py
 ```
 
 Uses `data/golden_cases.json` and `make_scripted_client` — no API key.
@@ -86,7 +92,12 @@ Uses `data/golden_cases.json` and `make_scripted_client` — no API key.
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-11-evals/exercises/01-golden-tests/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-11-evals/exercises/01-golden-tests/test_start.py -v
 ```
 
 ## Stretch Goals

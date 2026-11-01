@@ -88,7 +88,14 @@ Return a system prompt that includes 2-3 examples of the `CATEGORY: explanation`
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-01-working-with-the-llm/exercises/03-prompting
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-01-working-with-the-llm/exercises/03-prompting
+uv run python start.py
 ```
 
 The interactive runner lets you pick any base prompt or challenge:
@@ -103,7 +110,12 @@ The interactive runner lets you pick any base prompt or challenge:
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-01-working-with-the-llm/exercises/03-prompting/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-01-working-with-the-llm/exercises/03-prompting/test_start.py -v
 ```
 
 The structural tests (no API key needed) check that each function returns a non-empty string. The integration tests (require `OPENAI_API_KEY`) call the API and verify the output matches the expected format.

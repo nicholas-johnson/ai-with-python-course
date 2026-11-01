@@ -83,8 +83,14 @@ For each `thresholds` item, if `metric_value < floor`, append a failure. `passed
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-11-evals/exercises/05-eval-compare
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-11-evals/exercises/05-eval-compare
+uv run python start.py
 ```
 
 `rag` should lose and fail the gate; `rag_rerank` should win and pass.
@@ -92,11 +98,16 @@ python start.py
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-11-evals/exercises/05-eval-compare/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-11-evals/exercises/05-eval-compare/test_start.py -v
 ```
 
 ## Stretch Goals
 
 - Make weights configurable so a medical domain can emphasise faithfulness.
 - Gate on a *delta* vs last week's scorecard, not only an absolute floor.
-- Plug this into a Module 12 capstone as a `/eval` endpoint that returns JSON.
+- Plug this into a capstone (`extras/`) as a `/eval` endpoint that returns JSON.

@@ -10,10 +10,30 @@ Build a FastAPI application with full CRUD endpoints (list, get, create, update)
 4. `POST /missions` — accepts a JSON body and adds a new mission. Returns 201.
 5. `PATCH /missions/{mission_id}` — partial update of an existing mission.
 
+## Run the server
+
+Once `create_app()` is implemented, start the API and open the interactive docs at http://127.0.0.1:8000/docs:
+
+```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-00-python-fundamentals/exercises/03-fastapi-crud
+uvicorn start:app --reload --port 8000
+
+# Option B - uv (no activation needed):
+cd module-00-python-fundamentals/exercises/03-fastapi-crud
+uv run uvicorn start:app --reload --port 8000
+```
+
 ## Run the tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-00-python-fundamentals/exercises/03-fastapi-crud/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-00-python-fundamentals/exercises/03-fastapi-crud/test_start.py -v
 ```
 
 ## Hints

@@ -389,7 +389,7 @@ def demo_scorecard():
     print("  Key concepts:")
     print("  • Compare on a delta (which config wins)")
     print("  • Gate on a floor (is it good enough to ship?)")
-    print("  • Module 12 capstones can reuse this as a release check")
+    print("  • The capstones in extras/ can reuse this as a release check")
 
 
 DEMOS = {

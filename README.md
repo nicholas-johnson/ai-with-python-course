@@ -16,15 +16,20 @@
 
 ## Prerequisites
 
-- **Python** 3.12 or newer — check with `python3 --version` or `py --version`
-- **pip** (bundled with Python — used inside a virtual environment)
+- **Python** 3.12 or newer — check with `python3 --version` or `py --version` (Option A), or let **uv** install it for you (Option B)
+- **pip** (bundled with Python — used inside a virtual environment) for Option A, **or** [**uv**](https://docs.astral.sh/uv/) for Option B
 - **Node.js** v22.22+ and **pnpm** v12+ (for slides only) — `corepack enable && corepack prepare pnpm@latest --activate`
 - A code editor (VS Code / Cursor recommended)
 - An OpenAI API key (or compatible provider) in your environment
 
 ## Setup
 
-### Python environment
+Pick **one** of the two Python workflows below. Both install the same dependencies from `pyproject.toml` and both create a virtual environment at the repo root (`.venv/`). The repo pins Python **3.12** via `.python-version`.
+
+- **Option A — pip + venv** (optionally with pyenv): the classic workflow. You create and **activate** a virtual environment, then `pip install`.
+- **Option B — uv**: a single fast tool that installs Python, creates the venv, and resolves dependencies from a committed lockfile. No activation needed — prefix commands with `uv run`.
+
+### Option A — pip + venv
 
 Create a virtual environment and install dependencies:
 
@@ -42,16 +47,57 @@ source .venv/bin/activate    # macOS / Linux
 pip install -e .
 
 # With optional extras (pick what you need)
-pip install -e ".[dev]"                        # pytest + ruff
-pip install -e ".[rag]"                        # chromadb, sentence-transformers
-pip install -e ".[langchain]"                  # langchain, langgraph
-pip install -e ".[local-ml]"                     # torch, transformers (CPU training)
-pip install -e ".[dev,rag,langchain,local-ml]"  # everything
+pip install -e ".[dev]"                               # pytest + ruff
+pip install -e ".[rag]"                               # chromadb, sentence-transformers
+pip install -e ".[langchain]"                         # langchain, langgraph
+pip install -e ".[audio]"                             # sounddevice, numpy
+pip install -e ".[local-ml]"                          # torch, transformers (CPU training)
+pip install -e ".[dev,rag,langchain,audio,local-ml]"  # everything
 ```
 
 > **Tip:** If `python3 --version` shows an old version but `py --version` shows 3.12+, use `py` instead. On macOS with Homebrew Python you **must** use a virtual environment — pip will refuse to install system-wide.
 
-You need to activate the venv (`source .venv/bin/activate`) each time you open a new terminal.
+You need to activate the venv (`source .venv/bin/activate`) each time you open a new terminal. Every `python …` and `pytest …` command in this course assumes the venv is active.
+
+> **Using pyenv?** Install and pin the interpreter first, then create the venv as above:
+>
+> ```bash
+> pyenv install 3.12.12
+> pyenv local 3.12.12      # matches the repo's .python-version
+> ```
+
+### Option B — uv
+
+Install uv (see the [uv docs](https://docs.astral.sh/uv/getting-started/installation/)):
+
+```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# macOS (Homebrew): brew install uv
+# Windows (PowerShell): powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then sync the project. uv reads `.python-version`, installs Python 3.12 if needed, creates `.venv/`, and installs from `uv.lock`:
+
+```bash
+cd ai-python-course
+
+uv sync                      # base dependencies
+
+# With optional extras (pick what you need)
+uv sync --extra dev                                              # pytest + ruff
+uv sync --extra rag                                             # chromadb, sentence-transformers
+uv sync --extra langchain                                       # langchain, langgraph
+uv sync --extra audio                                          # sounddevice, numpy
+uv sync --extra local-ml                                       # torch, transformers (CPU training)
+uv sync --extra dev --extra rag --extra langchain --extra audio --extra local-ml  # everything
+```
+
+With uv you **do not** activate the venv. Run any script or tool with `uv run`, from any directory in the repo:
+
+```bash
+uv run python module-01-working-with-the-llm/demo/demo.py
+```
 
 ### Slides dependencies (pnpm monorepo)
 
@@ -60,6 +106,8 @@ pnpm install
 ```
 
 ### Running tests
+
+With **Option A**, activate the venv first (`source .venv/bin/activate`), then:
 
 ```bash
 # Run all exercise tests (many fail until you complete start.py)
@@ -72,13 +120,21 @@ pytest module-01-working-with-the-llm/
 pytest module-00-python-fundamentals/exercises/01-dataclass-filtering/test_start.py
 ```
 
+With **Option B** (uv), prefix the same commands with `uv run` (no activation needed):
+
+```bash
+uv run --extra dev pytest
+uv run --extra dev pytest module-01-working-with-the-llm/
+uv run --extra dev pytest module-00-python-fundamentals/exercises/01-dataclass-filtering/test_start.py
+```
+
 ## Project structure
 
 This is a **hybrid monorepo** — Python exercises and demos live alongside a pnpm workspace that powers the slide decks.
 
-Each **module** has its own `README.md`, **demo** scripts you can run with `python …`, and **exercises** with `start.py` (your work), `test_start.py` (pytest), and `solution.py` (instructor reference — try the exercise first!).
+Each **module** has its own `README.md`, **demo** scripts you can run with `python …` (venv active) or `uv run python …`, and **exercises** with `start.py` (your work), `test_start.py` (pytest), and `solution.py` (instructor reference — try the exercise first!).
 
-Shared mission data lives in [`data/`](data/).
+Shared mission data lives in [`data/`](data/). Full-stack capstone apps live in [`extras/`](extras/).
 
 ## Slides
 
@@ -118,8 +174,9 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | 9 | [module-09-multi-agent](module-09-multi-agent/) | Roles, coordination patterns, shared context |
 | 10 | [module-10-langchain](module-10-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
 | 11 | [module-11-evals](module-11-evals/) | Golden tests, retrieval metrics, LLM-as-judge, faithfulness, scorecard + gate |
-| 12 | [module-12-productionisation](module-12-productionisation/) | Production hardening + capstone apps: tracing, reliability, cost controls, deployment |
+| 12 | [module-12-productionisation](module-12-productionisation/) | Production hardening: tracing, reliability, cost controls, deployment |
 | 13 | [module-13-edge-topics](module-13-edge-topics/) | Hybrid search, re-ranking, HyDE, agentic RAG, guardrails, and more |
+| Extras | [extras](extras/) | Capstone apps: pick one and build a production-ready backend |
 
 ## Course outline
 
@@ -251,18 +308,11 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 12 — [Productionisation](module-12-productionisation/)
 
-**Topics:** Production hardening (tracing, retries, circuit breakers, cost controls, deployment) plus capstone apps. Choose one full-stack app and build a production-ready FastAPI backend for a provided frontend.
-
-| Exercise | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Recipe Finder | [`exercises/01-recipe-finder`](module-12-productionisation/exercises/01-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
-| Movie Night | [`exercises/02-movie-night`](module-12-productionisation/exercises/02-movie-night/) | RAG, hybrid search, text-to-SQL, structured output, charts |
-| Travel Planner | [`exercises/03-travel-planner`](module-12-productionisation/exercises/03-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
-| Personal Assistant | [`exercises/04-personal-assistant`](module-12-productionisation/exercises/04-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar management, cost controls |
+**Topics:** Production hardening — structured tracing, retries and timeouts, circuit breakers, fallbacks, cost controls, deployment (config, secrets, Docker, health checks).
 
 ### Module 13 — [Edge Topics](module-13-edge-topics/)
 
-**Topics:** Advanced retrieval patterns (hybrid search, re-ranking, HyDE), agentic RAG, citation verification, web search backends, text-to-SQL, fine-tuning data pipelines, guardrails, semantic caching, multimodal RAG, contextual chunking. Pick-and-choose — delegates work on topics that interest them most. (LLM eval moved to Module 11.)
+**Topics:** Advanced retrieval patterns (hybrid search, re-ranking, HyDE), agentic RAG, citation verification, web search backends, text-to-SQL, guardrails, semantic caching, multimodal RAG, contextual chunking, and local ML (fine-tuning data, CPU training, Hugging Face models). Pick-and-choose — delegates work on topics that interest them most. Exercise numbers match the topic numbers in the module README and slides.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
@@ -273,11 +323,26 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Citation verification | [`exercises/05-citation-verification`](module-13-edge-topics/exercises/05-citation-verification/) | Verify and ground citations in source documents |
 | Web search backend | [`exercises/06-web-search-backend`](module-13-edge-topics/exercises/06-web-search-backend/) | Integrate web search as a retrieval source |
 | Text-to-SQL | [`exercises/07-text-to-sql`](module-13-edge-topics/exercises/07-text-to-sql/) | Natural language to SQL query generation |
-| Fine-tuning data | [`exercises/09-fine-tuning-data`](module-13-edge-topics/exercises/09-fine-tuning-data/) | Build datasets for fine-tuning |
-| Guardrails | [`exercises/10-guardrails`](module-13-edge-topics/exercises/10-guardrails/) | Input/output validation and safety filters |
-| Semantic cache | [`exercises/11-semantic-cache`](module-13-edge-topics/exercises/11-semantic-cache/) | Cache LLM responses by semantic similarity |
-| Multimodal RAG | [`exercises/12-multimodal-rag`](module-13-edge-topics/exercises/12-multimodal-rag/) | RAG with images and text |
-| Contextual chunking | [`exercises/13-contextual-chunking`](module-13-edge-topics/exercises/13-contextual-chunking/) | Context-aware document chunking strategies |
+| Guardrails | [`exercises/08-guardrails`](module-13-edge-topics/exercises/08-guardrails/) | Input/output validation and safety filters |
+| Semantic cache | [`exercises/09-semantic-cache`](module-13-edge-topics/exercises/09-semantic-cache/) | Cache LLM responses by semantic similarity |
+| Multimodal RAG | [`exercises/10-multimodal-rag`](module-13-edge-topics/exercises/10-multimodal-rag/) | RAG with images and text |
+| Contextual chunking | [`exercises/11-contextual-chunking`](module-13-edge-topics/exercises/11-contextual-chunking/) | Context-aware document chunking strategies |
+| Fine-tuning data | [`exercises/12-fine-tuning-data`](module-13-edge-topics/exercises/12-fine-tuning-data/) | Build datasets for fine-tuning |
+| Local training | [`exercises/13-local-training`](module-13-edge-topics/exercises/13-local-training/) | Fine-tune a small classifier on CPU |
+| Hugging Face run | [`exercises/14-huggingface-run`](module-13-edge-topics/exercises/14-huggingface-run/) | Run a Hub model with tokenizer + model, no `pipeline` |
+
+### Extras — [Capstones](extras/)
+
+**After Module 13.** Choose one full-stack app and build a production-ready FastAPI backend for a provided frontend. Each capstone combines Module 12's production patterns with Module 13 techniques.
+
+| Capstone | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Recipe Finder | [`extras/01-recipe-finder`](extras/01-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| Movie Night | [`extras/02-movie-night`](extras/02-movie-night/) | RAG, hybrid search, text-to-SQL, structured output, charts |
+| Travel Planner | [`extras/03-travel-planner`](extras/03-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
+| Personal Assistant | [`extras/04-personal-assistant`](extras/04-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar management, cost controls |
+
+Open-ended ideas using Hugging Face models on CPU: [`extras/capstone-ideas.md`](extras/capstone-ideas.md).
 
 ## License
 

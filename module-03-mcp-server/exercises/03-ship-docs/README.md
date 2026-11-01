@@ -56,6 +56,10 @@ The `docs/` folder contains 5 markdown files:
 ## Run it
 
 ```bash
+# Option A - pip + venv (activate the repo-root venv first):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-03-mcp-server/exercises/03-ship-docs
+
 # Run tests
 pytest test_start.py -v
 
@@ -64,6 +68,12 @@ python starter/http_server.py
 
 # In another terminal, run the agent
 python starter/agent.py
+
+# Option B - uv (no activation needed):
+cd module-03-mcp-server/exercises/03-ship-docs
+uv run --extra dev pytest test_start.py -v      # run tests
+uv run python starter/http_server.py            # start the HTTP server
+uv run python starter/agent.py                  # in another terminal, run the agent
 ```
 
 ## Try it

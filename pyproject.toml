@@ -49,6 +49,11 @@ local-ml = [
 [tool.setuptools]
 packages = []
 
+[tool.uv]
+# This repo is course material, not an installable library, so uv must not try
+# to build/install it as a package. Dependencies still install from [project].
+package = false
+
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]

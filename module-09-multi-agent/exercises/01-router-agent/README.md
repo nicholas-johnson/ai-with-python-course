@@ -81,8 +81,14 @@ The `main()` function and command handling are already provided. Once you implem
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-09-multi-agent/exercises/01-router-agent
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-09-multi-agent/exercises/01-router-agent
+uv run python start.py
 ```
 
 Try different types of queries:
@@ -95,7 +101,14 @@ Use `/route` to check classification without executing the specialist.
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-09-multi-agent/exercises/01-router-agent
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-09-multi-agent/exercises/01-router-agent
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

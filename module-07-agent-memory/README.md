@@ -128,7 +128,12 @@ Replace the oldest N turns with a single system message containing the summary. 
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-07-agent-memory/demo/demo.py
+
+# Option B - uv (no activation needed):
+uv run python module-07-agent-memory/demo/demo.py
 ```
 
 All-in-one interactive walkthrough covering:
@@ -150,7 +155,12 @@ The three exercises chain together. Each builds on the last; you can bring your 
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-07-agent-memory/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-07-agent-memory/
 ```
 
 ## Slides

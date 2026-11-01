@@ -92,7 +92,7 @@ gate(scorecard, {"avg_recall": 0.6, "overall": 0.5})
 # {"passed": False, "failures": [{"metric": "avg_recall", "value": 0.4, "threshold": 0.6}]}
 ```
 
-The capstone (Module 12) can reuse this as a release check, not a slide.
+The capstones in `extras/` can reuse this as a release check, not a slide.
 
 ---
 
@@ -108,7 +108,12 @@ The capstone (Module 12) can reuse this as a release check, not a slide.
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-11-evals/demo/demo.py
+
+# Option B - uv (no activation needed):
+uv run python module-11-evals/demo/demo.py
 ```
 
 Five parts, no API key — press Enter / pick a number:
@@ -132,7 +137,12 @@ The exercises chain: each one adds a measurement the next one can consume.
 | [`exercises/05-eval-compare`](exercises/05-eval-compare/) | Scorecard two configs, pick a winner, gate a release |
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-11-evals/ -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-11-evals/ -v
 ```
 
 ## Slides

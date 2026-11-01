@@ -92,14 +92,28 @@ The FastAPI backend needs to make the MCP tools available to the ReAct agent. Th
 Run the MCP server standalone to verify tools work:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-08-structured-workflows/exercises/03-holiday-planner
 python server.py
+
+# Option B - uv (no activation needed):
+cd module-08-structured-workflows/exercises/03-holiday-planner
+uv run python server.py
 ```
 
 Run the FastAPI backend:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-08-structured-workflows/exercises/03-holiday-planner
 pip install "fastapi[standard]" uvicorn
 uvicorn start:app --reload --port 8000
+
+# Option B - uv (fastapi + uvicorn are in the base project deps):
+cd module-08-structured-workflows/exercises/03-holiday-planner
+uv run uvicorn start:app --reload --port 8000
 ```
 
 Test the health endpoint:
@@ -127,7 +141,14 @@ curl -N -X POST http://localhost:8000/chat \
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-08-structured-workflows/exercises/03-holiday-planner
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-08-structured-workflows/exercises/03-holiday-planner
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

@@ -87,8 +87,14 @@ Filter facts below the confidence threshold (default 0.7). Deduplicate by `(subj
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-06-structured-facts/exercises/01-fact-extractor
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-06-structured-facts/exercises/01-fact-extractor
+uv run python start.py
 ```
 
 Try extracting from different log IDs (SAL-001 through SAL-025). Compare the raw JSON with the validated facts. Notice how confidence varies by claim type — engineering measurements tend to score higher than speculative entries.
@@ -96,7 +102,14 @@ Try extracting from different log IDs (SAL-001 through SAL-025). Compare the raw
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-06-structured-facts/exercises/01-fact-extractor
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-06-structured-facts/exercises/01-fact-extractor
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

@@ -95,8 +95,14 @@ The interactive loop uses `SmartSessionMemory` instead of `SessionMemory`, plus 
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-07-agent-memory/exercises/02-conversation-summary
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-07-agent-memory/exercises/02-conversation-summary
+uv run python start.py
 ```
 
 Have a long conversation (10+ exchanges) -- tell BARKEEP stories, order drinks, ask about the station. Watch the `/turns` count -- when it hits the threshold, summarisation triggers automatically. Use `/summary` to see the compressed history. Use `/force-summarise` to trigger it manually.
@@ -104,7 +110,14 @@ Have a long conversation (10+ exchanges) -- tell BARKEEP stories, order drinks, 
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-07-agent-memory/exercises/02-conversation-summary
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-07-agent-memory/exercises/02-conversation-summary
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

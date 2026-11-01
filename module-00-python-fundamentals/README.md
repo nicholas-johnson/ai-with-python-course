@@ -232,11 +232,20 @@ async with httpx.AsyncClient(transport=transport, base_url="http://test") as cli
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-00-python-fundamentals/demo/01_data_structures.py
 python module-00-python-fundamentals/demo/02_modules_cli.py --department science
 python module-00-python-fundamentals/demo/03_dataclasses_protocols.py
 python module-00-python-fundamentals/demo/04_async_essentials.py
 python module-00-python-fundamentals/demo/05_http_basics.py
+
+# Option B - uv (no activation needed):
+uv run python module-00-python-fundamentals/demo/01_data_structures.py
+uv run python module-00-python-fundamentals/demo/02_modules_cli.py --department science
+uv run python module-00-python-fundamentals/demo/03_dataclasses_protocols.py
+uv run python module-00-python-fundamentals/demo/04_async_essentials.py
+uv run python module-00-python-fundamentals/demo/05_http_basics.py
 ```
 
 ## Exercises
@@ -250,7 +259,12 @@ python module-00-python-fundamentals/demo/05_http_basics.py
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-00-python-fundamentals/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-00-python-fundamentals/
 ```
 
 ## Slides

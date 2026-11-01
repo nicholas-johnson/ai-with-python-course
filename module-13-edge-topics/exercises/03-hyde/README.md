@@ -124,8 +124,14 @@ def hyde_search(client, query, collection, n_results=5):
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-13-edge-topics/exercises/03-hyde
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/03-hyde
+uv run python start.py
 ```
 
 Try questions where the wording is very different from how a document would phrase it: "Why do engines fail?", "How do you fix broken sensors?", "What's the crew supposed to do in an emergency?"
@@ -133,7 +139,12 @@ Try questions where the wording is very different from how a document would phra
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/03-hyde/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/03-hyde/test_start.py -v
 ```
 
 ## Stretch Goals

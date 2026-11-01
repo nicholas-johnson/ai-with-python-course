@@ -252,11 +252,20 @@ The recommendation: **know the pattern first, then use the framework**. You can 
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-10-langchain/demo/01_chains_and_prompts.py
 python module-10-langchain/demo/02_langchain_agents.py
 python module-10-langchain/demo/03_langchain_rag.py
 python module-10-langchain/demo/04_serving_chains.py
 python module-10-langchain/demo/04_serving_chains.py serve   # live server
+
+# Option B - uv (no activation needed):
+uv run python module-10-langchain/demo/01_chains_and_prompts.py
+uv run python module-10-langchain/demo/02_langchain_agents.py
+uv run python module-10-langchain/demo/03_langchain_rag.py
+uv run python module-10-langchain/demo/04_serving_chains.py
+uv run python module-10-langchain/demo/04_serving_chains.py serve   # live server
 ```
 
 ## Exercises
@@ -275,7 +284,12 @@ Exercises 01–03 chain together; exercise 04 is standalone (same LCEL pattern a
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-10-langchain/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-10-langchain/
 ```
 
 ## Slides

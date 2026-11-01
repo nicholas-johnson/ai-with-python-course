@@ -13,7 +13,14 @@ All commands run from this directory (`module-05-rag-fundamentals/demo/`).
 ### 1. Ingest ship logs
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-05-rag-fundamentals/demo
 python ingest.py
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/demo
+uv run python ingest.py
 ```
 
 This loads `data/ship_logs.json`, chunks the content, embeds with `text-embedding-3-small`, and stores everything in a local ChromaDB database (`chroma_data/`). An interactive menu lets you pick chunk size — try the deliberately bad small sizes to see how retrieval degrades.
@@ -21,7 +28,14 @@ This loads `data/ship_logs.json`, chunks the content, embeds with `text-embeddin
 ### 2. Query the vector database
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-05-rag-fundamentals/demo
 python query.py
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/demo
+uv run python query.py
 ```
 
 A lightweight REPL for searching the index directly. Shows similarity scores and chunk content. Useful for demonstrating how chunk size affects retrieval quality without the overhead of the full agent.
@@ -37,7 +51,10 @@ Commands:
 ### 3. (Optional) Inspect the MCP server
 
 ```bash
+# Option A (venv active):
 mcp dev server.py
+# Option B (uv):
+uv run mcp dev server.py
 ```
 
 Opens the MCP Inspector in your browser. You can call each tool individually and see raw JSON responses. Try:
@@ -48,7 +65,14 @@ Opens the MCP Inspector in your browser. You can call each tool individually and
 ### 4. Chat with the RAG agent
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-05-rag-fundamentals/demo
 python agent.py
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/demo
+uv run python agent.py
 ```
 
 This spawns `server.py` as a subprocess, discovers its tools, and runs an interactive chat loop. The agent uses OpenAI tool calling to query the document index.

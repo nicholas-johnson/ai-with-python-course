@@ -56,7 +56,10 @@ Type hints drive schema generation: `name: str` becomes `{"type": "string"}` in 
 Run it with:
 
 ```bash
+# Option A (venv active):
 mcp run server.py
+# Option B (uv):
+uv run mcp run server.py
 ```
 
 Or from code with `mcp.run(transport="stdio")` for local development and testing.
@@ -140,7 +143,12 @@ The client validates arguments locally before sending them over the wire — thi
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-03-mcp-server/demo/demo.py
+
+# Option B - uv (no activation needed):
+uv run python module-03-mcp-server/demo/demo.py
 ```
 
 Walks through all three topics interactively — press Enter between sections:
@@ -162,7 +170,12 @@ Each exercise builds an MCP server (`server.py`) and runs it via a console agent
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-03-mcp-server/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-03-mcp-server/
 ```
 
 ## Slides

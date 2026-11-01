@@ -71,8 +71,14 @@ Loop, attach three floats, then average. Empty list → zeros.
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-11-evals/exercises/02-retrieval-metrics
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-11-evals/exercises/02-retrieval-metrics
+uv run python start.py
 ```
 
 Compares a **naive** ranked run to a **reranked** run on `data/labeled_queries.json`. The reranked lists should win.
@@ -80,7 +86,12 @@ Compares a **naive** ranked run to a **reranked** run on `data/labeled_queries.j
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-11-evals/exercises/02-retrieval-metrics/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-11-evals/exercises/02-retrieval-metrics/test_start.py -v
 ```
 
 ## Stretch Goals

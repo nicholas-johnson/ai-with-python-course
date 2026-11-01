@@ -59,7 +59,10 @@ Implement all four tools: `search_docs`, `get_chunk`, `ask_docs`, `list_sources`
 **Test the server standalone:**
 
 ```bash
+# Option A (venv active):
 mcp dev server.py
+# Option B (uv):
+uv run mcp dev server.py
 ```
 
 This opens the MCP Inspector -- a web UI where you can call each tool and see raw responses.
@@ -100,8 +103,14 @@ The agent should:
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-05-rag-fundamentals/exercises/03-rag-mcp-server
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/exercises/03-rag-mcp-server
+uv run python start.py
 ```
 
 Ask questions about the scout logs. Watch the agent discover and call the RAG tools. Try asking it to search for specific topics, then dig into individual chunks.
@@ -109,7 +118,14 @@ Ask questions about the scout logs. Watch the agent discover and call the RAG to
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-05-rag-fundamentals/exercises/03-rag-mcp-server
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/exercises/03-rag-mcp-server
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

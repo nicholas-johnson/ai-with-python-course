@@ -12,7 +12,12 @@ Parse JSON records into typed dataclasses, filter by field values, and produce f
 ## Run the tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-00-python-fundamentals/exercises/01-dataclass-filtering/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-00-python-fundamentals/exercises/01-dataclass-filtering/test_start.py -v
 ```
 
 ## Hints

@@ -115,14 +115,25 @@ def two_stage_retrieve(client, query, retrieve_fn, retrieve_k=20, final_k=5):
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-13-edge-topics/exercises/02-reranking
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/02-reranking
+uv run python start.py
 ```
 
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/02-reranking/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/02-reranking/test_start.py -v
 ```
 
 ## Stretch Goals

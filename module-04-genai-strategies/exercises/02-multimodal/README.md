@@ -120,7 +120,8 @@ Start the backend and frontend. Try:
 ```bash
 # Terminal 1
 cd module-04-genai-strategies/exercises/02-multimodal
-uvicorn start:app --reload --port 8000
+uvicorn start:app --reload --port 8000              # Option A (venv active)
+# Option B (uv): uv run uvicorn start:app --reload --port 8000
 
 # Terminal 2
 cd module-04-genai-strategies/frontend
@@ -130,7 +131,14 @@ pnpm dev
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-04-genai-strategies/exercises/02-multimodal
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-04-genai-strategies/exercises/02-multimodal
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

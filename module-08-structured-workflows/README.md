@@ -83,8 +83,14 @@ The planner generates the full sequence. The executor runs each step, collecting
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-08-structured-workflows/demo/01_react.py
 python module-08-structured-workflows/demo/02_plan_and_execute.py
+
+# Option B - uv (no activation needed):
+uv run python module-08-structured-workflows/demo/01_react.py
+uv run python module-08-structured-workflows/demo/02_plan_and_execute.py
 ```
 
 | Script | What it shows |
@@ -107,7 +113,12 @@ A Svelte + ShadCN + Tailwind frontend is provided in `exercises/03-holiday-plann
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-08-structured-workflows/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-08-structured-workflows/
 ```
 
 ## Slides

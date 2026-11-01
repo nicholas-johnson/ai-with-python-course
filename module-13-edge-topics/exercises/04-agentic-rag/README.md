@@ -142,8 +142,14 @@ for _ in range(max_turns):
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-13-edge-topics/exercises/04-agentic-rag
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/04-agentic-rag
+uv run python start.py
 ```
 
 Try multi-part questions: "What is the status of the reactor AND what maintenance was done last week?", "Find all safety incidents and summarize them."
@@ -151,7 +157,12 @@ Try multi-part questions: "What is the status of the reactor AND what maintenanc
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/04-agentic-rag/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/04-agentic-rag/test_start.py -v
 ```
 
 ## Stretch Goals

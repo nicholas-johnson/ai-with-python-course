@@ -180,9 +180,16 @@ When the graph contains no relevant entities, the answer honestly says so with l
 Each demo is a separate interactive script. All use real OpenAI calls.
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-06-structured-facts/demo/01_extraction.py
 python module-06-structured-facts/demo/02_graph.py
 python module-06-structured-facts/demo/03_grounded_qa.py
+
+# Option B - uv (no activation needed):
+uv run python module-06-structured-facts/demo/01_extraction.py
+uv run python module-06-structured-facts/demo/02_graph.py
+uv run python module-06-structured-facts/demo/03_grounded_qa.py
 ```
 
 | Script | What it shows |
@@ -204,7 +211,12 @@ The three exercises chain together. Each builds on the last; you can bring your 
 Run tests for this module:
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-06-structured-facts/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-06-structured-facts/
 ```
 
 ## Slides

@@ -131,7 +131,12 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-04-genai-strategies/demo/demo.py
+
+# Option B - uv (no activation needed):
+uv run python module-04-genai-strategies/demo/demo.py
 ```
 
 A quick multimodal demo — press Enter between sections:
@@ -160,7 +165,12 @@ It connects to `http://localhost:8000` (via Vite proxy). Features light up as yo
 ### Run tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-04-genai-strategies/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-04-genai-strategies/
 ```
 
 ## Slides

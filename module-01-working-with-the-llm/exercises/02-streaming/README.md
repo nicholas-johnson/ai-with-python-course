@@ -68,7 +68,14 @@ The tests check that `stream_response()` returns the full text as a single strin
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-01-working-with-the-llm/exercises/02-streaming
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-01-working-with-the-llm/exercises/02-streaming
+uv run python start.py
 ```
 
 Try these interactions:
@@ -80,7 +87,12 @@ Try these interactions:
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-01-working-with-the-llm/exercises/02-streaming/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-01-working-with-the-llm/exercises/02-streaming/test_start.py -v
 ```
 
 ## Stretch goals

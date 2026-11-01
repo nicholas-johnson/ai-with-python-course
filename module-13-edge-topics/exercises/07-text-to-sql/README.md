@@ -162,8 +162,14 @@ def ask_database(client, db_path, question):
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-13-edge-topics/exercises/07-text-to-sql
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/07-text-to-sql
+uv run python start.py
 ```
 
 Try: "How many crew members are in engineering?", "What's the highest sensor reading?", "List all crew sorted by rank."
@@ -171,7 +177,12 @@ Try: "How many crew members are in engineering?", "What's the highest sensor rea
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/07-text-to-sql/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/07-text-to-sql/test_start.py -v
 ```
 
 ## Stretch Goals

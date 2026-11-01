@@ -12,7 +12,12 @@ Build an async producer/consumer pipeline with `asyncio.Queue`, backpressure, se
 ## Run the tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-00-python-fundamentals/exercises/02-async-queue-processing/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-00-python-fundamentals/exercises/02-async-queue-processing/test_start.py -v
 ```
 
 ## Hints

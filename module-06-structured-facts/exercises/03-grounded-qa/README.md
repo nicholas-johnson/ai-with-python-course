@@ -80,8 +80,14 @@ Tie it all together: extract entities, retrieve evidence, build prompt, call Ope
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-06-structured-facts/exercises/03-grounded-qa
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-06-structured-facts/exercises/03-grounded-qa
+uv run python start.py
 ```
 
 Try asking about the Meridian's crew, what happened to Specimen Theta, or why the distress beacon failed. Use `/nograph` to see how the answer quality drops without evidence.
@@ -89,7 +95,14 @@ Try asking about the Meridian's crew, what happened to Specimen Theta, or why th
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-06-structured-facts/exercises/03-grounded-qa
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-06-structured-facts/exercises/03-grounded-qa
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

@@ -195,7 +195,12 @@ Always log dissent — if an agent disagrees with the consensus, that disagreeme
 ## Demos
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-09-multi-agent/demo/demo.py
+
+# Option B - uv (no activation needed):
+uv run python module-09-multi-agent/demo/demo.py
 ```
 
 ## Exercises
@@ -210,8 +215,14 @@ python module-09-multi-agent/demo/demo.py
 Run tests per exercise (each folder has its own `test_start.py`):
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-09-multi-agent/exercises/01-router-agent/ -v
 pytest module-09-multi-agent/exercises/04-swarm-tools/ -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-09-multi-agent/exercises/01-router-agent/ -v
+uv run --extra dev pytest module-09-multi-agent/exercises/04-swarm-tools/ -v
 ```
 
 ## Slides

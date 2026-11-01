@@ -155,8 +155,14 @@ def compute_summary(results):
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-11-evals/exercises/03-llm-judge
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-11-evals/exercises/03-llm-judge
+uv run python start.py
 ```
 
 Uses a mocked client so it runs without an API key.
@@ -164,7 +170,12 @@ Uses a mocked client so it runs without an API key.
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-11-evals/exercises/03-llm-judge/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-11-evals/exercises/03-llm-judge/test_start.py -v
 ```
 
 ## Stretch Goals

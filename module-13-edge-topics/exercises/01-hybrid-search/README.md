@@ -149,7 +149,12 @@ Call `bm25_search` and `vector_search`, then pass both ranked lists to `reciproc
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/01-hybrid-search/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/01-hybrid-search/test_start.py -v
 ```
 
 ## Stretch Goals

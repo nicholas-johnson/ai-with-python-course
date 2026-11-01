@@ -1,33 +1,33 @@
 # Module 13 — Edge Topics
 
-This is a collection of advanced and emerging techniques that push beyond the core RAG and agent patterns covered in earlier modules. Unlike other modules, these topics are **independent** — pick and choose based on interest and time. Most topics have a matching exercise; topics **12–16** are slide-first concepts, and **Local ML** adds hands-on CPU training (exercises **14–15**).
+This is a collection of advanced and emerging techniques that push beyond the core RAG and agent patterns covered in earlier modules. Unlike other modules, these topics are **independent** — pick and choose based on interest and time. **Exercise numbers match topic numbers:** topics **1–11** each have a matching exercise, topics **12–14** are hands-on local ML on a laptop CPU, and topics **15–18** are slide-only concepts.
 
 Think of this module as a toolbox of specialised techniques. Some (hybrid search, re-ranking) you will use on almost every production system. Others (GraphRAG, test-time compute, MoE) are situational but powerful when the need arises. The slide deck walks through each topic with a plain-language “what is it?” card and a **reference** to the paper or report that introduced the idea.
 
-## Topics at a glance (slide deck)
+Evaluation (LLM-as-judge, retrieval metrics, faithfulness) is covered in **[Module 11 — Evals](../module-11-evals/)**.
 
-| Slide | Topic | Exercise | Reference |
-|-------|--------|----------|-----------|
+## Topics at a glance
+
+| # | Topic | Exercise | Reference |
+|---|-------|----------|-----------|
 | 1 | Hybrid Search | `01-hybrid-search` | Cormack, Clarke & Büttcher (2009), SIGIR — RRF |
 | 2 | Re-ranking | `02-reranking` | Nogueira & Cho (2019), arXiv:1901.04085 |
 | 3 | HyDE | `03-hyde` | Gao et al. (2022), arXiv:2212.10496 |
 | 4 | Agentic RAG | `04-agentic-rag` | Jiang et al. (2023), arXiv:2305.06983 |
 | 5 | Citation Verification | `05-citation-verification` | Min et al. (2023), arXiv:2305.14251 — FActScore |
-| 6 | Text-to-SQL | `07-text-to-sql` | Yu et al. (2018), EMNLP — Spider |
-| 7 | Eval / LLM-as-Judge | Module 11 — Evals | Zheng et al. (2023), arXiv:2306.05685 |
-| 8 | Advanced Guardrails | `10-guardrails` | Inan et al. (2023), arXiv:2312.06674 — Llama Guard |
-| 9 | Semantic Caching | `11-semantic-cache` | Bang et al. (2023), arXiv:2308.15179 — GPTCache |
-| 10 | Multimodal RAG | `12-multimodal-rag` | Radford et al. (2021), ICML — CLIP |
-| 11 | Contextual Chunking | `13-contextual-chunking` | Lewis et al. (2020), NeurIPS — RAG |
-| 12 | Test-Time Compute Scaling | — | Snell et al. (2024), arXiv:2408.03314 |
-| 13 | Speculative Decoding | — | Leviathan et al. (2023), ICML |
-| 14 | GraphRAG | — | Edge et al. (2024), arXiv:2404.16130 |
-| 15 | DPO + LoRA | `09-fine-tuning-data` (data prep) | Rafailov et al. (2023), NeurIPS; Hu et al. (2021), ICLR — LoRA |
-| 16 | Mixture of Experts | — | Jiang et al. (2024), arXiv:2401.04088 — Mixtral |
-| — | **Local training (CPU)** | `14-local-training` | Wolf et al. (2020), EMNLP — Transformers library |
-| — | **Hugging Face Hub run** | `15-huggingface-run` | Lhoest et al. (2021), NeurIPS — Datasets |
-
-Optional (not in slide deck): Web Search Backend — `06-web-search-backend` — Nakano et al. (2021), arXiv:2112.09332 — WebGPT.
+| 6 | Web Search Backend | `06-web-search-backend` | Nakano et al. (2021), arXiv:2112.09332 — WebGPT |
+| 7 | Text-to-SQL | `07-text-to-sql` | Yu et al. (2018), EMNLP — Spider |
+| 8 | Advanced Guardrails | `08-guardrails` | Inan et al. (2023), arXiv:2312.06674 — Llama Guard |
+| 9 | Semantic Caching | `09-semantic-cache` | Bang et al. (2023), arXiv:2308.15179 — GPTCache |
+| 10 | Multimodal RAG | `10-multimodal-rag` | Radford et al. (2021), ICML — CLIP |
+| 11 | Contextual Chunking | `11-contextual-chunking` | Lewis et al. (2020), NeurIPS — RAG |
+| 12 | DPO + LoRA | `12-fine-tuning-data` (data prep) | Rafailov et al. (2023), NeurIPS; Hu et al. (2021), ICLR — LoRA |
+| 13 | Train a model locally (CPU) | `13-local-training` | Wolf et al. (2020), EMNLP — Transformers library |
+| 14 | Run a Hugging Face model (CPU) | `14-huggingface-run` | Lhoest et al. (2021), NeurIPS — Datasets |
+| 15 | Test-Time Compute Scaling | — | Snell et al. (2024), arXiv:2408.03314 |
+| 16 | Speculative Decoding | — | Leviathan et al. (2023), ICML |
+| 17 | GraphRAG | — | Edge et al. (2024), arXiv:2404.16130 |
+| 18 | Mixture of Experts | — | Jiang et al. (2024), arXiv:2401.04088 — Mixtral |
 
 ---
 
@@ -315,7 +315,7 @@ Min, S., et al. (2023). "FActScore: Fine-grained Atomic Evaluation of Factual Pr
 
 ---
 
-## Appendix — Web Search Backend (optional)
+## 6. Web Search Backend
 
 ### Concept
 
@@ -358,11 +358,9 @@ def search_with_fallback(query, vector_search_fn, threshold=0.7):
 
 Nakano, R., et al. (2021). "WebGPT: Browser-assisted question-answering with human feedback." *arXiv:2112.09332*.
 
-*Exercise `06-web-search-backend` only — not covered in the slide deck.*
-
 ---
 
-## 6. Text-to-SQL
+## 7. Text-to-SQL
 
 ### Concept
 
@@ -414,72 +412,6 @@ def safe_execute(db_path: str, sql: str) -> list[dict]:
 ### Reference
 
 Yu, T., et al. (2018). "Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task." *EMNLP*.
-
----
-
-## 7. Eval / LLM-as-Judge
-
-### Concept
-
-You cannot improve what you cannot measure. Evaluation of RAG systems has two dimensions: retrieval quality (did we find the right documents?) and generation quality (did the LLM produce a correct, faithful answer?). Traditional metrics like BLEU and ROUGE compare surface-level text overlap, but LLM-as-judge evaluators can assess semantic correctness, faithfulness to sources, and relevance to the question.
-
-Retrieval quality is measured with precision (what fraction of retrieved documents are relevant?) and recall (what fraction of relevant documents were retrieved?). You need a labelled dataset with known relevant documents per query. For generation quality, the key dimensions are: **faithfulness** (is every claim supported by the context?), **relevance** (does the answer address the question?), and **completeness** (does it cover all aspects?).
-
-LLM-as-judge works by prompting a strong model to evaluate an answer against a reference or against the retrieved context. The judge receives the question, the candidate answer, and optionally a reference answer, then scores on specified dimensions. To reduce bias, use structured rubrics, multiple evaluation dimensions, and consider running the judge multiple times to average scores.
-
-The practical workflow is: build a test set of 50-100 question-answer pairs, run your RAG pipeline on each question, then evaluate with the LLM judge. Track scores over time as you iterate on prompts, retrieval strategies, and chunking.
-
-**Hands-on for this topic lives in Module 11 — Evals** (golden tests, retrieval metrics, LLM-as-judge, faithfulness, scorecard + gate). This slide remains as a pointer.
-
-### Code Pattern
-
-```python
-from openai import OpenAI
-from pydantic import BaseModel, Field
-
-class JudgeScores(BaseModel):
-    correctness: int = Field(ge=1, le=5)
-    completeness: int = Field(ge=1, le=5)
-    relevance: int = Field(ge=1, le=5)
-    explanation: str
-
-
-def llm_judge(
-    client: OpenAI,
-    question: str,
-    answer: str,
-    reference: str,
-) -> dict:
-    response = client.responses.parse(
-        model=MODEL,
-        reasoning={"effort": "none"},
-        text_format=JudgeScores,
-        input=[{
-            "role": "user",
-            "content": (
-                f"Evaluate this answer against the reference.\n\n"
-                f"Question: {question}\n\n"
-                f"Answer: {answer}\n\n"
-                f"Reference: {reference}\n\n"
-                f"Score each dimension 1-5:\n"
-                f"- Correctness: Is the answer factually correct?\n"
-                f"- Completeness: Does it cover all key points?\n"
-                f"- Relevance: Does it address the question?"
-            ),
-        }],
-    )
-    return response.output_parsed.model_dump()
-```
-
-### When to Use
-
-- Every production RAG system should have evaluation.
-- During development to compare prompt/retrieval strategies.
-- Trade-off: LLM judges have their own biases; use structured rubrics and multiple dimensions.
-
-### Reference
-
-Zheng, L., et al. (2023). "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena." *arXiv:2306.05685*.
 
 ---
 
@@ -723,70 +655,15 @@ Lewis, P., et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensiv
 
 ---
 
-## 12. Test-Time Compute Scaling
-
-### Concept
-
-Normally an LLM answers in one pass: prompt in, completion out. **Test-time compute scaling** means using more work **when answering** — not training a bigger model, but letting the same model take extra steps before the user sees a reply.
-
-That extra work might be: writing a visible or hidden chain-of-thought, generating several candidate answers and picking the best, or running a verify-and-revise loop. Models like OpenAI o1 and DeepSeek-R1 are built around this idea — you may see a “thinking” phase, then the final answer.
-
-The trade-off is clear: harder questions can improve a lot, but each query uses more tokens, time, and money than a single-shot model call.
-
-### When to Use
-
-- Hard reasoning: maths, planning, multi-step analysis.
-- Trade-off: slower and more expensive per query.
-
-### Reference
-
-Snell, C., et al. (2024). "Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters." *arXiv:2408.03314*.
-
----
-
-## 13. Speculative Decoding
-
-### Concept
-
-A small **draft** model proposes several tokens; the large model verifies them in one forward pass. Matching tokens are accepted in bulk (~2–4× faster generation) without changing the final output distribution.
-
-### When to Use
-
-- Production inference where latency matters and you can host two models.
-- Trade-off: extra memory for the draft model; implementation complexity in serving stacks.
-
-### Reference
-
-Leviathan, Y., Kalman, M., & Matias, Y. (2023). "Fast Inference from Transformers via Speculative Decoding." *ICML*.
-
----
-
-## 14. GraphRAG
-
-### Concept
-
-Build a **knowledge graph** from your corpus (entities, relationships), detect communities, and pre-summarise clusters. Retrieval can answer **global** questions (“what are the main themes?”) using cluster summaries, not only local chunk search.
-
-### When to Use
-
-- Large document sets where overview questions matter as much as fact lookup.
-- Trade-off: indexing cost; graph construction and maintenance.
-
-### Reference
-
-Edge, D., et al. (2024). "From Local to Global: A Graph RAG Approach to Query-Focused Summarization." *arXiv:2404.16130*.
-
----
-
-## 15. DPO and LoRA
+## 12. DPO and LoRA
 
 ### Concept
 
 **DPO** (Direct Preference Optimization) trains a model to prefer human-chosen answers over rejected ones using a single loss — no separate reward model or PPO loop. In practice, alignment runs with **LoRA**: only small adapter matrices are updated (W′ = W + BA), so training fits on modest hardware.
 
-High-quality **preference pairs** (or chat JSONL) remain essential. Exercise `09-fine-tuning-data` covers JSONL preparation; exercise `14-local-training` runs a small CPU fine-tune with Hugging Face `Trainer`.
+High-quality **preference pairs** (or chat JSONL) remain essential. Exercise `12-fine-tuning-data` covers JSONL preparation; exercise `13-local-training` runs a small CPU fine-tune with Hugging Face `Trainer`.
 
-### Code Pattern (data prep — exercise 09)
+### Code Pattern (data prep — exercise 12)
 
 ```python
 import json
@@ -814,7 +691,90 @@ Hu, E. J., et al. (2021). "LoRA: Low-Rank Adaptation of Large Language Models." 
 
 ---
 
-## 16. Mixture of Experts (MoE)
+## 13–14. Local ML (CPU)
+
+Train and run small models on a laptop — no GPU required. **Topic 13** trains a classifier locally (exercise `13-local-training`); **topic 14** downloads and runs a pre-trained model from the Hugging Face Hub (exercise `14-huggingface-run`).
+
+```bash
+# Option A - pip (venv active):
+pip install -e ".[local-ml]"
+
+# Option B - uv:
+uv sync --extra local-ml
+```
+
+| Script | What it does |
+|--------|----------------|
+| `demo/13_train_local.py` | Fine-tune DistilBERT: urgent vs routine ship logs (~2–5 min CPU) |
+| `demo/14_huggingface_run.py` | Download SST-2 sentiment model and classify sample logs |
+| `exercises/13-local-training/` | Train 3-class department classifier (engineering / medical / navigation) |
+| `exercises/14-huggingface-run/` | Lower-level tokenizer + model inference (no `pipeline`) |
+
+**Resources:** ~2–4 GB RAM, ~500 MB disk for Hugging Face cache after first run. Training uses `max_steps=30` on tiny datasets so workshops finish quickly.
+
+### Reference (local ML)
+
+- Wolf, T., et al. (2020). "Transformers: State-of-the-Art Natural Language Processing." *EMNLP System Demonstrations* (Hugging Face `transformers` library).
+- Lhoest, Q., et al. (2021). "Datasets: A Community Library for Natural Language Processing." *NeurIPS* (Hugging Face `datasets`).
+
+---
+
+## 15. Test-Time Compute Scaling
+
+### Concept
+
+Normally an LLM answers in one pass: prompt in, completion out. **Test-time compute scaling** means using more work **when answering** — not training a bigger model, but letting the same model take extra steps before the user sees a reply.
+
+That extra work might be: writing a visible or hidden chain-of-thought, generating several candidate answers and picking the best, or running a verify-and-revise loop. Models like OpenAI o1 and DeepSeek-R1 are built around this idea — you may see a “thinking” phase, then the final answer.
+
+The trade-off is clear: harder questions can improve a lot, but each query uses more tokens, time, and money than a single-shot model call.
+
+### When to Use
+
+- Hard reasoning: maths, planning, multi-step analysis.
+- Trade-off: slower and more expensive per query.
+
+### Reference
+
+Snell, C., et al. (2024). "Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters." *arXiv:2408.03314*.
+
+---
+
+## 16. Speculative Decoding
+
+### Concept
+
+A small **draft** model proposes several tokens; the large model verifies them in one forward pass. Matching tokens are accepted in bulk (~2–4× faster generation) without changing the final output distribution.
+
+### When to Use
+
+- Production inference where latency matters and you can host two models.
+- Trade-off: extra memory for the draft model; implementation complexity in serving stacks.
+
+### Reference
+
+Leviathan, Y., Kalman, M., & Matias, Y. (2023). "Fast Inference from Transformers via Speculative Decoding." *ICML*.
+
+---
+
+## 17. GraphRAG
+
+### Concept
+
+Build a **knowledge graph** from your corpus (entities, relationships), detect communities, and pre-summarise clusters. Retrieval can answer **global** questions (“what are the main themes?”) using cluster summaries, not only local chunk search.
+
+### When to Use
+
+- Large document sets where overview questions matter as much as fact lookup.
+- Trade-off: indexing cost; graph construction and maintenance.
+
+### Reference
+
+Edge, D., et al. (2024). "From Local to Global: A Graph RAG Approach to Query-Focused Summarization." *arXiv:2404.16130*.
+
+---
+
+## 18. Mixture of Experts (MoE)
 
 ### Concept
 
@@ -833,60 +793,45 @@ Jiang, A. Q., et al. (2024). "Mixtral of Experts." *arXiv:2401.04088*.
 
 ## Exercises
 
-| Ex | Slide | Topic | Directory |
-|----|-------|--------|-----------|
-| 01 | 1 | Hybrid Search | `exercises/01-hybrid-search/` |
-| 02 | 2 | Re-ranking | `exercises/02-reranking/` |
-| 03 | 3 | HyDE | `exercises/03-hyde/` |
-| 04 | 4 | Agentic RAG | `exercises/04-agentic-rag/` |
-| 05 | 5 | Citation Verification | `exercises/05-citation-verification/` |
-| 06 | — | Web Search Backend (optional) | `exercises/06-web-search-backend/` |
-| 07 | 6 | Text-to-SQL | `exercises/07-text-to-sql/` |
-| — | 7 | LLM Eval (moved) | See **Module 11 — Evals** (`module-11-evals/`) |
-| 09 | 15 | Fine-tuning Data Prep (for DPO) | `exercises/09-fine-tuning-data/` |
-| 10 | 8 | Guardrails | `exercises/10-guardrails/` |
-| 11 | 9 | Semantic Caching | `exercises/11-semantic-cache/` |
-| 12 | 10 | Multimodal RAG | `exercises/12-multimodal-rag/` |
-| 13 | 11 | Contextual Chunking | `exercises/13-contextual-chunking/` |
-| 14 | — | Local Training (CPU) | `exercises/14-local-training/` |
-| 15 | — | Hugging Face Run (CPU) | `exercises/15-huggingface-run/` |
+| Ex | Topic | Directory |
+|----|-------|-----------|
+| 01 | Hybrid Search | `exercises/01-hybrid-search/` |
+| 02 | Re-ranking | `exercises/02-reranking/` |
+| 03 | HyDE | `exercises/03-hyde/` |
+| 04 | Agentic RAG | `exercises/04-agentic-rag/` |
+| 05 | Citation Verification | `exercises/05-citation-verification/` |
+| 06 | Web Search Backend | `exercises/06-web-search-backend/` |
+| 07 | Text-to-SQL | `exercises/07-text-to-sql/` |
+| 08 | Advanced Guardrails | `exercises/08-guardrails/` |
+| 09 | Semantic Caching | `exercises/09-semantic-cache/` |
+| 10 | Multimodal RAG | `exercises/10-multimodal-rag/` |
+| 11 | Contextual Chunking | `exercises/11-contextual-chunking/` |
+| 12 | Fine-tuning Data Prep (for DPO) | `exercises/12-fine-tuning-data/` |
+| 13 | Local Training (CPU) | `exercises/13-local-training/` |
+| 14 | Hugging Face Run (CPU) | `exercises/14-huggingface-run/` |
 
-Slides **12–16** (test-time compute, speculative decoding, GraphRAG, DPO + LoRA, MoE) have no dedicated exercise yet — concepts only.
+Topics **15–18** (test-time compute, speculative decoding, GraphRAG, MoE) are concepts only — no exercise.
 
 ## Demos
 
 | Script | Topic |
 |--------|--------|
 | `demo/demo.py` | Hybrid search, agentic RAG, citation verification, semantic cache (OpenAI API) |
-| `demo/14_train_local.py` | Local training — urgent vs routine (CPU) |
-| `demo/15_huggingface_run.py` | Hugging Face Hub — sentiment pipeline (CPU) |
-
-## Local ML (CPU)
-
-Train and run small models on a laptop — no GPU required. These sections follow slide topics **“Train a Model Locally”** and **“Run a Hugging Face Model”**.
-
-```bash
-pip install -e ".[local-ml]"
-```
-
-| Script | What it does |
-|--------|----------------|
-| `demo/14_train_local.py` | Fine-tune DistilBERT: urgent vs routine ship logs (~2–5 min CPU) |
-| `demo/15_huggingface_run.py` | Download SST-2 sentiment model and classify sample logs |
-| `exercises/14-local-training/` | Train 3-class department classifier (engineering / medical / navigation) |
-| `exercises/15-huggingface-run/` | Lower-level tokenizer + model inference (no `pipeline`) |
-
-**Resources:** ~2–4 GB RAM, ~500 MB disk for Hugging Face cache after first run. Training uses `max_steps=30` on tiny datasets so workshops finish quickly.
-
-### Reference (local ML)
-
-- Wolf, T., et al. (2020). "Transformers: State-of-the-Art Natural Language Processing." *EMNLP System Demonstrations* (Hugging Face `transformers` library).
-- Lhoest, Q., et al. (2021). "Datasets: A Community Library for Natural Language Processing." *NeurIPS* (Hugging Face `datasets`).
+| `demo/13_train_local.py` | Local training — urgent vs routine (CPU) |
+| `demo/13_finetune_generate.py` | Local training — fine-tune SmolLM2 to write duty-officer summaries (CPU) |
+| `demo/14_huggingface_run.py` | Hugging Face Hub — sentiment pipeline (CPU) |
+| `demo/14_huggingface_translate.py` | Hugging Face Hub — translate ship logs English → French (CPU) |
+| `demo/14_huggingface_generate.py` | Hugging Face Hub — local chatbot with SmolLM2-360M-Instruct (CPU) |
 
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/
 ```
 
 ## Slides
@@ -897,7 +842,7 @@ pnpm slides:13
 cd module-13-edge-topics/slides && pnpm dev
 ```
 
-The deck includes 16 concept topics, two hands-on sections (local training + Hugging Face), comparison and exercise overview slides. Each “What is…?” slide ends with the same **reference** cited in the table above.
+The deck covers all 18 topics in order, then a comparison slide and an exercise overview. Each “What is…?” slide ends with the same **reference** cited in the table above.
 
 ## References (full list)
 
@@ -906,19 +851,18 @@ The deck includes 16 concept topics, two hands-on sections (local training + Hug
 3. Gao, L., et al. (2022). Precise Zero-Shot Dense Retrieval without Relevance Labels. *arXiv:2212.10496*.
 4. Jiang, Z., et al. (2023). Active Retrieval Augmented Generation. *arXiv:2305.06983*.
 5. Min, S., et al. (2023). FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation. *arXiv:2305.14251*.
-6. Yu, T., et al. (2018). Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task. *EMNLP*.
-7. Zheng, L., et al. (2023). Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena. *arXiv:2306.05685*.
+6. Nakano, R., et al. (2021). WebGPT: Browser-assisted question-answering with human feedback. *arXiv:2112.09332*.
+7. Yu, T., et al. (2018). Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task. *EMNLP*.
 8. Inan, H., et al. (2023). Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. *arXiv:2312.06674*.
 9. Bang, J., et al. (2023). GPTCache: An Open-Source Semantic Cache for LLM Applications. *arXiv:2308.15179*.
 10. Radford, A., et al. (2021). Learning Transferable Visual Models From Natural Language Supervision. *ICML*.
 11. Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. *NeurIPS*.
-12. Snell, C., et al. (2024). Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters. *arXiv:2408.03314*.
-13. Leviathan, Y., Kalman, M., & Matias, Y. (2023). Fast Inference from Transformers via Speculative Decoding. *ICML*.
-14. Edge, D., et al. (2024). From Local to Global: A Graph RAG Approach to Query-Focused Summarization. *arXiv:2404.16130*.
-15. Rafailov, R., et al. (2023). Direct Preference Optimization: Your Language Model is Secretly a Reward Model. *NeurIPS*.
-16. Hu, E. J., et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. *ICLR 2022*.
-17. Jiang, A. Q., et al. (2024). Mixtral of Experts. *arXiv:2401.04088*.
-18. Wolf, T., et al. (2020). Transformers: State-of-the-Art Natural Language Processing. *EMNLP System Demonstrations*.
-19. Lhoest, Q., et al. (2021). Datasets: A Community Library for Natural Language Processing. *NeurIPS*.
+12. Rafailov, R., et al. (2023). Direct Preference Optimization: Your Language Model is Secretly a Reward Model. *NeurIPS*; Hu, E. J., et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. *ICLR 2022*.
+13. Wolf, T., et al. (2020). Transformers: State-of-the-Art Natural Language Processing. *EMNLP System Demonstrations*.
+14. Lhoest, Q., et al. (2021). Datasets: A Community Library for Natural Language Processing. *NeurIPS*.
+15. Snell, C., et al. (2024). Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters. *arXiv:2408.03314*.
+16. Leviathan, Y., Kalman, M., & Matias, Y. (2023). Fast Inference from Transformers via Speculative Decoding. *ICML*.
+17. Edge, D., et al. (2024). From Local to Global: A Graph RAG Approach to Query-Focused Summarization. *arXiv:2404.16130*.
+18. Jiang, A. Q., et al. (2024). Mixtral of Experts. *arXiv:2401.04088*.
 
-**Optional:** Nakano, R., et al. (2021). WebGPT: Browser-assisted question-answering with human feedback. *arXiv:2112.09332*.
+Numbers match the topic numbers above.

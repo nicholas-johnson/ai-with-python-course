@@ -137,7 +137,7 @@ def main():
 
         if user_input.startswith("/forget "):
             key = user_input[8:].strip()
-            if long_term.forget(key):
+            if long_term.forget`(key):
                 print(f"[Forgot: {key}]\n")
             else:
                 print(f"[No memory found for: {key}]\n")

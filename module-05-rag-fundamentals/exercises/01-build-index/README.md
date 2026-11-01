@@ -99,8 +99,14 @@ Handle these commands:
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-05-rag-fundamentals/exercises/01-build-index
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/exercises/01-build-index
+uv run python start.py
 ```
 
 Try searching for topics from the scout logs -- crew members, alien signals, first contact protocol, sensor readings.
@@ -108,7 +114,14 @@ Try searching for topics from the scout logs -- crew members, alien signals, fir
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-05-rag-fundamentals/exercises/01-build-index
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-05-rag-fundamentals/exercises/01-build-index
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

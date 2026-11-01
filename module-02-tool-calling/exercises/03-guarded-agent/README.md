@@ -88,7 +88,14 @@ The audit log is `self.audit_log` -- append `AuditEntry` objects as you go, then
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-02-tool-calling/exercises/03-guarded-agent
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-02-tool-calling/exercises/03-guarded-agent
+uv run python start.py
 ```
 
 The agent starts with `log_discovery` blocked -- it can observe planets but cannot write to the mission log. Try these:
@@ -100,7 +107,14 @@ The agent starts with `log_discovery` blocked -- it can observe planets but cann
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-02-tool-calling/exercises/03-guarded-agent
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-02-tool-calling/exercises/03-guarded-agent
+uv run --extra dev pytest test_start.py -v
 ```
 
 ## Stretch goals

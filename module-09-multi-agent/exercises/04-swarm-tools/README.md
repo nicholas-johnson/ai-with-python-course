@@ -90,8 +90,14 @@ Record `chain` (departments visited) and `trace` (hop events for debugging).
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-09-multi-agent/exercises/04-swarm-tools
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-09-multi-agent/exercises/04-swarm-tools
+uv run python start.py
 ```
 
 Example queries:
@@ -105,7 +111,14 @@ Use `/trace` to see handoffs and tool results.
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-09-multi-agent/exercises/04-swarm-tools
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-09-multi-agent/exercises/04-swarm-tools
+uv run --extra dev pytest test_start.py -v
 ```
 
 Tests use a mocked OpenAI client — no real API calls.

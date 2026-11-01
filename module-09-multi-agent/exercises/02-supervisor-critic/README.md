@@ -87,8 +87,14 @@ The `main()` function and command handling are already provided. Once you implem
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-09-multi-agent/exercises/02-supervisor-critic
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-09-multi-agent/exercises/02-supervisor-critic
+uv run python start.py
 ```
 
 Try queries and use `/trace` to see the full pipeline:
@@ -117,7 +123,14 @@ With `/max-revisions 0`, the critic still reviews but the specialist never gets 
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-09-multi-agent/exercises/02-supervisor-critic
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-09-multi-agent/exercises/02-supervisor-critic
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

@@ -148,8 +148,14 @@ Handle these commands:
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-10-langchain/exercises/03-rag-chain
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-10-langchain/exercises/03-rag-chain
+uv run python start.py
 ```
 
 Ask questions about Horizon logs: Lagrange resupply, Theta-9 survey, docking seals, cargo operations. Use `/norag` to compare RAG answers with raw LLM answers.
@@ -157,7 +163,14 @@ Ask questions about Horizon logs: Lagrange resupply, Theta-9 survey, docking sea
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-10-langchain/exercises/03-rag-chain
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-10-langchain/exercises/03-rag-chain
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

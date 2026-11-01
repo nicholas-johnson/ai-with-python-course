@@ -133,8 +133,14 @@ def search_with_fallback(query, vector_search_fn, threshold=0.7):
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-13-edge-topics/exercises/06-web-search-backend
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-13-edge-topics/exercises/06-web-search-backend
+uv run python start.py
 ```
 
 Try queries your internal store won't have: "latest Python release", "SpaceX launch schedule", "DuckDuckGo API documentation".
@@ -142,7 +148,12 @@ Try queries your internal store won't have: "latest Python release", "SpaceX lau
 ## Running Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-13-edge-topics/exercises/06-web-search-backend/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-13-edge-topics/exercises/06-web-search-backend/test_start.py -v
 ```
 
 ## Stretch Goals

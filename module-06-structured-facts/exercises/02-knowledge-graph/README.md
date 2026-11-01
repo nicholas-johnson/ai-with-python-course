@@ -76,8 +76,14 @@ Loop over all facts, call `add_fact` for each. Track entity types (infer from pr
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 cd module-06-structured-facts/exercises/02-knowledge-graph
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-06-structured-facts/exercises/02-knowledge-graph
+uv run python start.py
 ```
 
 Try querying crew members (Juno Marquez, Dr. Idris Kone), systems (Meridian reactor, containment field), and events (containment breach, emergency jump). Use `/path` to trace the chain of events that led to the Meridian's silence.
@@ -85,7 +91,14 @@ Try querying crew members (Juno Marquez, Dr. Idris Kone), systems (Meridian reac
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-06-structured-facts/exercises/02-knowledge-graph
 pytest test_start.py -v
+
+# Option B - uv (no activation needed):
+cd module-06-structured-facts/exercises/02-knowledge-graph
+uv run --extra dev pytest test_start.py -v
 ```
 
 The tests check:

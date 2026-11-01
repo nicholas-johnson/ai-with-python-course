@@ -112,7 +112,14 @@ The `max_steps` cap is critical -- without it, a confused model can loop forever
 ## Try it
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+cd module-02-tool-calling/exercises/01-tool-calling-agent
 python start.py
+
+# Option B - uv (no activation needed):
+cd module-02-tool-calling/exercises/01-tool-calling-agent
+uv run python start.py
 ```
 
 Try these questions:
@@ -125,7 +132,12 @@ Try these questions:
 ## Tests
 
 ```bash
+# Option A - pip + venv (run from the repo root):
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pytest module-02-tool-calling/exercises/01-tool-calling-agent/test_start.py -v
+
+# Option B - uv (no activation needed):
+uv run --extra dev pytest module-02-tool-calling/exercises/01-tool-calling-agent/test_start.py -v
 ```
 
 ## Stretch goals
