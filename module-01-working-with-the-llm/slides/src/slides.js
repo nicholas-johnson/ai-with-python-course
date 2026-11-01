@@ -184,7 +184,7 @@ print(completion.choices[0].message.content)`,
     type: 'title',
     content: {
       title: 'Demo — Chat Completions',
-      subtitle: 'Switch to terminal: python demo/completions.py',
+      subtitle: 'Switch to terminal: python demo/01_completions.py',
       icon: 'rocket',
     },
   },

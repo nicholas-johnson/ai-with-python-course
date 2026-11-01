@@ -1,5 +1,5 @@
 """Part 2: Responses API — one call, print the reply, return.
-Run alone:  python module-01-working-with-the-llm/demo/responses.py
+Run alone:  python module-01-working-with-the-llm/demo/02_responses.py
 """
 
 import os

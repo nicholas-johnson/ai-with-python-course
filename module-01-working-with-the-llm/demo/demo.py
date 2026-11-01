@@ -12,14 +12,17 @@ Walks through the full module in one script:
 Requires: OPENAI_API_KEY environment variable.
 """
 
+from importlib import import_module
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from basic_chat import demo_basic_chat
-from completions import demo_completions
-from prompting import demo_prompting
-from responses import demo_responses
-from streaming import demo_streaming, demo_streaming_clean
+demo_completions = import_module("01_completions").demo_completions
+demo_responses = import_module("02_responses").demo_responses
+demo_basic_chat = import_module("03_basic_chat").demo_basic_chat
+demo_streaming = import_module("04_streaming").demo_streaming
+demo_streaming_clean = import_module("04_streaming").demo_streaming_clean
+demo_prompting = import_module("05_prompting").demo_prompting
 
 DEMOS = {
     "1":  ("Chat Completions",        demo_completions),

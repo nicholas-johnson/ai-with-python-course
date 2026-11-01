@@ -1,5 +1,5 @@
 """Part 1: Chat Completions — one call, print the reply, return.
-Run alone:  python module-01-working-with-the-llm/demo/completions.py
+Run alone:  python module-01-working-with-the-llm/demo/01_completions.py
 """
 
 import os
