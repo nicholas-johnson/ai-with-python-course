@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 import time
 import uuid
 from collections.abc import Callable
@@ -162,7 +163,7 @@ def handle_query(question: str, trace: TraceContext) -> str:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(message)s", stream=sys.stdout)
 
     trace = TraceContext()
     print(f"Tracing one request — trace_id {trace.trace_id}\n")
