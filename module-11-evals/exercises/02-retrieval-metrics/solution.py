@@ -85,11 +85,21 @@ if __name__ == "__main__":
     runs = json.loads((here / "ranked_runs.json").read_text())
     k = 3
     print(f"Retrieval metrics @k={k}\n")
+
+    per_query = {}
     for name, run in runs.items():
-        queries = attach_labels(run, labeled)
-        summary = summarize(evaluate_queries(queries, k=k))
+        evaluations = evaluate_queries(attach_labels(run, labeled), k=k)
+        per_query[name] = {row["query"]: row["recall"] for row in evaluations}
+        summary = summarize(evaluations)
         print(
             f"  {name:10}  recall={summary['avg_recall']:.2f}  "
             f"precision={summary['avg_precision']:.2f}  "
             f"mrr={summary['avg_mrr']:.2f}  n={summary['num_queries']}"
         )
+
+    print(f"\n  recall@{k} per query:\n")
+    for row in labeled:
+        query = row["query"]
+        scores = "  ".join(f"{name}={per_query[name][query]:.2f}" for name in runs)
+        print(f"    {query:50} {scores}")
+    print("\n  Reranking wins on four queries and loses the fifth. Averages hide that.")

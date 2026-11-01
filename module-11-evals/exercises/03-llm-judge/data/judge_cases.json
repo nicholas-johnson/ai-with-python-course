@@ -1,0 +1,66 @@
+{
+  "rag": [
+    {
+      "id": "warp-efficiency",
+      "question": "What is the current warp core efficiency?",
+      "answer": "The warp core is operating at 94% efficiency, with a minor fluctuation in plasma conduit 7-B.",
+      "reference": "The warp core is currently at 97% efficiency. It was running at 94% with a minor fluctuation in plasma conduit 7-B until the repair was completed during EVA downtime."
+    },
+    {
+      "id": "kepler-minerals",
+      "question": "What minerals did the survey find at Kepler-442?",
+      "answer": "The first sample batch showed elevated concentrations of iridium and osmium.",
+      "reference": "EVA Team Alpha returned samples from asteroid K442-A1-07 showing elevated concentrations of iridium and osmium, consistent with a differentiated planetesimal core fragment."
+    },
+    {
+      "id": "trappist-water",
+      "question": "Is there water in the TRAPPIST-1 system?",
+      "answer": "A water vapour signature was detected in the upper atmosphere during the TRAPPIST-1 survey.",
+      "reference": "Water vapour was detected in the upper atmosphere during the TRAPPIST-1d orbital survey, and a surface scan of TRAPPIST-1e revealed potential subsurface liquid water, indicated by thermal hotspots near the terminator line."
+    },
+    {
+      "id": "crew-radiation",
+      "question": "What are the crew radiation exposure levels?",
+      "answer": "The logs cover EVA staging and security sweeps. Radiation levels near the cargo bay are elevated during sample intake.",
+      "reference": "All 12 mission crew are within normal parameters and radiation exposure badges show baseline levels. EVA teams were reminded about dosimeter protocols for the asteroid belt phase."
+    },
+    {
+      "id": "void-navigation",
+      "question": "How does the ship navigate inside the Boötes Void?",
+      "answer": "Star density drops rapidly inside the Boötes Void perimeter, so navigation relies on inertial reference and pre-plotted waypoints.",
+      "reference": "Inside the Boötes Void perimeter star density drops rapidly, so navigation relies on inertial reference and pre-plotted waypoints."
+    }
+  ],
+  "rag_rerank": [
+    {
+      "id": "warp-efficiency",
+      "question": "What is the current warp core efficiency?",
+      "answer": "The warp core is back to 97% efficiency. It was running at 94% with a fluctuation in plasma conduit 7-B until that repair was completed during EVA downtime.",
+      "reference": "The warp core is currently at 97% efficiency. It was running at 94% with a minor fluctuation in plasma conduit 7-B until the repair was completed during EVA downtime."
+    },
+    {
+      "id": "kepler-minerals",
+      "question": "What minerals did the survey find at Kepler-442?",
+      "answer": "EVA Team Alpha returned the first sample batch from asteroid K442-A1-07, which showed elevated concentrations of iridium and osmium, consistent with a differentiated planetesimal core fragment.",
+      "reference": "EVA Team Alpha returned samples from asteroid K442-A1-07 showing elevated concentrations of iridium and osmium, consistent with a differentiated planetesimal core fragment."
+    },
+    {
+      "id": "trappist-water",
+      "question": "Is there water in the TRAPPIST-1 system?",
+      "answer": "Yes. A water vapour signature was detected in the upper atmosphere of TRAPPIST-1d, and a surface scan of TRAPPIST-1e revealed potential subsurface liquid water, with thermal hotspots near the terminator line.",
+      "reference": "Water vapour was detected in the upper atmosphere during the TRAPPIST-1d orbital survey, and a surface scan of TRAPPIST-1e revealed potential subsurface liquid water, indicated by thermal hotspots near the terminator line."
+    },
+    {
+      "id": "crew-radiation",
+      "question": "What are the crew radiation exposure levels?",
+      "answer": "All 12 mission crew are within normal parameters and radiation exposure badges show baseline levels.",
+      "reference": "All 12 mission crew are within normal parameters and radiation exposure badges show baseline levels. EVA teams were reminded about dosimeter protocols for the asteroid belt phase."
+    },
+    {
+      "id": "void-navigation",
+      "question": "How does the ship navigate inside the Boötes Void?",
+      "answer": "Navigation uses the comm relay chain and the Barnard's Star depot transit registration to fix position.",
+      "reference": "Inside the Boötes Void perimeter star density drops rapidly, so navigation relies on inertial reference and pre-plotted waypoints."
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "_comment": "Stands in for the judge model so the exercise runs with no API key. These are not gold labels: they are what a judge returned on one pass, recorded so the walkthrough is reproducible.",
+  "rag": {
+    "warp-efficiency": {
+      "correctness": 3,
+      "completeness": 2,
+      "relevance": 5,
+      "explanation": "The 94% figure is stale; the conduit was repaired and efficiency is back to 97%."
+    },
+    "kepler-minerals": {
+      "correctness": 5,
+      "completeness": 3,
+      "relevance": 5,
+      "explanation": "Right minerals, but omits the asteroid and what the composition implies."
+    },
+    "trappist-water": {
+      "correctness": 5,
+      "completeness": 2,
+      "relevance": 5,
+      "explanation": "Mentions the vapour signature only; misses the subsurface liquid water on TRAPPIST-1e."
+    },
+    "crew-radiation": {
+      "correctness": 1,
+      "completeness": 1,
+      "relevance": 2,
+      "explanation": "Elevated cargo bay radiation is not in any log. Badges show baseline levels."
+    },
+    "void-navigation": {
+      "correctness": 5,
+      "completeness": 4,
+      "relevance": 5,
+      "explanation": "Accurate and on point; omits the expected signal degradation past marker V-10."
+    }
+  },
+  "rag_rerank": {
+    "warp-efficiency": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Current figure, prior figure, and the cause of the change."
+    },
+    "kepler-minerals": {
+      "correctness": 5,
+      "completeness": 4,
+      "relevance": 5,
+      "explanation": "Covers the samples and the interpretation; slightly more detail than asked for."
+    },
+    "trappist-water": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Both findings, correctly attributed to the right planets."
+    },
+    "crew-radiation": {
+      "correctness": 5,
+      "completeness": 4,
+      "relevance": 5,
+      "explanation": "Correct levels; does not mention the dosimeter reminder."
+    },
+    "void-navigation": {
+      "correctness": 2,
+      "completeness": 1,
+      "relevance": 3,
+      "explanation": "Comm relays and a fuel depot registration have nothing to do with void navigation."
+    }
+  }
+}

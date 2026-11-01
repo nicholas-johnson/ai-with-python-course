@@ -1,7 +1,9 @@
 """
 Demo 01 — Structured Tracing
 ==============================
-Shows how TraceContext propagates trace IDs through a request pipeline.
+Shows how a trace ID and its spans follow one request through a pipeline.
+
+Needs OPENAI_API_KEY.
 
 Run:  python module-12-productionisation/demo/01_tracing.py
 """
@@ -11,14 +13,16 @@ import os
 import time
 import uuid
 
-from openai import OpenAI
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 client = OpenAI()
+
+QUESTION = "How is the warp core holding up after the ion storm?"
 
 
 class TraceContext:
@@ -52,7 +56,7 @@ class TraceContext:
 
 
 def demo_traced_request():
-    """Simulate a traced AI request pipeline."""
+    """Trace one crew question through classify, answer, and guardrail steps."""
     print("=" * 60)
     print("  DEMO: Structured Tracing")
     print("=" * 60)
@@ -66,46 +70,66 @@ def demo_traced_request():
         model=MODEL,
         reasoning={"effort": "none"},
         input=[
-            {"role": "system", "content": "Classify this query as one of: question, command, chitchat. Reply with one word."},
-            {"role": "user", "content": "What's the weather like in Paris?"},
+            {
+                "role": "system",
+                "content": (
+                    "Classify this crew query as one of: status_request, command, "
+                    "chitchat. Reply with one word."
+                ),
+            },
+            {"role": "user", "content": QUESTION},
         ],
         max_output_tokens=10,
     )
     classification = response.output_text.strip()
-    trace.end_span(span, metadata={"classification": classification, "tokens": response.usage.total_tokens})
-    print(f"  Classify: {classification} ({span['duration_ms']}ms)")
+    trace.end_span(
+        span,
+        metadata={
+            "classification": classification,
+            "tokens": response.usage.total_tokens,
+        },
+    )
+    print(f"  classify_query    {span['duration_ms']}ms  -> {classification}")
 
-    # Span 2: generate response
+    # Span 2: generate the answer
     span = trace.start_span("generate_response")
     response = client.responses.create(
         model=MODEL,
         reasoning={"effort": "none"},
         input=[
-            {"role": "system", "content": "You are a helpful assistant. Answer briefly."},
-            {"role": "user", "content": "What's the weather like in Paris?"},
+            {
+                "role": "system",
+                "content": (
+                    "You are the DSS Pathfinder ship AI. Answer the crew briefly. "
+                    "The warp core is at 94% efficiency and stable since the storm."
+                ),
+            },
+            {"role": "user", "content": QUESTION},
         ],
         max_output_tokens=100,
     )
     answer = response.output_text.strip()
     trace.end_span(span, metadata={"tokens": response.usage.total_tokens})
-    print(f"  Generate: {span['duration_ms']}ms")
+    print(f"  generate_response {span['duration_ms']}ms")
 
-    # Span 3: guardrails check
+    # Span 3: guardrail check
     span = trace.start_span("guardrails_check")
     time.sleep(0.01)
-    passed = len(answer) > 0 and len(answer) < 5000
-    trace.end_span(span, status="ok" if passed else "blocked", metadata={"passed": passed})
-    print(f"  Guardrails: {'passed' if passed else 'blocked'} ({span['duration_ms']}ms)")
+    passed = 0 < len(answer) < 5000
+    trace.end_span(
+        span, status="ok" if passed else "blocked", metadata={"passed": passed}
+    )
+    print(f"  guardrails_check  {span['duration_ms']}ms  -> {'passed' if passed else 'blocked'}")
 
     print(f"\n  Answer: {answer}\n")
 
-    # Print full trace as JSON
-    print("--- Full trace (JSON) ---")
+    print("--- Spans as JSON, one object per span ---")
     for s in trace.spans:
         safe = {k: v for k, v in s.items() if k not in ("start_time", "end_time")}
         print(json.dumps(safe, indent=2))
     print()
     print(trace.summary())
+    print("\n  Searching the logs for that trace ID returns these three spans in order.\n")
 
 
 if __name__ == "__main__":

@@ -7,12 +7,16 @@ correctness, completeness, and relevance.
 
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
+DATA_DIR = Path(__file__).parent / "data"
 
 
 class JudgeScores(BaseModel):
@@ -91,3 +95,48 @@ def compute_summary(results: list[dict]) -> dict:
         "avg_relevance": sum(r["relevance"] for r in results) / n,
         "num_cases": n,
     }
+
+
+def load_cases(config: str) -> list[dict]:
+    return json.loads((DATA_DIR / "judge_cases.json").read_text())[config]
+
+
+def make_canned_judge(config: str, cases: list[dict]):
+    """A stand-in for the judge model so this runs with no API key."""
+    from unittest.mock import MagicMock
+
+    scores = json.loads((DATA_DIR / "canned_scores.json").read_text())[config]
+    queue = [scores[case["id"]] for case in cases]
+
+    def parse(*, text_format, **kwargs):
+        canned = queue.pop(0)
+        return MagicMock(
+            output_text=json.dumps(canned),
+            output_parsed=text_format(**canned),
+        )
+
+    client = MagicMock()
+    client.responses.parse.side_effect = parse
+    return client
+
+
+if __name__ == "__main__":
+    print("LLM-as-judge — two configs, one question set, no API key\n")
+
+    for config in ("rag", "rag_rerank"):
+        cases = load_cases(config)
+        results = evaluate_dataset(make_canned_judge(config, cases), cases)
+        summary = compute_summary(results)
+
+        print(f"  {config}")
+        for row in results:
+            print(
+                f"    {row['id']:18} correctness={row['correctness']} "
+                f"completeness={row['completeness']} relevance={row['relevance']}"
+            )
+            print(f"                       {row['explanation']}")
+        print(
+            f"    average            correctness={summary['avg_correctness']:.2f}  "
+            f"completeness={summary['avg_completeness']:.2f}  "
+            f"relevance={summary['avg_relevance']:.2f}  n={summary['num_cases']}\n"
+        )

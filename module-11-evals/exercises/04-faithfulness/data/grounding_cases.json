@@ -1,20 +1,131 @@
-[
-  {
-    "id": "grounded-warp",
-    "answer": "The warp core is at 94% efficiency. Plasma conduit 7-B has a minor fluctuation.",
-    "context": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance.",
-    "notes": "Both claims are in the log."
-  },
-  {
-    "id": "hallucinated-temp",
-    "answer": "The warp core is at 94% efficiency. Core temperature is 9000K.",
-    "context": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances.",
-    "notes": "9000K is not in the source."
-  },
-  {
-    "id": "kepler-extra",
-    "answer": "Pathfinder arrived at Kepler-442 and raised shields to level 2. The crew found a derelict Romulan scout.",
-    "context": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution — asteroid density higher than projected. Deploying first sensor buoy at coordinates K442-A1.",
-    "notes": "Romulan scout is invented."
-  }
-]
+{
+  "rag": [
+    {
+      "id": "warp-efficiency",
+      "question": "What is the current warp core efficiency?",
+      "answer": "The warp core is operating at 94% efficiency, with a minor fluctuation in plasma conduit 7-B.",
+      "context": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution — asteroid density higher than projected. Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance. Anomalous sensor contact at long range — bearing 180 mark 12. Unable to classify.",
+      "script": [
+        "The warp core is operating at 94% efficiency.\nThere is a minor fluctuation in plasma conduit 7-B.",
+        "supported",
+        "supported"
+      ],
+      "notes": "Both claims are in the retrieved text. Stale, but grounded — faithfulness does not check whether the source is current."
+    },
+    {
+      "id": "kepler-minerals",
+      "question": "What minerals did the survey find at Kepler-442?",
+      "answer": "The first sample batch showed elevated concentrations of iridium and osmium, gathered from three separate asteroids.",
+      "context": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution. Day 4 at Kepler-442. Two of three survey zones complete. Mineral yields exceeding projections by 40%. First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium.",
+      "script": [
+        "The first sample batch showed elevated concentrations of iridium and osmium.\nThe samples were gathered from three separate asteroids.",
+        "supported",
+        "unsupported"
+      ],
+      "notes": "Three asteroids is invented. The log names one, K442-A1-07, and mentions three survey zones."
+    },
+    {
+      "id": "trappist-water",
+      "question": "Is there water in the TRAPPIST-1 system?",
+      "answer": "A water vapour signature was detected in the upper atmosphere. Surface oceans have been confirmed on TRAPPIST-1e.",
+      "context": "Long-range sensors detecting unusual spectral signature at bearing 047 mark 3. TRAPPIST-1 survey commencing. Spectrometer array calibrated and running continuous atmospheric scans. Water vapour signature detected in upper atmosphere. Exiting warp in 4 hours. Plotting approach vector for Kepler-442 outer belt.",
+      "script": [
+        "A water vapour signature was detected in the upper atmosphere.\nSurface oceans have been confirmed on TRAPPIST-1e.",
+        "supported",
+        "unsupported"
+      ],
+      "notes": "Confirmed surface oceans is invented. The retrieved text never mentions TRAPPIST-1e at all."
+    },
+    {
+      "id": "crew-radiation",
+      "question": "What are the crew radiation exposure levels?",
+      "answer": "Radiation levels near the cargo bay are elevated during sample intake. The medical team has restricted access to the lower decks.",
+      "context": "Security sweep of EVA staging area complete. All suits inspected, tether integrity verified. Anomalous sensor contact at long range — bearing 180 mark 12. Raised alert status to yellow. EVA Team Alpha deployed successfully. Cargo bay prepped for mineral samples — containment protocols active.",
+      "script": [
+        "Radiation levels near the cargo bay are elevated during sample intake.\nThe medical team has restricted access to the lower decks.",
+        "unsupported",
+        "unsupported"
+      ],
+      "notes": "Nothing relevant was retrieved, so the generator filled the gap. Both claims are invented."
+    },
+    {
+      "id": "void-navigation",
+      "question": "How does the ship navigate inside the Boötes Void?",
+      "answer": "Star density is dropping rapidly inside the Boötes Void perimeter. Navigation relies on inertial reference. Pre-plotted waypoints are used.",
+      "context": "Void Cartography mission underway. Entering Boötes Void perimeter. Star density dropping rapidly — navigation relies on inertial reference and pre-plotted waypoints. Anomalous sensor contact at long range. Raised alert status to yellow. Exiting warp in 4 hours. Plotting approach vector for Kepler-442 outer belt.",
+      "script": [
+        "Star density is dropping rapidly inside the Boötes Void perimeter.\nNavigation relies on inertial reference.\nPre-plotted waypoints are used.",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "notes": "The relevant log was retrieved at rank 1, and every claim traces back to it."
+    }
+  ],
+  "rag_rerank": [
+    {
+      "id": "warp-efficiency",
+      "question": "What is the current warp core efficiency?",
+      "answer": "The warp core is back to 97% efficiency. It was running at 94% with a fluctuation in plasma conduit 7-B. The repair was completed during EVA downtime.",
+      "context": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance. Sensor buoy K442-B1 deployed and transmitting. Plasma conduit 7-B repair completed during EVA downtime — efficiency back to 97%. Arrived Kepler-442. All stop. Shields raised to level 2 as precaution.",
+      "script": [
+        "The warp core is back to 97% efficiency.\nIt was running at 94% with a fluctuation in plasma conduit 7-B.\nThe repair was completed during EVA downtime.",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "notes": "Both logs retrieved, so every claim is traceable."
+    },
+    {
+      "id": "kepler-minerals",
+      "question": "What minerals did the survey find at Kepler-442?",
+      "answer": "EVA Team Alpha returned the first sample batch from asteroid K442-A1-07. The samples show elevated concentrations of iridium and osmium. The composition is consistent with a differentiated planetesimal core fragment.",
+      "context": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium. This is consistent with a differentiated planetesimal core fragment. EVA Team Alpha deployed successfully. Cargo bay prepped for mineral samples — containment protocols active. Day 4 at Kepler-442. Two of three survey zones complete.",
+      "script": [
+        "EVA Team Alpha returned the first sample batch from asteroid K442-A1-07.\nThe samples show elevated concentrations of iridium and osmium.\nThe composition is consistent with a differentiated planetesimal core fragment.",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "notes": "Fully grounded."
+    },
+    {
+      "id": "trappist-water",
+      "question": "Is there water in the TRAPPIST-1 system?",
+      "answer": "A water vapour signature was detected in the upper atmosphere of TRAPPIST-1d. A surface scan of TRAPPIST-1e revealed potential subsurface liquid water. The radar probe has confirmed the subsurface water.",
+      "context": "TRAPPIST-1 survey commencing. Initial orbital insertion around planet d successful. Water vapour signature detected in upper atmosphere. Surface scan of TRAPPIST-1e reveals potential subsurface liquid water. Thermal imaging shows hotspots near the terminator line. Deploying ground-penetrating radar probe for confirmation.",
+      "script": [
+        "A water vapour signature was detected in the upper atmosphere of TRAPPIST-1d.\nA surface scan of TRAPPIST-1e revealed potential subsurface liquid water.\nThe radar probe has confirmed the subsurface water.",
+        "supported",
+        "supported",
+        "unsupported"
+      ],
+      "notes": "The subtle one. The probe is being deployed for confirmation; nothing has been confirmed yet. A judge comparing against a reference answer would likely wave this through."
+    },
+    {
+      "id": "crew-radiation",
+      "question": "What are the crew radiation exposure levels?",
+      "answer": "All 12 mission crew are within normal parameters. Radiation exposure badges show baseline levels.",
+      "context": "Crew health check complete. All 12 mission crew within normal parameters. Radiation exposure badges show baseline levels. Reminded EVA teams about dosimeter protocols for the asteroid belt phase. Security sweep of EVA staging area complete. EVA Team Alpha deployed successfully.",
+      "script": [
+        "All 12 mission crew are within normal parameters.\nRadiation exposure badges show baseline levels.",
+        "supported",
+        "supported"
+      ],
+      "notes": "Reranking pulled the right log to rank 1 and the answer stays inside it."
+    },
+    {
+      "id": "void-navigation",
+      "question": "How does the ship navigate inside the Boötes Void?",
+      "answer": "Navigation uses the comm relay chain to fix position. The Barnard's Star depot transit registration provides a reference point. Star density inside the void is unchanged.",
+      "context": "Anomalous sensor contact at long range — bearing 180 mark 12. Raised alert status to yellow. Night watch report: all systems nominal. Received automated ping from Barnard's Star fuel depot confirming our transit registration. Exiting warp in 4 hours. Plotting approach vector for Kepler-442 outer belt.",
+      "script": [
+        "Navigation uses the comm relay chain to fix position.\nThe Barnard's Star depot transit registration provides a reference point.\nStar density inside the void is unchanged.",
+        "unsupported",
+        "supported",
+        "unsupported"
+      ],
+      "notes": "Reranking dropped the navigation log, so the generator stitched an answer from unrelated ones. The depot ping is genuinely in the context; it just has nothing to do with the question."
+    }
+  ]
+}

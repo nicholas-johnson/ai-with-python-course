@@ -3,6 +3,10 @@ Exercise 04 — Faithfulness
 
 Split an answer into claims and check each one against retrieved context.
 Faithfulness = supported claims / total claims.
+
+The dataset is the same five ship-log questions used in exercises 02 and 03,
+answered by both pipeline configs. The averages you produce here feed the
+scorecard in exercise 05.
 """
 
 from __future__ import annotations
@@ -14,6 +18,8 @@ from pathlib import Path
 from openai import OpenAI
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
+DATA_DIR = Path(__file__).parent / "data"
 
 
 def extract_claims(client: OpenAI, answer: str) -> list[str]:
@@ -69,49 +75,56 @@ def score_faithfulness(client: OpenAI, answer: str, context: str) -> dict:
     pass
 
 
-if __name__ == "__main__":
+def load_cases(config: str) -> list[dict]:
+    """Answers and the context each config retrieved for them. Provided."""
+    return json.loads((DATA_DIR / "grounding_cases.json").read_text())[config]
+
+
+def make_scripted_client(script: list[str]):
+    """
+    A stand-in for the model so this runs with no API key. Provided.
+
+    Replays one claim-extraction reply followed by one verdict per claim.
+    """
     from unittest.mock import MagicMock
 
-    here = Path(__file__).parent / "data" / "grounding_cases.json"
-    cases = json.loads(here.read_text())
+    queue = list(script)
 
-    # Scripted: first call extracts claims (two lines), then two support verdicts.
-    scripts = {
-        "grounded-warp": [
-            "The warp core is at 94% efficiency.\n"
-            "Plasma conduit 7-B has a minor fluctuation.",
-            "supported",
-            "supported",
-        ],
-        "hallucinated-temp": [
-            "The warp core is at 94% efficiency.\nCore temperature is 9000K.",
-            "supported",
-            "unsupported",
-        ],
-        "kepler-extra": [
-            "Pathfinder arrived at Kepler-442 and raised shields to level 2.\n"
-            "The crew found a derelict Romulan scout.",
-            "supported",
-            "unsupported",
-        ],
-    }
+    def create(**kwargs):
+        response = MagicMock()
+        response.output_text = queue.pop(0)
+        return response
 
-    print("Faithfulness (mocked client, no API key)\n")
-    for case in cases:
-        queue = list(scripts[case["id"]])
+    client = MagicMock()
+    client.responses.create.side_effect = create
+    return client
 
-        def create(**kwargs):
-            resp = MagicMock()
-            resp.output_text = queue.pop(0)
-            return resp
 
-        client = MagicMock()
-        client.responses.create.side_effect = create
-        result = score_faithfulness(client, case["answer"], case["context"])
-        if result is None:
-            print(f"  {case['id']}: not implemented")
+if __name__ == "__main__":
+    print("Faithfulness — two configs, one question set, no API key\n")
+
+    for config in ("rag", "rag_rerank"):
+        cases = load_cases(config)
+        scored = []
+        for case in cases:
+            client = make_scripted_client(case["script"])
+            result = score_faithfulness(client, case["answer"], case["context"])
+            if result is None:
+                break
+            scored.append((case, result))
+
+        if len(scored) != len(cases):
+            print(f"  {config}: not implemented\n")
             continue
-        print(
-            f"  {case['id']:20}  faithfulness={result['faithfulness']:.2f}  "
-            f"{result['num_supported']}/{result['num_claims']} supported"
-        )
+
+        print(f"  {config}")
+        for case, result in scored:
+            print(
+                f"    {case['id']:18} faithfulness={result['faithfulness']:.2f}  "
+                f"{result['num_supported']}/{result['num_claims']} supported"
+            )
+            for claim in result["claims"]:
+                mark = "ok" if claim["supported"] else "!!"
+                print(f"                       [{mark}] {claim['claim']}")
+        average = sum(r["faithfulness"] for _, r in scored) / len(scored)
+        print(f"    average            faithfulness={average:.2f}  n={len(scored)}\n")
