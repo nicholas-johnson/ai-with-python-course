@@ -1,0 +1,35 @@
+{
+  "build-a": {
+    "How many people are in engineering?": [
+      {"tool_calls": [{"id": "call_eng", "name": "get_crew_count", "arguments": {"department": "engineering"}}]},
+      {"content": "Engineering has 2 crew members."}
+    ],
+    "Is the warp drive healthy?": [
+      {"tool_calls": [{"id": "call_warp", "name": "get_ship_status", "arguments": {"system": "warp"}}]},
+      {"content": "Warp is online at 97% efficiency."}
+    ],
+    "Who is the captain?": [
+      {"tool_calls": [{"id": "call_search", "name": "search_crew", "arguments": {"query": "captain"}}]},
+      {"content": "Commander Elara Voss is the captain."}
+    ],
+    "What ship are we on?": [
+      {"content": "You are aboard the DSS Pathfinder."}
+    ]
+  },
+  "build-b": {
+    "How many people are in engineering?": [
+      {"tool_calls": [{"id": "call_eng", "name": "get_crew_count", "arguments": {"department": "medical"}}]},
+      {"content": "Engineering has 1 crew member."}
+    ],
+    "Is the warp drive healthy?": [
+      {"content": "Warp should be fine."}
+    ],
+    "Who is the captain?": [
+      {"tool_calls": [{"id": "call_search", "name": "search_crew", "arguments": {"query": "captain"}}]},
+      {"content": "The captain is Commander Elara Voss."}
+    ],
+    "What ship are we on?": [
+      {"content": "You are aboard the DSS Pathfinder."}
+    ]
+  }
+}

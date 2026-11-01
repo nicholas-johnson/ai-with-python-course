@@ -1,12 +1,18 @@
 [
-  {"id": "LOG-002", "text": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance."},
-  {"id": "LOG-005", "text": "Crew health check complete. All 12 mission crew within normal parameters. Radiation exposure badges show baseline levels."},
-  {"id": "LOG-007", "text": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution — asteroid density higher than projected."},
-  {"id": "LOG-009", "text": "EVA Team Alpha deployed successfully. Cargo bay prepped for mineral samples — containment protocols active."},
-  {"id": "LOG-010", "text": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium."},
-  {"id": "LOG-011", "text": "Plasma conduit 7-B repair completed during EVA downtime — warp core efficiency back to 97%."},
-  {"id": "LOG-013", "text": "TRAPPIST-1 survey commencing. Water vapour signature detected in upper atmosphere — promising."},
-  {"id": "LOG-014", "text": "Surface scan of TRAPPIST-1e reveals potential subsurface liquid water. Thermal imaging shows hotspots near the terminator line."},
-  {"id": "LOG-015", "text": "Void Cartography mission underway. Entering Boötes Void perimeter. Star density dropping rapidly."},
-  {"id": "LOG-016", "text": "Anomalous sensor contact at long range. Raised alert status to yellow. Monitoring."}
+  {"id": "LOG-001", "text": "Mission Kepler Sweep officially underway. All stations report ready. Warp drive engaged at 0800 hours. Estimated arrival at Kepler-442 asteroid belt in 72 hours."},
+  {"id": "LOG-002", "text": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance for next downtime window."},
+  {"id": "LOG-003", "text": "Long-range sensors detecting unusual spectral signature at bearing 047 mark 3. Consistent with heavy element concentration — possibly a metallic asteroid cluster not in current charts."},
+  {"id": "LOG-004", "text": "Night watch report: all systems nominal. Received automated ping from Barnard's Star fuel depot confirming our transit registration. Next scheduled comm window with HQ at 0600."},
+  {"id": "LOG-005", "text": "Crew health check complete. All 12 mission crew within normal parameters. Radiation exposure badges show baseline levels. Reminded EVA teams about dosimeter protocols for the asteroid belt phase."},
+  {"id": "LOG-006", "text": "Exiting warp in 4 hours. Plotting approach vector for Kepler-442 outer belt. Three candidate survey zones identified. Zone A has the highest mineral probability but overlaps with a debris field."},
+  {"id": "LOG-007", "text": "Arrived Kepler-442. All stop. Shields raised to level 2 as precaution — asteroid density higher than projected. Deploying first sensor buoy at coordinates K442-A1."},
+  {"id": "LOG-008", "text": "Security sweep of EVA staging area complete. All suits inspected, tether integrity verified. Cleared EVA Team Alpha for first excursion at 0600 tomorrow."},
+  {"id": "LOG-009", "text": "EVA Team Alpha deployed successfully. Shuttle 2 in standby. Cargo bay prepped for mineral samples — containment protocols active. Estimated first sample return at 1100."},
+  {"id": "LOG-010", "text": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium. This is consistent with a differentiated planetesimal core fragment."},
+  {"id": "LOG-011", "text": "Sensor buoy K442-B1 deployed and transmitting. Telemetry link stable at 99.7% uptime. Plasma conduit 7-B repair completed during EVA downtime — efficiency back to 97%."},
+  {"id": "LOG-012", "text": "Day 4 at Kepler-442. Two of three survey zones complete. Mineral yields exceeding projections by 40%. Science division requesting a mission extension of 48 hours."},
+  {"id": "LOG-013", "text": "TRAPPIST-1 survey commencing. Initial orbital insertion around planet d successful. Spectrometer array calibrated and running continuous atmospheric scans. Water vapour signature detected in upper atmosphere."},
+  {"id": "LOG-014", "text": "Surface scan of TRAPPIST-1e reveals potential subsurface liquid water. Thermal imaging shows hotspots near the terminator line. Deploying ground-penetrating radar probe for confirmation."},
+  {"id": "LOG-015", "text": "Void Cartography mission underway. Entering Boötes Void perimeter. Star density dropping rapidly — navigation relies on inertial reference and pre-plotted waypoints."},
+  {"id": "LOG-016", "text": "Anomalous sensor contact at long range — bearing 180 mark 12. Unable to classify. Could be sensor echo from void boundary or unknown object. Raised alert status to yellow."}
 ]

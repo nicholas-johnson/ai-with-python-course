@@ -1,22 +1,22 @@
 [
   {
-    "query": "warp core efficiency",
+    "query": "What is the current warp core efficiency?",
     "relevant_ids": ["LOG-002", "LOG-011"]
   },
   {
-    "query": "Kepler mineral samples",
+    "query": "What minerals did the survey find at Kepler-442?",
     "relevant_ids": ["LOG-009", "LOG-010"]
   },
   {
-    "query": "TRAPPIST water",
+    "query": "Is there water in the TRAPPIST-1 system?",
     "relevant_ids": ["LOG-013", "LOG-014"]
   },
   {
-    "query": "crew radiation health",
+    "query": "What are the crew radiation exposure levels?",
     "relevant_ids": ["LOG-005"]
   },
   {
-    "query": "Boötes Void navigation",
+    "query": "How does the ship navigate inside the Boötes Void?",
     "relevant_ids": ["LOG-015"]
   }
 ]

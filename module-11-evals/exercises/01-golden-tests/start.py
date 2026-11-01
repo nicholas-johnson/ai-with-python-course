@@ -1,11 +1,13 @@
 """
-Exercise 01 — Golden Tests (Agent-loop regression)
+Exercise 01 — Golden Tests
 
-Regression-test a tool-calling agent's *loop* with a mock LLM. The scripted
-responses contain the tool call and the answer, so this checks that your loop
-dispatches and round-trips correctly — not that the model chose the tool.
-No API key: scripted responses drive the loop. A real golden eval runs the
-live model (exact-match tools + LLM judge for prose) — see the README.
+Freeze the outcome you accept for a question, then re-run a later build of the
+agent and compare. The golden file holds only the question and the accepted
+outcome; what the agent does comes from the build under test.
+
+Two builds ship with this exercise. Build A is what you released. Build B has
+had its prompt changed and has drifted. Your harness should pass A and fail B.
+No API key: each build replays its own recorded behaviour.
 """
 
 from __future__ import annotations
@@ -16,6 +18,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
+DATA_DIR = Path(__file__).parent / "data"
 
 # ---------------------------------------------------------------------------
 # Ship tools — provided. Focus on the eval harness below.
@@ -55,16 +59,24 @@ TOOLS: list[dict] = [
 ]
 
 CREW_DATA = {
-    "command": [{"name": "Commander Elara Voss", "role": "Captain"}],
+    "command": [{"name": "Commander Elara Voss", "role": "captain"}],
     "science": [
-        {"name": "Dr. Jian Chen", "role": "Chief Science Officer"},
-        {"name": "Ensign Dax Morel", "role": "Xenobiologist"},
+        {"name": "Lt. Cmdr. Kael Orin", "role": "science-officer"},
+        {"name": "Specialist Juno Park", "role": "science-officer"},
+        {"name": "Dr. Felix Strand", "role": "science-officer"},
     ],
     "engineering": [
-        {"name": "Chief Engineer Mira Chen", "role": "Lead Engineer"},
-        {"name": "Specialist Bodhi Kwan", "role": "Systems Tech"},
+        {"name": "Chief Engineer Mira Chen", "role": "engineer"},
+        {"name": "Ensign Tomás Herrera", "role": "engineer"},
     ],
-    "medical": [{"name": "Dr. Amara Osei", "role": "Chief Medical Officer"}],
+    "operations": [
+        {"name": "Lt. Zara Petrov", "role": "navigator"},
+        {"name": "Ensign Dax Morel", "role": "ops"},
+        {"name": "Lt. Cmdr. Aisha Okonkwo", "role": "navigator"},
+        {"name": "Specialist Bodhi Kwan", "role": "ops"},
+    ],
+    "medical": [{"name": "Dr. Sable Achebe", "role": "medical-officer"}],
+    "security": [{"name": "Lt. Reiko Tanaka", "role": "security-chief"}],
 }
 
 SHIP_SYSTEMS = {
@@ -109,14 +121,32 @@ SYSTEM_PROMPT = (
 )
 
 
-def make_scripted_client(scripted_responses: list[dict]):
-    """
-    Build a fake OpenAI client from a list of response dicts.
+def load_cases() -> list[dict]:
+    """The golden file: questions and the outcomes we accept. Provided."""
+    return json.loads((DATA_DIR / "golden_cases.json").read_text())
 
-    Each dict is either {"tool_calls": [{"id", "name", "arguments"}]}
-    or {"content": "final answer"}.
+
+def load_build(name: str) -> dict:
+    """One build's recorded behaviour, keyed by question. Provided."""
+    return json.loads((DATA_DIR / "builds.json").read_text())[name]
+
+
+def make_scripted_client(build: dict):
     """
-    queue = list(scripted_responses)
+    Build a fake OpenAI client that replays one build of the agent.
+
+    `build` maps a question to the turns that build produces for it. Each turn
+    is either {"tool_calls": [{"id", "name", "arguments"}]} or
+    {"content": "final answer"}. The client reads the question off the input
+    messages, so one client serves the whole suite — same as a real one.
+    """
+    queues: dict[str, list[dict]] = {}
+
+    def _question_from(messages) -> str:
+        for message in messages:
+            if isinstance(message, dict) and message.get("role") == "user":
+                return message["content"]
+        raise RuntimeError("No user message in input")
 
     def _to_response(item: dict):
         if "tool_calls" in item:
@@ -137,8 +167,12 @@ def make_scripted_client(scripted_responses: list[dict]):
         return SimpleNamespace(output=[], output_text=item.get("content", ""))
 
     def create(**kwargs):
+        question = _question_from(kwargs["input"])
+        if question not in queues:
+            queues[question] = list(build[question])
+        queue = queues[question]
         if not queue:
-            raise RuntimeError("Scripted client has no more responses")
+            raise RuntimeError(f"Build has no more responses for: {question}")
         return _to_response(queue.pop(0))
 
     return SimpleNamespace(responses=SimpleNamespace(create=create))
@@ -197,7 +231,7 @@ def score_case(result: dict, case: dict) -> dict:
 
 def run_suite(client, cases: list[dict]) -> dict:
     """
-    Run every case with the same client and score each one.
+    Run every case against one build and score each one.
 
     Returns:
         {
@@ -215,18 +249,32 @@ def run_suite(client, cases: list[dict]) -> dict:
     pass
 
 
+def _format_tools(tools: list[dict]) -> str:
+    """Render a tool list for the report. Provided."""
+    if not tools:
+        return "(no tools called)"
+    return ", ".join(
+        f"{t['name']}({', '.join(f'{k}={v}' for k, v in t['arguments'].items())})"
+        for t in tools
+    )
+
+
 if __name__ == "__main__":
-    data_path = Path(__file__).parent / "data" / "golden_cases.json"
-    cases = json.loads(data_path.read_text())
-    print("Golden suite — agent-loop regression, scripted LLM, no API key\n")
-    scored = []
-    for case in cases:
-        client = make_scripted_client(case["scripted_responses"])
-        actual = run_case(client, case)
-        result = score_case(actual, case)
-        scored.append(result)
-        mark = "PASS" if result and result.get("passed") else "FAIL"
-        mismatches = ",".join(result.get("mismatches", [])) if result else "not implemented"
-        print(f"  [{mark}] {case['id']}" + (f"  ({mismatches})" if mismatches else ""))
-    n_pass = sum(1 for r in scored if r and r.get("passed"))
-    print(f"\n{n_pass}/{len(cases)} passed")
+    cases = load_cases()
+    by_id = {case["id"]: case for case in cases}
+    print("Golden suite — one frozen reference, two builds, no API key\n")
+
+    for build_name, note in (("build-a", "shipped"), ("build-b", "prompt changed")):
+        summary = run_suite(make_scripted_client(load_build(build_name)), cases)
+        if summary is None:
+            print(f"  {build_name} ({note}): not implemented\n")
+            continue
+
+        print(f"  {build_name} ({note})")
+        for result in summary["results"]:
+            mark = "PASS" if result["passed"] else "FAIL"
+            detail = ",".join(result["mismatches"])
+            print(f"    [{mark}] {result['id']}" + (f"  ({detail})" if detail else ""))
+            if "answer" in result["mismatches"]:
+                print(f"           expected  {by_id[result['id']]['expected_answer']}")
+        print(f"    {summary['passed']}/{summary['total']} passed\n")

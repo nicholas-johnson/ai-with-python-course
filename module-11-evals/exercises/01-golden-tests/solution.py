@@ -1,9 +1,8 @@
 """
 Exercise 01 — Golden Tests (Solution)
 
-Agent-loop regression test: a mock LLM scripts the tool call and the answer,
-so this verifies the loop dispatches and round-trips — not the model's choice.
-A real golden eval runs the live model (exact-match tools + judge) — see README.
+One frozen reference, two builds of the agent. Build A matches the reference;
+build B has drifted and the suite says where.
 """
 
 from __future__ import annotations
@@ -14,6 +13,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
+DATA_DIR = Path(__file__).parent / "data"
 
 TOOLS: list[dict] = [
     {
@@ -49,16 +50,24 @@ TOOLS: list[dict] = [
 ]
 
 CREW_DATA = {
-    "command": [{"name": "Commander Elara Voss", "role": "Captain"}],
+    "command": [{"name": "Commander Elara Voss", "role": "captain"}],
     "science": [
-        {"name": "Dr. Jian Chen", "role": "Chief Science Officer"},
-        {"name": "Ensign Dax Morel", "role": "Xenobiologist"},
+        {"name": "Lt. Cmdr. Kael Orin", "role": "science-officer"},
+        {"name": "Specialist Juno Park", "role": "science-officer"},
+        {"name": "Dr. Felix Strand", "role": "science-officer"},
     ],
     "engineering": [
-        {"name": "Chief Engineer Mira Chen", "role": "Lead Engineer"},
-        {"name": "Specialist Bodhi Kwan", "role": "Systems Tech"},
+        {"name": "Chief Engineer Mira Chen", "role": "engineer"},
+        {"name": "Ensign Tomás Herrera", "role": "engineer"},
     ],
-    "medical": [{"name": "Dr. Amara Osei", "role": "Chief Medical Officer"}],
+    "operations": [
+        {"name": "Lt. Zara Petrov", "role": "navigator"},
+        {"name": "Ensign Dax Morel", "role": "ops"},
+        {"name": "Lt. Cmdr. Aisha Okonkwo", "role": "navigator"},
+        {"name": "Specialist Bodhi Kwan", "role": "ops"},
+    ],
+    "medical": [{"name": "Dr. Sable Achebe", "role": "medical-officer"}],
+    "security": [{"name": "Lt. Reiko Tanaka", "role": "security-chief"}],
 }
 
 SHIP_SYSTEMS = {
@@ -103,8 +112,22 @@ SYSTEM_PROMPT = (
 )
 
 
-def make_scripted_client(scripted_responses: list[dict]):
-    queue = list(scripted_responses)
+def load_cases() -> list[dict]:
+    return json.loads((DATA_DIR / "golden_cases.json").read_text())
+
+
+def load_build(name: str) -> dict:
+    return json.loads((DATA_DIR / "builds.json").read_text())[name]
+
+
+def make_scripted_client(build: dict):
+    queues: dict[str, list[dict]] = {}
+
+    def _question_from(messages) -> str:
+        for message in messages:
+            if isinstance(message, dict) and message.get("role") == "user":
+                return message["content"]
+        raise RuntimeError("No user message in input")
 
     def _to_response(item: dict):
         if "tool_calls" in item:
@@ -125,8 +148,12 @@ def make_scripted_client(scripted_responses: list[dict]):
         return SimpleNamespace(output=[], output_text=item.get("content", ""))
 
     def create(**kwargs):
+        question = _question_from(kwargs["input"])
+        if question not in queues:
+            queues[question] = list(build[question])
+        queue = queues[question]
         if not queue:
-            raise RuntimeError("Scripted client has no more responses")
+            raise RuntimeError(f"Build has no more responses for: {question}")
         return _to_response(queue.pop(0))
 
     return SimpleNamespace(responses=SimpleNamespace(create=create))
@@ -200,18 +227,43 @@ def run_suite(client, cases: list[dict]) -> dict:
     }
 
 
+def _format_tools(tools: list[dict]) -> str:
+    if not tools:
+        return "(no tools called)"
+    return ", ".join(
+        f"{t['name']}({', '.join(f'{k}={v}' for k, v in t['arguments'].items())})"
+        for t in tools
+    )
+
+
 if __name__ == "__main__":
-    data_path = Path(__file__).parent / "data" / "golden_cases.json"
-    cases = json.loads(data_path.read_text())
-    print("Golden suite — agent-loop regression, scripted LLM, no API key\n")
-    scored = []
-    for case in cases:
-        client = make_scripted_client(case["scripted_responses"])
-        actual = run_case(client, case)
-        result = score_case(actual, case)
-        scored.append(result)
-        mark = "PASS" if result["passed"] else "FAIL"
-        extra = f"  ({','.join(result['mismatches'])})" if result["mismatches"] else ""
-        print(f"  [{mark}] {case['id']}{extra}")
-    n_pass = sum(1 for r in scored if r["passed"])
-    print(f"\n{n_pass}/{len(cases)} passed")
+    cases = load_cases()
+    by_id = {case["id"]: case for case in cases}
+    print("Golden suite — one frozen reference, two builds, no API key\n")
+
+    for build_name, note in (("build-a", "shipped"), ("build-b", "prompt changed")):
+        client = make_scripted_client(load_build(build_name))
+        actuals = {case["id"]: run_case(client, case) for case in cases}
+        results = [score_case(actuals[case["id"]], case) for case in cases]
+        n_pass = sum(1 for r in results if r["passed"])
+
+        print(f"  {build_name} ({note})")
+        for result in results:
+            case = by_id[result["id"]]
+            actual = actuals[result["id"]]
+            mark = "PASS" if result["passed"] else "FAIL"
+            detail = ",".join(result["mismatches"])
+            print(f"    [{mark}] {result['id']}" + (f"  ({detail})" if detail else ""))
+            if "tools" in result["mismatches"]:
+                print(f"           expected  {_format_tools(case['expected_tools'])}")
+                print(f"           actual    {_format_tools(actual['tools'])}")
+            if "answer" in result["mismatches"]:
+                print(f"           expected  {case['expected_answer']}")
+                print(f"           actual    {actual['answer']}")
+        print(f"    {n_pass}/{len(results)} passed\n")
+
+    print("  ship-status-warp is the regression golden tests exist for: build B")
+    print("  stopped calling get_ship_status. Nothing in the golden file told it")
+    print("  to call that tool — the build changed, and the suite noticed.\n")
+    print("  search-captain is a false alarm: the facts are right, the wording")
+    print("  moved. Exact match cannot tell those apart. That is exercise 03's job.")

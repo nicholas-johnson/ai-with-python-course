@@ -1,46 +1,46 @@
 {
-  "naive": [
+  "rag": [
     {
-      "query": "warp core efficiency",
-      "ranked_ids": ["LOG-007", "LOG-016", "LOG-002", "LOG-011", "LOG-005"]
+      "query": "What is the current warp core efficiency?",
+      "ranked_ids": ["LOG-007", "LOG-002", "LOG-016", "LOG-011", "LOG-005"]
     },
     {
-      "query": "Kepler mineral samples",
-      "ranked_ids": ["LOG-007", "LOG-009", "LOG-015", "LOG-010", "LOG-002"]
+      "query": "What minerals did the survey find at Kepler-442?",
+      "ranked_ids": ["LOG-007", "LOG-012", "LOG-010", "LOG-009", "LOG-001"]
     },
     {
-      "query": "TRAPPIST water",
-      "ranked_ids": ["LOG-005", "LOG-013", "LOG-007", "LOG-014", "LOG-016"]
+      "query": "Is there water in the TRAPPIST-1 system?",
+      "ranked_ids": ["LOG-003", "LOG-013", "LOG-006", "LOG-014", "LOG-010"]
     },
     {
-      "query": "crew radiation health",
-      "ranked_ids": ["LOG-016", "LOG-015", "LOG-007", "LOG-005", "LOG-002"]
+      "query": "What are the crew radiation exposure levels?",
+      "ranked_ids": ["LOG-008", "LOG-016", "LOG-009", "LOG-005", "LOG-002"]
     },
     {
-      "query": "Boötes Void navigation",
-      "ranked_ids": ["LOG-007", "LOG-002", "LOG-015", "LOG-016", "LOG-005"]
+      "query": "How does the ship navigate inside the Boötes Void?",
+      "ranked_ids": ["LOG-015", "LOG-016", "LOG-006", "LOG-004", "LOG-001"]
     }
   ],
-  "reranked": [
+  "rag_rerank": [
     {
-      "query": "warp core efficiency",
+      "query": "What is the current warp core efficiency?",
       "ranked_ids": ["LOG-002", "LOG-011", "LOG-007", "LOG-016", "LOG-005"]
     },
     {
-      "query": "Kepler mineral samples",
-      "ranked_ids": ["LOG-010", "LOG-009", "LOG-007", "LOG-015", "LOG-002"]
+      "query": "What minerals did the survey find at Kepler-442?",
+      "ranked_ids": ["LOG-010", "LOG-009", "LOG-012", "LOG-007", "LOG-001"]
     },
     {
-      "query": "TRAPPIST water",
-      "ranked_ids": ["LOG-013", "LOG-014", "LOG-005", "LOG-007", "LOG-016"]
+      "query": "Is there water in the TRAPPIST-1 system?",
+      "ranked_ids": ["LOG-013", "LOG-014", "LOG-003", "LOG-006", "LOG-010"]
     },
     {
-      "query": "crew radiation health",
-      "ranked_ids": ["LOG-005", "LOG-002", "LOG-016", "LOG-015", "LOG-007"]
+      "query": "What are the crew radiation exposure levels?",
+      "ranked_ids": ["LOG-005", "LOG-008", "LOG-009", "LOG-016", "LOG-002"]
     },
     {
-      "query": "Boötes Void navigation",
-      "ranked_ids": ["LOG-015", "LOG-016", "LOG-007", "LOG-002", "LOG-005"]
+      "query": "How does the ship navigate inside the Boötes Void?",
+      "ranked_ids": ["LOG-016", "LOG-004", "LOG-006", "LOG-015", "LOG-001"]
     }
   ]
 }

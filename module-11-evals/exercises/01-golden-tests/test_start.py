@@ -1,13 +1,14 @@
 """Tests for Exercise 01 — Golden Tests."""
 
+import json
 from unittest.mock import MagicMock
 
-from start import make_scripted_client, run_case, run_suite, score_case
+from start import load_build, load_cases, make_scripted_client, run_case, run_suite, score_case
 
 
 def _tool_message(name: str, arguments: dict, call_id: str = "call_1"):
     """A mock response whose output is one function_call item."""
-    tc = MagicMock(type="function_call", call_id=call_id, arguments=__import__("json").dumps(arguments))
+    tc = MagicMock(type="function_call", call_id=call_id, arguments=json.dumps(arguments))
     tc.name = name  # MagicMock(name=...) would name the mock, not set .name
     return MagicMock(output=[tc], output_text="")
 
@@ -60,9 +61,9 @@ class TestRunCase:
         run_case(client, CASE_DIRECT)
         client.responses.create.assert_called()
 
-    def test_scripted_helper_drives_loop(self):
-        client = make_scripted_client(
-            [
+    def test_scripted_build_drives_loop(self):
+        build = {
+            "Warp status?": [
                 {
                     "tool_calls": [
                         {
@@ -74,7 +75,7 @@ class TestRunCase:
                 },
                 {"content": "Warp is online at 97% efficiency."},
             ]
-        )
+        }
         case = {
             "id": "warp",
             "question": "Warp status?",
@@ -83,7 +84,7 @@ class TestRunCase:
             ],
             "expected_answer": "Warp is online at 97% efficiency.",
         }
-        result = run_case(client, case)
+        result = run_case(make_scripted_client(build), case)
         assert result["tools"] == case["expected_tools"]
         assert result["answer"] == case["expected_answer"]
 
@@ -142,3 +143,40 @@ class TestRunSuite:
         assert summary["passed"] == 0
         assert summary["failed"] == 0
         assert summary["results"] == []
+
+
+class TestShippedBuilds:
+    """The point of the lab: one reference, two builds, different verdicts."""
+
+    def test_build_a_passes_every_case(self):
+        cases = load_cases()
+        summary = run_suite(make_scripted_client(load_build("build-a")), cases)
+        assert summary["passed"] == summary["total"]
+        assert summary["failed"] == 0
+
+    def test_build_b_fails(self):
+        cases = load_cases()
+        summary = run_suite(make_scripted_client(load_build("build-b")), cases)
+        assert summary["failed"] > 0
+
+    def test_build_b_dropped_a_tool_call(self):
+        cases = load_cases()
+        summary = run_suite(make_scripted_client(load_build("build-b")), cases)
+        warp = next(r for r in summary["results"] if r["id"] == "ship-status-warp")
+        assert "tools" in warp["mismatches"]
+
+    def test_build_b_paraphrase_is_an_answer_only_mismatch(self):
+        # Right facts, different words. Exact match cannot tell this from a
+        # real regression — that is what the judge in exercise 03 is for.
+        cases = load_cases()
+        summary = run_suite(make_scripted_client(load_build("build-b")), cases)
+        captain = next(r for r in summary["results"] if r["id"] == "search-captain")
+        assert captain["mismatches"] == ["answer"]
+
+
+class TestGoldenFile:
+    def test_holds_only_the_reference(self):
+        # If the golden file also scripted the agent, the suite would be
+        # comparing the script to itself and would pass forever.
+        for case in load_cases():
+            assert set(case) == {"id", "question", "expected_tools", "expected_answer"}
