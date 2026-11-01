@@ -174,13 +174,13 @@ Two scripts call each API once, print the reply, and exit. The menu script walks
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-python module-01-working-with-the-llm/demo/completions.py
-python module-01-working-with-the-llm/demo/responses.py
+python module-01-working-with-the-llm/demo/01_completions.py
+python module-01-working-with-the-llm/demo/02_responses.py
 python module-01-working-with-the-llm/demo/demo.py
 
 # Option B - uv (no activation needed):
-uv run python module-01-working-with-the-llm/demo/completions.py
-uv run python module-01-working-with-the-llm/demo/responses.py
+uv run python module-01-working-with-the-llm/demo/01_completions.py
+uv run python module-01-working-with-the-llm/demo/02_responses.py
 uv run python module-01-working-with-the-llm/demo/demo.py
 ```
 

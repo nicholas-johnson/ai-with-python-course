@@ -210,7 +210,7 @@ print(response.output_text)`,
     type: 'title',
     content: {
       title: 'Demo — Responses',
-      subtitle: 'Switch to terminal: python demo/responses.py',
+      subtitle: 'Switch to terminal: python demo/02_responses.py',
       icon: 'rocket',
     },
   },

@@ -20,8 +20,8 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-01-working-with-the-llm/demo/completions.py` | One Chat Completions call, print the reply, exit. |
-| `module-01-working-with-the-llm/demo/responses.py` | One Responses API call, print the reply, exit. Same question as the Completions script. |
+| `module-01-working-with-the-llm/demo/01_completions.py` | One Chat Completions call, print the reply, exit. |
+| `module-01-working-with-the-llm/demo/02_responses.py` | One Responses API call, print the reply, exit. Same question as the Completions script. |
 | `module-01-working-with-the-llm/demo/demo.py` | The same walkthrough from a menu. 1 Chat Completions. 2 Responses. 3 The chat loop. 4 Streaming. 5 Prompt engineering. |
 
 **Exercises (chained — each builds on the previous):**

@@ -120,7 +120,7 @@ def demo_prompting(client: OpenAI):
         messages = [{"role": "system", "content": system_prompt}]
 
         print(f"\n--- [{name}] {desc} ---")
-        print(f"  System: {system_prompt[:80]}...\n")
+        print(f"  System: {system_prompt}\n")
         print("Type messages to chat with this prompt. Type 'quit' to pick another.\n")
 
         while True:
