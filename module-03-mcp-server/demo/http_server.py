@@ -1,6 +1,6 @@
 """
 Module 3 Demo — Navigation MCP Server (Streamable HTTP)
-Runs at http://localhost:8000/mcp
+Runs at http://127.0.0.1:8000/mcp
 
 Start:  python http_server.py
 """
@@ -102,5 +102,5 @@ def nearby_objects(sector: str, radius: float) -> str:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("Pathfinder Navigation server starting at http://localhost:8000/mcp")
+    print("Pathfinder Navigation server starting at http://127.0.0.1:8000/mcp")
     server.run(transport="streamable-http", stateless_http=True)

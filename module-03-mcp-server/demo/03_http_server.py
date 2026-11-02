@@ -9,7 +9,7 @@ import json
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-NAV_SERVER_URL = "http://localhost:8000/mcp"
+NAV_SERVER_URL = "http://127.0.0.1:8000/mcp"
 
 
 def log(tag: str, message: str):

@@ -152,12 +152,13 @@ python module-03-mcp-server/demo/demo.py
 uv run python module-03-mcp-server/demo/demo.py
 ```
 
-Menu. Parts 3 and 4 need `http_server.py` running in another terminal.
+Menu. Parts 3 and 4 need `http_server.py` running in another terminal. Parts 4 and 5 need `OPENAI_API_KEY`. Part 5 spawns the weather server itself.
 
 1. **List tools** — connect to the ship server, print the names
 2. **Ship server (stdio)** — discovery, then call each tool
 3. **Navigation server (HTTP)** — the same, over a URL
 4. **Multi-server agent** — one model, both servers
+5. **Weather agent** — chat with a local server that fetches live weather
 
 ## Exercises
 

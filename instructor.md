@@ -75,7 +75,7 @@
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-03-mcp-server/demo/demo.py` | Menu. 1 List tools on the ship server. 2 Explore that server over stdio. 3 Explore the navigation server over HTTP (`http_server.py` in another terminal). 4 One agent, both servers. |
+| `module-03-mcp-server/demo/demo.py` | Menu. 1 List tools on the ship server. 2 Explore that server over stdio. 3 Explore the navigation server over HTTP (`http_server.py` in another terminal). 4 One agent, both servers. 5 Chat with the local weather server. |
 
 **Exercises (chained — each builds on the previous):**
 

@@ -25,7 +25,7 @@ SYSTEM_PROMPT = (
 )
 
 LOCAL_SERVER = str(Path(__file__).parent / "local_server.py")
-HTTP_SERVER_URL = "http://localhost:8000/mcp"
+HTTP_SERVER_URL = "http://127.0.0.1:8000/mcp"
 
 
 def mcp_to_openai_tools(mcp_tools: list) -> list[dict]:

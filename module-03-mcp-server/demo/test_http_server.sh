@@ -2,7 +2,7 @@
 # Test the HTTP MCP server with curl
 # First start the server:  python http_server.py
 
-URL="http://localhost:8000/mcp"
+URL="http://127.0.0.1:8000/mcp"
 CT="-H Content-Type:application/json"
 ACCEPT="-H Accept:application/json,text/event-stream"
 

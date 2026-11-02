@@ -32,7 +32,7 @@ Already defined in `server.py`:
 
 ## What's new
 
-- `server.run(transport="streamable-http", stateless_http=True)` — serves over HTTP at `http://localhost:8000/mcp` (transport options go on `run()`, not the constructor)
+- `server.run(transport="streamable-http", stateless_http=True)` — serves over HTTP at `http://127.0.0.1:8000/mcp` (transport options go on `run()`, not the constructor)
 - The agent connects via `streamable_http_client` instead of `stdio_client` — it yields `(read, write)`, the same pair as stdio
 
 ## Run it

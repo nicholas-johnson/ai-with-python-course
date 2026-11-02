@@ -94,5 +94,5 @@ def run_analysis(sample_id: str, method: str) -> str:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("Science Lab server starting at http://localhost:8000/mcp")
+    print("Science Lab server starting at http://127.0.0.1:8000/mcp")
     server.run(transport="streamable-http", stateless_http=True)

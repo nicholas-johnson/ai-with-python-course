@@ -18,7 +18,7 @@ load_dotenv()
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 SHIP_SERVER_SCRIPT = str(Path(__file__).parent / "local_server.py")
-NAV_SERVER_URL = "http://localhost:8000/mcp"
+NAV_SERVER_URL = "http://127.0.0.1:8000/mcp"
 
 
 def log(tag: str, message: str):

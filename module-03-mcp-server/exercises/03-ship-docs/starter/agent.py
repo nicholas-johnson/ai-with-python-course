@@ -28,7 +28,7 @@ SYSTEM_PROMPT = (
 
 LOCAL_SERVER = str(Path(__file__).parent / "local_server.py")
 DOCS_SERVER = str(Path(__file__).parent / "server.py")
-HTTP_SERVER_URL = "http://localhost:8000/mcp"
+HTTP_SERVER_URL = "http://127.0.0.1:8000/mcp"
 
 
 async def run_agent(tool_router, openai_tools, resource_context):

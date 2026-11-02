@@ -40,7 +40,7 @@ export const slides = [
       icon: 'radio',
       points: [
         '**Local stdio** — the client **spawns** the server as a child process and pipes JSON-RPC over stdin/stdout. No port, no URL — the client starts and stops the server automatically. This is how **Cursor** and **Claude Desktop** work.',
-        '**Remote HTTP** — the server runs independently at a URL (e.g. `localhost:8000/mcp`). You start it yourself. For **shared team servers**, cloud deployment, cross-network access.',
+        '**Remote HTTP** — the server runs independently at a URL (e.g. `127.0.0.1:8000/mcp`). You start it yourself. For **shared team servers**, cloud deployment, cross-network access.',
         'Same JSON-RPC protocol, same tool schemas — different wire format.',
         'One-line change: `server.run()` vs `server.run(transport="streamable-http")`.',
       ],
