@@ -6,10 +6,15 @@ Split an answer into claims and check each one against retrieved context.
 
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
+
 from openai import OpenAI
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+
+DATA_DIR = Path(__file__).parent / "data"
 
 
 def extract_claims(client: OpenAI, answer: str) -> list[str]:
@@ -67,3 +72,46 @@ def score_faithfulness(client: OpenAI, answer: str, context: str) -> dict:
         "num_supported": n_ok,
         "faithfulness": (n_ok / n) if n else 1.0,
     }
+
+
+def load_cases(config: str) -> list[dict]:
+    return json.loads((DATA_DIR / "grounding_cases.json").read_text())[config]
+
+
+def make_scripted_client(script: list[str]):
+    """A stand-in for the model so this runs with no API key."""
+    from unittest.mock import MagicMock
+
+    queue = list(script)
+
+    def create(**kwargs):
+        response = MagicMock()
+        response.output_text = queue.pop(0)
+        return response
+
+    client = MagicMock()
+    client.responses.create.side_effect = create
+    return client
+
+
+if __name__ == "__main__":
+    print("Faithfulness — two configs, one question set, no API key\n")
+
+    for config in ("rag", "rag_rerank"):
+        cases = load_cases(config)
+        scored = [
+            (case, score_faithfulness(make_scripted_client(case["script"]), case["answer"], case["context"]))
+            for case in cases
+        ]
+
+        print(f"  {config}")
+        for case, result in scored:
+            print(
+                f"    {case['id']:18} faithfulness={result['faithfulness']:.2f}  "
+                f"{result['num_supported']}/{result['num_claims']} supported"
+            )
+            for claim in result["claims"]:
+                mark = "ok" if claim["supported"] else "!!"
+                print(f"                       [{mark}] {claim['claim']}")
+        average = sum(r["faithfulness"] for _, r in scored) / len(scored)
+        print(f"    average            faithfulness={average:.2f}  n={len(scored)}\n")

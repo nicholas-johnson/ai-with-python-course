@@ -29,6 +29,7 @@ class CircuitBreaker:
             elapsed = time.time() - self.last_failure_time
             if elapsed > self.recovery_time:
                 self.state = "half-open"
+                print("      cooldown elapsed — letting one request through to test")
             else:
                 remaining = self.recovery_time - elapsed
                 raise CircuitOpenError(f"circuit open, {remaining:.1f}s until the next attempt")
@@ -67,7 +68,7 @@ def demo_circuit_breaker():
     breaker = CircuitBreaker(failure_threshold=3, recovery_time=4.0)
     service = telemetry_service(recovers_at=time.time() + 6.0)
 
-    for i in range(1, 16):
+    for i in range(1, 12):
         time.sleep(0.8)
         before = breaker.state
         try:

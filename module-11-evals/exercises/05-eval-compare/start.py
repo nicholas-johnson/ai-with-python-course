@@ -116,9 +116,10 @@ def gate(scorecard: dict, thresholds: dict) -> dict:
 
 if __name__ == "__main__":
     data = json.loads((Path(__file__).parent / "data" / "config_runs.json").read_text())
+    runs = {name: run for name, run in data.items() if not name.startswith("_")}
     scorecards = [
         build_scorecard(name, run["retrieval"], run["judge"], run["faithfulness"])
-        for name, run in data.items()
+        for name, run in runs.items()
     ]
     print("Scorecards\n")
     if any(s is None for s in scorecards):

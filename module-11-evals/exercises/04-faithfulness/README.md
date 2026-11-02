@@ -2,34 +2,40 @@
 
 ## Recap
 
-An LLM-as-judge (Exercise 03) scores an answer against a **reference**. That misses a different failure: the answer agrees with the reference but **is not in the retrieved context** — or worse, the model invents a temperature that no log ever recorded.
+The judge in [exercise 03](../03-llm-judge/) scores an answer against a **reference**. That leaves a gap. An answer can agree with the reference and still contain something the pipeline never retrieved — the model knew it from pre-training, or simply made it up. Either way you have no evidence for it, and no way to show a user where it came from.
 
-**Faithfulness** asks: is every claim in the answer supported by the context you actually retrieved?
+**Faithfulness** asks a different question: is every claim in the answer supported by the context you actually retrieved? The reference answer plays no part.
 
 1. Split the answer into atomic claims.
-2. For each claim, ask a model whether the context supports it (`supported` / `unsupported`).
-3. `faithfulness = supported_claims / total_claims`.
+2. For each claim, ask the model whether the context supports it.
+3. Divide: `faithfulness = supported_claims / total_claims`.
 
 ```
 Answer:  "The warp core is at 94% efficiency. Core temperature is 9000K."
-Context: "Warp core operating at 94% efficiency. Plasma conduit 7-B fluctuation."
+Context: "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B."
 
 Claim 1 — 94% efficiency  → supported
 Claim 2 — 9000K           → unsupported
 faithfulness = 1/2 = 0.5
 ```
 
-This is the generation-side cousin of citation verification (Module 13). Here you score a **ratio**, not a list of citations, so it can sit on a scorecard next to recall and judge averages.
+This is the generation-side cousin of citation verification in Module 13. The difference is what you get back: a ratio rather than a list of citations, which is what lets it sit on a scorecard next to recall and the judge averages.
 
-Pytest mocks the client. No API key required to pass.
+One thing faithfulness does *not* tell you is whether the source was right. An answer that faithfully repeats a stale log scores 1.0. Grounding and correctness are separate properties, which is why [exercise 05](../05-eval-compare/) keeps both on the card.
+
+### The dataset
+
+The same five questions again, answered by both configs, each paired with the context that config actually retrieved. The averages feed the scorecard in exercise 05.
+
+Pytest mocks the client, and so does `start.py`, so no API key is needed.
 
 ## What you build
 
 | Function | What it does |
 |---|---|
-| `extract_claims(client, answer)` | One factual claim per line |
-| `check_support(client, claim, context)` | `"supported"` or `"unsupported"` |
-| `score_faithfulness(client, answer, context)` | Per-claim rows + ratio |
+| `extract_claims(client, answer)` | Split an answer into one factual claim per line |
+| `check_support(client, claim, context)` | Return `"supported"` or `"unsupported"` |
+| `score_faithfulness(client, answer, context)` | Per-claim rows plus the ratio |
 
 `score_faithfulness` returns:
 
@@ -45,21 +51,23 @@ Pytest mocks the client. No API key required to pass.
 }
 ```
 
-If there are **zero** claims, return `faithfulness` of `1.0` (nothing to hallucinate).
+An answer with zero claims scores `1.0`. There is nothing in it to hallucinate.
 
 ## Step-by-step
 
-### 1. `extract_claims`
+### 1. Implement `extract_claims`
 
-Prompt the model (`MODEL`) to list each claim on its own line, no bullets. Split on `\n` and drop blanks.
+Prompt the model to list each factual claim from the answer on its own line, with no numbering or bullets, then split the reply on newlines and drop any blank lines. Asking for one claim per line keeps the parsing trivial; asking for JSON here would work too but costs more tokens for no benefit.
 
-### 2. `check_support`
+### 2. Implement `check_support`
 
-Prompt for exactly `supported` or `unsupported`. Lowercase the reply. If it contains `unsupported`, treat it as unsupported (the word "supported" sits inside "unsupported"). Anything else → `unsupported`.
+Prompt the model with the claim and the context and ask for exactly one of two words back. Lowercase the reply before you inspect it.
 
-### 3. `score_faithfulness`
+Check for `"unsupported"` **before** you check for `"supported"`, because the second word is a substring of the first — a naive `"supported" in verdict` matches both and silently marks every hallucination as grounded. Treat anything you do not recognise as unsupported, so an unparseable reply fails safe rather than inflating the score.
 
-`extract_claims`, then `check_support` each claim against the **full** context (one string, not a list of passages). Count, divide, return the dict.
+### 3. Implement `score_faithfulness`
+
+Call `extract_claims`, then `check_support` on each claim against the **full** context string. Build the per-claim rows, count the supported ones, and divide. Remember the zero-claim case returns `1.0` rather than dividing by zero.
 
 ## Try it
 
@@ -74,21 +82,34 @@ cd module-11-evals/exercises/04-faithfulness
 uv run python start.py
 ```
 
-Runs three cases from `data/grounding_cases.json` with a mocked client.
+This scores both configs and prints every claim with its verdict. Two cases are worth reading closely:
 
-## Running Tests
+- On the crew radiation question, plain `rag` retrieved nothing relevant and the generator filled the gap with invented detail. Faithfulness drops to 0.0, and it is the only metric in this module that catches it as a *grounding* failure rather than a vague quality dip.
+- On the TRAPPIST water question, `rag_rerank` says the radar probe "has confirmed" the subsurface water. The log says a probe is being deployed *for* confirmation. The claim is plausible, close to the reference, and would likely slip past the judge — but it is not in the context, so faithfulness marks it.
+
+## Tests
 
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pytest module-11-evals/exercises/04-faithfulness/test_start.py -v
+cd module-11-evals/exercises/04-faithfulness
+pytest test_start.py -v
 
 # Option B - uv (no activation needed):
-uv run --extra dev pytest module-11-evals/exercises/04-faithfulness/test_start.py -v
+cd module-11-evals/exercises/04-faithfulness
+uv run --extra dev pytest test_start.py -v
 ```
 
-## Stretch Goals
+The tests check:
 
-- Check each claim against a *list* of passages and record which passage supported it (citation verification).
-- Average several judge votes per claim to reduce flip-flops.
-- Add a "partially supported" label and decide how it counts in the ratio.
+- `extract_claims` returns a list of strings and filters out blank lines
+- `check_support` returns only the two permitted labels
+- `score_faithfulness` computes the ratio, counts supported claims, and keeps the claim text
+- An answer with no claims scores `1.0`
+- No real OpenAI calls — every test uses a mocked client
+
+## Stretch goals
+
+- Check each claim against a *list* of passages instead of one joined string, and record which passage supported it. That turns the score into citation verification.
+- Take several verdicts per claim and use the majority, so a borderline claim does not flip between runs.
+- Add a "partially supported" label and decide how it should count. Half a point is the obvious answer; think about whether it is the right one for a safety-critical domain.

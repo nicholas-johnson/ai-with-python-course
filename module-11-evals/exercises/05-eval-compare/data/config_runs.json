@@ -1,32 +1,33 @@
 {
+  "_comment": "Printed output of the exercise 02, 03 and 04 solutions, to two decimal places. Run those exercises and you will produce these numbers yourself.",
   "rag": {
     "retrieval": {
       "avg_recall": 0.50,
-      "avg_precision": 0.33,
-      "avg_mrr": 0.40
+      "avg_precision": 0.27,
+      "avg_mrr": 0.52
     },
     "judge": {
-      "avg_correctness": 3.2,
-      "avg_completeness": 2.8,
-      "avg_relevance": 3.5
+      "avg_correctness": 3.8,
+      "avg_completeness": 2.4,
+      "avg_relevance": 4.4
     },
     "faithfulness": {
-      "avg_faithfulness": 0.62
+      "avg_faithfulness": 0.60
     }
   },
   "rag_rerank": {
     "retrieval": {
       "avg_recall": 0.80,
-      "avg_precision": 0.60,
+      "avg_precision": 0.47,
       "avg_mrr": 0.85
     },
     "judge": {
-      "avg_correctness": 4.1,
-      "avg_completeness": 3.9,
-      "avg_relevance": 4.4
+      "avg_correctness": 4.4,
+      "avg_completeness": 3.8,
+      "avg_relevance": 4.6
     },
     "faithfulness": {
-      "avg_faithfulness": 0.88
+      "avg_faithfulness": 0.80
     }
   }
 }

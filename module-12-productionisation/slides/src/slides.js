@@ -37,8 +37,8 @@ export const slides = [
       title: 'Why tracing matters',
       icon: 'search',
       points: [
-        'User reports: "the AI gave a wrong answer at 14:32." Which request? What did the model see?',
-        'Every request gets a **trace ID** — a unique identifier that propagates through every step.',
+        'A crew member reports a wrong answer this morning. Which request was it, and what did the model see?',
+        'Every request gets a **trace ID** — one identifier carried through every step it touches.',
         'Each step is a **span** with timing, status, and metadata.',
         'Log spans as JSON. In production, send to **Datadog**, **Jaeger**, or **OpenTelemetry**.',
       ],
@@ -94,7 +94,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Reliability patterns',
-      subtitle: 'Expect failure. Handle it gracefully.',
+      subtitle: 'Dependencies fail. Decide what happens next.',
       icon: 'shield',
     },
   },
@@ -106,9 +106,9 @@ export const slides = [
       points: [
         '**Network blips** — transient connection failures to LLM APIs.',
         '**Rate limits** — API returns 429 when you hit the quota.',
-        '**Timeouts** — model takes too long, your server thread is blocked.',
-        '**Cascading failures** — one failing service brings down the whole system.',
-        'The answer: **retries**, **timeouts**, **circuit breakers**, **fallbacks**.',
+        '**Timeouts** — the model takes too long and your server thread is still waiting.',
+        '**Cascading failures** — one slow dependency ties up the resources every other request needs.',
+        'Four answers: **retries**, **timeouts**, **circuit breakers**, **fallbacks**.',
       ],
     },
   },
@@ -127,7 +127,7 @@ export const slides = [
             await asyncio.sleep(delay)`,
       highlights: [
         '**Exponential backoff**: 1s → 2s → 4s — gives the service time to recover.',
-        '**Jitter** (random.uniform) prevents thundering herd when many clients retry simultaneously.',
+        '**Jitter** (random.uniform) spreads out clients that all failed at the same moment.',
         'Only retry on **transient errors** (5xx, timeout, rate limit) — never on 4xx.',
       ],
     },
@@ -161,9 +161,9 @@ export const slides = [
                 self.state = "open"
             raise`,
       highlights: [
-        '**Closed** = normal operation. **Open** = failing fast, no requests sent.',
+        '**Closed** = normal operation. **Open** = requests rejected locally, none sent.',
         'After recovery_time, enters **half-open** — one test request decides.',
-        'Prevents wasting resources hammering a broken service.',
+        'A dead dependency stops occupying connections that healthy requests need.',
       ],
     },
   },
@@ -174,19 +174,19 @@ export const slides = [
       left: {
         label: 'No protection',
         items: [
-          'API timeout → server thread blocked forever',
-          'Rate limit → retry immediately → get rate limited again',
-          'Service down → every request fails slowly',
-          'Users see errors and spinners',
+          'No timeout → the thread waits on a call that never returns',
+          'Rate limit → immediate retry → rate limited again',
+          'Service down → every request waits its full timeout',
+          'The crew sees errors and spinners',
         ],
       },
       right: {
         label: 'With patterns',
         items: [
           'Timeout fires → fallback response in 2 seconds',
-          'Backoff + jitter → automatic recovery',
-          'Circuit breaker → fail fast, try fallback model',
-          'Users get answers (maybe degraded) instead of errors',
+          'Backoff + jitter → recovers without a coordinated retry spike',
+          'Circuit breaker → reject locally, try the fallback model',
+          'The crew gets an answer, sometimes a degraded one',
         ],
       },
     },
@@ -197,9 +197,9 @@ export const slides = [
       title: 'Fallback chains',
       icon: 'refresh-cw',
       points: [
-        'When the primary model fails, fall back — do not just return an error.',
-        'Fallback chain: **primary model** → **cheaper model** → **cached response** → **graceful error**.',
-        'The user experience degrades gradually, never crashes.',
+        'When the primary model fails, fall through the chain rather than returning an error.',
+        'Fallback chain: **primary model** → **cheaper model** → **cached response** → **plain apology**.',
+        'Each rung is a worse answer than the one above it, and all of them beat a 500.',
         '`asyncio.wait_for(call, timeout=30)` — every external call gets a timeout.',
       ],
     },
@@ -222,7 +222,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Cost controls',
-      subtitle: 'LLM tokens cost money. Budget before you spend.',
+      subtitle: 'An agent loop has no natural stopping point',
       icon: 'list',
     },
   },
