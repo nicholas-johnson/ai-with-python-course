@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'AI Python Course',
+      title: 'Agentic AI with Python',
       subtitle: 'Nicholas Johnson',
       icon: 'sparkles',
     },
@@ -85,50 +85,50 @@ export const slides = [
       ],
     },
   },
-  {
-    type: 'cards',
-    content: {
-      title: 'Modern model architectures',
-      cards: [
-        {
-          heading: 'Transformers (Attention)',
-          points: [
-            '**"Attention Is All You Need"** (2017) — self-attention over full sequences.',
-            'Powers GPT, Claude, Gemini, LLaMA — all large language models.',
-            'Scales to billions of parameters; parallelises well on GPUs.',
-            'Variants: encoder-only (BERT), decoder-only (GPT), encoder-decoder (T5).',
-          ],
-        },
-        {
-          heading: 'Diffusion Models',
-          points: [
-            'Learn to **denoise** data — reverse a gradual corruption process.',
-            'DALL·E, Stable Diffusion, Midjourney — state of the art in image generation.',
-            'Also applied to video (Sora), audio, and molecular design.',
-            'Slower inference (many steps), but produces extremely high-quality outputs.',
-          ],
-        },
-        {
-          heading: 'State-Space Models',
-          points: [
-            '**Mamba / S4** — process sequences in linear time instead of quadratic.',
-            'Map continuous-time dynamics to discrete steps; efficient on long contexts.',
-            'Emerging alternative to attention for very long sequences (100k+ tokens).',
-            'Hybrid architectures (Jamba) mix SSM layers with attention layers.',
-          ],
-        },
-        {
-          heading: 'GANs & VAEs',
-          points: [
-            '**GANs**: generator vs discriminator — adversarial training loop.',
-            '**VAEs**: encode to latent space, decode back — probabilistic generation.',
-            'Dominated image synthesis before diffusion models took over.',
-            'Still used in style transfer, super-resolution, and latent-space editing.',
-          ],
-        },
-      ],
-    },
-  },
+  // {
+  //   type: 'cards',
+  //   content: {
+  //     title: 'Modern model architectures',
+  //     cards: [
+  //       {
+  //         heading: 'Transformers (Attention)',
+  //         points: [
+  //           '**"Attention Is All You Need"** (2017) — self-attention over full sequences.',
+  //           'Powers GPT, Claude, Gemini, LLaMA — all large language models.',
+  //           'Scales to billions of parameters; parallelises well on GPUs.',
+  //           'Variants: encoder-only (BERT), decoder-only (GPT), encoder-decoder (T5).',
+  //         ],
+  //       },
+  //       {
+  //         heading: 'Diffusion Models',
+  //         points: [
+  //           'Learn to **denoise** data — reverse a gradual corruption process.',
+  //           'DALL·E, Stable Diffusion, Midjourney — state of the art in image generation.',
+  //           'Also applied to video (Sora), audio, and molecular design.',
+  //           'Slower inference (many steps), but produces extremely high-quality outputs.',
+  //         ],
+  //       },
+  //       {
+  //         heading: 'State-Space Models',
+  //         points: [
+  //           '**Mamba / S4** — process sequences in linear time instead of quadratic.',
+  //           'Map continuous-time dynamics to discrete steps; efficient on long contexts.',
+  //           'Emerging alternative to attention for very long sequences (100k+ tokens).',
+  //           'Hybrid architectures (Jamba) mix SSM layers with attention layers.',
+  //         ],
+  //       },
+  //       {
+  //         heading: 'GANs & VAEs',
+  //         points: [
+  //           '**GANs**: generator vs discriminator — adversarial training loop.',
+  //           '**VAEs**: encode to latent space, decode back — probabilistic generation.',
+  //           'Dominated image synthesis before diffusion models took over.',
+  //           'Still used in style transfer, super-resolution, and latent-space editing.',
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // },
   {
     type: 'image',
     content: {
@@ -144,7 +144,7 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Call the model with OpenAI\'s **Responses API** — and recognise the older **Chat Completions API**.',
+        "Call the model with OpenAI's **Responses API** — and recognise the older **Chat Completions API**.",
         'Build a **CLI chat loop** with conversation history.',
         '**Stream responses** token by token for real-time output.',
         'Apply **prompt engineering** patterns: personas, structured outputs, few-shot examples.',
@@ -215,29 +215,17 @@ print(response.output_text)`,
     },
   },
   {
-    type: 'comparison',
+    type: 'standard',
     content: {
       title: 'Why Responses is better',
-      left: {
-        label: 'Responses API (use this)',
-        items: [
-          'One reply field: `response.output_text`',
-          '`instructions` stays separate from the conversation',
-          'Optional server-side state: `previous_response_id`',
-          'Built-in tools: web search, file search, code interpreter',
-          'New features ship here first',
-        ],
-      },
-      right: {
-        label: 'Chat Completions (older)',
-        items: [
-          'Reply: `completion.choices[0].message.content`',
-          'The system prompt is just another message',
-          'You always resend the full message list',
-          'No built-in tools',
-          'Still supported, and still everywhere',
-        ],
-      },
+      icon: 'sparkles',
+      points: [
+        'The reply is a plain string: `response.output_text`.',
+        '`instructions` keeps the system prompt separate from the conversation.',
+        'Server-side state via `previous_response_id` — chain calls without resending history.',
+        'Built-in tools: **web search**, **file search**, and **code interpreter**.',
+        'New features ship on the Responses API first.',
+      ],
     },
   },
   // ---- Section: The chat loop ----
@@ -476,7 +464,7 @@ async def chat(request: ChatRequest):
       ],
     },
   },
-  
+
   // ---- Demo: Prompt engineering ----
   {
     type: 'title',
