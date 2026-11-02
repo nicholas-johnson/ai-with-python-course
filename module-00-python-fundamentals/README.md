@@ -221,11 +221,12 @@ async with httpx.AsyncClient(transport=transport, base_url="http://test") as cli
 
 ---
 
-## Field rules
+## Summary
 
+- **Pick the right collection.** Lists for order, dicts for lookup, sets for membership, tuples for fixed records.
 - **Use dataclasses for domain objects.** Dicts are fine for JSON; dataclasses are better for code.
 - **Async for I/O, sync for computation.** Agent loops are mostly I/O — async is the default.
-- **Log, do not print.** `logging.info` > `print()` in anything beyond a throwaway demo.
+- **Log, and test the HTTP layer.** `logging` over `print`. FastAPI plus httpx exercises the API without a live server.
 
 ---
 

@@ -166,12 +166,12 @@ When the graph contains no relevant entities, the answer honestly says so with l
 
 ---
 
-## Field rules
+## Summary
 
-- **Define schemas before extraction.** Pydantic models constrain output to usable structure.
-- **Filter by confidence.** Low-confidence facts pollute the graph and mislead downstream QA.
-- **Graphs complement vectors.** Use vector search for similarity; use graph traversal for connections.
-- **Always cite provenance.** Every fact should trace back to its source document.
+- **Schema is the contract.** Pydantic structured outputs are what you can validate, store, and query.
+- **Every fact needs provenance and a score.** A fact without a source is an unsupported claim. Confidence decides what you keep.
+- **Entities and edges make a graph.** Multi-hop questions walk relationships, not just similar text.
+- **Grounded QA cites the source.** Answer from stored facts, and show where each one came from.
 
 ---
 

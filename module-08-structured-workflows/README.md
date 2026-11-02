@@ -71,12 +71,12 @@ The planner generates the full sequence. The executor runs each step, collecting
 
 ---
 
-## Field rules
+## Summary
 
-- **Cap your loops.** ReAct max_steps and plan-and-execute max_replans prevent runaway agents.
-- **Log the trace.** Thoughts + actions + observations are your best debugging tool.
-- **Choose the right pattern.** ReAct for exploration, plan-and-execute for structured tasks.
-- **Show the plan to the user.** Transparency builds trust — let users see what the agent intends to do.
+- **ReAct is thought, action, observation.** The agent reasons, calls a tool, and reads the result back into context.
+- **Plan-and-execute separates planning from doing.** Generate a plan, run the steps, and re-plan when one fails. Show that plan to the user.
+- **Cap the loops and log the trace.** `max_steps` and `max_replans` stop a runaway agent. Every step belongs in the log.
+- **Pick the pattern for the task.** ReAct to explore. Plan-and-execute when the task already has a shape.
 
 ---
 

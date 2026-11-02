@@ -132,11 +132,12 @@ The client validates arguments locally before sending them over the wire — thi
 
 ---
 
-## Field rules
+## Summary
 
-- **Let the schema speak.** Type hints generate JSON Schema — keep functions simple and well-typed.
-- **Handle errors gracefully.** Return JSON errors, never crash. The agent needs to adapt.
-- **Sanitise all inputs.** Filenames, URLs, queries — never trust user-controlled values.
+- **MCP is discovery plus a schema.** The server advertises tools. The agent validates arguments and calls them.
+- **Schema is documentation.** If the schema is wrong, the agent will call it wrong. Type hints generate the JSON Schema.
+- **stdio locally, HTTP remotely.** A local process uses stdio. A remote server uses Streamable HTTP.
+- **Fail soft, and sanitise inputs.** Return JSON errors, never crash. Never trust filenames, URLs, or queries.
 
 ---
 

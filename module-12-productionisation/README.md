@@ -308,13 +308,12 @@ Check each dependency you rely on — database, vector store, LLM API reachabili
 
 ---
 
-## Field rules
+## Summary
 
-- **Trace every request.** Generating an ID costs nothing, and it is the only thing that lets you reconstruct a single request afterwards without correlating timestamps by hand.
-- **Retry with backoff and jitter.** Fixed-interval retries from many clients arrive together and re-create the load that caused the failure.
-- **Check the budget before the call, not after.** A token count you read at the end of the day tells you what you spent, not what to refuse.
-- **Never hard-code secrets.** Environment variables locally, a secrets manager in production, and `.env` in `.gitignore`.
-- **Degrade rather than fail.** A cheaper model or a cached answer is still an answer. The fallback chain is what makes that the default instead of a 500.
+- **Trace every request.** A trace ID costs nothing, and it is how you reconstruct one request afterwards.
+- **Retry with backoff, then fall back.** Jitter stops a thundering herd. A cheaper model or a cached answer is still an answer.
+- **Budget tokens before you spend them.** Track per-session and per-day. Check the cap before the call, not after the bill.
+- **Config and secrets stay out of the code.** Environment variables locally, a secrets manager in production, and a health check on the container.
 
 ---
 

@@ -116,12 +116,12 @@ Replace the oldest N turns with a single system message containing the summary. 
 
 ---
 
-## Field rules
+## Summary
 
-- **Cap session memory.** Unbounded history overflows the context window and inflates costs.
-- **Decay long-term memory.** Without decay, stale facts pollute retrieval.
-- **Honour forget requests immediately.** Privacy is not optional.
-- **Summarise before you truncate.** A summary beats silently dropping context.
+- **Separate session from profile.** The buffer clears with the conversation. Long-term memory persists across visits, and it needs a cap.
+- **Summarise before you truncate.** A summary beats silently dropping context when the buffer overflows.
+- **Decay stale facts, and forget on request.** Old facts should fade. A forget request stops serving immediately.
+- **Memory can be MCP tools.** Any agent can remember, recall, and forget through the server.
 
 ---
 

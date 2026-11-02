@@ -163,7 +163,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -171,21 +171,26 @@ export const slides = [
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 8',
+      title: 'Summary',
       rules: [
         {
-          rule: 'Cap your loops',
-          example: 'ReAct max_steps=10, plan-and-execute max_replans=2. Runaway agents waste tokens.',
+          rule: 'ReAct is thought, action, observation',
+          example: 'The agent reasons, calls a tool, and reads the result back into context.',
+          icon: 'refresh-cw',
+        },
+        {
+          rule: 'Plan-and-execute separates planning from doing',
+          example: 'Generate a plan, run the steps, and re-plan when one fails.',
+          icon: 'list',
+        },
+        {
+          rule: 'Cap the loops and log the trace',
+          example: 'ReAct max_steps and plan-and-execute max_replans. Every step belongs in the log.',
           icon: 'shield',
         },
         {
-          rule: 'Log the trace',
-          example: 'Every Thought/Action/Observation or plan step — your best debugging tool.',
-          icon: 'search',
-        },
-        {
-          rule: 'Choose the right pattern',
-          example: 'ReAct for exploration, plan-and-execute for structured multi-step tasks.',
+          rule: 'Pick the pattern for the task',
+          example: 'ReAct to explore. Plan-and-execute when the task already has a shape.',
           icon: 'git-branch',
         },
       ],

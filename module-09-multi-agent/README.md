@@ -183,12 +183,12 @@ Always log dissent — if an agent disagrees with the consensus, that disagreeme
 
 ---
 
-## Field rules
+## Summary
 
-- **Start with one agent.** Only add more when a single agent demonstrably cannot handle the task.
-- **Define roles clearly.** Overlapping responsibilities cause duplicate work and conflicting answers.
-- **Restrict tool access per role.** The critic should not have write access.
-- **Log dissent.** Minority opinions may contain early warnings.
+- **One agent until you can justify another.** If one prompt can do it, one agent should do it.
+- **Roles stay narrow.** Router, specialist, critic, supervisor. Overlap means duplicate work.
+- **Pick one coordination pattern.** Supervisor, swarm, debate, or consensus — and stick to it.
+- **Scope tools and log the trace.** The critic should not have write access. Keep the whole conversation, including dissent.
 
 ---
 

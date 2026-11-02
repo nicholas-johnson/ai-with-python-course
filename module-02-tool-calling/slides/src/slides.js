@@ -268,7 +268,7 @@ def check_inventory(product: str) -> dict:
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'lightbulb',
     },
   },
@@ -276,16 +276,21 @@ def check_inventory(product: str) -> dict:
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 2',
+      title: 'Summary',
       rules: [
         {
-          rule: 'Always cap loop iterations',
+          rule: 'Messages drive the loop',
+          example: 'system, user, assistant, and tool results are the whole conversation.',
+          icon: 'message-square',
+        },
+        {
+          rule: 'Cap the loop',
           example: 'max_steps prevents runaway agents and surprise bills.',
           icon: 'shield',
         },
         {
           rule: 'Validate before you execute',
-          example: 'Check allowlist + schema before calling any tool.',
+          example: 'Check allowlist and schema before calling any tool.',
           icon: 'check-square',
         },
         {

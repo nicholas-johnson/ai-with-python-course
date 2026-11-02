@@ -188,7 +188,7 @@ server.run()  # stdio transport`,
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -196,22 +196,27 @@ server.run()  # stdio transport`,
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 3',
+      title: 'Summary',
       rules: [
+        {
+          rule: 'MCP is discovery plus a schema',
+          example: 'The server advertises tools. The agent validates arguments and calls them.',
+          icon: 'globe',
+        },
         {
           rule: 'Schema is documentation',
           example: 'If the schema is wrong, the agent will call it wrong.',
           icon: 'file-text',
         },
         {
-          rule: 'Handle errors gracefully',
-          example: 'Return JSON errors, never crash. The agent needs to adapt.',
-          icon: 'shield',
+          rule: 'stdio locally, HTTP remotely',
+          example: 'A local process uses stdio. A remote server uses Streamable HTTP.',
+          icon: 'server',
         },
         {
-          rule: 'Sanitise all inputs',
-          example: 'Filenames, URLs, queries — never trust user-controlled values.',
-          icon: 'lock',
+          rule: 'Fail soft, and sanitise inputs',
+          example: 'Return JSON errors, never crash. Never trust filenames, URLs, or queries.',
+          icon: 'shield',
         },
       ],
     },

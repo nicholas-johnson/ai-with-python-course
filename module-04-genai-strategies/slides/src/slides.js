@@ -239,7 +239,7 @@ print(transcript.text)  # "Hello, this is a voice memo about..."`,
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -247,16 +247,26 @@ print(transcript.text)  # "Hello, this is a voice memo about..."`,
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 4',
+      title: 'Summary',
       rules: [
+        {
+          rule: 'Stream the chat from FastAPI',
+          example: 'SSE delivers tokens as they arrive. An MCP server supplies the tools.',
+          icon: 'zap',
+        },
         {
           rule: 'Count tokens before you send',
           example: 'Surprise truncation is worse than deliberate trimming.',
           icon: 'calculator',
         },
         {
+          rule: 'Images and audio are inputs too',
+          example: 'Vision and speech-to-text sit beside the text chat.',
+          icon: 'image',
+        },
+        {
           rule: 'Chain guardrails, never skip them',
-          example: 'Schema → filter → confidence. Fail fast, log always.',
+          example: 'Schema, then content filter, then confidence. Fail fast, log always.',
           icon: 'shield',
         },
       ],

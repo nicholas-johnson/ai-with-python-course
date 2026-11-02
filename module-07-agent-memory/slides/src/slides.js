@@ -231,7 +231,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -239,22 +239,27 @@ export const slides = [
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 7',
+      title: 'Summary',
       rules: [
         {
           rule: 'Separate session from profile',
-          example: 'Session clears on logout; profile persists across visits.',
+          example: 'The buffer clears with the conversation. Long-term memory persists across visits.',
           icon: 'database',
         },
         {
           rule: 'Summarise before you truncate',
-          example: 'A summary beats silently dropping context.',
+          example: 'A summary beats silently dropping context when the buffer overflows.',
           icon: 'file-minus',
         },
         {
-          rule: 'Honour forget requests immediately',
-          example: 'Privacy is not optional — flag and stop serving.',
+          rule: 'Decay stale facts, and forget on request',
+          example: 'Old facts should fade. A forget request stops serving immediately.',
           icon: 'eye-off',
+        },
+        {
+          rule: 'Memory can be MCP tools',
+          example: 'Any agent can remember, recall, and forget through the server.',
+          icon: 'plug',
         },
       ],
     },

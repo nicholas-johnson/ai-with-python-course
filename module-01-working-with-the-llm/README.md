@@ -160,8 +160,10 @@ The key insight is that prompts are **instructions, not wishes**. Vague prompts 
 
 ---
 
-## Field rules
+## Summary
 
+- **Two ways to call the model.** Responses is the API you write. Chat Completions is what older code still uses.
+- **A chat loop keeps the history.** Each turn appends the user message and the assistant reply.
 - **Stream by default.** Waiting 5 seconds for a response feels broken.
 - **Prompt with intent.** Vague instructions get vague results. Be explicit about format, scope, and persona.
 

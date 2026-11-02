@@ -101,13 +101,12 @@ The capstones in `extras/` can reuse this as a release check, not a slide.
 
 ---
 
-## Field rules
+## Summary
 
-- **Keep the reference and the behaviour apart.** A fixture that scripts what the agent does cannot catch the agent changing. Freeze the outcome you accept; let the build under test supply the rest.
-- **Cheap checks often, token checks on a trigger.** Exact-match tool calls and retrieval metrics belong in pytest on every commit. The judged pass and faithfulness cost tokens — run them on a schedule or on PR labels, not on every save.
-- **Label a small set well.** Twenty queries with real relevant doc IDs beat two hundred guessed ones.
-- **Never trust a single number.** Look at mismatches and unsupported claims, not only the average.
-- **Gate on a floor, compare on a delta.** "Did we get worse?" is a different question from "which config wins?"
+- **Golden tests freeze the outcome.** The fixture does not script the agent. Exact-match the tool calls; judge the prose. Cheap checks on every commit; judged passes when prompts or retrieval change.
+- **Retrieval has numbers.** recall@k, precision@k, and MRR, on a small set you labelled properly.
+- **Judge the answer, then check the claims.** Correctness, completeness, and relevance — then faithfulness against the retrieved context. Read the mismatches, not only the average.
+- **Compare on a delta, gate on a floor.** “Did we get better?” is a different question from “is this shippable?”
 
 ---
 

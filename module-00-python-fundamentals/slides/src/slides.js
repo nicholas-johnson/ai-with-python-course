@@ -384,7 +384,7 @@ async def list_projects(status: str | None = None):
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -392,8 +392,13 @@ async def list_projects(status: str | None = None):
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 0',
+      title: 'Summary',
       rules: [
+        {
+          rule: 'Pick the right collection',
+          example: 'Lists for order, dicts for lookup, sets for membership, tuples for fixed records.',
+          icon: 'database',
+        },
         {
           rule: 'Use dataclasses for domain objects',
           example: 'Dicts are fine for JSON; dataclasses are better for code.',
@@ -405,8 +410,8 @@ async def list_projects(status: str | None = None):
           icon: 'zap',
         },
         {
-          rule: 'Log, do not print',
-          example: 'logging.info > print() in anything beyond a demo.',
+          rule: 'Log, and test the HTTP layer',
+          example: 'logging over print. FastAPI plus httpx exercises the API without a live server.',
           icon: 'clipboard-list',
         },
       ],

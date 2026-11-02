@@ -447,12 +447,12 @@ Cost: Billing budgets, quotas`,
     },
   },
 
-  // --- Field rules ---
+  // --- Summary ---
 
   {
     type: 'rules',
     content: {
-      title: 'Production field rules',
+      title: 'Summary',
       rules: [
         {
           rule: 'Trace every request',
@@ -460,26 +460,19 @@ Cost: Billing budgets, quotas`,
           icon: 'search',
         },
         {
-          rule: 'Retry with backoff and jitter',
-          example:
-            'Flat retries cause thundering herds. Exponential backoff with jitter prevents them.',
+          rule: 'Retry with backoff, then fall back',
+          example: 'Jitter stops a thundering herd. A cheaper model or a cache is still an answer.',
           icon: 'refresh-cw',
         },
         {
           rule: 'Budget tokens before you spend them',
-          example:
-            'Track per-session and per-day. A runaway agent produces a surprising bill.',
+          example: 'Track per-session and per-day. Check the cap before the call, not after the bill.',
           icon: 'list',
         },
         {
-          rule: 'Never hard-code secrets',
-          example: 'Environment variables or a secrets manager. Nothing else.',
+          rule: 'Config and secrets stay out of the code',
+          example: 'Environment variables or a secrets manager. A health check for the container.',
           icon: 'shield',
-        },
-        {
-          rule: 'Demo failures, not just successes',
-          example: 'Graceful degradation is the most impressive production feature.',
-          icon: 'cpu',
         },
       ],
     },

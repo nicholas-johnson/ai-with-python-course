@@ -121,10 +121,12 @@ def run_guardrails(response, schema, blocked_terms, min_confidence):
 
 ---
 
-## Field rules
+## Summary
 
+- **Stream the chat from FastAPI.** SSE delivers tokens as they arrive. An MCP server supplies the tools.
 - **Count tokens before you send.** Surprise truncation is worse than deliberate trimming.
-- **Chain guardrails, never skip them.** Schema → filter → confidence. Fail fast, log always.
+- **Images and audio are inputs too.** Vision and speech-to-text sit beside the text chat.
+- **Chain guardrails, never skip them.** Schema, then content filter, then confidence. Fail fast, log always.
 
 ---
 

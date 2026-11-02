@@ -239,13 +239,12 @@ The recommendation: **know the pattern first, then use the framework**. You can 
 
 ---
 
-## Field rules
+## Summary
 
-- **Know the pattern, then pick the tool.** LangChain is faster only if you know what it does underneath.
-- **Use LCEL for standard pipelines.** Prompt → model → parser is one line.
-- **Ask for structure with a schema, not a sentence.** `with_structured_output` beats "respond with ONLY JSON".
-- **Inspect `result["messages"]` during development** (or turn on LangSmith tracing). The trace shows every tool call and decision.
-- **Know when to eject.** If the framework fights you, go back to plain Python.
+- **LCEL is prompt, model, parser.** Structured output comes from a schema (`with_structured_output`), not a plea for JSON.
+- **Agents and RAG are the same patterns.** `create_agent` runs the tool loop. A retriever is the RAG chain, or a tool the agent calls.
+- **Know the pattern, then pick the tool.** LangChain is faster for chains, tool agents, and RAG — if you know what it does underneath.
+- **Read the trace, and leave when it fights you.** `result["messages"]` (or LangSmith) shows every call. If the framework gets in the way, go back to plain Python.
 
 ---
 

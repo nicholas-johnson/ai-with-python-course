@@ -156,11 +156,12 @@ For regression testing, **mock the LLM** with scripted responses and check that 
 
 ---
 
-## Field rules
+## Summary
 
-- **Always cap loop iterations.** `max_steps` prevents runaway agents and surprise bills.
+- **Messages drive the loop.** `system`, `user`, `assistant`, and tool results are the whole conversation.
+- **Cap the loop.** `max_steps` prevents runaway agents and surprise bills.
 - **Validate before you execute.** Check the allowlist and schema before calling any tool handler.
-- **Use golden tests for regression.** Real API calls for development, mocks for CI.
+- **Log every tool call.** An audit trail is how you debug a misbehaving agent.
 
 ---
 

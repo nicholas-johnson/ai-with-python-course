@@ -332,22 +332,27 @@ def route(query, client):
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 9',
+      title: 'Summary',
       rules: [
         {
-          rule: 'Justify every agent',
+          rule: 'One agent until you can justify another',
           example: 'If one prompt can do it, one agent should do it.',
           icon: 'scale',
         },
         {
-          rule: 'Scope tools per agent',
-          example: 'The critic should not delete production data.',
-          icon: 'lock',
+          rule: 'Roles stay narrow',
+          example: 'Router, specialist, critic, supervisor. Overlap means duplicate work.',
+          icon: 'users',
         },
         {
-          rule: 'Log the full conversation trace',
-          example: 'When multi-agent goes wrong, you need the whole picture.',
-          icon: 'clipboard-list',
+          rule: 'Pick one coordination pattern',
+          example: 'Supervisor, swarm, debate, or consensus — and stick to it.',
+          icon: 'git-branch',
+        },
+        {
+          rule: 'Scope tools and log the trace',
+          example: 'The critic should not delete production data. Keep the whole conversation.',
+          icon: 'lock',
         },
       ],
     },

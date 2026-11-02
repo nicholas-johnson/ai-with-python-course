@@ -140,12 +140,12 @@ The `[Source N]` format lets you trace every claim back to a chunk. Post-process
 
 ---
 
-## Field rules
+## Summary
 
-- **Chunk for retrieval, not for reading.** 300-500 tokens per chunk is the sweet spot.
-- **Always carry metadata.** Source, index, and timestamp make citations possible.
-- **Same model for docs and queries.** Mismatched embeddings produce garbage similarity scores.
-- **Always ground with citations.** An answer without a source is just a hallucination with confidence.
+- **Chunk for retrieval, not for reading.** Smaller chunks with overlap beat whole-page dumps. Carry source metadata so a citation is possible.
+- **Same model for docs and queries.** Embed both sides, store the vectors, and search. Mismatched models score garbage.
+- **Ground every answer.** An answer without a source is just a hallucination with confidence.
+- **The pipeline can be tools.** Wrap ingest and search as MCP tools any agent can call.
 
 ---
 

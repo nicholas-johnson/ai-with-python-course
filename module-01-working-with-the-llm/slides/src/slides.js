@@ -480,7 +480,7 @@ async def chat(request: ChatRequest):
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -488,8 +488,18 @@ async def chat(request: ChatRequest):
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 1',
+      title: 'Summary',
       rules: [
+        {
+          rule: 'Two ways to call the model',
+          example: 'Responses is the API you write. Chat Completions is what older code still uses.',
+          icon: 'message-square',
+        },
+        {
+          rule: 'A chat loop keeps the history',
+          example: 'Each turn appends the user message and the assistant reply.',
+          icon: 'refresh-cw',
+        },
         {
           rule: 'Stream by default',
           example: 'Waiting 5 seconds for a response feels broken.',

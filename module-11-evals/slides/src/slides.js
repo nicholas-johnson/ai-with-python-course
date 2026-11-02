@@ -275,27 +275,27 @@ gate(scorecard, {"avg_recall": 0.6, "overall": 0.55})
   {
     type: 'rules',
     content: {
-      title: 'Field rules',
+      title: 'Summary',
       rules: [
         {
           icon: 'zap',
-          rule: 'Separate reference from behaviour',
-          example: 'A fixture that scripts the agent cannot catch the agent changing.',
+          rule: 'Golden tests freeze the outcome',
+          example: 'The fixture does not script the agent. Exact-match the tool calls; judge the prose.',
         },
         {
-          icon: 'timer',
-          rule: 'Judge on a schedule',
-          example: 'Token spend when prompts or retrieval change, not every save.',
+          icon: 'search',
+          rule: 'Retrieval has numbers',
+          example: 'recall@k, precision@k, and MRR, on a small set you labelled properly.',
         },
         {
-          icon: 'file-text',
-          rule: 'Label a small set well',
-          example: 'Twenty real relevant doc IDs beat two hundred guessed ones.',
+          icon: 'scale',
+          rule: 'Judge the answer, then check the claims',
+          example: 'Correctness, completeness, relevance — then faithfulness against the retrieved context.',
         },
         {
-          icon: 'eye',
-          rule: 'Read the mismatches',
-          example: 'Never trust a single average — inspect unsupported claims.',
+          icon: 'award',
+          rule: 'Compare on a delta, gate on a floor',
+          example: '“Did we get better?” is a different question from “is this shippable?”',
         },
       ],
     },

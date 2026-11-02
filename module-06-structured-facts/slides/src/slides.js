@@ -266,7 +266,7 @@ class KnowledgeGraph:
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -274,22 +274,27 @@ class KnowledgeGraph:
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 6',
+      title: 'Summary',
       rules: [
         {
           rule: 'Schema is the contract',
-          example: 'Pydantic models catch bad data before it enters the graph.',
+          example: 'Pydantic structured outputs are what you can validate, store, and query.',
           icon: 'file-text',
         },
         {
-          rule: 'Every fact needs provenance',
-          example: 'A fact without a source is an unsupported claim.',
+          rule: 'Every fact needs provenance and a score',
+          example: 'A fact without a source is an unsupported claim. Confidence decides what you keep.',
           icon: 'link',
         },
         {
-          rule: 'Confidence is not optional',
-          example: 'Threshold + dedup = clean, trustworthy knowledge.',
-          icon: 'check-square',
+          rule: 'Entities and edges make a graph',
+          example: 'Multi-hop questions walk relationships, not just similar text.',
+          icon: 'git-branch',
+        },
+        {
+          rule: 'Grounded QA cites the source',
+          example: 'Answer from stored facts, and show where each one came from.',
+          icon: 'book-open',
         },
       ],
     },

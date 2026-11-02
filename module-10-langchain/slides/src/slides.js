@@ -420,7 +420,7 @@ async def classify_invoke(req: InvokeRequest):
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -440,22 +440,27 @@ async def classify_invoke(req: InvokeRequest):
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 10',
+      title: 'Summary',
       rules: [
         {
-          rule: 'Know the pattern, then pick the tool',
-          example: 'LangChain is faster only if you know what it does underneath.',
+          rule: 'LCEL is prompt, model, parser',
+          example: 'Structured output comes from a schema, not a plea for JSON.',
+          icon: 'link',
+        },
+        {
+          rule: 'Agents and RAG are the same patterns',
+          example: 'create_agent runs the tool loop. A retriever is the RAG chain, or a tool the agent calls.',
           icon: 'layers',
         },
         {
-          rule: 'Inspect the message trace during development',
-          example: 'result["messages"] (or LangSmith) shows every tool call and decision.',
-          icon: 'check-square',
+          rule: 'Know the pattern, then pick the tool',
+          example: 'LangChain is faster for chains, tool agents, and RAG — if you know what it does underneath.',
+          icon: 'scale',
         },
         {
-          rule: 'Know when to eject',
-          example: 'If the framework fights you, go back to plain Python.',
-          icon: 'lock',
+          rule: 'Read the trace, and leave when it fights you',
+          example: 'result["messages"] shows every call. If the framework gets in the way, go back to plain Python.',
+          icon: 'check-square',
         },
       ],
     },

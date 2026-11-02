@@ -242,7 +242,7 @@ def search_docs(query: str, k: int = 5) -> str:
     type: 'title',
     content: {
       title: 'Putting it all together',
-      subtitle: 'Field rules and exercises',
+      subtitle: 'Summary and exercises',
       icon: 'check-square',
     },
   },
@@ -250,7 +250,7 @@ def search_docs(query: str, k: int = 5) -> str:
   {
     type: 'rules',
     content: {
-      title: 'Field rules — Module 5',
+      title: 'Summary',
       rules: [
         {
           rule: 'Chunk for retrieval, not for reading',
@@ -259,13 +259,18 @@ def search_docs(query: str, k: int = 5) -> str:
         },
         {
           rule: 'Same model for docs and queries',
-          example: 'Mismatched embeddings produce garbage similarity scores.',
+          example: 'Embed both sides, store the vectors, and search. Mismatched models score garbage.',
           icon: 'compass',
         },
         {
-          rule: 'Always ground with citations',
+          rule: 'Ground every answer',
           example: 'An answer without a source is just a hallucination with confidence.',
           icon: 'book-open',
+        },
+        {
+          rule: 'The pipeline can be tools',
+          example: 'Wrap ingest and search as MCP tools any agent can call.',
+          icon: 'plug',
         },
       ],
     },
