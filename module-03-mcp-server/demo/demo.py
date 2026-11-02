@@ -6,7 +6,7 @@ Run:  python module-03-mcp-server/demo/demo.py
   Part 2: Explore the ship server (stdio)
   Part 3: Explore the navigation server (HTTP)
   Part 4: One agent, both servers
-  Part 5: Chat with the weather server
+  Part 5: Chat with the weather and TV ratings servers
 
 Requires:
   - OPENAI_API_KEY for Parts 4 and 5
@@ -28,7 +28,7 @@ DEMOS = {
     "2": ("Explore ship server (stdio)", demo_explore_stdio),
     "3": ("Explore navigation server (HTTP)", demo_explore_http),
     "4": ("Multi-server LLM agent", demo_multi_server_agent),
-    "5": ("Weather agent (stdio)", demo_weather_agent),
+    "5": ("Weather and TV agent (stdio)", demo_weather_agent),
 }
 
 
@@ -66,7 +66,7 @@ async def main():
     print("  2. stdio transport  — client spawns the server, no URL")
     print("  3. HTTP transport   — server at a URL, remote-friendly")
     print("  4. Multi-server     — one LLM, many MCP servers, mixed transports")
-    print("  5. Weather agent    — one LLM, a local server that fetches live weather")
+    print("  5. Live tools       — one LLM, weather and TV ratings, both over stdio")
     print()
     print("=" * 60)
 
