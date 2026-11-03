@@ -9,11 +9,13 @@ Run standalone:  mcp dev server.py
 
 import sys
 
+from compaction import KEEP_RECENT, Anchor, compact, count_tokens  # noqa: F401
+from dotenv import load_dotenv
 from mcp.server.mcpserver import MCPServer
+from memory_store import MemoryStore, build_collection
 from openai import OpenAI
 
-from compaction import KEEP_RECENT, Anchor, compact, count_tokens  # noqa: F401
-from memory_store import MemoryStore, build_collection
+load_dotenv()
 
 mcp = MCPServer("Cantina Memory")
 

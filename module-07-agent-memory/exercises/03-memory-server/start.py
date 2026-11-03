@@ -10,7 +10,7 @@ Run:  python start.py
 """
 
 import asyncio
-import json
+import json  # noqa: F401 — you need this in run_turn
 import os
 
 from dotenv import load_dotenv

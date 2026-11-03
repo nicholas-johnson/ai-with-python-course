@@ -8,11 +8,13 @@ Run standalone:  mcp dev solution_server.py
 
 import sys
 
+from compaction import KEEP_RECENT, Anchor, compact, count_tokens
+from dotenv import load_dotenv
 from mcp.server.mcpserver import MCPServer
+from memory_store import MemoryStore, build_collection
 from openai import OpenAI
 
-from compaction import KEEP_RECENT, Anchor, compact, count_tokens
-from memory_store import MemoryStore, build_collection
+load_dotenv()
 
 mcp = MCPServer("Cantina Memory")
 
@@ -97,7 +99,9 @@ def thread_budget(thread_id: str, budget_tokens: int = 1200) -> str:
 
 
 @mcp.tool()
-def compact_thread(thread_id: str, budget_tokens: int = 1200, keep_recent: int = KEEP_RECENT) -> str:
+def compact_thread(
+    thread_id: str, budget_tokens: int = 1200, keep_recent: int = KEEP_RECENT
+) -> str:
     """Compact a thread to fit a budget, preserving its anchors."""
     thread = threads.get(thread_id)
     if not thread:

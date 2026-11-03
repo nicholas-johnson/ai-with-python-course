@@ -186,7 +186,11 @@ def test_run_turn_feeds_the_tool_result_back_to_the_model():
     answer = asyncio.run(client_mod.run_turn(client, messages, session, []))
 
     assert answer == "Your usual, then."
-    outputs = [m for m in messages if isinstance(m, dict) and m.get("type") == "function_call_output"]
+    outputs = [
+        message
+        for message in messages
+        if isinstance(message, dict) and message.get("type") == "function_call_output"
+    ]
     assert len(outputs) == 1
     assert outputs[0]["call_id"] == "call_1"
     assert "Comet Tail" in outputs[0]["output"]
