@@ -14,7 +14,7 @@ export const slides = [
       points: [
         'LLMs hallucinate. Source documents do not.',
         'Retrieval-Augmented Generation feeds real documents into the prompt.',
-        'The model answers from evidence — and you can cite the source.',
+        'The model answers from evidence, and you can cite the source.',
       ],
     },
   },
@@ -26,6 +26,7 @@ export const slides = [
       points: [
         'Design **chunking strategies** for long-form documents and knowledge bases.',
         'Produce **embeddings**, store in a **vector index**, and query effectively.',
+        'Expand a query with **alternate phrasings** or a **hypothetical passage** (HyDE).',
         'Build **grounded prompts** with citations back to source chunks.',
         'Wrap a RAG pipeline as **MCP tools** any agent can call.',
       ],
@@ -42,6 +43,54 @@ export const slides = [
         '**Generate**: feed retrieved chunks + query to the LLM.',
         '**Cite**: link each claim in the answer back to its source chunk.',
       ],
+    },
+  },
+
+  // ---- Section: Vector stores ----
+  {
+    type: 'title',
+    content: {
+      title: 'What is a vector store?',
+      subtitle: 'Where the embeddings live',
+      icon: 'database',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What is a vector store?',
+      icon: 'database',
+      points: [
+        'A database that indexes **vectors** rather than rows and columns.',
+        'Each entry holds the embedding, the original text, and its metadata.',
+        'You search by **distance**: hand it a vector, get the nearest ones back.',
+        'The search is **approximate** (ANN) — a little recall traded for speed.',
+        'Without one, answering a query means comparing it to every chunk you own.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Common vector stores',
+      icon: 'layers',
+      points: [
+        '**ChromaDB** — in-process, batteries included. What this course uses.',
+        '**FAISS** — a library, not a server. Fast at millions of vectors, more code.',
+        '**pgvector** — a Postgres extension. Vectors beside your relational data.',
+        '**Qdrant**, **Weaviate** — dedicated servers with filtering and hybrid search.',
+        '**Pinecone** — hosted and managed. You pay to have no infrastructure.',
+      ],
+    },
+  },
+
+  // ---- Section: Chunking ----
+  {
+    type: 'title',
+    content: {
+      title: 'Chunking',
+      subtitle: 'Splitting documents so retrieval can find them',
+      icon: 'scissors',
     },
   },
   {
@@ -83,6 +132,39 @@ export const slides = [
     },
   },
   {
+    type: 'comparison',
+    content: {
+      title: 'Synthetic chunking',
+      left: {
+        label: 'Fact extraction',
+        items: [
+          'Pull every atomic claim out of the passage',
+          '"Efficiency fell to 72% after the ion storm"',
+          'A query about that claim lands on a precise vector',
+          'Retrieve the source passage, not the claim alone',
+        ],
+      },
+      right: {
+        label: 'FAQ extraction',
+        items: [
+          'Generate the questions the passage answers',
+          '"What did the ion storm do to the reactor?"',
+          'A crew question matches a question, not the prose',
+          'Embed the question; hand the passage to the model',
+        ],
+      },
+    },
+  },
+  // ---- Section: Embeddings ----
+  {
+    type: 'title',
+    content: {
+      title: 'Embeddings',
+      subtitle: 'Turning text into something you can measure distance between',
+      icon: 'compass',
+    },
+  },
+  {
     type: 'standard',
     content: {
       title: 'Embeddings — turning text into vectors',
@@ -93,6 +175,7 @@ export const slides = [
         '**OpenAI** `text-embedding-3-small` — fast, cheap, 1536 dimensions.',
         '**Sentence Transformers** — local, free, great for prototyping.',
         'Always embed queries with the **same model** used for documents.',
+        '`dimensions=256` truncates the vector — smaller index, slightly worse recall.',
       ],
     },
   },
@@ -107,7 +190,7 @@ client = OpenAI()
 
 def embed(texts: list[str]) -> list[list[float]]:
     resp = client.embeddings.create(
-        model="text-embedding-3-small", input=texts
+        model="text-embedding-3-small", input=texts, dimensions=256
     )
     return [d.embedding for d in resp.data]
 
@@ -132,6 +215,105 @@ def search(query, index, k=5):
       title: 'Demo — Ingest + embed',
       subtitle: 'Switch to terminal: python demo/ingest.py',
       icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Advanced techniques ----
+  {
+    type: 'title',
+    content: {
+      title: 'Advanced techniques',
+      subtitle: 'What you add once the basic pipeline works',
+      icon: 'sparkles',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Synthetic query expansion',
+      left: {
+        label: 'Query expansion',
+        items: [
+          'Rewrite the question a few different ways',
+          '"reactor output after the storm"',
+          'Search each phrasing and merge the hits',
+          'Answer from the passages, not the rewrites',
+        ],
+      },
+      right: {
+        label: 'HyDE',
+        items: [
+          'Write a hypothetical log entry that answers it',
+          '"Efficiency fell to 72% after the ion storm…"',
+          'Embed that passage — it sits near real logs',
+          'Throw the fiction away; cite what you retrieved',
+        ],
+      },
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Hybrid search',
+      icon: 'search',
+      points: [
+        'Vector search matches **meaning**. Keyword search (**BM25**) matches **tokens**.',
+        'Ask for error code `FTL-4092` and the embedding has nothing to be similar to.',
+        'Run both searches, then merge the two ranked lists.',
+        '**Reciprocal Rank Fusion** scores by position: `1/(k + rank)`, k ≈ 60.',
+        'Ranks fuse cleanly — no normalising BM25 scores against cosine distances.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Re-ranking',
+      icon: 'arrow-up-down',
+      points: [
+        'Retrieval is tuned for **recall** — cast a wide net, then order it properly.',
+        'A **cross-encoder** reads query and passage **together**, not separately.',
+        'That catches negation and qualification a bi-encoder averages away.',
+        'Typical shape: retrieve 50 cheaply, re-rank 25, send the top 5 to the model.',
+        'You pay latency per candidate — keep the candidate set small.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Metadata filtering',
+      code: `# Exact match — only engineering logs
+collection.query(
+    query_texts=["hull damage"],
+    n_results=5,
+    where={"department": "engineering"},
+)
+
+# Range — only logs since the ion storm
+collection.query(
+    query_texts=["hull damage"],
+    n_results=5,
+    where={"stardate": {"$gte": 2287.0}},
+)`,
+      highlights: [
+        'The filter runs first — search only ranks what survives it',
+        'You can only filter on metadata you stored at ingest time',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Semantic caching',
+      icon: 'zap',
+      points: [
+        'The crew asks the same question twenty different ways.',
+        'Cache on the **embedding**, not the string — "reactor status" ≈ "how is the reactor".',
+        'On a hit above a similarity threshold, return the stored answer and skip the pipeline.',
+        'Threshold too low and you confidently serve the answer to a different question.',
+        'Re-indexing the corpus should drop the cache — stale answers outlive their sources.',
+      ],
     },
   },
 
@@ -259,7 +441,8 @@ def search_docs(query: str, k: int = 5) -> str:
         },
         {
           rule: 'Same model for docs and queries',
-          example: 'Embed both sides, store the vectors, and search. Mismatched models score garbage.',
+          example:
+            'Embed both sides, store the vectors, and search. Mismatched models score garbage.',
           icon: 'compass',
         },
         {

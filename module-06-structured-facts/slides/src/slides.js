@@ -2,7 +2,7 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 6 — Structured Facts',
+      title: 'Module 6 — Graphs & Structured Facts',
       subtitle: 'From raw text to verifiable knowledge',
       icon: 'database',
     },
@@ -29,6 +29,16 @@ export const slides = [
         'Construct a **knowledge graph** from entities and relationships.',
         'Implement **grounded QA** that cites source documents.',
       ],
+    },
+  },
+
+  // ---- Section: Structured outputs ----
+  {
+    type: 'title',
+    content: {
+      title: 'Structured Outputs',
+      subtitle: 'Typed fields the model must follow',
+      icon: 'file-text',
     },
   },
   {
@@ -278,12 +288,14 @@ class KnowledgeGraph:
       rules: [
         {
           rule: 'Schema is the contract',
-          example: 'Pydantic structured outputs are what you can validate, store, and query.',
+          example:
+            'Pydantic structured outputs are what you can validate, store, and query.',
           icon: 'file-text',
         },
         {
           rule: 'Every fact needs provenance and a score',
-          example: 'A fact without a source is an unsupported claim. Confidence decides what you keep.',
+          example:
+            'A fact without a source is an unsupported claim. Confidence decides what you keep.',
           icon: 'link',
         },
         {
