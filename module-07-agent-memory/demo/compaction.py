@@ -64,7 +64,7 @@ def safe_split(messages: list[dict], index: int) -> int:
     between them.
     """
     index = max(0, min(index, len(messages)))
-    while index > 0 and messages[index].get("type") == "function_call_output":
+    while 0 < index < len(messages) and messages[index].get("type") == "function_call_output":
         index -= 1
     return index
 

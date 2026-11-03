@@ -238,25 +238,31 @@ By end of day, attendees can build a **tool-using agent**, expose capabilities v
 
 **Talk**
 
-- ReAct: Thought → Action → Observation with traces
-- Plan-and-execute: plan up front, execute, re-plan on failure
-- When to use each (exploration vs structured multi-step tasks)
+- The control-flow spectrum: fixed chain → router → plan-and-execute → ReAct; push left until the task breaks
+- ReAct: Thought → Action → Observation, with the thought as a required schema field rather than a hope
+- Loop control: step budget, no-progress detection, forced finalisation, cost ceiling
+- Plan-and-execute: plan up front, execute, re-plan on failure — and why the plan being *data* is the point
+- `depends_on` turns the plan into a graph: independent steps run concurrently, which ReAct cannot do
+- Approval gates and checkpointing; code decides what is irreversible, never the model
 - Streaming and plan visualisation in a web app
 
 **Demo**
 
-- Live ReAct loop with tools; plan-and-execute with re-planning on failure
+- Five parts: one task four ways with a cost/latency table; ReAct with its guards; plan-and-execute with re-planning; `depends_on` waves with serial vs parallel timing; halt-approve-resume over a JSON checkpoint
 
 **Exercises**
 
-1. **ReAct agent** — ReAct loop with web search, calculator, notes + full trace
+1. **ReAct agent** — ReAct loop with web search, calculator, notes + full trace and the three guards
 2. **Plan-and-execute** — Planner + executor with re-planning; compare to ReAct
-3. **Holiday planner** — FastAPI + Svelte app with plan visualisation (frontend provided)
+3. **Parallel and approval** — `depends_on` waves with `asyncio.gather`, an approval gate, checkpoint and resume
+4. **Holiday planner** — FastAPI + Svelte app with plan visualisation (frontend provided)
 
 **After this module, attendees can**
 
-- Implement ReAct and plan-and-execute with capped loops and traces
-- Choose the right workflow pattern for a task
+- Place a task on the control-flow spectrum and justify the choice
+- Implement ReAct and plan-and-execute with capped loops, visible reasoning, and traces
+- Schedule independent plan steps concurrently from a dependency graph
+- Pause a workflow for human approval, checkpoint it, and resume without repeating side effects
 - Integrate structured workflows into a streaming web UI
 
 ---

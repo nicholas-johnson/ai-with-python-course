@@ -35,10 +35,18 @@ _notes: list[str] = []
 _bookings: list[str] = []
 
 DESTINATIONS = {
-    "lisbon": "Lisbon: 22C in May, flights from GBP 90, highlights: Alfama, Belem, day trip to Sintra.",
-    "reykjavik": "Reykjavik: 9C in May, flights from GBP 150, highlights: Blue Lagoon, Golden Circle.",
-    "palermo": "Palermo: 24C in May, flights from GBP 110, highlights: street food, Monreale, Mondello.",
-    "tallinn": "Tallinn: 14C in May, flights from GBP 80, highlights: old town, Kadriorg, Lahemaa.",
+    "lisbon": (
+        "Lisbon: 22C in May, flights from GBP 90, highlights: Alfama, Belem, Sintra."
+    ),
+    "reykjavik": (
+        "Reykjavik: 9C in May, flights from GBP 150, highlights: Blue Lagoon, Golden Circle."
+    ),
+    "palermo": (
+        "Palermo: 24C in May, flights from GBP 110, highlights: street food, Monreale."
+    ),
+    "tallinn": (
+        "Tallinn: 14C in May, flights from GBP 80, highlights: old town, Kadriorg, Lahemaa."
+    ),
 }
 
 FLIGHTS = {

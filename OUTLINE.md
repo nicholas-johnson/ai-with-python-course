@@ -2,100 +2,144 @@
 
 Build production-grade AI systems — agents, tools, RAG pipelines, and multi-agent workflows — in Python.
 
+Modules 1–13 run across three days. Module 0 is prework, covered only if the group needs it. For the delivery schedule and per-module demo/exercise breakdown, see [MSCI-three-day-outline.md](MSCI-three-day-outline.md).
+
 ---
 
-## Day 1 — Build a working chatbot
+## Module 0 — Python Fundamentals *(prework)*
 
-### Module 0 — Python Fundamentals
-
-- Work fluently with Python data structures, modules/packages, CLI args, and logging.
-- Model domain objects with dataclasses and define contracts with Protocols.
-- Write async code: asyncio tasks, queues, timeouts, and cancellation.
+- Work fluently with Python data structures: lists, dicts, sets, tuples.
+- Organise code with modules/packages, CLI args (`argparse`), and logging.
+- Model domain objects with dataclasses and define contracts with `Protocol`.
+- Write async code: `asyncio` tasks, queues, timeouts, and cancellation.
 - Build and test a basic HTTP API with FastAPI and httpx.
+
+---
+
+## Day 1 — Build a working agent
 
 ### Module 1 — Working with the LLM
 
-- Call the LLM directly with OpenAI's Responses API — message roles, parameters, streaming — and recognise the older Chat Completions API.
-- Build a CLI chat loop with conversation history and a FastAPI streaming endpoint with SSE.
-- Implement session storage: in-memory first, then file-based.
-- Apply prompting patterns that hold up in production (structured outputs, grounding).
+- Call the LLM directly with OpenAI's Responses API (instructions, input, message roles, the response object).
+- Recognise the older Chat Completions API — still supported and common in existing code, but being phased out.
+- Build a CLI chat loop with conversation history.
+- Stream responses token by token for real-time output.
+- Apply prompting patterns that hold up in production (personas, format constraints, guardrails, few-shot examples).
 
 ### Module 2 — Tool Calling
 
 - Understand the conversation items that drive an agent (system, user and assistant messages; function calls and their outputs).
-- Build a tool-calling loop: schema in, action out, result back, repeat.
-- Implement a tool registry with schema validation, routing, and error handling.
-- Add safety rails (allowlists, rate limits, redaction) and an evaluation harness with golden tests.
+- Build a tool-calling loop with real OpenAI API calls: schema in, action out, result back, repeat.
+- Implement a tool registry with decorator registration, routing, and error handling.
+- Add safety rails: allowlists, rate limits, audit logs.
 
-### Module 3 — GenAI Strategies
+### Module 3 — MCP Server
 
-- Apply prompt engineering: system prompts, few-shot examples, structured outputs, and grounding.
-- Work with multimodal inputs and outputs: vision/image analysis, speech-to-text, text-to-speech.
-- Add guardrails: model selection, token budgeting, content filters, and confidence thresholds.
+- Understand the Model Context Protocol: tool discovery, schemas, calling conventions.
+- Build MCP servers with `MCPServer` and practical tools: data queries, web fetch, file I/O.
+- Connect an MCP server to a real agent via `mcp.client.stdio`.
+- Convert MCP tool schemas to OpenAI tool-calling format for dynamic discovery.
+
+### Module 4 — GenAI Strategies *(Day 1 closer)*
+
+- Build a FastAPI app with SSE streaming chat, tool integration, and multimodal endpoints.
+- Connect an MCP server to a web API for real-time tool use.
+- Reason about model selection trade-offs: quality, cost, latency.
+- Count tokens and enforce budgets before calling the model.
+- Work with multimodal inputs: vision/image analysis and speech-to-text.
+- Apply guardrails: schema validation, content filters, and confidence thresholds.
 
 ---
 
-## Day 2 — MCP + knowledge
-
-### Module 4 — MCP Server
-
-- Understand MCP concepts: tool discovery, schemas, calling conventions.
-- Build a minimal MCP server in Python, then add practical tools.
-- Implement real-world tools: data lookups, queries, sensor reads.
-- Add per-tool auth scopes and structured logging for observability.
+## Day 2 — Knowledge + retrieval
 
 ### Module 5 — RAG Fundamentals
 
-- Design chunking strategies (size, overlap, structure-aware splits) for long documents.
-- Produce embeddings, store them in a vector index, and query effectively.
-- Apply retrieval strategies: hybrid search, metadata filters, reranking, and grounded answers with citations.
-- Run basic RAG evaluation: recall/precision on retrieval and adversarial queries.
+- Split documents into chunks (fixed-size, sentence-aware, structure-aware, overlap) and synthetic units (extracted facts, generated FAQs).
+- Generate embeddings with `text-embedding-3-small` and store them in ChromaDB.
+- Expand queries at search time with query expansion and HyDE.
+- Build grounded prompts with source citations.
+- Wrap a RAG pipeline as MCP tools any agent can call.
 
-### Module 6 — Multi-Agent Systems
+### Module 6 — Structured Facts
 
-- Decide when multi-agent designs are worth the latency and operational complexity.
-- Model roles (router, researcher, coder, critic) and coordination patterns (supervisor, swarm, debate).
-- Share context and tools safely across agents and apply conflict resolution / consensus strategies.
+- Use Pydantic models to define structured output schemas.
+- Build a fact extraction pipeline: claims, provenance, and confidence scores.
+- Construct a knowledge graph: entities, relationships, and traversal with `networkx`.
+- Implement grounded QA from graphs with citations.
+- Expose the graph as an MCP server and let an agent loop choose the traversal.
 
-### Module 7 — Agent Memory + Workflows
+### Module 7 — Agent Memory
 
-- Implement short-term memory (conversation/session) separate from long-term profile or notes.
-- Apply summarisation to fit context limits; model decay and explicit "do not remember" controls.
-- Compare workflow patterns: ReAct, plan-and-execute, and tool routing for multi-step tasks.
+- Account for a context window as a budget and know where the tokens actually go.
+- Write memories worth keeping, and supersede facts instead of stacking contradictions.
+- Select memories by semantic recall, scored on relevance, recency, and importance.
+- Compact a long conversation without losing the decisions and open tasks inside it.
+- Expose memory and compaction as MCP tools so any agent can use them.
+
+### Module 8 — Structured Workflows *(Day 2 closer)*
+
+- Place a task on the control-flow spectrum: fixed chain, router, plan-and-execute, ReAct.
+- Build a ReAct loop whose reasoning is visible, with a step budget, repeat detection, and a forced finish.
+- Build plan-and-execute with re-planning on failure.
+- Run independent plan steps concurrently with a `depends_on` graph.
+- Pause a plan for human approval, checkpoint it to disk, and resume without repeating work.
 
 ---
 
-## Day 3 — Structured knowledge + ship it
+## Day 3 — Ship it
 
-### Module 8 — Structured Facts
+### Module 9 — Multi-Agent Systems
 
-- Use structured outputs (Pydantic models, JSON Schema) to get reliable, typed data from an LLM.
-- Build a fact extraction pipeline that decomposes text into individual claims with provenance.
-- Construct a knowledge graph from extracted entities and relationships.
-- Implement grounded QA that answers questions from the graph and cites source documents.
+- Know when to use multi-agent systems (and when a single agent is better).
+- Define agent roles: router, researcher, critic, supervisor, executor.
+- Implement coordination patterns: supervisor, swarm, debate, blackboard, task queue.
+- Share context and tools between agents safely.
+- Build conflict resolution and consensus mechanisms.
 
-### Module 9 — Adaptive Retrieval
+### Module 10 — LangChain with Python
 
-- Build a retrieval router that selects the right source (vector store, knowledge graph, keyword search) based on query type.
-- Implement query decomposition — breaking complex questions into focused sub-queries.
-- Add a self-critique loop (corrective RAG) that evaluates retrieved documents and re-retrieves when quality is low.
-- Orchestrate multi-source retrieval — merging results from different backends with relevance scoring.
+- Build LCEL chains: prompt templates, the pipe operator, and structured output with Pydantic.
+- Wrap functions as LangChain tools and run them with `create_agent` (LangChain 1.x), adding middleware and memory.
+- Construct a RAG chain with a LangChain retriever and ChromaDB, then turn retrieval into an agent tool (agentic RAG).
+- Serve an LCEL chain as a REST API with FastAPI using the Runnable `ainvoke` / `astream` methods.
+- Know when to use LangChain and when to stay hand-rolled.
 
-### Module 10 — Production Concerns
+### Module 11 — Evals
 
-- Add tracing and structured logging so every tool call is attributable and debuggable.
-- Define metrics and timelines that surface latency, errors, and dependency health.
-- Implement reliability (retries, timeouts, circuit breakers, fallbacks) and cost controls (caching, batching, token budgets).
-- Outline deployment: containers, running MCP alongside HTTP APIs, and config per environment.
+- Catch agent regressions with golden tests: a frozen reference, exact-match tool calls, and a judged answer.
+- Score retrieval with recall@k, precision@k, and MRR against a labelled query set.
+- Grade answers with an LLM-as-judge on correctness, completeness, and relevance.
+- Measure faithfulness: every claim in an answer must be grounded in retrieved context.
+- Compare two configs on a scorecard and fail a release that drops below a threshold.
 
-### Module 11 — LangChain with Python
+### Module 12 — Productionisation
 
-- Understand what LangChain provides vs building from scratch: chains, agents, tools, memory, and output parsers.
-- Rewrite a hand-rolled agent loop using LangChain components and compare the trade-offs.
-- Connect LangChain to an MCP server and RAG pipeline built in earlier modules.
+- Implement structured tracing with trace IDs and spans.
+- Apply reliability patterns: retries with backoff, timeouts, circuit breakers, fallbacks.
+- Enforce cost controls: token budgets, model tiering, caching.
+- Deploy with environment config, secrets management, and health checks.
 
-### Module 12 — Capstone Project
+### Module 13 — Edge Topics *(pick and choose)*
 
-- Build a full agentic application: chat UI or CLI, RAG, MCP tools, and a coordinated multi-agent path for complex questions.
-- Write demo scenarios and integration tests that guard against regressions.
-- Document extension points for adding tools, data sources, and policies.
+Independent advanced techniques; exercise numbers match topic numbers.
+
+- Retrieval quality: hybrid search (RRF), re-ranking, HyDE, contextual chunking.
+- Agentic and trust: agentic RAG, citation verification, web search backend.
+- Data: text-to-SQL, fine-tuning data prep (DPO + LoRA).
+- Production UX: advanced guardrails, semantic caching, multimodal RAG.
+- Local ML on a laptop CPU: train a small model, run a Hugging Face model.
+- Concepts only: test-time compute scaling, speculative decoding, GraphRAG, mixture of experts.
+
+---
+
+## Capstone *(in `extras/`)*
+
+Choose one full-stack application — the frontend is provided, build the FastAPI backend.
+
+| App | Techniques practised |
+| --- | -------------------- |
+| Recipe Finder | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| Movie Night | RAG, hybrid search, text-to-SQL, structured output |
+| Travel Planner | Agentic RAG, tool calling, structured itineraries, web fallback |
+| Personal Assistant | Chat + tools + MCP, RAG over notes, calendar, cost controls |

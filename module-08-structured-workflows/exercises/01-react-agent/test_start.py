@@ -86,7 +86,9 @@ def test_run_react_returns_dict():
     mod = _import_start()
 
     mock_client = MagicMock()
-    mock_client.responses.create.return_value = MagicMock(output=[], output_text="The answer is 42.")
+    mock_client.responses.create.return_value = MagicMock(
+        output=[], output_text="The answer is 42."
+    )
 
     result = mod.run_react("What is 6 * 7?", mock_client, max_steps=3)
 

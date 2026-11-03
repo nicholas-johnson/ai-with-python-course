@@ -3,7 +3,9 @@ Exercise 01 — ReAct Agent
 Build a ReAct loop: Thought → Action → Observation with explicit traces.
 """
 from __future__ import annotations
+
 import os
+
 from dotenv import load_dotenv
 from openai import OpenAI
 

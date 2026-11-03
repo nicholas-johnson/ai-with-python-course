@@ -165,7 +165,7 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | 5 | [module-05-rag-fundamentals](module-05-rag-fundamentals/) | Chunking, embeddings, vector stores, retrieval, evaluation |
 | 6 | [module-06-structured-facts](module-06-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA, graph MCP |
 | 7 | [module-07-agent-memory](module-07-agent-memory/) | Short/long-term memory, summarisation, decay controls |
-| 8 | [module-08-structured-workflows](module-08-structured-workflows/) | ReAct, plan-and-execute, tool routing — the Day 2 closer |
+| 8 | [module-08-structured-workflows](module-08-structured-workflows/) | Control flow from chains to ReAct, parallel plans, approval gates — the Day 2 closer |
 
 ### Day 3 — Ship it
 
@@ -264,13 +264,14 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 8 — [Structured Workflows](module-08-structured-workflows/)
 
-**Topics:** Workflow patterns (ReAct, plan-and-execute, tool routing), chaining reasoning steps, dynamic replanning, structured execution traces.
+**Topics:** The control-flow spectrum (fixed chain, router, plan-and-execute, ReAct), loop control, dynamic replanning, parallel plan execution, approval gates and checkpointing, structured execution traces.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| ReAct agent | [`exercises/01-react-agent`](module-08-structured-workflows/exercises/01-react-agent/) | Implement ReAct: Reason, Act, Observe |
+| ReAct agent | [`exercises/01-react-agent`](module-08-structured-workflows/exercises/01-react-agent/) | Implement ReAct, with a step budget, repeat detection, and a forced finish |
 | Plan-and-execute | [`exercises/02-plan-and-execute`](module-08-structured-workflows/exercises/02-plan-and-execute/) | Decompose a goal into steps, execute, and replan |
-| Holiday planner | [`exercises/03-holiday-planner`](module-08-structured-workflows/exercises/03-holiday-planner/) | Multi-step workflow combining tools to plan a trip |
+| Parallel and approval | [`exercises/03-parallel-approval`](module-08-structured-workflows/exercises/03-parallel-approval/) | Run independent steps concurrently, gate irreversible ones, checkpoint and resume |
+| Holiday planner | [`exercises/04-holiday-planner`](module-08-structured-workflows/exercises/04-holiday-planner/) | Multi-step workflow combining tools to plan a trip |
 
 ### Module 9 — [Multi-Agent Systems](module-09-multi-agent/)
 

@@ -1,7 +1,10 @@
 """
 Exercise 03 — Memory MCP Server (solution)
-=============================================
-Console agent connected to the Memory MCP server via stdio.
+==========================================
+Console agent connected to the Cantina Memory server over stdio.
+
+The model drives the memory tools. The harness drives the compaction tools:
+it records every turn and compacts when the thread goes over budget.
 
 Run:  python solution.py
 """
@@ -11,15 +14,29 @@ import json
 import os
 
 from dotenv import load_dotenv
-from openai import OpenAI
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from openai import OpenAI
 
 load_dotenv()
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
-
 SERVER_SCRIPT = "solution_server.py"
+
+THREAD_ID = "tonight"
+BUDGET_TOKENS = 500
+PATRON = "zara"
+
+SYSTEM_PROMPT = (
+    "You are BARKEEP, the AI bartender at The Nebula's Edge cantina on Relay "
+    "Station Omicron, serving " + PATRON + " tonight. "
+    "Your memory lives behind tools, not in your head. "
+    f"Call recall(patron='{PATRON}', query=...) before claiming you do not know "
+    "something, and remember(...) when a patron tells you something durable: a "
+    "usual order, an allergy, who they are, an unpaid tab. "
+    "Do not store one-off questions or small talk. "
+    "You are warm, slightly wry, and you never forget a regular."
+)
 
 
 def mcp_to_openai_tools(mcp_tools) -> list[dict]:
@@ -35,11 +52,20 @@ def mcp_to_openai_tools(mcp_tools) -> list[dict]:
     ]
 
 
+async def call_text(session, name: str, arguments: dict) -> str:
+    """Call one MCP tool and return its text content."""
+    result = await session.call_tool(name, arguments)
+    return result.content[0].text if result.content else "No result"
+
+
 async def run_turn(client, messages, session, openai_tools, max_steps: int = 10) -> str:
-    """Execute one conversational turn: call the LLM, handle tool calls, return final text."""
+    """One conversational turn, including any tool calls the model makes."""
     for _ in range(max_steps):
         response = client.responses.create(
-            model=MODEL, reasoning={"effort": "none"}, input=messages, tools=openai_tools,
+            model=MODEL,
+            reasoning={"effort": "none"},
+            input=messages,
+            tools=openai_tools,
         )
         calls = [item for item in response.output if item.type == "function_call"]
 
@@ -49,43 +75,51 @@ async def run_turn(client, messages, session, openai_tools, max_steps: int = 10)
             return answer
 
         messages += response.output
-        for tc in calls:
-            fn_name = tc.name
-            fn_args = json.loads(tc.arguments)
-            print(f"  [tool_call] {fn_name}({json.dumps(fn_args)})")
+        for call in calls:
+            arguments = json.loads(call.arguments)
+            print(f"  [tool_call] {call.name}({json.dumps(arguments)})")
 
-            result = await session.call_tool(fn_name, fn_args)
-            result_text = result.content[0].text if result.content else "No result"
-            print(f"  [tool_result] {result_text[:150].replace(chr(10), ' ')}...")
+            result_text = await call_text(session, call.name, arguments)
+            print(f"  [tool_result] {result_text[:150].replace(chr(10), ' ')}")
 
-            messages.append({"type": "function_call_output", "call_id": tc.call_id, "output": result_text})
+            messages.append(
+                {
+                    "type": "function_call_output",
+                    "call_id": call.call_id,
+                    "output": result_text,
+                }
+            )
 
     return "(max tool steps reached)"
+
+
+async def record_and_compact(session, role: str, text: str) -> None:
+    """Log a turn to the server, and compact the thread when it is over budget.
+
+    This is harness work, not a decision for the model: the thread has to be
+    recorded whatever the model chooses to do.
+    """
+    await call_text(session, "append_turn", {"thread_id": THREAD_ID, "role": role, "text": text})
+    verdict = await call_text(
+        session, "thread_budget", {"thread_id": THREAD_ID, "budget_tokens": BUDGET_TOKENS}
+    )
+    if "over budget" not in verdict:
+        return
+
+    report = await call_text(
+        session,
+        "compact_thread",
+        {"thread_id": THREAD_ID, "budget_tokens": BUDGET_TOKENS},
+    )
+    print(f"  [compaction] {report.splitlines()[0]}")
 
 
 async def agent_loop(session, openai_tools, mcp_tools_map):
     """Interactive REPL: read user input, dispatch to run_turn."""
     client = OpenAI()
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are BARKEEP, the AI bartender at The Nebula's Edge cantina "
-                "on Relay Station Omicron. You have access to a memory system. "
-                "Use the remember tool to store facts patrons share with you "
-                "(drink orders, dietary restrictions, names, stories, preferences). "
-                "Use the recall tool to retrieve memories when a patron asks "
-                "'what's my usual?' or you need context. "
-                "Use list_memories to see everything you know about your regulars. "
-                "Always check your memories before claiming you don't know something. "
-                "When you store a memory, use a descriptive snake_case key like "
-                "drink_order_zara or allergy_tanaka. "
-                "You're warm, slightly wry, and take pride in never forgetting a regular."
-            ),
-        }
-    ]
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    print("Type a message, /tools to list tools, or 'quit' to exit.\n")
+    print("Type a message, or /tools, /anchors, /budget, /thread, quit.\n")
 
     while True:
         try:
@@ -97,14 +131,44 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
         if user_input.lower() == "quit":
             print("Goodbye!")
             break
+
         if user_input == "/tools":
             for name, tool in mcp_tools_map.items():
-                print(f"  - {name}: {tool.description or 'No description'}")
+                summary = (tool.description or "").strip().splitlines()[0]
+                print(f"  - {name}: {summary}")
+            print()
+            continue
+
+        if user_input == "/anchors":
+            print(await call_text(session, "get_anchors", {"thread_id": THREAD_ID}) + "\n")
+            continue
+
+        if user_input == "/budget":
+            print(
+                await call_text(
+                    session,
+                    "thread_budget",
+                    {"thread_id": THREAD_ID, "budget_tokens": BUDGET_TOKENS},
+                )
+                + "\n"
+            )
+            continue
+
+        if user_input == "/thread":
+            print(
+                await call_text(
+                    session, "compact_thread", {"thread_id": THREAD_ID, "budget_tokens": 0}
+                )
+                + "\n"
+            )
             continue
 
         messages.append({"role": "user", "content": user_input})
         answer = await run_turn(client, messages, session, openai_tools)
         print(f"Agent: {answer}\n")
+
+        await record_and_compact(session, "user", user_input)
+        await record_and_compact(session, "assistant", answer)
 
 
 async def async_main():
@@ -116,9 +180,9 @@ async def async_main():
             tools_result = await session.list_tools()
             mcp_tools = tools_result.tools
             openai_tools = mcp_to_openai_tools(mcp_tools)
-            mcp_tools_map = {t.name: t for t in mcp_tools}
+            mcp_tools_map = {tool.name: tool for tool in mcp_tools}
 
-            print(f"Connected to Cantina Memory server. {len(mcp_tools)} tools available.")
+            print(f"Connected to Cantina Memory. {len(mcp_tools)} tools available.")
             await agent_loop(session, openai_tools, mcp_tools_map)
 
 

@@ -6,9 +6,11 @@ A ReAct loop: Thought → Action → Observation with explicit traces.
 Run:  python solution.py
 """
 from __future__ import annotations
+
 import json
 import os
 import re
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -113,7 +115,7 @@ TOOL_SCHEMAS = [
             "properties": {
                 "expression": {
                     "type": "string",
-                    "description": "The math expression to evaluate, e.g. '2 + 2' or '(10 * 5) / 3'",
+                    "description": "The math expression, e.g. '2 + 2' or '(10 * 5) / 3'",
                 }
             },
             "required": ["expression"],

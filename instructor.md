@@ -215,27 +215,38 @@ Day 2 closer.
 
 **Talk about:**
 
-- ReAct pattern: Reason → Act → Observe loop
-- Plan-and-execute workflows: generate plan, execute steps, re-plan on failure
-- Comparison: when to use ReAct vs plan-and-execute
-- Integration into web apps with SSE streaming
+- The control-flow spectrum: fixed chain → router → plan-and-execute → ReAct. The question is not "ReAct or planning?" but how many decisions you hand to the model, since each one is untestable. Push left until the task breaks.
+- ReAct: Reason → Act → Observe. Note this is Module 2's loop plus a visible thought — and that reading the thought off `output_text` gives you a blank field, because it is empty whenever the model emits a tool call. Fix with a required `thought` on a structured schema.
+- Loop control: step budget, no-progress detection (and why it must reset after a mutating tool), forced finalisation, cost ceiling.
+- Plan-and-execute: generate plan, execute steps, re-plan on failure. The payoff is that the plan is *data*.
+- `depends_on` turns the plan into a graph — independent steps run concurrently. ReAct structurally cannot do this.
+- Approval gates and checkpointing. Code decides what is dangerous, never the model.
+- Integration into web apps with SSE streaming.
 
-**Demo:**
+**Demo:** menu runner at `module-08-structured-workflows/demo/demo.py`; each part also runs standalone.
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-08-structured-workflows/demo/01_react.py` | ReAct loop with real tools — trace printed live |
-| `module-08-structured-workflows/demo/02_plan_and_execute.py` | Plan generation, step execution, re-planning on failure |
+| `demo/01_control_flow.py` | One task, four strategies — comparison table of LLM calls, tokens, seconds, model decisions |
+| `demo/02_react.py` | ReAct with a required `thought`; second half runs a deliberately stuck model so the guards fire (no API key needed for that part) |
+| `demo/03_plan_and_execute.py` | Plan generation, step execution, re-planning on failure |
+| `demo/04_parallel_plan.py` | `depends_on` scheduled into waves; serial vs parallel wall-clock |
+| `demo/05_approval_resume.py` | Halts before an irreversible step, checkpoints to JSON, resumes after approval |
+
+Tools are shared in `demo/workflow_tools.py` so demo 01 compares strategies like for like. They sleep to simulate network calls — set `DEMO_TOOL_LATENCY=0` to speed up a dry run.
 
 **Exercises (chained — delegates build a Holiday Planner web app):**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-react-agent` | ReAct loop with web search, calculator, notes. /trace, /tools, /steps N |
+| `exercises/01-react-agent` | ReAct loop with web search, calculator, notes, plus the three guards. /trace, /tools, /steps N |
 | `exercises/02-plan-and-execute` | Planner + executor with re-planning. /plan, /react, /replan comparison |
-| `exercises/03-holiday-planner` | FastAPI backend + Svelte frontend. SSE streaming, MCP tools, plan visualisation |
+| `exercises/03-parallel-approval` | `depends_on` waves via `asyncio.gather`, approval gate on `book_flight`, JSON checkpoint and resume |
+| `exercises/04-holiday-planner` | FastAPI backend + Svelte frontend. SSE streaming, MCP tools, plan visualisation |
 
 A Svelte frontend is provided. Delegates focus on the backend logic.
+
+Run tests per exercise — a bare `pytest module-08-structured-workflows/` cannot collect, because every exercise has a `test_start.py` and there are no package markers (true of every module).
 
 ---
 

@@ -12,6 +12,7 @@ import os
 import time
 import uuid
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 import chromadb
@@ -29,6 +30,8 @@ RELEVANCE_WEIGHT = 0.6
 RECENCY_WEIGHT = 0.25
 IMPORTANCE_WEIGHT = 0.15
 DAY_SECONDS = 86_400
+
+CHROMA_PATH = str(Path(__file__).resolve().parent / "chroma_data")
 
 MemoryKind = Literal["preference", "constraint", "identity", "commitment"]
 
@@ -88,7 +91,7 @@ def score_memory(
     raise NotImplementedError("TODO")
 
 
-def build_collection(path: str = ".chroma_memories"):
+def build_collection(path: str = CHROMA_PATH):
     """A persistent Chroma collection using cosine distance."""
     return chromadb.PersistentClient(path=path).get_or_create_collection(
         "cantina_memories",

@@ -177,96 +177,93 @@ def count_tokens(messages: list[dict]) -> int:
       ],
     },
   },
-  {
-    type: 'code',
-    content: {
-      title: 'A typed write decision',
-      code: `class MemoryCandidate(BaseModel):
-    text: str = Field(description="A standalone sentence")
-    kind: Literal["preference", "constraint",
-                  "identity", "commitment"]
-    importance: float = Field(ge=0.0, le=1.0)
+  //   {
+  //     type: 'code',
+  //     content: {
+  //       title: 'A typed write decision',
+  //       code: `class MemoryCandidate(BaseModel):
+  //     text: str = Field(description="A standalone sentence")
+  //     kind: Literal["preference", "constraint",
+  //                   "identity", "commitment"]
+  //     importance: float = Field(ge=0.0, le=1.0)
 
+  // class WriteDecision(BaseModel):
+  //     candidates: list[MemoryCandidate]
 
-class WriteDecision(BaseModel):
-    candidates: list[MemoryCandidate]
+  // decision = client.responses.parse(
+  //     model=MODEL, text_format=WriteDecision, input=[...]
+  // ).output_parsed`,
+  //       highlights: [
+  //         'Structured output means a typed answer, not prose to parse',
+  //         'An empty candidate list is the common and correct case',
+  //       ],
+  //     },
+  //   },
+  // {
+  //   type: 'comparison',
+  //   content: {
+  //     title: 'Where the write happens',
+  //     left: {
+  //       label: 'Hot path',
+  //       items: [
+  //         'Extract inside the turn',
+  //         'Memory available immediately',
+  //         'User waits for a second model call',
+  //         'What the demo does — visible effect',
+  //       ],
+  //     },
+  //     right: {
+  //       label: 'Background',
+  //       items: [
+  //         'Extract after the response streams',
+  //         'Turn stays fast',
+  //         'Memory lands a beat later',
+  //         'What chat products ship',
+  //       ],
+  //     },
+  //   },
+  // },
+  // {
+  //   type: 'standard',
+  //   content: {
+  //     title: 'Supersede, do not append',
+  //     icon: 'arrow-up-down',
+  //     points: [
+  //       'In March: *"keep it brief."* In June: *"give me the full detail."*',
+  //       'Append both and the model receives **two opposing instructions**.',
+  //       'It picks one at random, turn by turn — and looks broken.',
+  //       'The near-miss is **duplication**: the same preference stored on three visits.',
+  //       'Resolve both **on write**, while you still know which is newer.',
+  //     ],
+  //   },
+  // },
+  //   {
+  //     type: 'code',
+  //     content: {
+  //       title: 'Resolve on write',
+  //       code: `class MergeDecision(BaseModel):
+  //     action: Literal["store", "replace", "skip"]
+  //     target: int = -1      # which existing memory
+  //     reason: str
 
+  // neighbours = store.recall(candidate.text, patron=p, k=3)
+  // decision = resolve(candidate.text, neighbours, client)
 
-decision = client.responses.parse(
-    model=MODEL, text_format=WriteDecision, input=[...]
-).output_parsed`,
-      highlights: [
-        'Structured output means a typed answer, not prose to parse',
-        'An empty candidate list is the common and correct case',
-      ],
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Where the write happens',
-      left: {
-        label: 'Hot path',
-        items: [
-          'Extract inside the turn',
-          'Memory available immediately',
-          'User waits for a second model call',
-          'What the demo does — visible effect',
-        ],
-      },
-      right: {
-        label: 'Background',
-        items: [
-          'Extract after the response streams',
-          'Turn stays fast',
-          'Memory lands a beat later',
-          'What chat products ship',
-        ],
-      },
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Supersede, do not append',
-      icon: 'arrow-up-down',
-      points: [
-        'In March: *"keep it brief."* In June: *"give me the full detail."*',
-        'Append both and the model receives **two opposing instructions**.',
-        'It picks one at random, turn by turn — and looks broken.',
-        'The near-miss is **duplication**: the same preference stored on three visits.',
-        'Resolve both **on write**, while you still know which is newer.',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Resolve on write',
-      code: `class MergeDecision(BaseModel):
-    action: Literal["store", "replace", "skip"]
-    target: int = -1      # which existing memory
-    reason: str
-
-
-neighbours = store.recall(candidate.text, patron=p, k=3)
-decision = resolve(candidate.text, neighbours, client)
-
-if decision.action == "skip":
-    return                               # already held
-memory_id = store.remember(candidate.text, patron=p)
-if decision.action == "replace":
-    store.supersede(
-        neighbours[decision.target].memory_id, by=memory_id
-    )`,
-      highlights: [
-        'Recall the neighbours first — a conflict or duplicate is always semantically close',
-        '`skip` is the quiet win: the same preference said three times is still one memory',
-        '`supersede` sets `active=False` and records what replaced it',
-        '`forget(id)` is the same soft delete with no replacement: audit trail, no content',
-      ],
-    },
-  },
+  // if decision.action == "skip":
+  //     return                               # already held
+  // memory_id = store.remember(candidate.text, patron=p)
+  // if decision.action == "replace":
+  //     store.supersede(
+  //         neighbours[decision.target].memory_id, by=memory_id
+  //     )`,
+  //       highlights: [
+  //         'Recall the neighbours first — a conflict or duplicate is always semantically close',
+  //         '`skip` is the quiet win: the same preference said three times is still one memory',
+  //         '`supersede` sets `active=False` and records what replaced it',
+  //         '`forget(id)` is the same soft delete with no replacement: audit trail, no content',
+  //       ],
+  //     },
+  //   },
 
   // ---- Section: Select ----
   {

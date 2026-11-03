@@ -1,14 +1,21 @@
-"""Tests for Exercise 02 — Conversation Summary."""
+"""Tests for Exercise 02 — Compaction.
+
+No API key needed: the summariser is driven by a fake responses.parse that
+returns a canned Compaction.
+"""
 
 import importlib
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
+
 
 def _import_start():
     """Import start.py (or solution.py as fallback) as a module."""
     ex_dir = Path(__file__).resolve().parent
+    sys.path.insert(0, str(ex_dir))
     for name in ("start", "solution"):
         mod_path = ex_dir / f"{name}.py"
         if mod_path.exists():
@@ -20,125 +27,189 @@ def _import_start():
     raise FileNotFoundError("Neither start.py nor solution.py found")
 
 
-def _mock_client(summary_text="The user discussed various topics."):
-    """Create a mock OpenAI client that returns a fixed summary."""
-    mock = MagicMock()
-    mock_response = MagicMock()
-    mock_response.output_text = summary_text
-    mock.responses.create.return_value = mock_response
-    return mock
+def _fake_client(mod):
+    """A client whose responses.parse returns a fixed Compaction."""
+    compaction = mod.Compaction(
+        summary="Zara ordered a round for the Pathfinder crew.",
+        anchors=[
+            mod.Anchor(kind="decision", text="Charge the evening to the ship's account"),
+            mod.Anchor(kind="open_task", text="Clear Marek's 12 credits"),
+            mod.Anchor(kind="constraint", text="No synthcitrus for Tanaka"),
+        ],
+    )
+    client = MagicMock()
+    client.responses.parse.return_value = MagicMock(output_parsed=compaction)
+    return client, compaction
 
 
-# --- summarise_turns tests ---
+TOOL_CALL = {
+    "type": "function_call",
+    "name": "check_stock",
+    "call_id": "call_1",
+    "arguments": '{"drink": "Comet Tail"}',
+}
+TOOL_OUTPUT = {
+    "type": "function_call_output",
+    "call_id": "call_1",
+    "output": '{"units_remaining": 11}',
+}
 
-def test_summarise_turns_returns_string():
-    """summarise_turns returns a non-empty string."""
+
+def test_count_tokens_counts_chat_messages():
+    """More text means more tokens, and an empty list is free."""
     mod = _import_start()
-    client = _mock_client("Summary of the conversation.")
+    assert mod.count_tokens([]) == 0
 
-    turns = [
-        {"role": "user", "content": "Hello, how are you?"},
-        {"role": "assistant", "content": "I'm doing well, thanks!"},
-        {"role": "user", "content": "Tell me about Python."},
-        {"role": "assistant", "content": "Python is a great language."},
+    short = mod.count_tokens([{"role": "user", "content": "Evening."}])
+    long = mod.count_tokens([{"role": "user", "content": "Evening. " * 50}])
+    assert 0 < short < long
+
+
+def test_count_tokens_counts_tool_items():
+    """A tool call and its output are not free."""
+    mod = _import_start()
+    assert mod.count_tokens([TOOL_CALL]) > mod.MESSAGE_OVERHEAD
+    assert mod.count_tokens([TOOL_OUTPUT]) > mod.MESSAGE_OVERHEAD
+
+
+def test_safe_split_leaves_a_clean_boundary_alone():
+    """A boundary between ordinary messages does not move."""
+    mod = _import_start()
+    messages = [{"role": "user", "content": str(i)} for i in range(5)]
+    assert mod.safe_split(messages, 3) == 3
+
+
+def test_safe_split_moves_off_a_tool_output():
+    """The boundary moves back so a call and its output stay together."""
+    mod = _import_start()
+    messages = [
+        {"role": "user", "content": "How much is left?"},
+        TOOL_CALL,
+        TOOL_OUTPUT,
+        {"role": "assistant", "content": "Eleven units."},
     ]
-
-    result = mod.summarise_turns(turns, client)
-    assert isinstance(result, str)
-    assert len(result) > 0
+    assert mod.safe_split(messages, 2) == 1, "Index 2 is the output — move back to its call"
 
 
-def test_summarise_turns_calls_openai():
-    """summarise_turns calls the OpenAI client."""
+def test_safe_split_clamps_out_of_range():
     mod = _import_start()
-    client = _mock_client()
-
-    turns = [
-        {"role": "user", "content": "Hello"},
-        {"role": "assistant", "content": "Hi there"},
-    ]
-
-    mod.summarise_turns(turns, client)
-    assert client.responses.create.called
+    messages = [{"role": "user", "content": "one"}]
+    assert mod.safe_split(messages, 99) == 1
+    assert mod.safe_split(messages, -5) == 0
 
 
-# --- SmartSessionMemory tests ---
-
-def test_smart_session_basic_add():
-    """SmartSessionMemory adds messages normally below threshold."""
+def test_render_block_lists_anchors_by_kind():
+    """The block carries the summary and labels every kind present."""
     mod = _import_start()
-    session = mod.SmartSessionMemory(
-        max_turns=30, summarise_threshold=10, client=_mock_client()
+    _, compaction = _fake_client(mod)
+
+    block = mod.render_block(compaction)
+    assert "[Earlier conversation]" in block
+    assert "Zara ordered a round" in block
+    assert "Decisions: Charge the evening to the ship's account" in block
+    assert "Open tasks: Clear Marek's 12 credits" in block
+    assert "Constraints: No synthcitrus for Tanaka" in block
+
+
+def test_render_block_reemits_carried_anchors():
+    """Anchors from an earlier pass survive the next one verbatim."""
+    mod = _import_start()
+    _, compaction = _fake_client(mod)
+    carried = [mod.Anchor(kind="decision", text="Zara has standing authority")]
+
+    block = mod.render_block(compaction, carried)
+    assert "Zara has standing authority" in block
+    assert "Charge the evening to the ship's account" in block
+
+
+def test_render_block_omits_empty_kinds():
+    mod = _import_start()
+    compaction = mod.Compaction(
+        summary="Quiet evening.",
+        anchors=[mod.Anchor(kind="decision", text="Close at 0200")],
     )
-
-    session.add({"role": "user", "content": "hello"})
-    session.add({"role": "assistant", "content": "hi"})
-
-    msgs = session.get_messages()
-    assert len(msgs) == 2
+    block = mod.render_block(compaction)
+    assert "Decisions:" in block
+    assert "Open tasks:" not in block
+    assert "Constraints:" not in block
 
 
-def test_smart_session_triggers_summarisation():
-    """SmartSessionMemory summarises when exceeding threshold."""
+def test_compact_is_a_no_op_under_budget():
+    """No model call happens while the thread still fits."""
     mod = _import_start()
-    client = _mock_client("Conversation summary here.")
-    session = mod.SmartSessionMemory(
-        max_turns=30, summarise_threshold=6, client=client
-    )
+    client, _ = _fake_client(mod)
+    thread = [{"role": "user", "content": "Evening."}]
 
-    for i in range(8):
-        role = "user" if i % 2 == 0 else "assistant"
-        session.add({"role": role, "content": f"message {i}"})
-
-    msgs = session.get_messages()
-    assert len(msgs) < 8
-    assert client.responses.create.called
+    result, report = mod.compact(thread, budget_tokens=10_000, keep_recent=4, client=client)
+    assert report is None
+    assert result == thread
+    client.responses.parse.assert_not_called()
 
 
-def test_smart_session_preserves_recent_messages():
-    """After summarisation, recent messages are preserved."""
+def test_compact_replaces_the_old_span_with_one_block():
+    """Over budget, the old span becomes a single system message."""
     mod = _import_start()
-    client = _mock_client("Summary of old messages.")
-    session = mod.SmartSessionMemory(
-        max_turns=30, summarise_threshold=6, client=client
-    )
+    client, _ = _fake_client(mod)
+    thread = [{"role": "user", "content": f"Turn number {i} of the evening."} for i in range(12)]
 
-    for i in range(8):
-        role = "user" if i % 2 == 0 else "assistant"
-        session.add({"role": role, "content": f"message {i}"})
+    result, report = mod.compact(thread, budget_tokens=20, keep_recent=4, client=client)
 
-    msgs = session.get_messages()
-    contents = [m["content"] for m in msgs]
-    assert any("message 7" in c for c in contents)
+    assert report is not None
+    assert result[0]["role"] == "system"
+    assert "[Earlier conversation]" in result[0]["content"]
+    assert result[1:] == thread[-4:], "The recent messages stay verbatim"
+    assert report.messages_compacted == 8
+    assert report.tokens_after < report.tokens_before
 
 
-def test_smart_session_stores_summary():
-    """SmartSessionMemory stores the summary text."""
+def test_compact_keeps_tool_pairs_together():
+    """The split boundary moves rather than orphaning a tool output."""
     mod = _import_start()
-    client = _mock_client("Important conversation details.")
-    session = mod.SmartSessionMemory(
-        max_turns=30, summarise_threshold=6, client=client
-    )
+    client, _ = _fake_client(mod)
+    thread = [{"role": "user", "content": f"Turn {i} of a long evening."} for i in range(8)]
+    thread += [TOOL_CALL, TOOL_OUTPUT, {"role": "assistant", "content": "Eleven units."}]
 
-    for i in range(8):
-        role = "user" if i % 2 == 0 else "assistant"
-        session.add({"role": role, "content": f"message {i}"})
+    result, report = mod.compact(thread, budget_tokens=20, keep_recent=2, client=client)
 
-    summary = session.get_summary()
-    assert isinstance(summary, str)
-    assert len(summary) > 0
+    assert report.actual_split != report.requested_split, "The boundary should have moved"
+    kept = [m.get("type") for m in result[1:]]
+    assert kept.count("function_call") == kept.count("function_call_output") == 1
 
 
-def test_smart_session_no_summarise_without_client():
-    """SmartSessionMemory does not summarise if no client is provided."""
+def test_compact_report_counts_tokens():
     mod = _import_start()
-    session = mod.SmartSessionMemory(
-        max_turns=30, summarise_threshold=4, client=None
-    )
+    client, _ = _fake_client(mod)
+    thread = [{"role": "user", "content": f"Turn number {i} of the evening."} for i in range(12)]
 
-    for i in range(6):
-        role = "user" if i % 2 == 0 else "assistant"
-        session.add({"role": role, "content": f"message {i}"})
+    _, report = mod.compact(thread, budget_tokens=20, keep_recent=4, client=client)
+    assert report.tokens_before == mod.count_tokens(thread)
+    assert report.tokens_after > 0
 
-    msgs = session.get_messages()
-    assert len(msgs) == 6
+
+def test_build_system_prompt_includes_memories():
+    mod = _import_start()
+    memory = MagicMock(text="Zara takes the Comet Tail with extra fizz.")
+
+    assert "Comet Tail" in mod.build_system_prompt([memory])
+    assert "BARKEEP" in mod.build_system_prompt([])
+    assert "Comet Tail" not in mod.build_system_prompt([])
+
+
+def test_sample_thread_contains_a_tool_pair():
+    """The /seed thread has to exercise the tool-pair path."""
+    mod = _import_start()
+    types = [m.get("type") for m in mod.SAMPLE_THREAD]
+    assert "function_call" in types
+    assert "function_call_output" in types
+
+
+@pytest.mark.parametrize("budget", [0, 20])
+def test_compact_handles_short_threads(budget):
+    """A thread no longer than keep_recent is left alone."""
+    mod = _import_start()
+    client, _ = _fake_client(mod)
+    thread = [{"role": "user", "content": "Evening."}, {"role": "assistant", "content": "Hello."}]
+
+    result, report = mod.compact(thread, budget_tokens=budget, keep_recent=4, client=client)
+    assert report is None
+    assert result == thread

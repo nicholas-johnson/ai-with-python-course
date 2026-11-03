@@ -1,133 +1,130 @@
-# Exercise 02 — Conversation Summary
+# Exercise 02 — Compaction
 
 ## Recap
 
-Long conversations overflow the context window. The naive fix -- drop old messages -- loses important context. A better approach is **summarisation**: compress older turns into a paragraph that preserves the key points.
+Exercise 01 handled memory: durable facts written to a store and selected back when relevant. This exercise handles the other half of the budget problem — **history**, the one component that grows every turn and has no natural ceiling. Turn fifty resends turns one through forty-nine.
 
-The pattern works like this:
+Dropping the oldest messages is the obvious fix and the wrong one. The oldest turns are where the decisions were made. "Charge everything to the ship's account" was agreed on turn three; truncate turn three and BARKEEP starts asking for credits again.
 
-```
-[system prompt]
-[summary of turns 1-20]     <- compressed into one message
-[turn 21: user message]
-[turn 22: assistant reply]
-...
-[turn 30: latest message]
-```
-
-When the conversation exceeds a threshold, the oldest half of messages gets summarised by the LLM and replaced with a single system message. This keeps the context window manageable while preserving continuity.
-
-**Summarisation** calls the LLM itself:
+**Compaction** replaces a span of history with a summary that deliberately preserves the load-bearing parts. You name them rather than hoping the summary keeps them:
 
 ```python
-def summarise_turns(turns, client):
-    formatted = "\n".join(f"{t['role']}: {t['content']}" for t in turns)
-    response = client.responses.create(
-        model=MODEL,
-        reasoning={"effort": "none"},
-        input=[
-            {"role": "system", "content": "Summarise this conversation..."},
-            {"role": "user", "content": formatted},
-        ],
-    )
-    return response.output_text
+class Anchor(BaseModel):
+    kind: Literal["decision", "open_task", "constraint"]
+    text: str
+
+
+class Compaction(BaseModel):
+    summary: str
+    anchors: list[Anchor]
 ```
+
+Three things go wrong if you are careless, and all three are in this exercise:
+
+| Failure | What happens | The fix here |
+| ------- | ------------ | ------------ |
+| Orphaned tool pair | A `function_call` without its `function_call_output` is an API error | `safe_split` walks the boundary back |
+| Broken cache prefix | Prompt caching keys on the longest identical prefix, so rewriting the front costs full price on every later call | The system prompt is assembled outside the thread and never rewritten |
+| Summary-of-summary drift | Compacting a compaction bleeds detail away a pass at a time | `carried` anchors are re-emitted verbatim |
 
 ## The scenario
 
-It's a busy night at **The Nebula's Edge**. Patrons come in, sit at the bar, and talk for hours -- stories about close calls in the asteroid belt, complaints about station management, gossip about who's docking tomorrow. BARKEEP listens to all of it.
+Same cantina, same BARKEEP, but now it is a long evening. The Pathfinder crew has been in for hours, decisions have been made, a tab is outstanding, and the conversation has long since outgrown a sensible prompt.
 
-But a conversation that stretches across 30+ exchanges won't fit in the context window. BARKEEP needs to compress the early part of the evening into a summary while keeping the last few exchanges verbatim -- because the patron just ordered another round and you need to remember what they're drinking *right now*.
+Exercise 01's memory store comes along as `memory_store.py`, so recall keeps working while you deal with history. Swap in your own version if you would rather.
 
 ## What you build
 
-A console app in **`start.py`** that extends the memory store from Exercise 1 with automatic conversation summarisation. When the session buffer gets too long, the oldest messages are compressed into a summary.
-
-The Exercise 1 solution is provided as `memory_store.py`.
-
-**Key components:**
+Compaction in **`start.py`**, wired into the chat loop so it fires on a budget trigger.
 
 | Component | Description |
-|---|---|
-| `summarise_turns(turns, client)` | Call OpenAI to compress a list of messages into a summary paragraph |
-| `SmartSessionMemory` | Extends `SessionMemory` -- auto-summarises when messages exceed a threshold |
+| --- | --- |
+| `count_tokens` | Token cost of a message list, tool items included |
+| `safe_split` | A split boundary that never separates a tool call from its output |
+| `summarise` | Structured call returning a summary plus anchors |
+| `render_block` | The single system message that replaces the old span |
+| `compact` | Budget trigger, split, summarise, rebuild, report |
+| `build_system_prompt` | Persona plus recalled memories |
+| `chat` | Recall, compact if over budget, answer |
 
 ## Step-by-step
 
-### 1. Import from `memory_store`
+### 1. `count_tokens`
 
-The Exercise 1 solution is provided as `memory_store.py`:
+Encode each message's text with `ENCODING` and add `MESSAGE_OVERHEAD` for the role and delimiters.
 
-```python
-from memory_store import SessionMemory, LongTermMemory, MemoryEntry, build_system_prompt, chat
-```
+The catch: a Responses API item does not always carry text in `content`. A `function_call` has `arguments` and `name`; a `function_call_output` has `output`. Miss those and tool calls count as free, which is exactly backwards — tool output is often the biggest thing in the thread.
 
-### 2. Implement `summarise_turns`
+### 2. `safe_split`
 
-Write a function that takes a list of message dicts and an OpenAI client, and returns a summary string:
+Clamp the index into range, then walk backwards while the message at that index is a `function_call_output`. Mind the ends: the index can legitimately equal `len(messages)`, and indexing there will raise.
 
-1. Format the turns into a readable transcript
-2. Call the model (`MODEL`) with a system prompt instructing it to summarise the conversation concisely
-3. Return the summary text
+### 3. `summarise`
 
-### 3. Implement `SmartSessionMemory`
+Flatten the span into a transcript, then one structured call with `text_format=Compaction`. Note what `COMPACT_PROMPT` asks for: at most five anchors, each a short clause. Without that cap the model writes an exhaustive anchor list that is as long as the conversation it replaced, and you save nothing.
 
-Extend `SessionMemory` with auto-summarisation:
+### 4. `render_block`
 
-- Override `add(message)` to check if the message count exceeds a threshold (e.g. 10 messages)
-- When triggered, take the oldest half of messages, summarise them, and replace them with a single `{"role": "system", "content": "[Summary] ..."}` message
-- Store the OpenAI client reference so `add` can call `summarise_turns`
-- Track the running summary so multiple summarisations accumulate
+Concatenate the carried anchors with the new ones, then emit the summary followed by one line per kind that has entries. Carried anchors go in verbatim — that is the whole defence against drift.
 
-### 4. Build the interactive loop
+### 5. `compact`
 
-The interactive loop uses `SmartSessionMemory` instead of `SessionMemory`, plus long-term memory from Exercise 1. The following commands are available:
+1. Return `(messages, None)` when you are already under budget or the thread is no longer than `keep_recent`. No model call unless you are genuinely over — compaction is a trigger, not a scheduled job.
+2. Split at `len(messages) - keep_recent`, passed through `safe_split`.
+3. Summarise the old span, render it into one system message, and return `[block, *recent]` with a `CompactionReport`.
 
-| Command | Action |
-|---|---|
-| any text | Chat with BARKEEP (summarisation happens automatically) |
-| `/summary` | Show the current accumulated summary |
-| `/turns` | Show how many messages are in the session buffer |
-| `/force-summarise` | Manually trigger summarisation of the current buffer |
-| `/memories` | Show long-term memories |
-| `quit` | Exit |
+### 6. `chat`
+
+Recall, append the user turn, compact, answer, append the reply. One subtlety: `compact` returns a new list, so write it back with `thread[:] = compacted` rather than rebinding the local name, or the caller keeps the old thread.
 
 ## Try it
 
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-cd module-07-agent-memory/exercises/02-conversation-summary
+cd module-07-agent-memory/exercises/02-compaction
 python start.py
 
 # Option B - uv (no activation needed):
-cd module-07-agent-memory/exercises/02-conversation-summary
+cd module-07-agent-memory/exercises/02-compaction
 uv run python start.py
 ```
 
-Have a long conversation (10+ exchanges) -- tell BARKEEP stories, order drinks, ask about the station. Watch the `/turns` count -- when it hits the threshold, summarisation triggers automatically. Use `/summary` to see the compressed history. Use `/force-summarise` to trigger it manually.
+| Command | Action |
+| --- | --- |
+| any text | Chat with BARKEEP |
+| `/seed` | Load a canned long evening, including a tool call pair |
+| `/budget` | Current token count against the budget |
+| `/thread` | The message list as it stands |
+| `/anchors` | Every anchor carried so far |
+| `/compact` | Force a compaction now |
+| `quit` | Exit |
+
+Try this: `/seed`, then `/budget` to see you are over, then `/compact` and watch the boundary move off the tool output. `/thread` shows the block that replaced eleven messages. Then ask "who is paying tonight?" — the answer should still be the ship's account, because it survived as an anchor.
 
 ## Tests
 
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-cd module-07-agent-memory/exercises/02-conversation-summary
+cd module-07-agent-memory/exercises/02-compaction
 pytest test_start.py -v
 
 # Option B - uv (no activation needed):
-cd module-07-agent-memory/exercises/02-conversation-summary
+cd module-07-agent-memory/exercises/02-compaction
 uv run --extra dev pytest test_start.py -v
 ```
 
-The tests check:
-- `summarise_turns` returns a non-empty string (mocked OpenAI call)
-- `SmartSessionMemory` triggers summarisation at the threshold
-- `SmartSessionMemory` preserves recent messages after summarisation
-- No real OpenAI calls are made in tests
+No API key needed — `responses.parse` is mocked to return a fixed `Compaction`. The tests check that:
+
+- `count_tokens` counts chat messages and tool items alike
+- `safe_split` leaves a clean boundary alone, moves off a tool output, and clamps out-of-range input
+- `render_block` labels each anchor kind, omits empty ones, and re-emits carried anchors
+- `compact` makes no model call under budget, replaces the old span with one block, keeps the recent messages verbatim, and never orphans a tool pair
 
 ## Stretch goals
 
-- Implement progressive summarisation: summarise the summary when it gets too long
-- Add token counting instead of message counting for the threshold
-- Compare summaries at different compression levels
+- Compact in a loop until the thread is actually under budget. One pass often gets close but not all the way.
+- Deduplicate anchors before rendering: after three passes you will have the same decision three times.
+- Track how many times a span has been compacted and log it. Watch the detail degrade generation by generation.
+- Write the pre-compaction thread to a JSONL file first. When an agent answers oddly after a compaction, that file is the only way to find out what it used to know.
