@@ -207,6 +207,20 @@ The `[Source N]` format lets you trace every claim back to a chunk. Post-process
 
 ---
 
+## Setup
+
+The demo and exercises import ChromaDB, which is not part of the base install. From the repo root:
+
+```bash
+# Option A - pip (venv active):
+pip install -e ".[rag]"
+
+# Option B - uv:
+uv sync --extra rag
+```
+
+The `rag` extra installs ChromaDB, plus `sentence-transformers` and `networkx` (used in later modules).
+
 ## Demos
 
 The demo is a multi-step walkthrough using a persistent ChromaDB (via Docker). See [`demo/README.md`](demo/README.md) for full instructions.
