@@ -83,16 +83,25 @@ Two places you can run this. On the **hot path**, right inside the turn, the mem
 
 The failure that actually bites in production is contradiction. A patron says "keep it brief" in March and "give me the full detail" in June. Append both and the model now receives two opposing instructions and picks one at random, turn by turn.
 
-Resolve on write. Recall the neighbours of the new fact first, ask whether it conflicts, and mark the loser superseded:
+The near-miss is duplication. "I always take the Comet Tail" said three times over three visits is three memories saying one thing, crowding out the facts that only got said once.
+
+Both are resolved on write, and both need the same first step: recall the neighbours of the new fact, because a contradiction or a duplicate is always semantically close to it.
 
 ```python
-def write(self, text: str, *, patron: str, kind: str, importance: float = 1.0) -> str:
-    neighbours = self.recall(text, patron=patron, k=3)
-    conflict = find_conflict(text, neighbours, self.client)   # structured call
-    memory_id = self.remember(text, patron=patron, kind=kind, importance=importance)
-    if conflict:
-        self.supersede(conflict.memory_id, by=memory_id)
-    return memory_id
+class MergeDecision(BaseModel):
+    action: Literal["store", "replace", "skip"]
+    target: int = -1          # which existing memory, for replace and skip
+    reason: str
+
+
+neighbours = store.recall(candidate.text, patron=patron, k=3)
+decision = resolve(candidate.text, neighbours, client)      # structured call
+
+if decision.action == "skip":
+    return                                                   # already held
+memory_id = store.remember(candidate.text, patron=patron, kind=candidate.kind)
+if decision.action == "replace":
+    store.supersede(neighbours[decision.target].memory_id, by=memory_id)
 ```
 
 `supersede` flips the old entry's `active` flag to `False` and records the id that replaced it. The entry stops being recalled, but the trail survives — which is also exactly what you want for a privacy request. `forget(memory_id)` is the same soft delete with no replacement: the content stops reaching the model, while the record that something was removed remains for audit.
@@ -228,7 +237,7 @@ Both halves of the module belong on that server. Memory tools let the agent writ
 ## Summary
 
 - **Budget the window.** Count tokens, know which component is eating them, and remember that a full window reads worse than a selective one.
-- **Supersede, do not append.** A new fact that contradicts an old one replaces it; soft-delete keeps the audit trail without feeding the model the conflict.
+- **Supersede, do not append.** A new fact that contradicts an old one replaces it, and one that merely repeats it is skipped. Soft-delete keeps the audit trail without feeding the model the conflict.
 - **Recall semantically and score it.** Embed memories, filter by namespace, then rank on relevance, recency, and importance. Decay is a weight, not a delete.
 - **Compact, do not truncate.** Preserve decisions, open tasks, and constraints by name, keep tool pairs intact, and leave the cache prefix alone.
 

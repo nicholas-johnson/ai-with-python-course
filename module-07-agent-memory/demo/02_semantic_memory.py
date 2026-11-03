@@ -6,9 +6,8 @@ Run alone:  python module-07-agent-memory/demo/02_semantic_memory.py
 import time
 
 from dotenv import load_dotenv
-from openai import OpenAI
-
 from memory_store import MemoryStore
+from openai import OpenAI
 
 load_dotenv()
 
@@ -21,7 +20,13 @@ SEED = [
     ("Zara is the quartermaster on the Pathfinder.", "role_assignment", "identity", 0.8, 120),
     ("Zara reacts badly to synthcitrus in any form.", "medical_note", "constraint", 1.0, 210),
     ("Zara prefers her briefings short.", "comms_style", "preference", 0.6, 11),
-    ("Zara asked to be told when the Pathfinder Sour is back in stock.", "open_request", "commitment", 0.5, 2),
+    (
+        "Zara asked to be told when the Pathfinder Sour is back in stock.",
+        "open_request",
+        "commitment",
+        0.5,
+        2,
+    ),
     ("Zara's shore leave ends on stardate 2288.4.", "schedule_note", "commitment", 0.4, 6),
 ]
 

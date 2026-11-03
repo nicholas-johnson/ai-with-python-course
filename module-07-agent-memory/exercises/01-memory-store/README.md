@@ -2,104 +2,95 @@
 
 ## Recap
 
-Agents need **memory** to be useful across turns. There are two fundamental types:
+An LLM remembers nothing between calls. Memory is two moves you build yourself: **write** facts to a store outside the model, and **select** them back into the next prompt.
 
-**Session memory** (short-term) holds the current conversation. It's a sliding window of messages that gets sent to the LLM on every call. Without it, the agent forgets what you just said. A cap prevents the context window from overflowing:
-
-```python
-class SessionMemory:
-    def __init__(self, max_turns=20):
-        self.messages = []
-
-    def add(self, message):
-        self.messages.append(message)
-        if len(self.messages) > self.max_turns:
-            self.messages.pop(0)  # drop oldest
-```
-
-**Long-term memory** persists facts across sessions. Each entry has an **importance score** that decays over time -- if a fact isn't reinforced, it fades. This mimics how human memory works: frequently-used facts stay strong, stale ones are forgotten:
+Selecting is a retrieval problem, so it uses the tools from Module 5. Memories go into a vector collection; the current turn is the query. Similarity alone is not enough to rank them, so you over-fetch and score on three signals:
 
 ```python
-@dataclass
-class MemoryEntry:
-    value: str
-    importance: float = 1.0   # decays each tick
-    timestamp: float = ...
-    forgotten: bool = False   # soft-delete
+similarities = [1.0 - d for d in results["distances"][0]]   # cosine distance -> similarity
+relevances = normalise(similarities)                        # spread across [0, 1]
+
+recency = 0.5 ** (age_days / HALF_LIFE_DAYS)                # decay, as a weight
+score = 0.6 * relevance + 0.25 * recency + 0.15 * importance
 ```
 
-The agent uses long-term memory by injecting relevant facts into the system prompt. It can also **auto-detect** memorable facts from conversation and store them.
+Writing has three possible outcomes, not one:
+
+| Outcome | When | What you do |
+| ------- | ---- | ----------- |
+| `store` | Genuinely new | Write it |
+| `replace` | It contradicts something held — a changed preference, a settled tab | Write it, then supersede the old one |
+| `skip` | Something held already says this | Write nothing |
+
+Both `supersede` and `forget` are soft deletes: `active` goes to `False` and the row stays. The content stops reaching the model while the record that it existed survives, which is what an audit trail needs.
 
 ## The scenario
 
-You're building **BARKEEP** -- the AI bartender at **The Nebula's Edge**, a cantina on Relay Station Omicron. A good bartender remembers every regular's order, their dietary restrictions, and the stories they share over drinks. Memory is the entire premise: "the usual" only works if you remember what "the usual" is.
+You are building **BARKEEP** — the AI bartender at **The Nebula's Edge**, a cantina on Relay Station Omicron. A good bartender remembers every regular's usual, their allergies, and who still owes for last rotation. Memory is the entire premise: "the usual" only works if you know what the usual is.
 
-- **Session memory** keeps track of the current evening's conversation -- who ordered what, what stories were told.
-- **Long-term memory** remembers facts across visits: "Zara always orders a Comet Tail with extra fizz", "Chief Tanaka is allergic to synthcitrus", "Marek still owes 12 credits on his tab."
-- **Decay** ensures old drink specials and temporary crew postings fade in relevance.
-- **Forget** handles privacy: when a patron says "forget I mentioned the cargo in bay 4", the bartender complies.
+The cantina has more than one regular, so the store is namespaced. Zara's memories must never surface while you are serving Tanaka — the `where` filter on every query is the only thing standing between you and a privacy incident.
 
 ## What you build
 
-A console app in **`start.py`** that implements both memory types and wires them into an interactive chat agent powered by OpenAI.
-
-**Key classes/functions:**
+A console app in **`start.py`**: a Chroma-backed semantic memory store wired into an interactive chat agent.
 
 | Component | Description |
-|---|---|
-| `SessionMemory` | Capped message buffer with `add` and `get_messages` |
-| `LongTermMemory` | Key-value store with `remember`, `recall`, `forget`, `tick_decay` |
-| `MemoryEntry` | Dataclass holding value, importance, timestamp, forgotten flag |
-| `build_system_prompt` | Injects long-term memories into the BARKEEP system prompt |
-| `chat` | Orchestrates session + long-term memory with OpenAI calls |
+| --- | --- |
+| `embed` | One string to one embedding vector |
+| `normalise` | Min-max the similarities across the candidate set |
+| `recency_weight`, `score_memory` | Half-life decay, and the weighted blend of the three signals |
+| `MemoryStore.remember` | Write one memory with its metadata |
+| `MemoryStore.recall` | Over-fetch, score, sort, return the top k |
+| `MemoryStore._deactivate` | The soft delete behind `supersede` and `forget` |
+| `propose_memories` | Structured call deciding what a turn is worth keeping |
+| `write_memories` | Branch on store / replace / skip |
+| `build_system_prompt` | Persona plus the recalled memory block |
+| `chat` | Recall, answer, then write |
+
+`resolve` — the structured call that chooses between store, replace, and skip — is given to you. What you do with its answer is the interesting part.
 
 ## Step-by-step
 
-### 1. Implement `SessionMemory`
+### 1. The scoring functions
 
-The session buffer holds chat messages as `{"role": ..., "content": ...}` dicts:
+Start here, because the tests for them need nothing but Python.
 
-- `add(message)` -- append the message. If the buffer exceeds `max_turns`, drop the oldest message.
-- `get_messages()` -- return the current message list.
-- `clear()` -- already provided, resets the buffer.
+- `embed(text, client)` — call `client.embeddings.create(model=EMBED_MODEL, input=[text])` and return `response.data[0].embedding`.
+- `normalise(similarities)` — min-max across the list. Return `[]` for an empty list, and `1.0` for every entry when they are all equal. Without this step, raw cosine similarities sit in a band around 0.03 to 0.38 while recency spans 0 to 1, and recency wins every ranking.
+- `recency_weight(written_at, now)` — `0.5 ** (age_days / HALF_LIFE_DAYS)`, with age floored at zero.
+- `score_memory(relevance, written_at, importance, now)` — return `(recency, combined)` using the three weight constants.
 
-### 2. Implement `LongTermMemory`
+### 2. `MemoryStore.remember`
 
-A dictionary-backed store where keys are topic labels and values are `MemoryEntry` objects:
+Call `self.collection.add` with the id, the embedding, the document text, and a metadata dict holding `patron`, `kind`, `importance`, `written_at`, `active=True`, and `superseded_by=""`.
 
-- `remember(key, value, importance=1.0)` -- store a new entry (or overwrite an existing one, refreshing the timestamp).
-- `recall(prefix="")` -- return all non-forgotten entries. If `prefix` is given, filter to keys that start with it. Sort by importance descending.
-- `forget(key)` -- mark an entry as forgotten (soft delete). Return `True` if found.
-- `tick_decay(factor=0.9)` -- multiply every non-forgotten entry's importance by `factor`. Remove entries that drop below 0.1. Return the count of removed entries.
+Chroma metadata values have to be `str`, `int`, `float`, or `bool` — that is why `superseded_by` starts as an empty string rather than `None`.
 
-### 3. Implement `build_system_prompt`
+### 3. `MemoryStore.recall`
 
-Build a system prompt string that includes the BARKEEP persona and the top long-term memories. Call `long_term.recall()` to get active memories, then format them into the prompt so the LLM knows what it remembers about each patron.
+1. Query with `n_results=max(k * 4, k)` — over-fetch, because you are about to rescore.
+2. Filter with `where={"$and": [{"patron": {"$eq": patron}}, {"active": {"$eq": True}}]}`. Both clauses matter: the first is the namespace, the second hides soft-deleted rows.
+3. Return `[]` when nothing comes back.
+4. Turn distances into similarities, normalise them, score each candidate, sort descending, return the first `k`.
 
-### 4. Implement `chat`
+### 4. `MemoryStore._deactivate`
 
-Wire everything together:
+Fetch the row by id, return `False` if it is not there, then copy the metadata, set `active=False` and `superseded_by`, and `update` it. `supersede` and `forget` are already written on top of this.
 
-1. Add the user's message to session memory
-2. Build the system prompt (with long-term memories)
-3. Construct the messages list: system prompt + session history
-4. Call `client.responses.create` with `model=MODEL, reasoning={"effort": "none"}`
-5. Add the assistant's response to session memory
-6. Auto-detect memorable facts: make a second LLM call asking "What facts from this exchange are worth remembering long-term?" and store any results
-7. Return the response text
+### 5. `propose_memories` and `write_memories`
 
-### 5. Run the interactive loop
+`propose_memories` is a structured call with `text_format=WriteDecision`. Most turns should return an empty list — that is the correct answer for "what's on tap tonight?".
 
-The `main()` function and command handling are already provided. Once you implement the core functions, these commands will work:
+`write_memories` is where the three outcomes live. For each candidate:
 
-| Command | Action |
-|---|---|
-| any text | Chat with BARKEEP |
-| `/memories` | Show all long-term memories with importance scores |
-| `/decay` | Apply one tick of decay to all memories |
-| `/forget <key>` | Forget a specific memory by key |
-| `/session` | Show session buffer stats and recent messages |
-| `quit` | Exit |
+1. `store.recall(candidate.text, patron=patron, k=3)` — the neighbours. A contradiction or a duplicate is always semantically close to the new fact, so this is where it will be.
+2. `resolve(...)` for the decision.
+3. On `skip`, print a note and move on.
+4. Otherwise `remember` it, and on `replace` supersede `neighbours[decision.target].memory_id`.
+
+### 6. `build_system_prompt` and `chat`
+
+The prompt is `PERSONA` plus a bulleted block of recalled memory text. `chat` recalls against the user's message, answers with `[system, *thread]`, then writes. Writing on the hot path costs the user a second call; a production chat would do it in the background after streaming the reply.
 
 ## Try it
 
@@ -114,7 +105,16 @@ cd module-07-agent-memory/exercises/01-memory-store
 uv run python start.py
 ```
 
-Chat with BARKEEP and tell it your drink order, your name, or a secret. Use `/memories` to see what it stored. Apply `/decay` a few times and watch importance scores drop. Use `/forget` to ask it to forget something specific.
+| Command | Action |
+| --- | --- |
+| any text | Chat with BARKEEP |
+| `/memories` | Every live memory for the current patron |
+| `/recall <query>` | Run recall and show the score breakdown |
+| `/forget <n>` | Soft-delete memory `n` from the `/memories` listing |
+| `/patron <name>` | Switch patrons — fresh conversation, separate memories |
+| `quit` | Exit |
+
+Worth doing in order: tell BARKEEP your usual, then tell it again in different words and watch the writer skip it. Change your mind about something and watch the old memory get superseded. Then `/patron tanaka` and check that none of Zara's memories follow you.
 
 ## Tests
 
@@ -129,14 +129,19 @@ cd module-07-agent-memory/exercises/01-memory-store
 uv run --extra dev pytest test_start.py -v
 ```
 
-The tests check:
-- `SessionMemory` adds messages and trims at `max_turns`
-- `LongTermMemory` stores, recalls, forgets, and decays entries
-- `build_system_prompt` returns a non-empty string
-- No OpenAI calls are made in tests -- only the data structures are tested
+The tests need no API key and no ChromaDB — the collection is a dict-backed stub with canned distances and embeddings come from a mock. They check that:
+
+- `normalise` spreads candidates across `[0, 1]` and survives empty and all-equal input
+- `recency_weight` halves once per half-life
+- `score_memory` is the weighted sum of the three signals
+- `remember` and `recall` round-trip a memory with its metadata
+- recall is namespaced per patron, respects `k`, and ranks a relevant old memory above a fresh irrelevant one
+- `forget` stops recall but leaves the row, and `supersede` records what replaced it
+- `build_system_prompt` carries both the persona and the recalled text
 
 ## Stretch goals
 
-- Add a `/save` and `/load` command that persists long-term memory to a JSON file
-- Implement importance boosting: if a patron re-mentions a fact, increase its importance instead of overwriting
-- Add semantic recall using embeddings instead of prefix matching
+- Add `/why <query>`: show every candidate the over-fetch returned, including the ones that lost, with their three component scores. Useful when recall surprises you.
+- Tune the weights. Set `RECENCY_WEIGHT` to 0.6 and find a query where the ranking becomes obviously wrong.
+- Write memories in the background with `asyncio` so the reply streams first and the write lands after.
+- Add a `kind` boost: constraints outrank preferences at equal relevance, because serving someone an allergen is worse than forgetting their usual.

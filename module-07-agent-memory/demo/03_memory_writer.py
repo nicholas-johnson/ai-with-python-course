@@ -6,10 +6,9 @@ Run alone:  python module-07-agent-memory/demo/03_memory_writer.py
 import time
 
 from dotenv import load_dotenv
-from openai import OpenAI
-
 from memory_store import MemoryStore
 from memory_writer import propose_memories, write_candidates
+from openai import OpenAI
 
 load_dotenv()
 
@@ -27,7 +26,8 @@ TURNS = [
     "What have you got on tap tonight?",
     "Same as always for me — the Comet Tail, extra fizz.",
     "I am waiting on my crewmate, so just water for now.",
-    "Actually, from now on give me the full detail on everything — I would rather have too much than miss something.",
+    "Actually, from now on give me the full detail on everything — "
+    "I would rather have too much than miss something.",
     "Cheers. Busy station tonight.",
     "Worth knowing: I am the quartermaster on the Pathfinder, so tabs can go to the ship.",
 ]

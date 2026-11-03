@@ -7,10 +7,9 @@ keeping; the second asks whether the new fact contradicts one already stored.
 import os
 from typing import Literal
 
+from memory_store import MemoryStore
 from openai import OpenAI
 from pydantic import BaseModel, Field
-
-from memory_store import MemoryStore
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
@@ -63,7 +62,9 @@ memories already held that are closest to it. Choose one action:
 Prefer skip over store when the difference is only phrasing."""
 
 
-def propose_memories(user_message: str, client: OpenAI, patron: str = "the patron") -> list[MemoryCandidate]:
+def propose_memories(
+    user_message: str, client: OpenAI, patron: str = "the patron"
+) -> list[MemoryCandidate]:
     """Ask the model what, if anything, this turn is worth remembering."""
     response = client.responses.parse(
         model=MODEL,

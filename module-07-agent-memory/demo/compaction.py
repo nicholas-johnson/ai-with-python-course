@@ -8,10 +8,9 @@ import os
 from dataclasses import dataclass
 from typing import Literal
 
+from budget import count_messages
 from openai import OpenAI
 from pydantic import BaseModel, Field
-
-from budget import count_messages
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 

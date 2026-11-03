@@ -162,7 +162,10 @@ HISTORY = [
             "the fifty-credit clearance threshold."
         ),
     },
-    {"role": "user", "content": "Add it to tonight's account and clear it. How much Comet Tail is left?"},
+    {
+        "role": "user",
+        "content": "Add it to tonight's account and clear it. How much Comet Tail is left?",
+    },
     {
         "type": "function_call",
         "name": "check_stock",

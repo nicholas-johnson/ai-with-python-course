@@ -119,3 +119,89 @@ def test_run_react_handles_tool_calls():
     tool_steps = [s for s in result["trace"] if s["type"] == "tool"]
     assert len(tool_steps) == 1
     assert tool_steps[0]["name"] == "calculator"
+    assert result["stop_reason"] == "answered"
+
+
+def _calculator_call(call_id: str = "call_1", expression: str = "2 + 2"):
+    """Build a mock function_call item for the calculator tool."""
+    call = MagicMock(
+        type="function_call", call_id=call_id, arguments=json.dumps({"expression": expression})
+    )
+    call.name = "calculator"  # MagicMock(name=...) would name the mock, not set .name
+    return call
+
+
+def test_run_react_blocks_repeated_calls():
+    """Guard 2: an identical tool call is not executed a second time."""
+    mod = _import_start()
+
+    mock_client = MagicMock()
+    mock_client.responses.create.side_effect = [
+        MagicMock(output=[_calculator_call("call_1")], output_text=""),
+        MagicMock(output=[_calculator_call("call_2")], output_text=""),
+        MagicMock(output=[], output_text="The result is 4."),
+    ]
+
+    # Patch the registry entry, not the module attribute: run_react dispatches
+    # through TOOLS, which holds a direct reference to the original function.
+    spy = MagicMock(wraps=mod.TOOLS["calculator"])
+    with patch.dict(mod.TOOLS, {"calculator": spy}):
+        result = mod.run_react("What is 2 + 2?", mock_client, max_steps=5)
+
+    assert spy.call_count == 1, "The repeated call should not reach the tool"
+    guard_steps = [s for s in result["trace"] if s["type"] == "guard"]
+    assert len(guard_steps) == 1, "The repeat should be recorded in the trace"
+    assert result["answer"] == "The result is 4."
+
+
+def test_run_react_allows_repeat_after_state_changes():
+    """Guard 2 is not blind: a mutating call makes an earlier read valid again."""
+    mod = _import_start()
+    mod._notes.clear()
+
+    def _read_call(call_id: str):
+        call = MagicMock(type="function_call", call_id=call_id, arguments=json.dumps({}))
+        call.name = "read_notes"
+        return call
+
+    def _write_call(call_id: str, content: str):
+        call = MagicMock(
+            type="function_call", call_id=call_id, arguments=json.dumps({"content": content})
+        )
+        call.name = "take_note"
+        return call
+
+    mock_client = MagicMock()
+    mock_client.responses.create.side_effect = [
+        MagicMock(output=[_read_call("c1")], output_text=""),
+        MagicMock(output=[_write_call("c2", "a new note")], output_text=""),
+        MagicMock(output=[_read_call("c3")], output_text=""),
+        MagicMock(output=[], output_text="Done."),
+    ]
+
+    result = mod.run_react("Check the notes, add one, check again", mock_client, max_steps=6)
+
+    read_steps = [s for s in result["trace"] if s["type"] == "tool" and s["name"] == "read_notes"]
+    assert len(read_steps) == 2, "The second read follows a write, so it must be allowed"
+    assert "a new note" in read_steps[1]["result"]
+    mod._notes.clear()
+
+
+def test_run_react_forces_an_answer_when_out_of_steps():
+    """Guard 3: exhausting the budget still produces an answer, not None."""
+    mod = _import_start()
+
+    mock_client = MagicMock()
+    # The model never stops asking for tools, so the budget runs out. The final
+    # response is the forced-answer call the loop makes on its way out.
+    mock_client.responses.create.side_effect = [
+        MagicMock(output=[_calculator_call("call_1", "1 + 1")], output_text=""),
+        MagicMock(output=[_calculator_call("call_2", "2 + 2")], output_text=""),
+        MagicMock(output=[], output_text="Partial answer: I ran out of steps."),
+    ]
+
+    result = mod.run_react("Keep going forever", mock_client, max_steps=2)
+
+    assert result["answer"], "Should never return an empty answer"
+    assert result["stop_reason"] == "budget_exhausted"
+    assert result["trace"][-1]["type"] == "answer"

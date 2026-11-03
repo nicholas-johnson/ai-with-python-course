@@ -84,6 +84,10 @@ TOOLS = {
     "read_notes": read_notes,
 }
 
+# Tools that change state. After one of these runs, an earlier read may now
+# return something different, so the repeat guard has to forget what it saw.
+MUTATING_TOOLS = {"take_note"}
+
 TOOL_SCHEMAS = [
     {
         "type": "function",
@@ -153,11 +157,12 @@ SYSTEM_PROMPT = {
 
 
 def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
-    """Run a ReAct loop: send query, handle tool calls, return trace + answer."""
+    """Run a ReAct loop with three guards: step budget, repeat detection, forced finish."""
     messages = [SYSTEM_PROMPT, {"role": "user", "content": query}]
     trace: list[dict] = []
+    seen: set[tuple[str, str]] = set()
 
-    for _step in range(max_steps):
+    for _step in range(max_steps):  # guard 1: the step budget
         response = client.responses.create(
             model=MODEL,
             reasoning={"effort": "none"},
@@ -171,18 +176,32 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
             for tool_call in calls:
                 name = tool_call.name
                 args = json.loads(tool_call.arguments)
-                func = TOOLS.get(name)
-                if func:
-                    result = func(**args)
-                else:
-                    result = f"Unknown tool: {name}"
 
-                trace.append({
-                    "type": "tool",
-                    "name": name,
-                    "args": args,
-                    "result": result,
-                })
+                # Guard 2: this exact call has already been made, so the result
+                # is already in the context. Running it again just burns a step.
+                signature = (name, json.dumps(args, sort_keys=True))
+                if signature in seen:
+                    result = (
+                        f"You already called {name} with these arguments and the result "
+                        "is above. Choose a different action, or give your final answer."
+                    )
+                    trace.append({"type": "guard", "name": name, "args": args})
+                else:
+                    seen.add(signature)
+                    func = TOOLS.get(name)
+                    result = func(**args) if func else f"Unknown tool: {name}"
+                    trace.append({
+                        "type": "tool",
+                        "name": name,
+                        "args": args,
+                        "result": result,
+                    })
+                    if name in MUTATING_TOOLS:
+                        # A repeat is only pointless when nothing has changed.
+                        # This call changed the state, so earlier reads are fair
+                        # game again.
+                        seen = {signature}
+
                 messages.append({
                     "type": "function_call_output",
                     "call_id": tool_call.call_id,
@@ -191,12 +210,22 @@ def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
         else:
             content = response.output_text or ""
             trace.append({"type": "answer", "content": content})
-            return {"answer": content, "trace": trace}
+            return {"answer": content, "trace": trace, "stop_reason": "answered"}
 
-    return {
-        "answer": "[Max steps reached — no final answer produced]",
-        "trace": trace,
-    }
+    # Guard 3: out of steps. Returning nothing is worse than a partial answer,
+    # so spend one more call asking for the best answer available.
+    messages.append({
+        "role": "user",
+        "content": "You are out of steps. Answer now with what you have, noting any gaps.",
+    })
+    response = client.responses.create(
+        model=MODEL,
+        reasoning={"effort": "none"},
+        input=messages,
+    )
+    content = response.output_text or "[Max steps reached — no final answer produced]"
+    trace.append({"type": "answer", "content": content})
+    return {"answer": content, "trace": trace, "stop_reason": "budget_exhausted"}
 
 
 def print_trace(trace: list[dict]) -> None:
@@ -207,6 +236,9 @@ def print_trace(trace: list[dict]) -> None:
             result_preview = step["result"][:200]
             print(f"  [Step {i}] \U0001f527 Tool: {step['name']}({args_str})")
             print(f"           \u2192 {result_preview}")
+        elif step["type"] == "guard":
+            args_str = json.dumps(step["args"], ensure_ascii=False)
+            print(f"  [Step {i}] \u26d4 Repeat blocked: {step['name']}({args_str})")
         elif step["type"] == "answer":
             print(f"  [Step {i}] \u2705 Answer: {step['content']}")
 
@@ -254,7 +286,8 @@ def main():
         result = run_react(user_input, client, max_steps)
         last_trace = result["trace"]
         print_trace(last_trace)
-        print(f"\nAnswer: {result['answer']}\n")
+        print(f"\nAnswer: {result['answer']}")
+        print(f"[stopped: {result['stop_reason']}]\n")
 
 
 if __name__ == "__main__":

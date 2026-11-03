@@ -32,7 +32,9 @@ else:
     ...
 ```
 
-The **trace** — the sequence of thoughts, tool calls, and observations — is what makes ReAct agents debuggable. You can inspect exactly why the model did what it did.
+The **trace** — the sequence of tool calls and observations — is what makes ReAct agents debuggable. You can inspect exactly why the model did what it did.
+
+> **A warning about the Thought.** With native tool calling, `response.output_text` is usually **empty** whenever the model emits a `function_call`. So if you read the "Thought" off `output_text`, you get a blank line on every step that actually did something. Demo `02_react.py` shows the fix — make `thought` a required field on a structured response schema. This exercise stays with native tool calling, because exercises 02-04 build on it, so your trace records tool calls and the final answer.
 
 ## What you build
 
@@ -45,7 +47,20 @@ A console app in **`start.py`** that runs a ReAct agent with four tools:
 | `take_note(content)` | Save a note to in-memory storage |
 | `read_notes()` | Retrieve all saved notes |
 
-The agent prints the full Thought → Action → Observation trace for every query.
+The agent prints the full Action → Observation trace for every query — and, crucially, it is **guarded**, so it cannot run forever, go in circles, or come back empty-handed.
+
+## Loop control: the three guards
+
+An unguarded loop is the single most common way an agent ruins a production afternoon. Yours needs all three:
+
+| Guard | Problem it solves | How |
+|---|---|---|
+| **1. Step budget** | Unbounded cost and latency | Loop at most `max_steps` times |
+| **2. No-progress detection** | The model repeats a call it already made, burning the budget on an observation it has already seen | Track a signature of every `(name, args)` you execute. On a repeat, skip the tool and feed back a nudge instead |
+| **2b. …but not blindly** | A repeat is only pointless if *nothing changed*. `read_notes()` after a new `take_note()` is a perfectly sensible repeat | Reset `seen` whenever a tool in `MUTATING_TOOLS` runs |
+| **3. Forced finalisation** | Hitting the budget returns `None`, which is worse than a partial answer | On exhaustion, make one final call without tools asking the model to answer with what it has |
+
+`run_react` returns `{"answer": str, "trace": list, "stop_reason": str}`, where `stop_reason` is `"answered"` or `"budget_exhausted"`.
 
 ## Step-by-step
 
@@ -81,18 +96,21 @@ Build the `TOOL_SCHEMAS` list — one OpenAI function-calling schema per tool:
 
 This is the core loop:
 
-1. Start with `[SYSTEM_PROMPT, {"role": "user", "content": query}]`
-2. Call `client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOL_SCHEMAS)`
-3. If `response.output` has `function_call` items:
+1. Start with `[SYSTEM_PROMPT, {"role": "user", "content": query}]`, plus `seen = set()` to remember which calls you have executed
+2. Loop at most `max_steps` times — **guard 1**
+3. Call `client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOL_SCHEMAS)`
+4. If `response.output` has `function_call` items:
    - Add the model's output to the history: `messages += response.output`
-   - For each call, look up the function in `TOOLS`, parse the JSON arguments, call it
-   - Append each result as a `{"type": "function_call_output", "call_id": call.call_id, "output": result}` item
-   - Add to the trace: `{"type": "tool", "name": name, "args": args, "result": result}`
-   - Loop back to step 2
-4. If there are no function calls, `response.output_text` is the final answer
-   - Add to trace: `{"type": "answer", "content": content}`
-5. Return `{"answer": str, "trace": list}`
-6. Enforce `max_steps` — if you hit the limit, return whatever you have
+   - For each call, build `signature = (name, json.dumps(args, sort_keys=True))`
+     - **If `signature` is already in `seen`** — **guard 2** — do *not* run the tool. Use a nudge string as the result (`"You already called {name} with these arguments..."`) and trace `{"type": "guard", "name": name, "args": args}`
+     - Otherwise add it to `seen`, look up the function in `TOOLS`, call it, and trace `{"type": "tool", "name": name, "args": args, "result": result}`
+   - Either way, append `{"type": "function_call_output", "call_id": call.call_id, "output": result}` to `messages`
+   - Loop back to step 3
+5. If there are no function calls, `response.output_text` is the final answer
+   - Trace `{"type": "answer", "content": content}` and return with `stop_reason="answered"`
+6. If the loop runs out of steps — **guard 3** — append a user message saying so, make one final call **without** `tools=`, trace the answer, and return it with `stop_reason="budget_exhausted"`
+
+The nudge in guard 2 matters: silently dropping the call leaves the model wondering why nothing happened. Telling it "you already did this, do something else" is what gets it unstuck.
 
 ### 4. Implement `print_trace`
 
@@ -102,10 +120,12 @@ Pretty-print each step:
 [Step 1] 🔧 Tool: search_web({"query": "population of France"})
          → France has a population of approximately 68 million...
 
-[Step 2] 🔧 Tool: calculator({"expression": "68000000 / 551695"})
+[Step 2] ⛔ Repeat blocked: search_web({"query": "population of France"})
+
+[Step 3] 🔧 Tool: calculator({"expression": "68000000 / 551695"})
          → 123.24...
 
-[Step 3] ✅ Answer: The population density of France is about 123 people per km².
+[Step 4] ✅ Answer: The population density of France is about 123 people per km².
 ```
 
 ### 5. Build the interactive loop
@@ -155,10 +175,14 @@ The tests check:
 - `calculator` returns correct numeric results
 - `take_note` / `read_notes` store and retrieve notes
 - `TOOL_SCHEMAS` is a non-empty list of tool definitions
-- `run_react` returns a dict with `"answer"` and `"trace"` keys
+- `run_react` returns a dict with `"answer"`, `"trace"` and `"stop_reason"` keys
+- **Guard 2**: a repeated tool call never reaches the tool, and is recorded in the trace
+- **Guard 2b**: a read repeated *after* a `take_note` is allowed through
+- **Guard 3**: exhausting the budget still returns an answer, with `stop_reason="budget_exhausted"`
 
 ## Stretch goals
 
+- Add a **cost ceiling**: stop on `response.usage.total_tokens` spent, not just steps taken
 - Add a `get_weather(city)` tool using a public API
 - Implement a `/history` command that shows the full message list sent to OpenAI
-- Add token counting to show how many tokens each ReAct loop consumed
+- Track *near*-repeats too: the same tool with trivially different arguments (`"France"` vs `"france "`) is usually the same mistake

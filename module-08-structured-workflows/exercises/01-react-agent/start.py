@@ -52,6 +52,10 @@ TOOLS = {
     "read_notes": read_notes,
 }
 
+# Tools that change state. After one of these runs, an earlier read may now
+# return something different, so the repeat guard has to forget what it saw.
+MUTATING_TOOLS = {"take_note"}
+
 TOOL_SCHEMAS = [
     # TODO: define OpenAI function schemas for each tool
     # Each entry should look like:
@@ -80,29 +84,45 @@ SYSTEM_PROMPT = {
 
 
 def run_react(query: str, client: OpenAI, max_steps: int = 5) -> dict:
-    """Run a ReAct loop: send query, handle tool calls, return trace + answer."""
+    """Run a ReAct loop with three guards: step budget, repeat detection, forced finish."""
     # TODO: implement the ReAct loop
     # 1. Start with messages = [SYSTEM_PROMPT, {"role": "user", "content": query}]
-    # 2. Call client.responses.create(model=MODEL, reasoning={"effort": "none"}, input=messages, tools=TOOL_SCHEMAS)
-    # 3. calls = [item for item in response.output if item.type == "function_call"]
+    #    Also keep `seen = set()` to remember which tool calls you have made.
+    # 2. Loop up to max_steps times                           <-- GUARD 1: step budget
+    # 3. Call client.responses.create(model=MODEL, reasoning={"effort": "none"},
+    #                                 input=messages, tools=TOOL_SCHEMAS)
+    # 4. calls = [item for item in response.output if item.type == "function_call"]
     #    If there are calls:
     #    a. Add the model's output to the history: messages += response.output
-    #    b. For each call: look up TOOLS[call.name], parse call.arguments, call it
-    #    c. Append {"type": "function_call_output", "call_id": ..., "output": result} to messages
-    #    d. Add {"type": "tool", "name": name, "args": args, "result": result} to trace
-    #    e. Loop back to step 2
-    # 4. Otherwise (no calls), content = response.output_text:
+    #    b. For each call, build signature = (name, json.dumps(args, sort_keys=True))
+    #       - If signature is in `seen`:                      <-- GUARD 2: no progress
+    #           do NOT run the tool. Use a nudge string as the result, e.g.
+    #           "You already called {name} with these arguments..."
+    #           and add {"type": "guard", "name": name, "args": args} to the trace.
+    #       - Otherwise: add it to `seen`, look up TOOLS[name], call it, and add
+    #           {"type": "tool", "name": name, "args": args, "result": result} to the trace.
+    #           If name is in MUTATING_TOOLS, reset `seen` to just this signature —
+    #           the state changed, so an earlier read is worth doing again.
+    #    c. Either way, append
+    #       {"type": "function_call_output", "call_id": ..., "output": result} to messages
+    #    d. Loop back to step 3
+    # 5. Otherwise (no calls), content = response.output_text:
     #    a. Add {"type": "answer", "content": content} to trace
-    #    b. Return {"answer": content, "trace": trace}
-    # 5. Stop after max_steps iterations
+    #    b. Return {"answer": content, "trace": trace, "stop_reason": "answered"}
+    # 6. If the loop runs out of steps:                       <-- GUARD 3: forced finish
+    #    a. Append a user message telling the model it is out of steps and must
+    #       answer now with whatever it has.
+    #    b. Make one final call WITHOUT tools, trace the answer, and return it with
+    #       stop_reason="budget_exhausted". Never return None.
     raise NotImplementedError("TODO")
 
 
 def print_trace(trace: list[dict]) -> None:
     """Pretty-print a ReAct trace."""
     # TODO: for each step in trace, print formatted output:
-    #   Tool steps:  [Step N] 🔧 Tool: name(args) → result
-    #   Answer step: [Step N] ✅ Answer: content
+    #   Tool steps:   [Step N] 🔧 Tool: name(args) → result
+    #   Guard steps:  [Step N] ⛔ Repeat blocked: name(args)
+    #   Answer step:  [Step N] ✅ Answer: content
     raise NotImplementedError("TODO")
 
 
@@ -149,7 +169,8 @@ def main():
         result = run_react(user_input, client, max_steps)
         last_trace = result["trace"]
         print_trace(last_trace)
-        print(f"\nAnswer: {result['answer']}\n")
+        print(f"\nAnswer: {result['answer']}")
+        print(f"[stopped: {result['stop_reason']}]\n")
 
 
 if __name__ == "__main__":

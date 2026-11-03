@@ -5,11 +5,10 @@ Run alone:  python module-07-agent-memory/demo/04_compaction.py
 
 import os
 
-from dotenv import load_dotenv
-from openai import OpenAI
-
 from budget import count_messages
 from compaction import compact, safe_split, truncate
+from dotenv import load_dotenv
+from openai import OpenAI
 from sample_prompt import HISTORY, assemble
 
 load_dotenv()

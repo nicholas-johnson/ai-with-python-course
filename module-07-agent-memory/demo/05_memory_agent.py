@@ -6,13 +6,12 @@ Run alone:  python module-07-agent-memory/demo/05_memory_agent.py
 import os
 import time
 
-from dotenv import load_dotenv
-from openai import OpenAI
-
 from budget import count_messages, count_text
 from compaction import compact
+from dotenv import load_dotenv
 from memory_store import MemoryStore
 from memory_writer import write_turn
+from openai import OpenAI
 from sample_prompt import SYSTEM_PROMPT
 
 load_dotenv()
@@ -38,9 +37,10 @@ def build_prompt(thread: list[dict], memories: list) -> list[dict]:
     """Assemble the call: system prompt, recalled memories, then the thread."""
     if memories:
         block = "\n".join(f"- {m.text}" for m in memories)
-        memory_message = {"role": "system", "content": f"What you remember about this patron:\n{block}"}
+        content = f"What you remember about this patron:\n{block}"
     else:
-        memory_message = {"role": "system", "content": "You have no memories of this patron yet."}
+        content = "You have no memories of this patron yet."
+    memory_message = {"role": "system", "content": content}
     return [SYSTEM_PROMPT, memory_message, *thread]
 
 

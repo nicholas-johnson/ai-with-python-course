@@ -234,7 +234,8 @@ decision = client.responses.parse(
         'In March: *"keep it brief."* In June: *"give me the full detail."*',
         'Append both and the model receives **two opposing instructions**.',
         'It picks one at random, turn by turn — and looks broken.',
-        'Resolve the conflict **on write**, while you still know which is newer.',
+        'The near-miss is **duplication**: the same preference stored on three visits.',
+        'Resolve both **on write**, while you still know which is newer.',
       ],
     },
   },
@@ -242,18 +243,25 @@ decision = client.responses.parse(
     type: 'code',
     content: {
       title: 'Resolve on write',
-      code: `def write(self, text, *, patron, kind, importance=1.0):
-    neighbours = self.recall(text, patron=patron, k=3)
-    conflict = find_conflict(text, neighbours, self.client)
+      code: `class MergeDecision(BaseModel):
+    action: Literal["store", "replace", "skip"]
+    target: int = -1      # which existing memory
+    reason: str
 
-    memory_id = self.remember(
-        text, patron=patron, kind=kind, importance=importance
-    )
-    if conflict:
-        self.supersede(conflict.memory_id, by=memory_id)
-    return memory_id`,
+
+neighbours = store.recall(candidate.text, patron=p, k=3)
+decision = resolve(candidate.text, neighbours, client)
+
+if decision.action == "skip":
+    return                               # already held
+memory_id = store.remember(candidate.text, patron=p)
+if decision.action == "replace":
+    store.supersede(
+        neighbours[decision.target].memory_id, by=memory_id
+    )`,
       highlights: [
-        'Recall the neighbours first — a conflict is always semantically close',
+        'Recall the neighbours first — a conflict or duplicate is always semantically close',
+        '`skip` is the quiet win: the same preference said three times is still one memory',
         '`supersede` sets `active=False` and records what replaced it',
         '`forget(id)` is the same soft delete with no replacement: audit trail, no content',
       ],
