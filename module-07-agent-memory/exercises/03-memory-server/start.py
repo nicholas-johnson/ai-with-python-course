@@ -68,6 +68,8 @@ SYSTEM_PROMPT = (
     "something, and remember(...) when a patron tells you something durable: a "
     "usual order, an allergy, who they are, an unpaid tab. "
     "Do not store one-off questions or small talk. "
+    f"Tonight's thread id is '{THREAD_ID}', if you need the anchors from "
+    "earlier in the evening. "
     "You are warm, slightly wry, and you never forget a regular."
 )
 
@@ -107,23 +109,30 @@ async def run_turn(client, messages, session, openai_tools, max_steps: int = 10)
     raise NotImplementedError("TODO")
 
 
+async def rebuild_context(session, messages) -> None:
+    """Replace the model's context with the service's version of the thread.
+
+    Without this the compaction saves tokens on the server and nowhere that
+    matters.
+    """
+    # TODO: call get_thread, json.loads the result, then
+    #       messages[:] = [messages[0], *thread]
+    #       Assign into the list, do not rebind it: the caller is holding the
+    #       same list. Keep messages[0] — that is the system prompt.
+    raise NotImplementedError("TODO")
+
+
 async def record_turns(session, messages, user_input: str, answer: str) -> None:
     """Log the turn to the server, and compact when the thread goes over budget.
 
     This is harness work, not a decision for the model: the thread has to be
-    recorded whatever the model chooses to do. When a compaction happens, the
-    model's context is rebuilt from the server's thread — otherwise the saving
-    exists on the server and nowhere that matters.
+    recorded whatever the model chooses to do.
     """
     # TODO: 1. append_turn twice: the user's message, then the answer
     #       2. call thread_budget with THREAD_ID and BUDGET_TOKENS
     #       3. return if the verdict does not say "over budget"
-    #       4. otherwise call compact_thread and print the first line of what
-    #          comes back
-    #       5. then call get_thread, json.loads it, and splice it into the
-    #          model's context: messages[:] = [messages[0], *thread]
-    #          Assign into the list, do not rebind it — the caller is holding
-    #          the same list.
+    #       4. otherwise call compact_thread, print the first line of what
+    #          comes back, and await rebuild_context(session, messages)
     raise NotImplementedError("TODO")
 
 
@@ -188,8 +197,9 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
                 await call_text(
                     session, "compact_thread", {"thread_id": THREAD_ID, "budget_tokens": 0}
                 )
-                + "\n"
             )
+            await rebuild_context(session, messages)
+            print()
             continue
 
         messages.append({"role": "user", "content": user_input})

@@ -68,6 +68,8 @@ SYSTEM_PROMPT = (
     "something, and remember(...) when a patron tells you something durable: a "
     "usual order, an allergy, who they are, an unpaid tab. "
     "Do not store one-off questions or small talk. "
+    f"Tonight's thread id is '{THREAD_ID}', if you need the anchors from "
+    "earlier in the evening. "
     "You are warm, slightly wry, and you never forget a regular."
 )
 
@@ -126,6 +128,18 @@ async def run_turn(client, messages, session, openai_tools, max_steps: int = 10)
     return "(max tool steps reached)"
 
 
+async def rebuild_context(session, messages) -> None:
+    """Replace the model's context with the service's version of the thread.
+
+    Without this the compaction saves tokens on the server and nowhere that
+    matters. Assign into the list rather than rebinding it: the caller is
+    holding the same one.
+    """
+    thread = json.loads(await call_text(session, "get_thread", {"thread_id": THREAD_ID}))
+    messages[:] = [messages[0], *thread]
+    print(f"  [context] rebuilt from the service: {len(messages)} messages")
+
+
 async def record_turns(session, messages, user_input: str, answer: str) -> None:
     """Log the turn to the server, and compact when the thread goes over budget.
 
@@ -149,10 +163,7 @@ async def record_turns(session, messages, user_input: str, answer: str) -> None:
         session, "compact_thread", {"thread_id": THREAD_ID, "budget_tokens": BUDGET_TOKENS}
     )
     print(f"  [compaction] {report.splitlines()[0]}")
-
-    thread = json.loads(await call_text(session, "get_thread", {"thread_id": THREAD_ID}))
-    messages[:] = [messages[0], *thread]
-    print(f"  [context] rebuilt from the service: {len(messages)} messages")
+    await rebuild_context(session, messages)
 
 
 async def agent_loop(session, openai_tools, mcp_tools_map):
@@ -216,8 +227,9 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
                 await call_text(
                     session, "compact_thread", {"thread_id": THREAD_ID, "budget_tokens": 0}
                 )
-                + "\n"
             )
+            await rebuild_context(session, messages)
+            print()
             continue
 
         messages.append({"role": "user", "content": user_input})

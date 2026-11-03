@@ -226,6 +226,30 @@ def test_run_turn_gives_up_rather_than_looping_forever():
     assert client.responses.create.call_count == 3
 
 
+def test_rebuild_context_keeps_the_system_prompt_in_front(monkeypatch):
+    """The service owns the thread; the system prompt stays local."""
+    client_mod = _import_client()
+
+    async def fake_call_text(session, name, arguments):
+        assert name == "get_thread"
+        return json.dumps(
+            [
+                {"role": "system", "content": "[Earlier conversation] six on the ship account"},
+                {"role": "user", "content": "and the booth?"},
+            ]
+        )
+
+    monkeypatch.setattr(client_mod, "call_text", fake_call_text)
+    messages = [{"role": "system", "content": "prompt"}, {"role": "user", "content": "stale"}]
+    asyncio.run(client_mod.rebuild_context(MagicMock(), messages))
+
+    assert [message["content"] for message in messages] == [
+        "prompt",
+        "[Earlier conversation] six on the ship account",
+        "and the booth?",
+    ]
+
+
 def test_record_turns_logs_both_sides_of_the_turn(monkeypatch):
     """Both messages go to the service, whatever the model did in between."""
     client_mod = _import_client()
