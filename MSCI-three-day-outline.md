@@ -185,10 +185,11 @@ By end of day, attendees can build a **tool-using agent**, expose capabilities v
 - Fact pipeline: extract → validate (confidence) → store
 - Knowledge graphs with `networkx` (entities, relationships, traversal)
 - Grounded QA from graph evidence
+- The same graph as MCP tools an agent loop can call
 
 **Demo**
 
-- Three scripts: extraction → graph build/query → graph-grounded QA vs ungrounded
+- Four scripts: extraction → graph build/query → graph-grounded QA vs ungrounded → graph MCP server plus an agent loop
 
 **Exercises**
 
@@ -201,6 +202,7 @@ By end of day, attendees can build a **tool-using agent**, expose capabilities v
 - Extract typed facts with confidence and provenance
 - Organise facts into a queryable knowledge graph
 - Answer questions only when graph evidence supports them
+- Expose graph queries as MCP tools an agent can call
 
 ---
 

@@ -8,6 +8,7 @@
 - Build a **fact extraction pipeline**: claims, provenance, and confidence scores.
 - Construct a **knowledge graph**: entities, relationships, and traversal with `networkx`.
 - Implement **grounded QA** from graphs with citations.
+- Expose the graph as an **MCP server** and let an agent loop choose the traversal.
 
 ---
 
@@ -166,18 +167,47 @@ When the graph contains no relevant entities, the answer honestly says so with l
 
 ---
 
+## The graph as an MCP tool
+
+Demos 02 and 03 decide the walk in code: pull entities out of the question, then fetch N hops. The same queries can be tools. `graph_server.py` loads a saved graph (`graph.json` — the extract, validate, store pipeline, already stored, with one name per entity) and exposes four tools:
+
+| Tool | Question it answers |
+| ---- | ------------------- |
+| `list_entities` | What is this name called in the graph? |
+| `neighbours` | What is directly connected to this entity? |
+| `shortest_path` | How is X related to Y? |
+| `facts_about` | What do we know about X, within N hops? |
+
+The server does not call a model. Demo 04 spawns it over stdio and runs the tool loop from Module 3. The model chooses the walk. It only sees edges the tool returns, including the source log id and the confidence that still lives on the edge.
+
+```python
+@server.tool()
+def shortest_path(start: str, end: str) -> str:
+    """Shortest chain of facts connecting two entities."""
+    ...
+```
+
+```bash
+python module-06-structured-facts/demo/04_graph_agent.py
+# or, to click the tools in a browser with no agent:
+mcp dev module-06-structured-facts/demo/graph_server.py
+```
+
+---
+
 ## Summary
 
 - **Schema is the contract.** Pydantic structured outputs are what you can validate, store, and query.
 - **Every fact needs provenance and a score.** A fact without a source is an unsupported claim. Confidence decides what you keep.
 - **Entities and edges make a graph.** Multi-hop questions walk relationships, not just similar text.
 - **Grounded QA cites the source.** Answer from stored facts, and show where each one came from.
+- **The graph can be a tool.** An MCP server answers list, neighbours, and path. The agent decides which to call.
 
 ---
 
 ## Demos
 
-Each demo is a separate interactive script. All use real OpenAI calls.
+Each numbered demo is a separate interactive script and uses real OpenAI calls. `graph_server.py` does not: it only reads the saved graph.
 
 ```bash
 # Option A - pip + venv (run from the repo root):
@@ -185,11 +215,13 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python module-06-structured-facts/demo/01_extraction.py
 python module-06-structured-facts/demo/02_graph.py
 python module-06-structured-facts/demo/03_grounded_qa.py
+python module-06-structured-facts/demo/04_graph_agent.py
 
 # Option B - uv (no activation needed):
 uv run python module-06-structured-facts/demo/01_extraction.py
 uv run python module-06-structured-facts/demo/02_graph.py
 uv run python module-06-structured-facts/demo/03_grounded_qa.py
+uv run python module-06-structured-facts/demo/04_graph_agent.py
 ```
 
 | Script | What it shows |
@@ -197,6 +229,10 @@ uv run python module-06-structured-facts/demo/03_grounded_qa.py
 | `01_extraction.py` | Pydantic schema, structured extraction, validation filtering |
 | `02_graph.py` | Build networkx graph from facts, query entities and paths |
 | `03_grounded_qa.py` | Graph-grounded QA with citations, comparison without graph |
+| `graph_server.py` | The saved graph as an MCP server (`list_entities`, `neighbours`, `shortest_path`, `facts_about`) |
+| `04_graph_agent.py` | Agent loop that discovers those tools and chooses the traversal |
+
+`04_graph_agent.py` spawns `graph_server.py` for you. To click the tools with no model in the loop: `mcp dev module-06-structured-facts/demo/graph_server.py`.
 
 ## Exercises
 

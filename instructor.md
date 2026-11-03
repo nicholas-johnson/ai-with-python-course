@@ -161,6 +161,7 @@ Multi-step walkthrough using persistent ChromaDB (Docker). Run from `module-05-r
 - Fact extraction pipelines: claims, provenance, confidence
 - Knowledge graphs: entities, relationships, traversal with networkx
 - Grounded QA from graphs with citations
+- Expose that graph as an MCP server so an agent loop chooses the traversal
 
 **Demo:**
 
@@ -171,6 +172,8 @@ Each demo is a separate interactive script with real OpenAI calls:
 | `module-06-structured-facts/demo/01_extraction.py` | Pydantic schema, structured extraction from logs, validation filtering |
 | `module-06-structured-facts/demo/02_graph.py` | Build networkx graph from facts, query entities and paths |
 | `module-06-structured-facts/demo/03_grounded_qa.py` | Graph-grounded QA with citations, comparison without graph |
+| `module-06-structured-facts/demo/graph_server.py` | Saved graph as an MCP server: list, neighbours, shortest path, facts within N hops |
+| `module-06-structured-facts/demo/04_graph_agent.py` | Spawns the graph server and runs an agent loop. Part 1 calls `shortest_path` with no model. Part 2 watches the model choose tools. Part 3 is open chat. |
 
 **Exercises:**
 

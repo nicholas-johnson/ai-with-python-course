@@ -8,17 +8,6 @@ export const slides = [
     },
   },
   {
-    type: 'welcome',
-    content: {
-      title: 'Raw text is unreliable. Structured data is actionable.',
-      points: [
-        'LLMs can extract typed, validated facts from unstructured logs and reports.',
-        'Facts form a knowledge graph — entities, relationships, provenance.',
-        'Grounded QA answers from the graph and cites its sources.',
-      ],
-    },
-  },
-  {
     type: 'standard',
     content: {
       title: 'Learning goals',
@@ -28,6 +17,7 @@ export const slides = [
         'Build a **fact extraction pipeline** with provenance and confidence.',
         'Construct a **knowledge graph** from entities and relationships.',
         'Implement **grounded QA** that cites source documents.',
+        'Expose the graph as **MCP tools** an agent loop can call.',
       ],
     },
   },
@@ -39,19 +29,6 @@ export const slides = [
       title: 'Structured Outputs',
       subtitle: 'Typed fields the model must follow',
       icon: 'file-text',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Structured outputs — why bother?',
-      icon: 'file-text',
-      points: [
-        'Free-text LLM answers are hard to **validate**, **store**, and **query**.',
-        'Structured outputs give you **typed fields** you can trust.',
-        'Pydantic models define the schema; the LLM fills in the values.',
-        'Validation catches errors **before** they reach your database.',
-      ],
     },
   },
   {
@@ -122,19 +99,6 @@ facts = response.output_parsed.facts if response.output_parsed else []   # None 
   {
     type: 'standard',
     content: {
-      title: 'Validation and deduplication',
-      icon: 'filter',
-      points: [
-        '**Confidence threshold**: drop facts below 0.7 (configurable).',
-        '**Deduplication**: same (subject, predicate, object) → keep highest confidence.',
-        '**Provenance**: every fact links back to the source sentence.',
-        'Handle refusals: `response.output_parsed` is `None` when the model declines.',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
       title: 'Knowledge graphs',
       icon: 'share-2',
       points: [
@@ -142,6 +106,35 @@ facts = response.output_parsed.facts if response.output_parsed else []   # None 
         '**Edges** = relationships (manages, works_at, supplies).',
         'Build from extracted facts: subject → edge → object.',
         'Traversal: "Who is connected to Acme Corp within 2 hops?"',
+      ],
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'From facts to nodes and edges',
+      icon: 'git-branch',
+      points: [
+        'Each validated fact is a triple: **subject → predicate → object**.',
+        '**Subject** and **object** become nodes; **predicate** becomes the directed edge.',
+        '*Marquez assessed the Meridian reactor* → `Juno Marquez --[assessed]--> Meridian reactor`.',
+        'Same name = same node, so facts from different logs **join into one graph**.',
+        'Confidence and source text live **on the edge** — every hop stays citable.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'The names are guessed',
+      icon: 'alert-triangle',
+      points: [
+        'Nothing constrains `subject`, `predicate`, or `object` — the model invents the wording.',
+        '"Juno Marquez" and "Engineer Marquez" become **two nodes**, and the path between them silently vanishes.',
+        'Edge labels drift too ("assessed" / "evaluated"), so you cannot filter on a relation.',
+        'Fix: a **controlled vocabulary** — `predicate: Literal["assessed", "repaired", ...]`.',
+        'Fix: **canonicalise entity names** before adding them, so aliases collapse to one node.',
       ],
     },
   },
@@ -271,6 +264,55 @@ class KnowledgeGraph:
     },
   },
 
+  // ---- Section: Graph as a tool ----
+  {
+    type: 'title',
+    content: {
+      title: 'The graph as a tool',
+      subtitle: 'An MCP server the agent chooses to call',
+      icon: 'server',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Let the agent walk the graph',
+      icon: 'route',
+      points: [
+        'Demos 02 and 03 **hard-code** the walk: pick entities, then fetch neighbours.',
+        'An MCP server turns those queries into **tools**: list, neighbours, path, facts within N hops.',
+        'The agent loop is the one from Module 3. The model picks the tool. Your code runs it.',
+        'The server is deterministic. It reads a saved graph — no model call inside the tool.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'One tool, one graph question',
+      code: `@server.tool()
+def shortest_path(start: str, end: str) -> str:
+    """Shortest chain of facts connecting two entities."""
+    ...
+
+# The agent sees the tool list, then:
+#   list_entities(query="chief engineer")
+#   shortest_path(start="Mira Chen", end="osmium")`,
+      highlights: [
+        'The docstring and the type hints become the schema the model reads',
+        'stdio: demo 04 spawns graph_server.py, no second terminal',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Graph agent',
+      subtitle: 'Switch to terminal: python demo/04_graph_agent.py',
+      icon: 'rocket',
+    },
+  },
+
   // ---- Section: Wrap-up ----
   {
     type: 'title',
@@ -307,6 +349,11 @@ class KnowledgeGraph:
           rule: 'Grounded QA cites the source',
           example: 'Answer from stored facts, and show where each one came from.',
           icon: 'book-open',
+        },
+        {
+          rule: 'The graph can be a tool',
+          example: 'An MCP server answers list, neighbours, and path. The agent decides which to call.',
+          icon: 'server',
         },
       ],
     },

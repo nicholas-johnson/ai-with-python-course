@@ -1,0 +1,442 @@
+[
+  {
+    "subject": "Elara Voss",
+    "predicate": "has_role",
+    "object": "Commander",
+    "confidence": 0.99,
+    "source_id": "LOG-001",
+    "source_text": "Log LOG-001 author: Commander Elara Voss."
+  },
+  {
+    "subject": "Elara Voss",
+    "predicate": "commands",
+    "object": "Kepler Sweep",
+    "confidence": 0.97,
+    "source_id": "LOG-001",
+    "source_text": "Mission Kepler Sweep officially underway."
+  },
+  {
+    "subject": "Kepler Sweep",
+    "predicate": "destination",
+    "object": "Kepler-442",
+    "confidence": 0.96,
+    "source_id": "LOG-001",
+    "source_text": "Estimated arrival at Kepler-442 asteroid belt in 72 hours."
+  },
+  {
+    "subject": "Mira Chen",
+    "predicate": "has_role",
+    "object": "Chief Engineer",
+    "confidence": 0.99,
+    "source_id": "LOG-002",
+    "source_text": "Log LOG-002 author: Chief Engineer Mira Chen."
+  },
+  {
+    "subject": "Warp core",
+    "predicate": "efficiency",
+    "object": "94%",
+    "confidence": 0.98,
+    "source_id": "LOG-002",
+    "source_text": "Warp core operating at 94% efficiency."
+  },
+  {
+    "subject": "Plasma conduit 7-B",
+    "predicate": "part_of",
+    "object": "Warp core",
+    "confidence": 0.86,
+    "source_id": "LOG-002",
+    "source_text": "Warp core operating at 94% efficiency. Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance for next downtime window."
+  },
+  {
+    "subject": "Mira Chen",
+    "predicate": "scheduled_maintenance_for",
+    "object": "Plasma conduit 7-B",
+    "confidence": 0.95,
+    "source_id": "LOG-002",
+    "source_text": "Minor fluctuation in plasma conduit 7-B — within tolerances but scheduling preventive maintenance for next downtime window."
+  },
+  {
+    "subject": "Kael Orin",
+    "predicate": "has_role",
+    "object": "Lieutenant Commander",
+    "confidence": 0.99,
+    "source_id": "LOG-003",
+    "source_text": "Log LOG-003 author: Lt. Cmdr. Kael Orin."
+  },
+  {
+    "subject": "Kael Orin",
+    "predicate": "detected",
+    "object": "unusual spectral signature",
+    "confidence": 0.96,
+    "source_id": "LOG-003",
+    "source_text": "Long-range sensors detecting unusual spectral signature at bearing 047 mark 3."
+  },
+  {
+    "subject": "unusual spectral signature",
+    "predicate": "bearing",
+    "object": "047 mark 3",
+    "confidence": 0.98,
+    "source_id": "LOG-003",
+    "source_text": "Long-range sensors detecting unusual spectral signature at bearing 047 mark 3."
+  },
+  {
+    "subject": "unusual spectral signature",
+    "predicate": "consistent_with",
+    "object": "metallic asteroid cluster",
+    "confidence": 0.93,
+    "source_id": "LOG-003",
+    "source_text": "Consistent with heavy element concentration — possibly a metallic asteroid cluster not in current charts."
+  },
+  {
+    "subject": "Dax Morel",
+    "predicate": "has_role",
+    "object": "Ensign",
+    "confidence": 0.99,
+    "source_id": "LOG-004",
+    "source_text": "Log LOG-004 author: Ensign Dax Morel."
+  },
+  {
+    "subject": "Dax Morel",
+    "predicate": "received_confirmation_from",
+    "object": "Barnard's Star fuel depot",
+    "confidence": 0.96,
+    "source_id": "LOG-004",
+    "source_text": "Received automated ping from Barnard's Star fuel depot confirming our transit registration."
+  },
+  {
+    "subject": "Barnard's Star fuel depot",
+    "predicate": "confirmed",
+    "object": "transit registration",
+    "confidence": 0.95,
+    "source_id": "LOG-004",
+    "source_text": "Received automated ping from Barnard's Star fuel depot confirming our transit registration."
+  },
+  {
+    "subject": "Sable Achebe",
+    "predicate": "has_role",
+    "object": "Doctor",
+    "confidence": 0.99,
+    "source_id": "LOG-005",
+    "source_text": "Log LOG-005 author: Dr. Sable Achebe."
+  },
+  {
+    "subject": "Sable Achebe",
+    "predicate": "examined",
+    "object": "mission crew",
+    "confidence": 0.96,
+    "source_id": "LOG-005",
+    "source_text": "Crew health check complete. All 12 mission crew within normal parameters."
+  },
+  {
+    "subject": "mission crew",
+    "predicate": "headcount",
+    "object": "12",
+    "confidence": 0.99,
+    "source_id": "LOG-005",
+    "source_text": "All 12 mission crew within normal parameters."
+  },
+  {
+    "subject": "Zara Petrov",
+    "predicate": "has_role",
+    "object": "Lieutenant",
+    "confidence": 0.99,
+    "source_id": "LOG-006",
+    "source_text": "Log LOG-006 author: Lt. Zara Petrov."
+  },
+  {
+    "subject": "Zara Petrov",
+    "predicate": "has_role",
+    "object": "Navigator",
+    "confidence": 0.95,
+    "source_id": "LOG-006",
+    "source_text": "Log LOG-006 category: navigation. Author: Lt. Zara Petrov."
+  },
+  {
+    "subject": "Zara Petrov",
+    "predicate": "plotted_approach_to",
+    "object": "Kepler-442",
+    "confidence": 0.97,
+    "source_id": "LOG-006",
+    "source_text": "Plotting approach vector for Kepler-442 outer belt."
+  },
+  {
+    "subject": "Zone A",
+    "predicate": "located_at",
+    "object": "Kepler-442",
+    "confidence": 0.9,
+    "source_id": "LOG-006",
+    "source_text": "Plotting approach vector for Kepler-442 outer belt. Three candidate survey zones identified. Zone A has the highest mineral probability but overlaps with a debris field from the 2340 mining collapse."
+  },
+  {
+    "subject": "Zone A",
+    "predicate": "overlaps",
+    "object": "2340 debris field",
+    "confidence": 0.98,
+    "source_id": "LOG-006",
+    "source_text": "Zone A has the highest mineral probability but overlaps with a debris field from the 2340 mining collapse."
+  },
+  {
+    "subject": "Elara Voss",
+    "predicate": "arrived_at",
+    "object": "Kepler-442",
+    "confidence": 0.99,
+    "source_id": "LOG-007",
+    "source_text": "Arrived Kepler-442."
+  },
+  {
+    "subject": "Elara Voss",
+    "predicate": "deployed",
+    "object": "Sensor buoy K442-A1",
+    "confidence": 0.97,
+    "source_id": "LOG-007",
+    "source_text": "Deploying first sensor buoy at coordinates K442-A1."
+  },
+  {
+    "subject": "Sensor buoy K442-A1",
+    "predicate": "located_at",
+    "object": "Kepler-442",
+    "confidence": 0.95,
+    "source_id": "LOG-007",
+    "source_text": "Arrived Kepler-442. Deploying first sensor buoy at coordinates K442-A1."
+  },
+  {
+    "subject": "Reiko Tanaka",
+    "predicate": "has_role",
+    "object": "Lieutenant",
+    "confidence": 0.99,
+    "source_id": "LOG-008",
+    "source_text": "Log LOG-008 author: Lt. Reiko Tanaka."
+  },
+  {
+    "subject": "Reiko Tanaka",
+    "predicate": "has_role",
+    "object": "Security Officer",
+    "confidence": 0.95,
+    "source_id": "LOG-008",
+    "source_text": "Log LOG-008 category: security. Author: Lt. Reiko Tanaka."
+  },
+  {
+    "subject": "Reiko Tanaka",
+    "predicate": "cleared",
+    "object": "EVA Team Alpha",
+    "confidence": 0.98,
+    "source_id": "LOG-008",
+    "source_text": "Cleared EVA Team Alpha for first excursion at 0600 tomorrow."
+  },
+  {
+    "subject": "Bodhi Kwan",
+    "predicate": "has_role",
+    "object": "Specialist",
+    "confidence": 0.99,
+    "source_id": "LOG-009",
+    "source_text": "Log LOG-009 author: Specialist Bodhi Kwan."
+  },
+  {
+    "subject": "Bodhi Kwan",
+    "predicate": "deployed",
+    "object": "EVA Team Alpha",
+    "confidence": 0.98,
+    "source_id": "LOG-009",
+    "source_text": "EVA Team Alpha deployed successfully."
+  },
+  {
+    "subject": "EVA Team Alpha",
+    "predicate": "standby_shuttle",
+    "object": "Shuttle 2",
+    "confidence": 0.95,
+    "source_id": "LOG-009",
+    "source_text": "Shuttle 2 in standby."
+  },
+  {
+    "subject": "Kael Orin",
+    "predicate": "analysed",
+    "object": "Asteroid K442-A1-07",
+    "confidence": 0.96,
+    "source_id": "LOG-010",
+    "source_text": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium."
+  },
+  {
+    "subject": "Asteroid K442-A1-07",
+    "predicate": "contains",
+    "object": "iridium",
+    "confidence": 0.98,
+    "source_id": "LOG-010",
+    "source_text": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium."
+  },
+  {
+    "subject": "Asteroid K442-A1-07",
+    "predicate": "contains",
+    "object": "osmium",
+    "confidence": 0.98,
+    "source_id": "LOG-010",
+    "source_text": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium."
+  },
+  {
+    "subject": "Asteroid K442-A1-07",
+    "predicate": "located_at",
+    "object": "Kepler-442",
+    "confidence": 0.9,
+    "source_id": "LOG-010",
+    "source_text": "First sample batch from asteroid K442-A1-07 shows elevated concentrations of iridium and osmium. Requesting extended survey time in Zone A."
+  },
+  {
+    "subject": "Asteroid K442-A1-07",
+    "predicate": "located_in",
+    "object": "Zone A",
+    "confidence": 0.78,
+    "source_id": "LOG-010",
+    "source_text": "Requesting extended survey time in Zone A."
+  },
+  {
+    "subject": "Mira Chen",
+    "predicate": "deployed",
+    "object": "Sensor buoy K442-B1",
+    "confidence": 0.98,
+    "source_id": "LOG-011",
+    "source_text": "Sensor buoy K442-B1 deployed and transmitting."
+  },
+  {
+    "subject": "Sensor buoy K442-B1",
+    "predicate": "located_at",
+    "object": "Kepler-442",
+    "confidence": 0.82,
+    "source_id": "LOG-011",
+    "source_text": "Sensor buoy K442-B1 deployed and transmitting."
+  },
+  {
+    "subject": "Mira Chen",
+    "predicate": "repaired",
+    "object": "Plasma conduit 7-B",
+    "confidence": 0.98,
+    "source_id": "LOG-011",
+    "source_text": "Plasma conduit 7-B repair completed during EVA downtime — efficiency back to 97%."
+  },
+  {
+    "subject": "Warp core",
+    "predicate": "efficiency",
+    "object": "97%",
+    "confidence": 0.9,
+    "source_id": "LOG-011",
+    "source_text": "Plasma conduit 7-B repair completed during EVA downtime — efficiency back to 97%."
+  },
+  {
+    "subject": "Elara Voss",
+    "predicate": "approved_pending_hq",
+    "object": "48-hour mission extension",
+    "confidence": 0.95,
+    "source_id": "LOG-012",
+    "source_text": "Science division requesting a mission extension of 48 hours — approved pending HQ confirmation."
+  },
+  {
+    "subject": "48-hour mission extension",
+    "predicate": "for_mission",
+    "object": "Kepler Sweep",
+    "confidence": 0.86,
+    "source_id": "LOG-012",
+    "source_text": "Day 4 at Kepler-442. Science division requesting a mission extension of 48 hours — approved pending HQ confirmation."
+  },
+  {
+    "subject": "Kepler-442",
+    "predicate": "mineral_yield",
+    "object": "40% above projections",
+    "confidence": 0.97,
+    "source_id": "LOG-012",
+    "source_text": "Mineral yields exceeding projections by 40%."
+  },
+  {
+    "subject": "Kael Orin",
+    "predicate": "surveyed",
+    "object": "TRAPPIST-1",
+    "confidence": 0.97,
+    "source_id": "LOG-013",
+    "source_text": "TRAPPIST-1 survey commencing."
+  },
+  {
+    "subject": "TRAPPIST-1d",
+    "predicate": "orbits",
+    "object": "TRAPPIST-1",
+    "confidence": 0.95,
+    "source_id": "LOG-013",
+    "source_text": "Initial orbital insertion around planet d successful."
+  },
+  {
+    "subject": "TRAPPIST-1d",
+    "predicate": "shows",
+    "object": "water vapour",
+    "confidence": 0.96,
+    "source_id": "LOG-013",
+    "source_text": "Water vapour signature detected in upper atmosphere — promising."
+  },
+  {
+    "subject": "Juno Park",
+    "predicate": "has_role",
+    "object": "Specialist",
+    "confidence": 0.99,
+    "source_id": "LOG-014",
+    "source_text": "Log LOG-014 author: Specialist Juno Park."
+  },
+  {
+    "subject": "Juno Park",
+    "predicate": "scanned",
+    "object": "TRAPPIST-1e",
+    "confidence": 0.97,
+    "source_id": "LOG-014",
+    "source_text": "Surface scan of TRAPPIST-1e reveals potential subsurface liquid water."
+  },
+  {
+    "subject": "TRAPPIST-1e",
+    "predicate": "orbits",
+    "object": "TRAPPIST-1",
+    "confidence": 0.88,
+    "source_id": "LOG-014",
+    "source_text": "Surface scan of TRAPPIST-1e reveals potential subsurface liquid water."
+  },
+  {
+    "subject": "TRAPPIST-1e",
+    "predicate": "may_contain",
+    "object": "subsurface liquid water",
+    "confidence": 0.94,
+    "source_id": "LOG-014",
+    "source_text": "Surface scan of TRAPPIST-1e reveals potential subsurface liquid water."
+  },
+  {
+    "subject": "Zara Petrov",
+    "predicate": "entered",
+    "object": "Boötes Void",
+    "confidence": 0.98,
+    "source_id": "LOG-015",
+    "source_text": "Entering Boötes Void perimeter."
+  },
+  {
+    "subject": "Boötes Void",
+    "predicate": "expected_signal_loss",
+    "object": "comms relay chain",
+    "confidence": 0.9,
+    "source_id": "LOG-015",
+    "source_text": "Comms relay chain established but signal degradation expected past marker V-10."
+  },
+  {
+    "subject": "Reiko Tanaka",
+    "predicate": "raised_alert_for",
+    "object": "anomalous sensor contact",
+    "confidence": 0.97,
+    "source_id": "LOG-016",
+    "source_text": "Raised alert status to yellow."
+  },
+  {
+    "subject": "anomalous sensor contact",
+    "predicate": "bearing",
+    "object": "180 mark 12",
+    "confidence": 0.98,
+    "source_id": "LOG-016",
+    "source_text": "Anomalous sensor contact at long range — bearing 180 mark 12."
+  },
+  {
+    "subject": "anomalous sensor contact",
+    "predicate": "located_in",
+    "object": "Boötes Void",
+    "confidence": 0.9,
+    "source_id": "LOG-016",
+    "source_text": "Anomalous sensor contact at long range — bearing 180 mark 12. Could be sensor echo from void boundary or unknown object."
+  }
+]

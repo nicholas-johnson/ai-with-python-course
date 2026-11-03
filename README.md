@@ -163,7 +163,7 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | Block | Module | Topic |
 | ----- | ------ | ----- |
 | 5 | [module-05-rag-fundamentals](module-05-rag-fundamentals/) | Chunking, embeddings, vector stores, retrieval, evaluation |
-| 6 | [module-06-structured-facts](module-06-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA |
+| 6 | [module-06-structured-facts](module-06-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA, graph MCP |
 | 7 | [module-07-agent-memory](module-07-agent-memory/) | Short/long-term memory, summarisation, decay controls |
 | 8 | [module-08-structured-workflows](module-08-structured-workflows/) | ReAct, plan-and-execute, tool routing — the Day 2 closer |
 
@@ -244,7 +244,7 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 6 — [Structured Facts](module-06-structured-facts/)
 
-**Topics:** Structured outputs (Pydantic, JSON Schema), fact extraction pipelines with provenance and confidence, knowledge graph construction (entities, relationships), grounded QA with citations.
+**Topics:** Structured outputs (Pydantic, JSON Schema), fact extraction pipelines with provenance and confidence, knowledge graph construction (entities, relationships), grounded QA with citations, graph queries as MCP tools.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
