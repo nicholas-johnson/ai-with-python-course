@@ -29,9 +29,10 @@ class WriteDecision(BaseModel):
     )
 
 
-class ConflictDecision(BaseModel):
-    conflicts_with: int = Field(
-        description="Index of the existing memory the new fact replaces, or -1 for none"
+class MergeDecision(BaseModel):
+    action: Literal["store", "replace", "skip"]
+    target: int = Field(
+        default=-1, description="Index of the existing memory to replace, or -1"
     )
     reason: str = Field(description="One short sentence")
 
@@ -50,12 +51,16 @@ database would already hold. Most turns produce no candidates at all.
 Write each fact as a standalone sentence that makes sense months later with no
 surrounding conversation, naming the patron rather than saying "the patron"."""
 
-CONFLICT_PROMPT = """A new fact about a patron has just been recorded.
+MERGE_PROMPT = """A new fact about a patron is about to be stored, alongside the
+memories already held that are closest to it. Choose one action:
 
-Decide whether it replaces one of the existing memories listed. It replaces an
-existing memory only when both cannot be true at once - a changed preference, a
-lifted constraint, a settled debt. A fact that merely adds detail replaces
-nothing. Answer with the index, or -1."""
+  replace - the new fact and an existing one cannot both be true: a changed
+            preference, a lifted constraint, a settled debt. Give its index.
+  skip    - an existing memory already says this, in equal or more detail.
+            Storing it again would only duplicate. Give its index.
+  store   - genuinely new, or it adds detail the existing memories lack.
+
+Prefer skip over store when the difference is only phrasing."""
 
 
 def propose_memories(user_message: str, client: OpenAI, patron: str = "the patron") -> list[MemoryCandidate]:
@@ -73,25 +78,27 @@ def propose_memories(user_message: str, client: OpenAI, patron: str = "the patro
     return decision.candidates if decision else []
 
 
-def find_conflict(text: str, neighbours: list, client: OpenAI) -> int:
-    """Return the index of the memory the new fact replaces, or -1."""
+def resolve(text: str, neighbours: list, client: OpenAI) -> MergeDecision:
+    """Decide whether a new fact is stored, replaces an existing one, or is a duplicate."""
     if not neighbours:
-        return -1
+        return MergeDecision(action="store", reason="Nothing stored nearby.")
 
     listing = "\n".join(f"{i}: {m.text}" for i, m in enumerate(neighbours))
     response = client.responses.parse(
         model=MODEL,
         reasoning={"effort": "none"},
-        text_format=ConflictDecision,
+        text_format=MergeDecision,
         input=[
-            {"role": "system", "content": CONFLICT_PROMPT},
+            {"role": "system", "content": MERGE_PROMPT},
             {"role": "user", "content": f"New fact: {text}\n\nExisting memories:\n{listing}"},
         ],
     )
     decision = response.output_parsed
-    if not decision or not 0 <= decision.conflicts_with < len(neighbours):
-        return -1
-    return decision.conflicts_with
+    if not decision:
+        return MergeDecision(action="store", reason="No decision returned.")
+    if decision.action in ("replace", "skip") and not 0 <= decision.target < len(neighbours):
+        return MergeDecision(action="store", reason="Target out of range.")
+    return decision
 
 
 def write_candidates(
@@ -102,11 +109,19 @@ def write_candidates(
     client: OpenAI,
     verbose: bool = False,
 ) -> list[str]:
-    """Write candidates, superseding anything each one replaces."""
+    """Write candidates, skipping duplicates and superseding what they replace."""
     written = []
     for candidate in candidates:
-        # Recall the neighbours before writing: a conflict is always close by.
+        # Recall the neighbours before writing: a conflict or a duplicate is
+        # always semantically close to the new fact.
         neighbours = store.recall(candidate.text, patron=patron, k=3)
+        decision = resolve(candidate.text, neighbours, client)
+
+        if decision.action == "skip":
+            if verbose:
+                print(f'    skipped (already known): "{candidate.text}"')
+            continue
+
         memory_id = store.remember(
             candidate.text,
             patron=patron,
@@ -115,11 +130,10 @@ def write_candidates(
         )
         written.append(memory_id)
 
-        index = find_conflict(candidate.text, neighbours, client)
-        if index >= 0:
-            store.supersede(neighbours[index].memory_id, by=memory_id)
+        if decision.action == "replace":
+            store.supersede(neighbours[decision.target].memory_id, by=memory_id)
             if verbose:
-                print(f'    superseded: "{neighbours[index].text}"')
+                print(f'    superseded: "{neighbours[decision.target].text}"')
         if verbose:
             print(f'    wrote [{candidate.kind}] "{candidate.text}"')
 

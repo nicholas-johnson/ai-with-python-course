@@ -21,10 +21,11 @@ EXISTING = [
     ("Zara prefers her briefings short.", "preference", 0.8, 60),
 ]
 
-# Three turns the writer should ignore, two it should keep, one that
-# contradicts something already stored.
+# Turns the writer should ignore, one it already knows, one that contradicts
+# something stored, and one genuinely new fact.
 TURNS = [
     "What have you got on tap tonight?",
+    "Same as always for me — the Comet Tail, extra fizz.",
     "I am waiting on my crewmate, so just water for now.",
     "Actually, from now on give me the full detail on everything — I would rather have too much than miss something.",
     "Cheers. Busy station tonight.",
@@ -53,7 +54,8 @@ def demo_memory_writer(client: OpenAI | None = None):
     print()
 
     print("-" * 60)
-    print("  Each turn goes to the writer. Most turns should produce nothing.")
+    print("  Each turn goes to the writer. Most turns should produce nothing,")
+    print("  and a candidate the store already holds should go no further.")
     print("-" * 60)
     print()
 
@@ -80,12 +82,18 @@ def demo_memory_writer(client: OpenAI | None = None):
         print(f"    - {row['text']}")
 
     print()
-    print('  "Prefers her briefings short" is gone — not deleted, superseded.')
-    print("  The row survives with active=False and the id of what replaced it,")
-    print("  so you can still answer what the agent believed and when.")
+    print("  Three outcomes, and only one of them is a plain write:")
     print()
-    print("  Append instead of supersede and the prompt would now carry both")
-    print("  instructions at once. The model picks one at random each turn and")
+    print('    skip     "the Comet Tail, extra fizz" — already held, in the same')
+    print("             detail. Storing it again buys nothing and costs tokens.")
+    print('    replace  "give me the full detail" cannot stand beside "prefers')
+    print('             her briefings short". The old one is superseded, not')
+    print("             deleted: active=False plus the id that replaced it, so")
+    print("             you can still answer what the agent believed and when.")
+    print("    store    the quartermaster fact is genuinely new.")
+    print()
+    print("  Append everything instead and the prompt would carry both briefing")
+    print("  instructions at once. The model picks one at random each turn, and")
     print("  the agent looks broken.")
     print()
 
