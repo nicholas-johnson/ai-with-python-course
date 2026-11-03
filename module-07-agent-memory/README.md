@@ -1,127 +1,236 @@
-# Module 7 — Agent Memory
+# Module 7 — Agent Memory and Context Engineering
 
-> An LLM has no memory between API calls. Every request is stateless — the model sees only the messages you send. "Memory" is a design pattern: you store information externally and inject it into the prompt when relevant. This module gives the agent a memory system with short-term session recall, long-term profile storage, and summarisation to keep conversations within token budgets.
+> An LLM has no memory between API calls. Every request is stateless — the model sees only the tokens you send. "Memory" is therefore a design pattern with two halves: you **write** things to a store outside the model, and you **select** the relevant ones back into the next prompt. Everything in this module is a move against a single budget: the context window.
 
 ## Learning goals
 
-- Distinguish **short-term** (session) and **long-term** (profile) memory.
-- Implement **summarisation** to compress conversation history under token budgets.
-- Model **memory decay** and explicit "do not remember" controls for privacy.
-- Expose memory as **MCP tools** so any agent can use it.
+- Account for a context window as a **budget** and know where the tokens actually go.
+- **Write** memories worth keeping, and **supersede** facts instead of stacking contradictions.
+- **Select** memories by semantic recall, scored on relevance, recency, and importance.
+- **Compact** a long conversation without losing the decisions and open tasks inside it.
+- Expose memory and compaction as **MCP tools** so any agent can use them.
 
 ---
 
-## Why agents need memory
+## The context budget
 
-Without memory, a crew member who says "As I mentioned earlier, the reactor is unstable" gets a confused response — the agent has no "earlier" to reference. With memory, the agent retrieves the previous conversation and responds in context.
+Every call you make sends the whole prompt again, and every token in it costs money, adds latency, and competes for the model's attention. A chat agent's prompt is rarely mostly conversation:
 
----
+| Component | Typical share of a working agent prompt |
+| --------- | --------------------------------------- |
+| System prompt and persona | small, fixed |
+| Tool schemas | grows with every tool you register |
+| Retrieved documents | the biggest single consumer in a RAG agent |
+| Conversation history | grows every single turn, forever |
+| Injected memories | small, if you select well |
 
-## Short-term memory — session context
-
-Session memory holds the current conversation. It is the list of messages from the current chat session, capped at a length or token budget so it fits in the context window.
+Count it rather than guess. `tiktoken` gives exact numbers for the `o200k_base` encoding used by current OpenAI models (Module 4 introduced this):
 
 ```python
-class SessionMemory:
-    def __init__(self, max_turns: int = 50, max_tokens: int = 4000):
-        self.messages: list[dict] = []
-        self.max_turns = max_turns
-        self.max_tokens = max_tokens
+import tiktoken
 
-    def add(self, message: dict):
-        self.messages.append(message)
-        self._trim()
+enc = tiktoken.get_encoding("o200k_base")
 
-    def _trim(self):
-        while len(self.messages) > self.max_turns:
-            self.messages.pop(0)
-        while self._token_count() > self.max_tokens:
-            self.messages.pop(0)
+def count_tokens(messages: list[dict]) -> int:
+    """Approximate the prompt cost of a message list."""
+    return sum(len(enc.encode(str(m.get("content", "")))) + 4 for m in messages)
 ```
 
-When the session exceeds the budget, the oldest messages are dropped. The system prompt is always preserved — it defines the agent's behaviour. Recent turns are more valuable than old ones, so FIFO eviction is the right default.
+A bigger window is not a licence to fill it. Model accuracy degrades as the window fills — distractors crowd out the relevant tokens, and material in the middle of a long prompt gets less attention than material at either end. This is often called **context rot**. The practical consequence: a tightly selected 2,000-token prompt usually beats a sprawling 100,000-token one, and it is twenty times cheaper.
+
+So context engineering has three moves, and the rest of this module is one section per move:
+
+- **Write** — put durable things in a store outside the prompt.
+- **Select** — pull back only what this turn needs.
+- **Compress** — when history still will not fit, compact it rather than truncate it.
 
 ---
 
-## Long-term memory — profiles and facts
+## Write: what is worth remembering
 
-Long-term memory persists across sessions. When Commander Voss says "I prefer concise briefings," the agent stores that preference and applies it in every future conversation.
+Most of what a user says is not memory-worthy. A good filter asks whether the fact will still matter next week:
+
+| Worth writing | Not worth writing |
+| ------------- | ----------------- |
+| Preferences — "I always take the Comet Tail with extra fizz" | One-off questions — "what's on tap tonight?" |
+| Constraints — "I'm allergic to synthcitrus" | Transient state — "I'm waiting on my crewmate" |
+| Identity — "I'm the quartermaster on the Pathfinder" | Chitchat and pleasantries |
+| Commitments — "Marek owes 12 credits on his tab" | Anything already in your database |
+
+Let the model make the call with a structured decision, so you get a typed answer instead of prose to parse:
 
 ```python
-class LongTermMemory:
-    def __init__(self):
-        self._store: dict[str, MemoryEntry] = {}
+class MemoryKind(str, Enum):
+    preference = "preference"
+    constraint = "constraint"
+    identity = "identity"
+    commitment = "commitment"
 
-    def remember(self, key: str, value: str, importance: float = 1.0):
-        self._store[key] = MemoryEntry(
-            value=value,
-            importance=importance,
-            last_accessed=time.time(),
-        )
 
-    def recall(self, key: str) -> str | None:
-        entry = self._store.get(key)
-        if entry and not entry.forgotten:
-            entry.last_accessed = time.time()
-            return entry.value
-        return None
+class MemoryCandidate(BaseModel):
+    text: str = Field(description="The fact, written as a standalone sentence")
+    kind: MemoryKind
+    importance: float = Field(ge=0.0, le=1.0)
+
+
+class WriteDecision(BaseModel):
+    candidates: list[MemoryCandidate]
 ```
 
-Long-term memory is keyed — you store facts by topic ("voss_preferences", "reactor_history") and recall them when the context matches. Importance scores and access timestamps help prioritise what to include when the budget is tight.
+Two places you can run this. On the **hot path**, right inside the turn, the memory is available immediately but the user waits for a second model call. In the **background**, after the response is streamed, the turn stays fast but the memory lands a beat later. Chat products generally write in the background; this module writes on the hot path so the effect is visible in the demo.
+
+### Supersede, do not append
+
+The failure that actually bites in production is contradiction. A patron says "keep it brief" in March and "give me the full detail" in June. Append both and the model now receives two opposing instructions and picks one at random, turn by turn.
+
+Resolve on write. Recall the neighbours of the new fact first, ask whether it conflicts, and mark the loser superseded:
+
+```python
+def write(self, text: str, *, patron: str, kind: str, importance: float = 1.0) -> str:
+    neighbours = self.recall(text, patron=patron, k=3)
+    conflict = find_conflict(text, neighbours, self.client)   # structured call
+    memory_id = self.remember(text, patron=patron, kind=kind, importance=importance)
+    if conflict:
+        self.supersede(conflict.memory_id, by=memory_id)
+    return memory_id
+```
+
+`supersede` flips the old entry's `active` flag to `False` and records the id that replaced it. The entry stops being recalled, but the trail survives — which is also exactly what you want for a privacy request. `forget(memory_id)` is the same soft delete with no replacement: the content stops reaching the model, while the record that something was removed remains for audit.
 
 ---
 
-## Memory decay
+## Select: semantic recall
 
-Not all memories are equal. A sensor reading from six months ago is less relevant than one from yesterday. **Decay** reduces memory importance over time:
+Early memory systems key memories by topic and look them up by prefix — `recall("drink_")`. It fails the moment the words diverge, which is immediately: the patron asks "what do I usually drink?" and the memory is filed under `favourite_beverage`.
+
+Recall is a retrieval problem, so use the retrieval tools from Module 5. Memories go into a vector collection, and the current turn is the query:
 
 ```python
-def tick_decay(self, decay_rate: float = 0.05):
-    for entry in self._store.values():
-        entry.importance *= (1.0 - decay_rate)
+collection = chromadb.PersistentClient(path=CHROMA_PATH).get_or_create_collection(
+    "cantina_memories",
+    embedding_function=None,                            # we embed ourselves
+    configuration={"hnsw": {"space": "cosine"}},        # distance in [0, 2]
+)
+
+collection.add(
+    ids=[memory_id],
+    embeddings=[embed(text, client)],
+    documents=[text],
+    metadatas=[{"patron": patron, "kind": kind, "importance": importance,
+                "written_at": time.time(), "active": True}],
+)
 ```
 
-Call `tick_decay()` periodically (once per session, once per day — your choice). Entries below a threshold are effectively forgotten. This prevents the memory store from growing without bound and ensures recent information ranks higher in retrieval.
+The `patron` metadata field is not decoration. It is the namespace, and the `where` filter on every query is what stops one patron's memories leaking into another's prompt:
+
+```python
+results = collection.query(
+    query_embeddings=[embed(query, client)],
+    n_results=k * 4,                                    # over-fetch, then rescore
+    where={"$and": [{"patron": {"$eq": patron}}, {"active": {"$eq": True}}]},
+)
+```
+
+### Scoring: relevance, recency, importance
+
+Similarity alone is not enough. A stale fact and a fresh one can read almost identically, and the fresh one should win. Over-fetch from the vector store, then rank on three signals:
+
+```python
+similarities = [1.0 - d for d in results["distances"][0]]   # cosine distance -> similarity
+relevances = normalise(similarities)                        # spread across [0, 1]
+
+for relevance, metadata in zip(relevances, metadatas):
+    age_days = (time.time() - metadata["written_at"]) / 86_400
+    recency = 0.5 ** (age_days / HALF_LIFE_DAYS)            # decay, as a weight
+    score = 0.6 * relevance + 0.25 * recency + 0.15 * metadata["importance"]
+```
+
+That `normalise` step is not cosmetic. Cosine similarity between two short sentences lands in a narrow band — in the demo, the six memories score between 0.03 and 0.38 against any given query — while recency spans the full 0 to 1. Blend the raw numbers and recency decides every ranking. Min-max across the candidates you actually retrieved makes the weights mean what they say.
+
+This is also where decay belongs. Treating decay as a garbage collector — multiply importance by 0.9 each tick, delete below a threshold — throws away facts that were merely quiet for a while, and an allergy does not become less true because nobody mentioned it. In the demo, a 210-day-old constraint has a recency weight of 0.008 and still ranks first when the patron asks for something citrus-forward, because relevance and importance carry it. As a half-life weight, decay does its real job: all else equal, prefer the recent fact, and let an old one resurface when it is the only thing that matches.
+
+Then inject the top handful, not everything you hold:
+
+```python
+memories = store.recall(user_input, patron="zara", k=5)
+block = "\n".join(f"- {m.text}" for m in memories)
+```
 
 ---
 
-## The right to forget
+## Compress: compaction, not truncation
 
-Privacy matters even on a starship. When a crew member says "forget what I told you about my medical condition," the agent must comply.
+Selection handles memory. History is the other half of the problem, and it grows without bound: left alone, turn 50 sends every word of turns 1 through 49.
+
+Dropping the oldest messages is the obvious fix and the wrong one. The oldest turns are where the decisions were made. "Charge everything to the ship's account" was agreed on turn 3; truncate turn 3 and the agent starts asking for payment again.
+
+**Compaction** replaces a span of history with a summary that deliberately preserves the load-bearing parts. Name them explicitly rather than hoping the summary keeps them:
 
 ```python
-def forget(self, key: str):
-    if key in self._store:
-        self._store[key].forgotten = True
+class Anchor(BaseModel):
+    kind: Literal["decision", "open_task", "constraint"]
+    text: str
+
+
+class Compaction(BaseModel):
+    summary: str = Field(description="What was discussed, in under 120 words")
+    anchors: list[Anchor] = Field(description="Decisions, open tasks, and constraints")
 ```
 
-A `forgotten` flag is preferable to deletion — you maintain an audit trail that the data existed and was deliberately removed, without retaining the content.
+A compaction pass then replaces the old span with a single block and keeps the recent turns verbatim:
+
+```python
+def compact(messages: list[dict], *, budget: int, keep_recent: int, client) -> list[dict]:
+    if count_tokens(messages) <= budget:
+        return messages
+
+    system, rest = messages[0], messages[1:]
+    split = safe_split(rest, len(rest) - keep_recent)    # never split a tool pair
+    old, recent = rest[:split], rest[split:]
+
+    result = summarise(old, client)                      # -> Compaction
+    block = render_block(result)                         # summary + anchor bullets
+    return [system, {"role": "system", "content": block}, *recent]
+```
+
+Three things go wrong here, and all three are worth knowing before you ship:
+
+- **Orphaned tool pairs.** A `function_call` and its `function_call_output` must stay together or the API rejects the request. `safe_split` walks the boundary backwards until it is not between a call and its output.
+- **A broken cache prefix.** Prompt caching keys on the longest identical prefix. Rewrite index 0 and you pay full price on every subsequent call, so leave the system prompt byte-identical and insert the compaction block after it.
+- **Summary-of-summary drift.** Compact a compaction repeatedly and detail bleeds away a generation at a time. Keep the anchors as structured text and re-emit them verbatim at each pass, so decisions survive even when the prose does not.
 
 ---
 
-## Summarisation
+## Memory as MCP tools
 
-When a conversation grows long, you can replace old turns with a summary. The summary preserves the key facts and decisions while using far fewer tokens.
+Memory is state with a small, stable interface, which makes it a natural service rather than a library. Wrap it in an MCP server and any agent — yours, someone else's, a desktop client — gets the same memory without importing your code:
 
 ```python
-def summarise_turns(turns: list[dict], max_tokens: int = 200) -> str:
-    """Ask the LLM to compress turns into a single summary paragraph."""
-    prompt = f"Summarise this conversation in one paragraph under {max_tokens} tokens:\n"
-    for turn in turns:
-        prompt += f"{turn['role']}: {turn['content']}\n"
-    return llm.complete(prompt)
+mcp = MCPServer("Cantina Memory")
+
+@mcp.tool()
+def remember(patron: str, text: str, kind: str = "preference") -> str:
+    """Store a durable fact about a patron."""
+
+@mcp.tool()
+def recall(patron: str, query: str, k: int = 5) -> str:
+    """Recall the memories most relevant to a query, scored and ranked."""
+
+@mcp.tool()
+def compact_thread(budget_tokens: int = 1200) -> str:
+    """Compact the stored conversation to fit a budget, preserving anchors."""
 ```
 
-Replace the oldest N turns with a single system message containing the summary. The agent retains the gist of what was discussed without carrying every word.
+Both halves of the module belong on that server. Memory tools let the agent write and select; compaction tools let it compress. The agent decides when to call them, and the store outlives any single agent process.
 
 ---
 
 ## Summary
 
-- **Separate session from profile.** The buffer clears with the conversation. Long-term memory persists across visits, and it needs a cap.
-- **Summarise before you truncate.** A summary beats silently dropping context when the buffer overflows.
-- **Decay stale facts, and forget on request.** Old facts should fade. A forget request stops serving immediately.
-- **Memory can be MCP tools.** Any agent can remember, recall, and forget through the server.
+- **Budget the window.** Count tokens, know which component is eating them, and remember that a full window reads worse than a selective one.
+- **Supersede, do not append.** A new fact that contradicts an old one replaces it; soft-delete keeps the audit trail without feeding the model the conflict.
+- **Recall semantically and score it.** Embed memories, filter by namespace, then rank on relevance, recency, and importance. Decay is a weight, not a delete.
+- **Compact, do not truncate.** Preserve decisions, open tasks, and constraints by name, keep tool pairs intact, and leave the cache prefix alone.
 
 ---
 
@@ -137,10 +246,14 @@ uv run python module-07-agent-memory/demo/demo.py
 ```
 
 Menu:
-1. Session memory — capped buffer, FIFO eviction
-2. Long-term memory — remember, recall, decay, forget
-3. Summarisation — compress a long conversation
-4. Memory-enhanced agent — chat with auto-memory detection
+
+1. Context budget — where the tokens go, and what truncation destroys
+2. Semantic memory — vector recall with scoring, next to prefix matching
+3. Memory writer — structured write decisions and supersession
+4. Compaction — anchors preserved under a token budget
+5. Memory agent — chat with semantic recall and auto-compaction
+
+Parts 1 and 4 run without an API key (part 4 falls back to a stub summariser). Parts 2, 3, and 5 need `OPENAI_API_KEY`. The memory store needs the `rag` extra for ChromaDB, which Module 5 already installed.
 
 ## Exercises
 
@@ -148,9 +261,9 @@ The three exercises chain together. Each builds on the last; you can bring your 
 
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-memory-store`](exercises/01-memory-store/) | Build session + long-term memory with decay and forget, wire into a chat agent |
-| [`exercises/02-conversation-summary`](exercises/02-conversation-summary/) | Auto-summarise long conversations to fit token budgets |
-| [`exercises/03-memory-server`](exercises/03-memory-server/) | Expose memory as an MCP server, connect an agent via stdio |
+| [`exercises/01-memory-store`](exercises/01-memory-store/) | Semantic memory store — scored recall, namespacing, supersede and forget |
+| [`exercises/02-compaction`](exercises/02-compaction/) | Budget-triggered compaction that preserves anchors and tool pairs |
+| [`exercises/03-memory-server`](exercises/03-memory-server/) | Expose memory and compaction as an MCP server, connect an agent via stdio |
 
 Run tests for this module:
 
@@ -169,5 +282,9 @@ From repo root: `pnpm slides:07`, or `cd module-07-agent-memory/slides && pnpm d
 
 ## Reference
 
+- [Anthropic — Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [Lost in the Middle (Liu et al. 2023)](https://arxiv.org/abs/2307.03172) — accuracy drops for material in the middle of a long context
 - [MemGPT (Packer et al. 2023)](https://arxiv.org/abs/2310.08560)
+- [Generative Agents (Park et al. 2023)](https://arxiv.org/abs/2304.03442) — the relevance/recency/importance retrieval score
 - [LangChain memory (short-term)](https://docs.langchain.com/oss/python/langchain/short-term-memory) and [long-term](https://docs.langchain.com/oss/python/langchain/long-term-memory)
+- [OpenAI prompt caching](https://platform.openai.com/docs/guides/prompt-caching)

@@ -3,18 +3,19 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 7 — Agent Memory',
-      subtitle: 'What to remember, what to forget, and how to keep it all in context',
+      subtitle: 'Context engineering: what to write, what to select, what to compress',
       icon: 'brain',
     },
   },
   {
     type: 'welcome',
     content: {
-      title: 'Persistence strategies for conversational agents',
+      title: 'The model is stateless. Memory is something you build.',
       points: [
-        'Useful agents need session context, durable preferences, and policies for forgetting.',
-        'Short-term vs long-term memory — different stores, different lifetimes.',
-        'Summarisation compresses old conversations to fit the context window.',
+        'Every call sends the whole prompt again — the model remembers nothing on its own.',
+        'Memory is two moves: **write** facts to a store, **select** them back into the prompt.',
+        'Compaction is the third move, for when history still will not fit.',
+        'All three are moves against one budget: the context window.',
       ],
     },
   },
@@ -24,204 +25,475 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Implement **short-term memory** (session buffer) separate from **long-term** storage.',
-        'Apply **summarisation** to fit context limits gracefully.',
-        'Model **decay** and explicit **"do not remember"** controls.',
-        'Expose memory as **MCP tools** for any agent to use.',
+        'Account for the context window as a **budget** and see where tokens go.',
+        '**Write** memories worth keeping, and **supersede** rather than stack contradictions.',
+        '**Select** by semantic recall, scored on relevance, recency, and importance.',
+        '**Compact** long conversations without losing decisions and open tasks.',
+        'Expose memory and compaction as **MCP tools**.',
+      ],
+    },
+  },
+
+  // ---- Section: The context budget ----
+  {
+    type: 'title',
+    content: {
+      title: 'The context budget',
+      subtitle: 'Keeping it under control',
+      icon: 'scale',
+    },
+  },
+  {
+    type: 'cards',
+    content: {
+      title: 'Where Context actually goes',
+      cards: [
+        {
+          heading: 'System + tools',
+          points: [
+            'Persona and policy — fixed cost',
+            'Tool schemas grow with every tool you register',
+            'Twenty tools can outweigh the conversation',
+          ],
+        },
+        {
+          heading: 'Retrieved docs',
+          points: [
+            'The biggest consumer in a RAG agent',
+            'Chunk count times chunk size',
+            'Reranking here buys budget everywhere else',
+          ],
+        },
+        {
+          heading: 'History',
+          points: [
+            'Grows every single turn, forever',
+            'Turn 50 resends turns 1-49',
+            'The only component with no natural ceiling',
+          ],
+        },
+        {
+          heading: 'Memories',
+          points: [
+            'Small — if you select well',
+            'Five facts, not fifty',
+            'Cheapest component, highest leverage',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Context rot',
+      icon: 'alert-triangle',
+      points: [
+        'A bigger window is not a licence to fill it.',
+        'Accuracy **degrades as the window fills** — distractors crowd out signal.',
+        'Material in the **middle** of a long prompt gets the least attention.',
+        'A tight 2k prompt beats a sprawling 100k one — and costs 2% as much.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Count, do not guess',
+      code: `import tiktoken
+
+enc = tiktoken.get_encoding("o200k_base")
+
+
+def count_tokens(messages: list[dict]) -> int:
+    """Approximate the prompt cost of a message list."""
+    return sum(
+        len(enc.encode(str(m.get("content", "")))) + 4
+        for m in messages
+    )`,
+      highlights: [
+        '`o200k_base` is the encoding for current OpenAI models (Module 4)',
+        'Measure each component separately — you cannot budget what you cannot see',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — The context budget',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 1',
+      icon: 'rocket',
+    },
+  },
+
+  // ---- Section: Write ----
+  {
+    type: 'title',
+    content: {
+      title: 'Write',
+      subtitle: 'What is worth keeping, and what to do when facts collide',
+      icon: 'database',
+    },
+  },
+  {
+    type: 'rules',
+    content: {
+      title: 'Worth writing: will it matter next week?',
+      rules: [
+        {
+          rule: 'Preferences',
+          example:
+            '"I always take the Comet Tail with extra fizz" — shapes every future turn.',
+          icon: 'star',
+        },
+        {
+          rule: 'Constraints',
+          example: '"I am allergic to synthcitrus" — never stops being true.',
+          icon: 'ban',
+        },
+        {
+          rule: 'Identity',
+          example: '"I am the quartermaster on the Pathfinder" — who you are talking to.',
+          icon: 'user',
+        },
+        {
+          rule: 'Commitments',
+          example: '"Marek owes 12 credits" — an open loop someone has to close.',
+          icon: 'clipboard-list',
+        },
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Not worth writing',
+      icon: 'eraser',
+      points: [
+        'One-off questions — *"what is on tap tonight?"*',
+        'Transient state — *"I am waiting on my crewmate"*',
+        'Chitchat and pleasantries.',
+        'Anything already in your database — **look it up, do not remember it**.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'A typed write decision',
+      code: `class MemoryCandidate(BaseModel):
+    text: str = Field(description="A standalone sentence")
+    kind: Literal["preference", "constraint",
+                  "identity", "commitment"]
+    importance: float = Field(ge=0.0, le=1.0)
+
+
+class WriteDecision(BaseModel):
+    candidates: list[MemoryCandidate]
+
+
+decision = client.responses.parse(
+    model=MODEL, text_format=WriteDecision, input=[...]
+).output_parsed`,
+      highlights: [
+        'Structured output means a typed answer, not prose to parse',
+        'An empty candidate list is the common and correct case',
       ],
     },
   },
   {
     type: 'comparison',
     content: {
-      title: 'Short-term vs long-term memory',
+      title: 'Where the write happens',
       left: {
-        label: 'Short-term (session)',
+        label: 'Hot path',
         items: [
-          'Current conversation turns',
-          'Lives in RAM or session store',
-          'Cleared on session end',
-          'Capped by token budget',
+          'Extract inside the turn',
+          'Memory available immediately',
+          'User waits for a second model call',
+          'What the demo does — visible effect',
         ],
       },
       right: {
-        label: 'Long-term (profile)',
+        label: 'Background',
         items: [
-          'User preferences, notes, facts',
-          'Persisted to disk / database',
-          'Survives across sessions',
-          'Subject to decay and privacy rules',
+          'Extract after the response streams',
+          'Turn stays fast',
+          'Memory lands a beat later',
+          'What chat products ship',
         ],
       },
     },
   },
   {
-    type: 'code',
+    type: 'standard',
     content: {
-      title: 'Session memory with cap',
-      code: `class SessionMemory:
-    def __init__(self, max_turns: int = 20):
-        self.max_turns = max_turns
-        self._turns: list[dict] = []
-
-    def add(self, message: dict):
-        self._turns.append(message)
-        while len(self._turns) > self.max_turns:
-            self._turns.pop(0)  # drop oldest
-
-    def get_messages(self) -> list[dict]:
-        return list(self._turns)
-
-    def clear(self):
-        self._turns.clear()`,
-      highlights: [
-        'FIFO eviction: oldest turns drop when the buffer is full',
-        'Simple but effective — production systems add summarisation',
+      title: 'Supersede, do not append',
+      icon: 'arrow-up-down',
+      points: [
+        'In March: *"keep it brief."* In June: *"give me the full detail."*',
+        'Append both and the model receives **two opposing instructions**.',
+        'It picks one at random, turn by turn — and looks broken.',
+        'Resolve the conflict **on write**, while you still know which is newer.',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Long-term memory with decay',
-      code: `class LongTermMemory:
-    def __init__(self, decay_rate: float = 0.05):
-        self._entries: dict[str, dict] = {}
-        self.decay_rate = decay_rate
+      title: 'Resolve on write',
+      code: `def write(self, text, *, patron, kind, importance=1.0):
+    neighbours = self.recall(text, patron=patron, k=3)
+    conflict = find_conflict(text, neighbours, self.client)
 
-    def remember(self, key: str, value: str, importance: float = 1.0):
-        self._entries[key] = {
-            "value": value, "importance": importance
-        }
-
-    def tick_decay(self):
-        expired = []
-        for key, entry in self._entries.items():
-            entry["importance"] -= self.decay_rate
-            if entry["importance"] <= 0:
-                expired.append(key)
-        for key in expired:
-            del self._entries[key]`,
+    memory_id = self.remember(
+        text, patron=patron, kind=kind, importance=importance
+    )
+    if conflict:
+        self.supersede(conflict.memory_id, by=memory_id)
+    return memory_id`,
       highlights: [
-        'Importance decays over time — unused facts eventually disappear',
-        'remember() can refresh importance when a fact is referenced again',
+        'Recall the neighbours first — a conflict is always semantically close',
+        '`supersede` sets `active=False` and records what replaced it',
+        '`forget(id)` is the same soft delete with no replacement: audit trail, no content',
       ],
     },
   },
-  // ---- Demo: Session + long-term memory ----
+
+  // ---- Section: Select ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Session + long-term memory',
-      subtitle: 'Switch to terminal: python demo/demo.py — Parts 1-2',
+      title: 'Select',
+      subtitle: 'Recall is a retrieval problem',
+      icon: 'search',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Why keyed lookup fails',
+      icon: 'frown',
+      points: [
+        'Early memory systems file by topic and look up by prefix: `recall("drink_")`.',
+        'The patron asks *"what do I usually drink?"*',
+        'The memory is filed under `favourite_beverage`. Nothing matches.',
+        'You already have the fix from Module 5: **embed it and retrieve**.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Memories in a vector collection',
+      code: `collection = chroma.get_or_create_collection(
+    "cantina_memories",
+    embedding_function=None,                   # we embed ourselves
+    configuration={"hnsw": {"space": "cosine"}},
+)
+
+results = collection.query(
+    query_embeddings=[embed(query, client)],
+    n_results=k * 4,                           # over-fetch, then rescore
+    where={"$and": [
+        {"patron": {"$eq": patron}},
+        {"active": {"$eq": True}},
+    ]},
+)`,
+      highlights: [
+        'The current turn is the query — no keys, no prefixes',
+        '`patron` is the **namespace**: the `where` filter is what stops memory leaking between users',
+        'Over-fetch from the index so there is something to rescore',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Score: relevance, recency, importance',
+      code: `sims = [1.0 - d for d in distances]   # cosine -> similarity
+rels = normalise(sims)               # spread across [0, 1]
+
+for relevance, meta in zip(rels, metadatas):
+    age_days = (now - meta["written_at"]) / 86_400
+    recency = 0.5 ** (age_days / HALF_LIFE_DAYS)
+
+    score = (0.6 * relevance
+             + 0.25 * recency
+             + 0.15 * meta["importance"])`,
+      highlights: [
+        'Similarity alone cannot tell a stale fact from a fresh one',
+        '**Normalise first**: raw cosine spans 0.03-0.38 here, recency spans 0-1 — blend them raw and recency wins every time',
+        'Inject the top five, not everything you hold',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Decay is a weight, not a delete',
+      icon: 'scale',
+      points: [
+        'The old way: multiply importance by 0.9 each tick, delete below a threshold.',
+        'That discards facts that were merely **quiet for a while**.',
+        'An allergy does not become less true because nobody mentioned it.',
+        'As a **half-life weight** in the ranking: prefer the recent fact, all else equal.',
+        'In the demo a 210-day-old constraint scores `recency = 0.008` — and still ranks first.',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Semantic recall and the writer',
+      subtitle: 'Switch to terminal: python demo/demo.py — Parts 2-3',
       icon: 'rocket',
     },
   },
 
-  // ---- Section: Summarisation ----
+  // ---- Section: Compress ----
   {
     type: 'title',
     content: {
-      title: 'Summarisation',
-      subtitle: 'Compressing history to fit the context window',
+      title: 'Compress',
+      subtitle: 'Compaction, not truncation',
       icon: 'file-minus',
     },
   },
-
   {
     type: 'standard',
     content: {
-      title: 'Summarisation — fitting context',
-      icon: 'file-minus',
+      title: 'Truncation loses the decisions',
+      icon: 'scissors',
       points: [
-        'When the conversation exceeds the budget, **summarise** older turns.',
-        'Replace 20 old messages with one **summary paragraph**.',
-        'Keep the system prompt + summary + recent N turns.',
-        'Trade-off: detail vs budget. Summaries lose nuance.',
+        'History is the one component with no ceiling — turn 50 resends turns 1-49.',
+        'Dropping the oldest messages is the obvious fix and the wrong one.',
+        'The oldest turns are **where the decisions were made**.',
+        '*"Charge it to the ship\'s account"* was agreed on turn 3.',
+        'Truncate turn 3 and the agent starts asking for payment again.',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Summarise and trim',
-      code: `def summarise_and_trim(messages, llm, max_tokens):
-    total = count_tokens(messages)
-    if total <= max_tokens:
+      title: 'Name what must survive',
+      code: `class Anchor(BaseModel):
+    kind: Literal["decision", "open_task", "constraint"]
+    text: str
+
+
+class Compaction(BaseModel):
+    summary: str = Field(
+        description="What was discussed, under 120 words"
+    )
+    anchors: list[Anchor] = Field(
+        description="Decisions, open tasks, and constraints"
+    )`,
+      highlights: [
+        'Do not hope the summary keeps the important parts — extract them by name',
+        'Anchors are structured, so they can be re-emitted verbatim next time',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The compaction pass',
+      code: `def compact(messages, *, budget, keep_recent, client):
+    if count_tokens(messages) <= budget:
         return messages
 
-    # Split: system + old turns + recent turns
-    system = messages[0]
-    split = len(messages) // 2
-    old_turns = messages[1:split]
-    recent = messages[split:]
+    system, rest = messages[0], messages[1:]
+    split = safe_split(rest, len(rest) - keep_recent)
+    old, recent = rest[:split], rest[split:]
 
-    summary = llm.chat([
-        {"role": "system", "content": "Summarise this conversation."},
-        *old_turns,
-    ])
-
-    return [system, {"role": "system", "content":
-        f"Earlier conversation summary: {summary}"
-    }, *recent]`,
+    result = summarise(old, client)        # -> Compaction
+    block = render_block(result)           # summary + anchors
+    return [system, {"role": "system", "content": block},
+            *recent]`,
       highlights: [
-        'The LLM itself produces the summary — meta but effective',
-        'Recent turns stay verbatim for conversational continuity',
+        'Budget-triggered: no model call until you are actually over',
+        'Recent turns stay verbatim; the old span becomes one block',
       ],
     },
   },
-  // ---- Demo: Summarisation ----
+  {
+    type: 'rules',
+    content: {
+      title: 'Three ways compaction breaks',
+      rules: [
+        {
+          rule: 'Orphaned tool pairs',
+          example:
+            'A `function_call` without its output is an API error. `safe_split` walks the boundary back until it is not between a call and its result.',
+          icon: 'plug',
+        },
+        {
+          rule: 'A broken cache prefix',
+          example:
+            'Prompt caching keys on the longest identical prefix. Leave index 0 byte-identical and insert the block after it.',
+          icon: 'timer',
+        },
+        {
+          rule: 'Summary-of-summary drift',
+          example:
+            'Compact a compaction repeatedly and detail bleeds away. Re-emit the anchors verbatim at every pass.',
+          icon: 'refresh-cw',
+        },
+      ],
+    },
+  },
   {
     type: 'title',
     content: {
-      title: 'Demo — Summarisation',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 3',
+      title: 'Demo — Compaction',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
       icon: 'rocket',
     },
   },
 
-  // ---- Section: Privacy + MCP ----
+  // ---- Section: Memory as a service ----
   {
     type: 'title',
     content: {
-      title: 'Privacy + MCP',
-      subtitle: 'Forgetting on demand and memory as a service',
-      icon: 'eye-off',
+      title: 'Memory as a service',
+      subtitle: 'Both halves, behind MCP',
+      icon: 'plug',
     },
   },
+  {
+    type: 'code',
+    content: {
+      title: 'Memory and compaction as MCP tools',
+      code: `mcp = MCPServer("Cantina Memory")
 
-  {
-    type: 'standard',
-    content: {
-      title: 'Privacy: "do not remember"',
-      icon: 'eye-off',
-      points: [
-        'Users may request deletion: **"forget my medical data"**.',
-        'Implement a **forget(key)** method that removes from all stores.',
-        'Long-term memory entries can have a **do_not_persist** flag.',
-        'Audit log: record *that* something was forgotten, not *what*.',
+
+@mcp.tool()
+def remember(patron: str, text: str, kind: str) -> str:
+    """Store a durable fact about a patron."""
+
+
+@mcp.tool()
+def recall(patron: str, query: str, k: int = 5) -> str:
+    """Recall the memories most relevant to a query."""
+
+
+@mcp.tool()
+def compact_thread(budget_tokens: int = 1200) -> str:
+    """Compact the thread, preserving anchors."""`,
+      highlights: [
+        'Memory is state behind a small, stable interface — a service, not a library',
+        'Any agent connects over stdio and gets the same memory, no imports',
+        'The store outlives any single agent process',
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'Memory as MCP tools',
-      icon: 'wrench',
-      points: [
-        'Wrap memory behind an **MCPServer** with remember/recall/forget tools.',
-        'Any agent can connect via stdio and use memory without importing code.',
-        'Memory persists as long as the server runs — agents can restart.',
-        'This is how production systems separate concerns: memory is a service.',
-      ],
-    },
-  },
-  // ---- Demo: Memory-enhanced agent ----
   {
     type: 'title',
     content: {
-      title: 'Demo — Memory-enhanced agent',
-      subtitle: 'Switch to terminal: python demo/demo.py — Part 4',
+      title: 'Demo — Memory agent',
+      subtitle: 'Switch to terminal: python demo/demo.py — Part 5',
       icon: 'rocket',
     },
   },
@@ -235,31 +507,34 @@ export const slides = [
       icon: 'check-square',
     },
   },
-
   {
     type: 'rules',
     content: {
       title: 'Summary',
       rules: [
         {
-          rule: 'Separate session from profile',
-          example: 'The buffer clears with the conversation. Long-term memory persists across visits.',
-          icon: 'database',
+          rule: 'Budget the window',
+          example:
+            'Count the tokens, know which component is eating them. A full window reads worse than a selective one.',
+          icon: 'scale',
         },
         {
-          rule: 'Summarise before you truncate',
-          example: 'A summary beats silently dropping context when the buffer overflows.',
+          rule: 'Supersede, do not append',
+          example:
+            'A new fact that contradicts an old one replaces it. Soft-delete keeps the audit trail, not the conflict.',
+          icon: 'arrow-up-down',
+        },
+        {
+          rule: 'Recall semantically, then score',
+          example:
+            'Embed, filter by namespace, rank on relevance, recency, and importance. Decay is a weight, not a delete.',
+          icon: 'search',
+        },
+        {
+          rule: 'Compact, do not truncate',
+          example:
+            'Preserve decisions, open tasks, and constraints by name. Keep tool pairs intact and the cache prefix alone.',
           icon: 'file-minus',
-        },
-        {
-          rule: 'Decay stale facts, and forget on request',
-          example: 'Old facts should fade. A forget request stops serving immediately.',
-          icon: 'eye-off',
-        },
-        {
-          rule: 'Memory can be MCP tools',
-          example: 'Any agent can remember, recall, and forget through the server.',
-          icon: 'plug',
         },
       ],
     },
@@ -269,9 +544,9 @@ export const slides = [
     content: {
       title: 'Exercises',
       points: [
-        '01 — Memory store: session buffer + long-term memory with decay and forget',
-        '02 — Conversation summary: auto-summarise when the buffer overflows',
-        '03 — Memory MCP server: expose memory as tools, connect an agent via stdio',
+        '01 — Memory store: semantic recall with scoring, namespacing, supersede and forget',
+        '02 — Compaction: budget-triggered compaction that preserves anchors and tool pairs',
+        '03 — Memory MCP server: memory and compaction as tools, agent connected via stdio',
       ],
     },
   },

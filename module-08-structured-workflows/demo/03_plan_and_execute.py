@@ -1,79 +1,24 @@
-"""
-Module 8 — Demo 02: Plan-and-Execute
+"""Part 3: Plan-and-execute - decide once, then carry it out.
 
-Interactive walkthrough of the plan-and-execute pattern.
-Generates a complete plan up front, then executes each step.
-Shows re-planning when a step fails.
+ReAct re-decides on every turn. Here the model writes the whole plan up front,
+code executes it, and the model is only consulted again if a step fails.
 
-Run:  python module-08-structured-workflows/demo/02_plan_and_execute.py
+Run alone:  python module-08-structured-workflows/demo/03_plan_and_execute.py
 """
 from __future__ import annotations
 
-import json
-import os
-import re
-from dataclasses import dataclass, field
-import httpx
+from dataclasses import dataclass
+
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
+from workflow_tools import MODEL, run_tool, schemas_for
 
 load_dotenv()
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
-
-
-# ---------------------------------------------------------------------------
-# Tools (reused from demo 01)
-# ---------------------------------------------------------------------------
-
-_notes: list[str] = []
-
-
-def search_web(query: str) -> str:
-    try:
-        resp = httpx.get(
-            "https://lite.duckduckgo.com/lite",
-            params={"q": query},
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=10,
-        )
-        text = re.sub(r"<[^>]+>", " ", resp.text)
-        text = re.sub(r"\s+", " ", text).strip()
-        return text[:2000] if text else "No results found."
-    except Exception as e:
-        return f"Search error: {e}"
-
-
-def calculator(expression: str) -> str:
-    allowed = set("0123456789+-*/.() ")
-    if not all(c in allowed for c in expression):
-        return "Error: only digits and basic operators allowed"
-    try:
-        return str(eval(expression, {"__builtins__": {}}, {}))
-    except Exception as e:
-        return f"Error: {e}"
-
-
-def take_note(content: str) -> str:
-    _notes.append(content)
-    return f"Note saved ({len(_notes)} total)."
-
-
-def read_notes() -> str:
-    if not _notes:
-        return "No notes yet."
-    return "\n".join(f"{i+1}. {n}" for i, n in enumerate(_notes))
-
-
-TOOLS = {"search_web": search_web, "calculator": calculator, "take_note": take_note, "read_notes": read_notes}
-
-TOOL_SCHEMAS = [
-    {"type": "function", "name": "search_web", "description": "Search the web.", "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
-    {"type": "function", "name": "calculator", "description": "Evaluate math.", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}},
-    {"type": "function", "name": "take_note", "description": "Save a note.", "parameters": {"type": "object", "properties": {"content": {"type": "string"}}, "required": ["content"]}},
-    {"type": "function", "name": "read_notes", "description": "Read all notes.", "parameters": {"type": "object", "properties": {}}},
-]
+TOOL_SCHEMAS = schemas_for(
+    "check_system", "search_logs", "lookup_mission", "calculator", "take_note", "read_notes"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -109,15 +54,17 @@ def generate_plan(goal: str, client: OpenAI) -> list[PlanStep]:
                 "role": "system",
                 "content": (
                     "You are a planning assistant. Given a goal, break it into 3-6 concrete steps. "
-                    "Each step should be a single, actionable task that can use web search, "
-                    "calculation, or note-taking tools."
+                    "Each step should be a single, actionable task that can use the ship system, "
+                    "log search, mission lookup, calculation, or note-taking tools."
                 ),
             },
             {"role": "user", "content": goal},
         ],
     )
     plan = response.output_parsed
-    return [PlanStep(number=s.number, description=s.description) for s in plan.steps] if plan else []
+    if not plan:
+        return []
+    return [PlanStep(number=s.number, description=s.description) for s in plan.steps]
 
 
 def execute_step(step: PlanStep, client: OpenAI) -> str:
@@ -148,10 +95,10 @@ def execute_step(step: PlanStep, client: OpenAI) -> str:
 
         messages += response.output
         for tc in calls:
-            fn_name = tc.name
-            fn_args = json.loads(tc.arguments)
-            result = TOOLS[fn_name](**fn_args)
-            messages.append({"type": "function_call_output", "output": result, "call_id": tc.call_id})
+            result = run_tool(tc.name, tc.arguments)
+            messages.append(
+                {"type": "function_call_output", "output": result, "call_id": tc.call_id}
+            )
 
     return "(step timed out)"
 
@@ -232,7 +179,7 @@ def plan_and_execute(goal: str, client: OpenAI, max_replans: int = 1) -> dict:
                 plan = completed + [step] + revise_plan(remaining, completed, str(e), client)
                 replans_left -= 1
                 i += 1
-                print(f"  Revised plan:")
+                print("  Revised plan:")
                 for s in plan[i:]:
                     print(f"    {s.number}. {s.description}")
                 print()
@@ -247,7 +194,10 @@ def plan_and_execute(goal: str, client: OpenAI, max_replans: int = 1) -> dict:
         model=MODEL,
         reasoning={"effort": "none"},
         input=[
-            {"role": "system", "content": "Synthesise the results of these steps into a final answer."},
+            {
+                "role": "system",
+                "content": "Synthesise the results of these steps into a final answer.",
+            },
             {"role": "user", "content": synthesis_prompt},
         ],
     )
@@ -259,44 +209,31 @@ def plan_and_execute(goal: str, client: OpenAI, max_replans: int = 1) -> dict:
 # Demo
 # ---------------------------------------------------------------------------
 
-def wait():
-    input("\n--- Press Enter to continue ---\n")
-
-
-def main():
-    client = OpenAI()
-
-    print("=" * 60)
-    print("  MODULE 8 DEMO — Plan-and-Execute")
-    print("=" * 60)
-
-    print("\n## Plan-and-Execute Pattern\n")
-    print("Instead of deciding one step at a time (ReAct),")
-    print("we generate a FULL PLAN up front, then execute each step.\n")
+def demo_plan_and_execute(client: OpenAI):
+    print("=" * 72)
+    print("PART 3: PLAN-AND-EXECUTE")
+    print("=" * 72)
+    print()
+    print("  The model decides the shape of the work once, up front.")
+    print("  Everything after that is code following a list.\n")
 
     goals = [
-        "Research the top 3 tallest buildings in the world, calculate the average height, and save the findings as a note.",
-        "Find out the current population of Tokyo, compare it to London, and calculate the ratio.",
+        "Assess mission MSN-001: check the reactor and shields, find any "
+        "engineering concerns in the logs, and note the overall risk.",
+        "Work out how many hours until the shields reach full charge, and "
+        "whether the sensor array maintenance fits in that window.",
     ]
 
     for goal in goals:
-        print(f"Goal: {goal}")
+        print(f"  Goal: {goal}")
         result = plan_and_execute(goal, client)
-        print(f"\n  Final Answer: {result['answer']}\n")
-        wait()
+        print(f"\n  Final answer: {result['answer']}\n")
 
-    print("## Interactive — Try your own goals\n")
-    print("Type a multi-step goal, or 'quit' to end.\n")
-
-    while True:
-        user_input = input("Goal: ").strip()
-        if not user_input or user_input.lower() == "quit":
-            break
-        result = plan_and_execute(user_input, client)
-        print(f"\nFinal Answer: {result['answer']}\n")
-
-    print("Done.")
+    print("  The plan is a list of plain objects. You can print it, show it to")
+    print("  a user, store it, or diff it against what actually happened.")
+    print("  That is the whole argument for planning: the plan is data.")
+    print()
 
 
 if __name__ == "__main__":
-    main()
+    demo_plan_and_execute(OpenAI())
