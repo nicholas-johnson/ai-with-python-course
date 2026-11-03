@@ -208,61 +208,61 @@ class KnowledgeGraph:
   },
 
   // ---- Section: Grounded QA ----
-  {
-    type: 'title',
-    content: {
-      title: 'Grounded QA',
-      subtitle: 'Answering questions with graph evidence and citations',
-      icon: 'help-circle',
-    },
-  },
+  // {
+  //   type: 'title',
+  //   content: {
+  //     title: 'Grounded QA',
+  //     subtitle: 'Answering questions with graph evidence and citations',
+  //     icon: 'help-circle',
+  //   },
+  // },
 
-  {
-    type: 'standard',
-    content: {
-      title: 'Grounded QA from the graph',
-      icon: 'help-circle',
-      points: [
-        'Query the graph for relevant entities and relationships.',
-        'Build a prompt with the **graph evidence** as context.',
-        'Answer must **cite** which entities/relationships it used.',
-        'No evidence found → low-confidence answer with a caveat.',
-      ],
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Vector RAG vs graph RAG',
-      left: {
-        label: 'Vector RAG',
-        items: [
-          'Retrieves text chunks by semantic similarity',
-          'Good for "what does the doc say about X?"',
-          'Flat — no relationship structure',
-          'Simple to build and scale',
-        ],
-      },
-      right: {
-        label: 'Graph RAG',
-        items: [
-          'Traverses entity relationships',
-          'Good for "how is X related to Y?"',
-          'Multi-hop reasoning built in',
-          'Requires extraction pipeline first',
-        ],
-      },
-    },
-  },
+  // {
+  //   type: 'standard',
+  //   content: {
+  //     title: 'Grounded QA from the graph',
+  //     icon: 'help-circle',
+  //     points: [
+  //       'Query the graph for relevant entities and relationships.',
+  //       'Build a prompt with the **graph evidence** as context.',
+  //       'Answer must **cite** which entities/relationships it used.',
+  //       'No evidence found → low-confidence answer with a caveat.',
+  //     ],
+  //   },
+  // },
+  // {
+  //   type: 'comparison',
+  //   content: {
+  //     title: 'Vector RAG vs graph RAG',
+  //     left: {
+  //       label: 'Vector RAG',
+  //       items: [
+  //         'Retrieves text chunks by semantic similarity',
+  //         'Good for "what does the doc say about X?"',
+  //         'Flat — no relationship structure',
+  //         'Simple to build and scale',
+  //       ],
+  //     },
+  //     right: {
+  //       label: 'Graph RAG',
+  //       items: [
+  //         'Traverses entity relationships',
+  //         'Good for "how is X related to Y?"',
+  //         'Multi-hop reasoning built in',
+  //         'Requires extraction pipeline first',
+  //       ],
+  //     },
+  //   },
+  // },
   // ---- Demo: Grounded QA ----
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Grounded QA',
-      subtitle: 'Switch to terminal: python demo/03_grounded_qa.py',
-      icon: 'rocket',
-    },
-  },
+  // {
+  //   type: 'title',
+  //   content: {
+  //     title: 'Demo — Grounded QA',
+  //     subtitle: 'Switch to terminal: python demo/03_grounded_qa.py',
+  //     icon: 'rocket',
+  //   },
+  // },
 
   // ---- Section: Graph as a tool ----
   {
@@ -352,7 +352,8 @@ def shortest_path(start: str, end: str) -> str:
         },
         {
           rule: 'The graph can be a tool',
-          example: 'An MCP server answers list, neighbours, and path. The agent decides which to call.',
+          example:
+            'An MCP server answers list, neighbours, and path. The agent decides which to call.',
           icon: 'server',
         },
       ],

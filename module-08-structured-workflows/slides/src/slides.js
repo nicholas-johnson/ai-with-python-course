@@ -24,13 +24,60 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Build a **ReAct loop**: Thought → Action → Observation, with explicit traces.',
         'Build a **plan-and-execute** workflow: generate a plan, execute steps, re-plan on failure.',
+        'Build a **ReAct loop**: Thought → Action → Observation, with explicit traces.',
         'Compare both patterns: when to use which, trade-offs in cost, latency, and reliability.',
         'Integrate workflows into a **web application** with streaming and plan visualisation.',
       ],
     },
   },
+
+  // ---- Section: Plan-and-execute ----
+  {
+    type: 'title',
+    content: {
+      title: 'Plan-and-execute',
+      subtitle: 'Full plan upfront, execute in order, re-plan on failure',
+      icon: 'git-branch',
+    },
+  },
+
+  {
+    type: 'code',
+    content: {
+      title: 'Plan-and-execute',
+      code: `async def plan_and_execute(goal, tools, client, max_replans=2):
+    plan = generate_plan(goal, client)
+    results = []
+
+    for i, step in enumerate(plan):
+        try:
+            result = await execute_step(step, tools, client)
+            results.append({"step": step, "result": result, "status": "done"})
+        except Exception as e:
+            results.append({"step": step, "error": str(e), "status": "failed"})
+            if max_replans > 0:
+                plan = revise_plan(plan[i+1:], results, client)
+                max_replans -= 1
+
+    return synthesise_answer(goal, results, client)`,
+      highlights: [
+        'The planner generates all steps up front',
+        'If a step fails, remaining steps are revised',
+      ],
+    },
+  },
+
+  // ---- Demo: Plan-and-execute ----
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Plan-and-execute',
+      subtitle: 'Switch to terminal: python demo/02_plan_and_execute.py',
+      icon: 'rocket',
+    },
+  },
+
   {
     type: 'standard',
     content: {
@@ -88,16 +135,6 @@ export const slides = [
     },
   },
 
-  // ---- Section: Plan-and-execute ----
-  {
-    type: 'title',
-    content: {
-      title: 'Plan-and-execute',
-      subtitle: 'Full plan upfront, execute in order, re-plan on failure',
-      icon: 'git-branch',
-    },
-  },
-
   {
     type: 'comparison',
     content: {
@@ -122,41 +159,6 @@ export const slides = [
       },
     },
   },
-  {
-    type: 'code',
-    content: {
-      title: 'Plan-and-execute',
-      code: `async def plan_and_execute(goal, tools, client, max_replans=2):
-    plan = generate_plan(goal, client)
-    results = []
-
-    for i, step in enumerate(plan):
-        try:
-            result = await execute_step(step, tools, client)
-            results.append({"step": step, "result": result, "status": "done"})
-        except Exception as e:
-            results.append({"step": step, "error": str(e), "status": "failed"})
-            if max_replans > 0:
-                plan = revise_plan(plan[i+1:], results, client)
-                max_replans -= 1
-
-    return synthesise_answer(goal, results, client)`,
-      highlights: [
-        'The planner generates all steps up front',
-        'If a step fails, remaining steps are revised',
-      ],
-    },
-  },
-
-  // ---- Demo: Plan-and-execute ----
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Plan-and-execute',
-      subtitle: 'Switch to terminal: python demo/02_plan_and_execute.py',
-      icon: 'rocket',
-    },
-  },
 
   // ---- Section: Wrap-up ----
   {
@@ -175,7 +177,8 @@ export const slides = [
       rules: [
         {
           rule: 'ReAct is thought, action, observation',
-          example: 'The agent reasons, calls a tool, and reads the result back into context.',
+          example:
+            'The agent reasons, calls a tool, and reads the result back into context.',
           icon: 'refresh-cw',
         },
         {
@@ -185,12 +188,14 @@ export const slides = [
         },
         {
           rule: 'Cap the loops and log the trace',
-          example: 'ReAct max_steps and plan-and-execute max_replans. Every step belongs in the log.',
+          example:
+            'ReAct max_steps and plan-and-execute max_replans. Every step belongs in the log.',
           icon: 'shield',
         },
         {
           rule: 'Pick the pattern for the task',
-          example: 'ReAct to explore. Plan-and-execute when the task already has a shape.',
+          example:
+            'ReAct to explore. Plan-and-execute when the task already has a shape.',
           icon: 'git-branch',
         },
       ],
