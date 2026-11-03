@@ -109,7 +109,27 @@ facts = response.output_parsed.facts if response.output_parsed else []   # None 
       ],
     },
   },
+  {
+    type: 'title',
+    content: {
+      title: 'Using an LLM to build the Graph',
+      subtitle: 'The Language model is the graph builder',
+      icon: 'rocket',
+    },
+  },
 
+  {
+    type: 'standard',
+    content: {
+      title: 'Using an LLM to build the Graph',
+      icon: 'git-branch',
+      points: [
+        'Have the language model read your document and convert it to facts',
+        'Find Subjects, Objects, and Predicates',
+        'Then use the facts to build the graph',
+      ],
+    },
+  },
   {
     type: 'standard',
     content: {
@@ -127,14 +147,11 @@ facts = response.output_parsed.facts if response.output_parsed else []   # None 
   {
     type: 'standard',
     content: {
-      title: 'The names are guessed',
+      title: 'Constraining Vocabulary',
       icon: 'alert-triangle',
       points: [
-        'Nothing constrains `subject`, `predicate`, or `object` — the model invents the wording.',
-        '"Juno Marquez" and "Engineer Marquez" become **two nodes**, and the path between them silently vanishes.',
-        'Edge labels drift too ("assessed" / "evaluated"), so you cannot filter on a relation.',
-        'Fix: a **controlled vocabulary** — `predicate: Literal["assessed", "repaired", ...]`.',
-        'Fix: **canonicalise entity names** before adding them, so aliases collapse to one node.',
+        'A **controlled vocabulary** for predicates — `predicate: Literal["assessed", "repaired", ...]`.',
+        '**Canonicalise entity names** before adding them, so aliases collapse to one node.',
       ],
     },
   },
@@ -268,7 +285,7 @@ class KnowledgeGraph:
   {
     type: 'title',
     content: {
-      title: 'The graph as a tool',
+      title: 'The graph as an MCP tool',
       subtitle: 'An MCP server the agent chooses to call',
       icon: 'server',
     },
@@ -279,10 +296,23 @@ class KnowledgeGraph:
       title: 'Let the agent walk the graph',
       icon: 'route',
       points: [
-        'Demos 02 and 03 **hard-code** the walk: pick entities, then fetch neighbours.',
-        'An MCP server turns those queries into **tools**: list, neighbours, path, facts within N hops.',
+        'An MCP server turns queries into **tools**: list, neighbours, path, facts within N hops.',
         'The agent loop is the one from Module 3. The model picks the tool. Your code runs it.',
         'The server is deterministic. It reads a saved graph — no model call inside the tool.',
+      ],
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'The MCP server',
+      icon: 'route',
+      points: [
+        'Neighbours: list all entities connected to a given entity',
+        'Path: find the shortest path between two entities',
+        'Facts: list all facts about a given entity',
+        'Facts within N hops: list all facts about a given entity within N hops',
       ],
     },
   },
