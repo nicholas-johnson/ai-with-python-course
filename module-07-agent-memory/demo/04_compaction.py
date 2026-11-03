@@ -83,6 +83,13 @@ def demo_compaction(client: OpenAI | None = None):
         print(f"    {line}")
     print()
 
+    if report.tokens_after > BUDGET:
+        print(f"  Note: {report.tokens_after} tokens is still over the {BUDGET} budget.")
+        print("  One pass gets you most of the way; a real agent compacts on a")
+        print("  trigger and rechecks, compacting again or keeping fewer recent")
+        print("  turns until it fits.")
+        print()
+
     print("-" * 60)
     print("  The same thread, truncated to the same budget")
     print("-" * 60)

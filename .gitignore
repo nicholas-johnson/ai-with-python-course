@@ -14,3 +14,4 @@ module-07-node-tools/exercises/01-sighting-logger/sightings.log
 module-07-node-tools/exercises/03-stream-processor/output.json
 chroma_data/
 module-13-edge-topics/models/
+module-08-structured-workflows/**/.workflow_state.json
