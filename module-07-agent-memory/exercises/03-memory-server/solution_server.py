@@ -6,9 +6,10 @@ Memory and compaction behind one MCP server.
 Run standalone:  mcp dev solution_server.py
 """
 
+import json
 import sys
 
-from compaction import KEEP_RECENT, Anchor, compact, count_tokens
+from compaction import BUDGET_TOKENS, KEEP_RECENT, Anchor, compact, count_tokens
 from dotenv import load_dotenv
 from mcp.server.mcpserver import MCPServer
 from memory_store import MemoryStore, build_collection
@@ -89,8 +90,23 @@ def append_turn(thread_id: str, role: str, text: str) -> str:
     return f"Thread {thread_id}: {len(thread)} messages, {count_tokens(thread)} tokens"
 
 
+def merge_anchors(thread_id: str, new_anchors: list[Anchor]) -> None:
+    """Keep the anchor list free of repeats.
+
+    Each pass re-reads the previous compaction block, so the same anchor can
+    come back a second time. The service owns the dedupe.
+    """
+    kept = anchors.setdefault(thread_id, [])
+    seen = {(anchor.kind, anchor.text.strip().lower()) for anchor in kept}
+    for anchor in new_anchors:
+        key = (anchor.kind, anchor.text.strip().lower())
+        if key not in seen:
+            seen.add(key)
+            kept.append(anchor)
+
+
 @mcp.tool()
-def thread_budget(thread_id: str, budget_tokens: int = 1200) -> str:
+def thread_budget(thread_id: str, budget_tokens: int = BUDGET_TOKENS) -> str:
     """Report a thread's token count against a budget."""
     thread = threads.get(thread_id, [])
     tokens = count_tokens(thread)
@@ -100,7 +116,7 @@ def thread_budget(thread_id: str, budget_tokens: int = 1200) -> str:
 
 @mcp.tool()
 def compact_thread(
-    thread_id: str, budget_tokens: int = 1200, keep_recent: int = KEEP_RECENT
+    thread_id: str, budget_tokens: int = BUDGET_TOKENS, keep_recent: int = KEEP_RECENT
 ) -> str:
     """Compact a thread to fit a budget, preserving its anchors."""
     thread = threads.get(thread_id)
@@ -118,7 +134,7 @@ def compact_thread(
         return f"Thread {thread_id} is already within {budget_tokens} tokens — nothing to do."
 
     threads[thread_id] = compacted
-    anchors.setdefault(thread_id, []).extend(report.anchors)
+    merge_anchors(thread_id, report.anchors)
     moved = (
         f" Boundary moved {report.requested_split} -> {report.actual_split} "
         "to keep a tool pair together."
@@ -130,6 +146,12 @@ def compact_thread(
         f"{report.tokens_before} -> {report.tokens_after} tokens.{moved}\n"
         f"{compacted[0]['content']}"
     )
+
+
+@mcp.tool()
+def get_thread(thread_id: str) -> str:
+    """Return a thread as JSON, so a caller can rebuild its context from it."""
+    return json.dumps(threads.get(thread_id, []))
 
 
 @mcp.tool()

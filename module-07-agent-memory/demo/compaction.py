@@ -52,6 +52,10 @@ something a reader would have to know to carry the conversation on:
 Rules for anchors: at most five, each one short clause under fifteen words, no
 duplication of the summary. Keep names, numbers, and identifiers exact.
 
+If the conversation opens with an [Earlier conversation] block, its anchors
+are already preserved: fold its summary into yours and list only anchors that
+are new since it.
+
 The whole point is to be smaller than what it replaces. Anything that is
 merely conversation does not survive."""
 

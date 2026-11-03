@@ -8,7 +8,13 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 MEMORY_TOOLS = {"remember", "recall", "forget", "list_memories"}
-COMPACTION_TOOLS = {"append_turn", "thread_budget", "compact_thread", "get_anchors"}
+COMPACTION_TOOLS = {
+    "append_turn",
+    "thread_budget",
+    "compact_thread",
+    "get_thread",
+    "get_anchors",
+}
 
 
 def _import_module(name: str):
@@ -220,7 +226,25 @@ def test_run_turn_gives_up_rather_than_looping_forever():
     assert client.responses.create.call_count == 3
 
 
-def test_record_and_compact_leaves_a_thread_within_budget_alone(monkeypatch):
+def test_record_turns_logs_both_sides_of_the_turn(monkeypatch):
+    """Both messages go to the service, whatever the model did in between."""
+    client_mod = _import_client()
+    logged = []
+
+    async def fake_call_text(session, name, arguments):
+        logged.append((name, arguments.get("role"), arguments.get("text")))
+        return "Thread tonight: 120 tokens in 4 messages — within budget"
+
+    monkeypatch.setattr(client_mod, "call_text", fake_call_text)
+    messages = [{"role": "system", "content": "prompt"}]
+    asyncio.run(client_mod.record_turns(MagicMock(), messages, "evening", "evening yourself"))
+
+    assert logged[0] == ("append_turn", "user", "evening")
+    assert logged[1] == ("append_turn", "assistant", "evening yourself")
+    assert logged[2][0] == "thread_budget"
+
+
+def test_record_turns_leaves_a_thread_within_budget_alone(monkeypatch):
     """Compaction is triggered by the budget, not by every turn."""
     client_mod = _import_client()
     calls = []
@@ -230,12 +254,12 @@ def test_record_and_compact_leaves_a_thread_within_budget_alone(monkeypatch):
         return "Thread tonight: 120 tokens in 4 messages — within budget"
 
     monkeypatch.setattr(client_mod, "call_text", fake_call_text)
-    asyncio.run(client_mod.record_and_compact(MagicMock(), "user", "evening"))
+    asyncio.run(client_mod.record_turns(MagicMock(), [{"role": "system"}], "evening", "hello"))
 
-    assert calls == ["append_turn", "thread_budget"]
+    assert "compact_thread" not in calls
 
 
-def test_record_and_compact_compacts_when_over_budget(monkeypatch):
+def test_record_turns_compacts_when_over_budget(monkeypatch):
     client_mod = _import_client()
     calls = []
 
@@ -243,12 +267,26 @@ def test_record_and_compact_compacts_when_over_budget(monkeypatch):
         calls.append(name)
         if name == "thread_budget":
             return "Thread tonight: 900 tokens in 20 messages — over budget"
-        return "Compacted 14 messages, 900 -> 300 tokens.\n[earlier conversation]"
+        if name == "get_thread":
+            return json.dumps(
+                [
+                    {"role": "system", "content": "[Earlier conversation] ..."},
+                    {"role": "user", "content": "and the tab?"},
+                ]
+            )
+        return "Compacted 14 messages, 900 -> 300 tokens.\n[Earlier conversation] ..."
 
     monkeypatch.setattr(client_mod, "call_text", fake_call_text)
-    asyncio.run(client_mod.record_and_compact(MagicMock(), "assistant", "on its way"))
+    messages = [{"role": "system", "content": "prompt"}, {"role": "user", "content": "old"}]
+    asyncio.run(client_mod.record_turns(MagicMock(), messages, "and the tab?", "on the ship."))
 
-    assert calls == ["append_turn", "thread_budget", "compact_thread"]
+    assert "compact_thread" in calls
+    assert "get_thread" in calls
+    # The compacted thread has to become the model's context, with the system
+    # prompt still in front of it.
+    assert messages[0]["content"] == "prompt"
+    assert messages[1]["content"].startswith("[Earlier conversation]")
+    assert len(messages) == 3
 
 
 def test_client_has_main():

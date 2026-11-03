@@ -10,8 +10,9 @@ Run:  python start.py
 """
 
 import asyncio
-import json  # noqa: F401 — you need this in run_turn
+import json  # noqa: F401 — you need this in run_turn and record_turns
 import os
+import sys
 
 from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
@@ -24,8 +25,40 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 SERVER_SCRIPT = "server.py"
 
 THREAD_ID = "tonight"
-BUDGET_TOKENS = 500
+BUDGET_TOKENS = 300
 PATRON = "zara"
+
+# A canned stretch of evening, so compaction can be watched without typing
+# fifteen turns first. The server stores plain turns, so this is role and text.
+SEED_THREAD = [
+    ("user", "Evening. Set up a round for the Pathfinder crew."),
+    ("assistant", "Six of them? Coming up."),
+    (
+        "user",
+        "Six, and charge the whole evening to the ship's account — I have standing "
+        "authority, so do not chase anyone individually for credits.",
+    ),
+    (
+        "assistant",
+        "Noted: the evening goes to the Pathfinder account, nobody chased individually.",
+    ),
+    ("user", "Tanaka is with us, so watch the synthcitrus."),
+    (
+        "assistant",
+        "Nothing citrus-derived goes near the Chief. The Void Mule is clean if they want sharp.",
+    ),
+    ("user", "How was the Veil run for the other crews?"),
+    (
+        "assistant",
+        "Loud. The Meridian crew came in arguing about sensor calibration and they have "
+        "not stopped. The Horizon lot went quiet after the second round.",
+    ),
+    ("user", "And Marek still owes you, does he not?"),
+    (
+        "assistant",
+        "Twelve credits since the last rotation — under the fifty-credit clearance threshold.",
+    ),
+]
 
 SYSTEM_PROMPT = (
     "You are BARKEEP, the AI bartender at The Nebula's Edge cantina on Relay "
@@ -74,17 +107,23 @@ async def run_turn(client, messages, session, openai_tools, max_steps: int = 10)
     raise NotImplementedError("TODO")
 
 
-async def record_and_compact(session, role: str, text: str) -> None:
-    """Log a turn to the server, and compact the thread when it is over budget.
+async def record_turns(session, messages, user_input: str, answer: str) -> None:
+    """Log the turn to the server, and compact when the thread goes over budget.
 
     This is harness work, not a decision for the model: the thread has to be
-    recorded whatever the model chooses to do.
+    recorded whatever the model chooses to do. When a compaction happens, the
+    model's context is rebuilt from the server's thread — otherwise the saving
+    exists on the server and nowhere that matters.
     """
-    # TODO: 1. call append_turn with thread_id=THREAD_ID, role, text
+    # TODO: 1. append_turn twice: the user's message, then the answer
     #       2. call thread_budget with THREAD_ID and BUDGET_TOKENS
     #       3. return if the verdict does not say "over budget"
     #       4. otherwise call compact_thread and print the first line of what
     #          comes back
+    #       5. then call get_thread, json.loads it, and splice it into the
+    #          model's context: messages[:] = [messages[0], *thread]
+    #          Assign into the list, do not rebind it — the caller is holding
+    #          the same list.
     raise NotImplementedError("TODO")
 
 
@@ -93,7 +132,10 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
     client = OpenAI()
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    print("Type a message, or /tools, /anchors, /budget, /thread, quit.\n")
+    print(
+        "Type a message, or /tools, /seed, /memories, /budget, "
+        "/anchors, /compact, quit.\n"
+    )
 
     while True:
         try:
@@ -128,7 +170,20 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
             )
             continue
 
-        if user_input == "/thread":
+        if user_input == "/seed":
+            for role, text in SEED_THREAD:
+                await call_text(
+                    session, "append_turn", {"thread_id": THREAD_ID, "role": role, "text": text}
+                )
+            print(f"Seeded {len(SEED_THREAD)} turns into thread {THREAD_ID}.\n")
+            continue
+
+        if user_input == "/memories":
+            print(await call_text(session, "list_memories", {"patron": PATRON}) + "\n")
+            continue
+
+        if user_input == "/compact":
+            # Budget zero forces a pass, whatever the thread currently costs.
             print(
                 await call_text(
                     session, "compact_thread", {"thread_id": THREAD_ID, "budget_tokens": 0}
@@ -141,12 +196,11 @@ async def agent_loop(session, openai_tools, mcp_tools_map):
         answer = await run_turn(client, messages, session, openai_tools)
         print(f"Agent: {answer}\n")
 
-        await record_and_compact(session, "user", user_input)
-        await record_and_compact(session, "assistant", answer)
+        await record_turns(session, messages, user_input, answer)
 
 
 async def async_main():
-    server_params = StdioServerParameters(command="python", args=[SERVER_SCRIPT])
+    server_params = StdioServerParameters(command=sys.executable, args=[SERVER_SCRIPT])
 
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:

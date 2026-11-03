@@ -22,8 +22,8 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 ENCODING = tiktoken.get_encoding("o200k_base")
 MESSAGE_OVERHEAD = 4
 
-BUDGET_TOKENS = 1200
-KEEP_RECENT = 4
+BUDGET_TOKENS = 300
+KEEP_RECENT = 2
 
 
 
@@ -60,6 +60,10 @@ something a reader would have to know to carry the conversation on:
 
 Rules for anchors: at most five, each one short clause under fifteen words, no
 duplication of the summary. Keep names, numbers, and identifiers exact.
+
+If the conversation opens with an [Earlier conversation] block, its anchors
+are already preserved: fold its summary into yours and list only anchors that
+are new since it.
 
 The whole point is to be smaller than what it replaces. Anything that is
 merely conversation does not survive."""

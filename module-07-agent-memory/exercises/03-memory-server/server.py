@@ -7,9 +7,16 @@ without importing your code.
 Run standalone:  mcp dev server.py
 """
 
+import json  # noqa: F401 — you need this in get_thread
 import sys
 
-from compaction import KEEP_RECENT, Anchor, compact, count_tokens  # noqa: F401
+from compaction import (  # noqa: F401 — you need all of these
+    BUDGET_TOKENS,
+    KEEP_RECENT,
+    Anchor,
+    compact,
+    count_tokens,
+)
 from dotenv import load_dotenv
 from mcp.server.mcpserver import MCPServer
 from memory_store import MemoryStore, build_collection
@@ -66,20 +73,33 @@ print("Cantina Memory: ready", file=sys.stderr, flush=True)
 #   see the thread growing.
 
 
-# TODO: thread_budget(thread_id, budget_tokens=1200) -> str
+# TODO: thread_budget(thread_id, budget_tokens=BUDGET_TOKENS) -> str
 #   Report count_tokens for the thread and whether it is over the budget.
+#   The word "over" has to appear when it is over: the client greps for it.
 
 
-# TODO: compact_thread(thread_id, budget_tokens=1200, keep_recent=KEEP_RECENT) -> str
+# TODO: merge_anchors(thread_id, new_anchors) -> None
+#   Not a tool, a helper. Append only the anchors you have not seen before,
+#   comparing on (kind, text) with the case and whitespace stripped. Each pass
+#   re-reads the previous compaction block, so the same anchor comes back.
+
+
+# TODO: compact_thread(thread_id, budget_tokens=BUDGET_TOKENS, keep_recent=KEEP_RECENT) -> str
 #   1. look the thread up; say so if there is nothing to compact
 #   2. call compact(thread, budget_tokens=..., keep_recent=..., client=client,
 #      carried=anchors.get(thread_id, []))
 #   3. a None report means it already fits — say so and make no changes
-#   4. otherwise store the compacted thread, extend anchors[thread_id] with
-#      report.anchors, and return the before/after token counts plus the
+#   4. otherwise store the compacted thread, merge_anchors(thread_id,
+#      report.anchors), and return the before/after token counts plus the
 #      compaction block itself (compacted[0]["content"])
 #   Mention it when report.actual_split != report.requested_split: that is the
 #   tool-pair guard doing its job, and it is worth seeing.
+
+
+# TODO: get_thread(thread_id) -> str
+#   Return json.dumps of the thread. The client rebuilds the model's context
+#   from this after a compaction, which is how the compaction block actually
+#   reaches the model.
 
 
 # TODO: get_anchors(thread_id) -> str

@@ -283,7 +283,7 @@ def count_tokens(messages: list[dict]) -> int:
         'Early memory systems file by topic and look up by prefix: `recall("drink_")`.',
         'The patron asks *"what do I usually drink?"*',
         'The memory is filed under `favourite_beverage`. Nothing matches.',
-        'You already have the fix from Module 5: **embed it and retrieve**.',
+        'Embed it and retrieve.',
       ],
     },
   },
@@ -333,20 +333,20 @@ for relevance, meta in zip(rels, metadatas):
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'Decay is a weight, not a delete',
-      icon: 'scale',
-      points: [
-        'The old way: multiply importance by 0.9 each tick, delete below a threshold.',
-        'That discards facts that were merely **quiet for a while**.',
-        'An allergy does not become less true because nobody mentioned it.',
-        'As a **half-life weight** in the ranking: prefer the recent fact, all else equal.',
-        'In the demo a 210-day-old constraint scores `recency = 0.008` — and still ranks first.',
-      ],
-    },
-  },
+  // {
+  //   type: 'standard',
+  //   content: {
+  //     title: 'Decay is a weight, not a delete',
+  //     icon: 'scale',
+  //     points: [
+  //       'The old way: multiply importance by 0.9 each tick, delete below a threshold.',
+  //       'That discards facts that were merely **quiet for a while**.',
+  //       'An allergy does not become less true because nobody mentioned it.',
+  //       'As a **half-life weight** in the ranking: prefer the recent fact, all else equal.',
+  //       'In the demo a 210-day-old constraint scores `recency = 0.008` — and still ranks first.',
+  //     ],
+  //   },
+  // },
   {
     type: 'title',
     content: {
