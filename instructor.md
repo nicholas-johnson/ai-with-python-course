@@ -185,27 +185,32 @@ Each demo is a separate interactive script with real OpenAI calls:
 
 ---
 
-### Module 7 — Agent Memory
+### Module 7 — Agent Memory and Context Engineering
 
 **Talk about:**
 
-- Short-term (session) vs long-term (profile) memory
-- Summarisation to fit context windows
-- Memory decay and explicit "do not remember" controls
+- The context window as a budget with competing claims: system prompt, tools, retrieved documents, memories, history
+- Context rot — accuracy falling as the window fills, and worst in the middle
+- Write: what is worth remembering, and resolving a contradiction on write instead of storing both
+- Select: semantic recall scored on relevance plus recency plus importance, with relevance normalised before blending
+- Compress: compaction with named anchors, and the three ways it breaks
+- Memory and compaction as services rather than as parts of the agent
 
 **Demo:**
 
 | Script | What it shows |
 | ------ | ------------- |
-| `module-07-agent-memory/demo/demo.py` | Menu. 1 Capped message list. 2 Long-term memory with decay. 3 Summarise a conversation. 4 Agent that writes memories as you talk. |
+| `module-07-agent-memory/demo/demo.py` | Menu. 1 Where the budget goes, and what truncation costs. 2 Semantic recall with the score broken down. 3 Writer that skips, replaces, and stores. 4 Compaction against truncation on the same thread. 5 Agent with all of it wired together. |
+
+Parts 1 and 4 run offline. Part 1 shows truncation dropping the decision that the whole evening hangs on; part 4 shows compaction keeping it as an anchor for roughly a third of the tokens.
 
 **Exercises:**
 
 | Folder | Delegates build |
 | ------ | --------------- |
-| `exercises/01-memory-store` | Session + long-term memory with decay/forget, interactive agent with /memories, /decay, /forget |
-| `exercises/02-conversation-summary` | Auto-summarise long conversations, /summary, /turns, /force-summarise |
-| `exercises/03-memory-server` | Memory as MCPServer, console agent via stdio, /tools |
+| `exercises/01-memory-store` | Chroma-backed semantic recall, blended scoring, typed write decisions that supersede, agent with /memories, /recall, /forget |
+| `exercises/02-compaction` | Token counting over tool items, `safe_split`, anchors, budget-triggered `compact`, agent with /seed, /budget, /anchors, /compact |
+| `exercises/03-memory-server` | One MCPServer over both families, stdio console agent, harness-driven compaction and context rebuild, /tools |
 
 ---
 

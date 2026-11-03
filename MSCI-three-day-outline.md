@@ -138,13 +138,13 @@ By end of day, attendees can build a **tool-using agent**, expose capabilities v
 
 ## Day 2 — Knowledge + retrieval
 
-**Theme:** Ground agents in documents and structured facts; add memory and deliberate workflows.
+**Theme:** Ground agents in documents and structured facts; engineer the context window and add deliberate workflows.
 
 | Block | Module | Topic |
 | ----- | ------ | ----- |
 | 5 | RAG Fundamentals | Chunk, embed, retrieve, cite |
 | 6 | Structured Facts | Extraction, knowledge graphs, grounded QA |
-| 7 | Agent Memory | Session / long-term memory, summarisation |
+| 7 | Agent Memory | Context budgets, semantic recall, compaction |
 | 8 | Structured Workflows | ReAct, plan-and-execute (Day 2 closer) |
 
 ---
@@ -206,31 +206,33 @@ By end of day, attendees can build a **tool-using agent**, expose capabilities v
 
 ---
 
-### Module 7 — Agent Memory
+### Module 7 — Agent Memory and Context Engineering
 
 **Talk**
 
-- Memory as external storage + prompt injection (LLMs are otherwise stateless)
-- Short-term session buffers vs long-term profiles
-- Decay and “do not remember” / forget controls
-- Summarisation to fit token budgets
-- Memory as MCP tools
+- The context window as a budget: system prompt, tools, retrieved documents, memories, history
+- Context rot — accuracy falls as the window fills, and worst in the middle
+- Write: what is worth remembering, and superseding a contradiction instead of storing both
+- Select: semantic recall scored on relevance, recency, and importance, with relevance normalised first
+- Compress: compaction with named anchors, and the three ways it goes wrong
+- Memory and compaction as services, not as parts of the agent
 
 **Demo**
 
-- Session memory → long-term remember/recall/decay/forget → summarisation → memory-enhanced chat
+- Where the budget goes → semantic recall with the score broken down → a writer that skips, replaces, and stores → compaction against truncation → the whole thing wired into an agent
 
 **Exercises**
 
-1. **Memory store** — Session + long-term memory with decay/forget, wired into a chat agent
-2. **Conversation summary** — Auto-summarise long conversations under a token budget
-3. **Memory MCP server** — Expose memory over MCP stdio for agent use
+1. **Memory store** — Chroma-backed semantic recall, blended scoring, typed write decisions that supersede
+2. **Compaction** — Budget-triggered compaction that preserves decisions and never orphans a tool pair
+3. **Memory MCP server** — Memory and compaction behind one MCP server, with the harness driving compaction
 
 **After this module, attendees can**
 
-- Design short- and long-term memory for agents
-- Summarise history instead of silently truncating
-- Honour privacy forget requests and expose memory via MCP
+- Account for a context window and say where the tokens went
+- Decide what to write, and resolve contradictions on write
+- Recall by meaning, with recency and importance as weights rather than as deletions
+- Compact history instead of truncating it, and keep the decisions inside it
 
 ---
 
@@ -460,7 +462,7 @@ By end of day, attendees can coordinate **multi-agent** systems, accelerate with
 | Day | Modules | Closer | Attendees leave able to… |
 | --- | ------- | ------ | ------------------------ |
 | **1** | 1–4 | Research Assistant | Call LLMs, build tool agents, serve MCP, ship a streaming multimodal chat API |
-| **2** | 5–8 | Holiday Planner | Ground answers (RAG + graphs), manage agent memory, run ReAct / plan-and-execute workflows |
+| **2** | 5–8 | Holiday Planner | Ground answers (RAG + graphs), engineer context and memory, run ReAct / plan-and-execute workflows |
 | **3** | 9–13 + extras | Capstone app | Orchestrate multi-agent systems, use LangChain, evaluate pipelines, productionise and ship, pick edge techniques |
 
 ---

@@ -164,7 +164,7 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | ----- | ------ | ----- |
 | 5 | [module-05-rag-fundamentals](module-05-rag-fundamentals/) | Chunking, embeddings, vector stores, retrieval, evaluation |
 | 6 | [module-06-structured-facts](module-06-structured-facts/) | Structured outputs, fact extraction, knowledge graphs, grounded QA, graph MCP |
-| 7 | [module-07-agent-memory](module-07-agent-memory/) | Short/long-term memory, summarisation, decay controls |
+| 7 | [module-07-agent-memory](module-07-agent-memory/) | Context budgets, semantic recall, memory writing, compaction, memory as MCP |
 | 8 | [module-08-structured-workflows](module-08-structured-workflows/) | Control flow from chains to ReAct, parallel plans, approval gates — the Day 2 closer |
 
 ### Day 3 — Ship it
@@ -252,15 +252,15 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Knowledge graph | [`exercises/02-knowledge-graph`](module-06-structured-facts/exercises/02-knowledge-graph/) | Build a networkx graph from facts, query entities, find paths |
 | Grounded QA | [`exercises/03-grounded-qa`](module-06-structured-facts/exercises/03-grounded-qa/) | Answer questions grounded in graph evidence with [Fact N] citations |
 
-### Module 7 — [Agent Memory](module-07-agent-memory/)
+### Module 7 — [Agent Memory and Context Engineering](module-07-agent-memory/)
 
-**Topics:** Short-term session memory vs long-term profile, summarisation for context limits, decay and "do not remember" controls.
+**Topics:** The context window as a budget, context rot, what is worth writing to memory, semantic recall scored on relevance plus recency plus importance, superseding contradictions, compaction with anchors, memory and compaction as MCP services.
 
 | Exercise | Folder | What you practise |
 | -------- | ------ | ----------------- |
-| Memory store | [`exercises/01-memory-store`](module-07-agent-memory/exercises/01-memory-store/) | Short-term buffer and long-term memory with decay |
-| Conversation summary | [`exercises/02-conversation-summary`](module-07-agent-memory/exercises/02-conversation-summary/) | Summarise long conversations to fit a token budget |
-| Memory MCP server | [`exercises/03-memory-server`](module-07-agent-memory/exercises/03-memory-server/) | Expose memory as an MCP server for agent integration |
+| Memory store | [`exercises/01-memory-store`](module-07-agent-memory/exercises/01-memory-store/) | Semantic recall over ChromaDB, blended scoring, writes that supersede rather than accumulate |
+| Compaction | [`exercises/02-compaction`](module-07-agent-memory/exercises/02-compaction/) | Budget-triggered compaction that preserves decisions and never orphans a tool pair |
+| Memory MCP server | [`exercises/03-memory-server`](module-07-agent-memory/exercises/03-memory-server/) | Memory and compaction behind one MCP server, with the harness driving compaction |
 
 ### Module 8 — [Structured Workflows](module-08-structured-workflows/)
 

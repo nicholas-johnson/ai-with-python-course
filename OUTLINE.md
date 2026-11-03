@@ -69,7 +69,7 @@ Modules 1–13 run across three days. Module 0 is prework, covered only if the g
 - Implement grounded QA from graphs with citations.
 - Expose the graph as an MCP server and let an agent loop choose the traversal.
 
-### Module 7 — Agent Memory
+### Module 7 — Agent Memory and Context Engineering
 
 - Account for a context window as a budget and know where the tokens actually go.
 - Write memories worth keeping, and supersede facts instead of stacking contradictions.
