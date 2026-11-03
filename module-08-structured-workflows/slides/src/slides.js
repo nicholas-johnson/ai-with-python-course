@@ -10,11 +10,11 @@ export const slides = [
   {
     type: 'welcome',
     content: {
-      title: 'One question runs through this module',
+      title: 'Structured Workflows',
       points: [
         'Every agent you have built so far lets the model decide what happens next.',
-        'That is a choice, not a default — and usually the most expensive one available.',
-        'Today: the spectrum from code-driven to model-driven, and where to sit on it.',
+        'That is a choice, not a default, and usually the most expensive one available.',
+        'There is a spectrum from code-driven to model-driven. We will explore the spectrum and how to choose the right place for your workflow.',
       ],
     },
   },
@@ -24,7 +24,8 @@ export const slides = [
       title: 'Learning goals',
       icon: 'target',
       points: [
-        'Place a task on the **control-flow spectrum**: chain, router, plan-and-execute, ReAct.',
+        'Place a task on the **control-flow spectrum**: pipeline, router, plan-and-execute, ReAct.',
+        'Build a **pipeline** where code owns every step, and a **router** with one auditable decision.',
         'Build a **ReAct loop** whose reasoning is visible, with guards that stop it running away.',
         'Build **plan-and-execute**, and exploit the fact that a plan is data.',
         'Run independent plan steps **concurrently**, and **pause a plan** for human approval.',
@@ -56,7 +57,7 @@ export const slides = [
       title: 'The control-flow spectrum',
       cards: [
         {
-          heading: '1. Fixed chain',
+          heading: '1. Pipeline',
           points: [
             '**Code decides** every step',
             'The model only generates text',
@@ -97,10 +98,11 @@ export const slides = [
   {
     type: 'three-way',
     content: {
-      title: 'Same job, three places on the spectrum',
-      left: {
-        label: 'Fixed chain',
-        code: `# you wrote
+      title: 'The control-flow spectrum',
+      columns: [
+        {
+          label: 'Pipeline',
+          code: `# you wrote
 # the order
 a = check("reactor")
 b = check("shields")
@@ -110,10 +112,24 @@ summarise([a, b, c])
 
 # model calls: 1
 # decisions:   0`,
-      },
-      middle: {
-        label: 'Plan-and-execute',
-        code: `# model wrote
+        },
+        {
+          label: 'Router',
+          code: `# model picks
+# a branch you wrote
+route = classify(task)
+
+for step in BRANCHES[route]:
+    run(step)
+
+summarise(findings)
+
+# model calls: 2
+# decisions:   1`,
+        },
+        {
+          label: 'Plan-and-execute',
+          code: `# model wrote
 # the order, once
 plan = make_plan(goal)
 
@@ -124,10 +140,10 @@ summarise(results)
 
 # model calls: 2+
 # decisions:   1`,
-      },
-      right: {
-        label: 'ReAct',
-        code: `# model decides
+        },
+        {
+          label: 'ReAct',
+          code: `# model decides
 # every turn
 while not done:
     s = decide(msgs)
@@ -137,18 +153,19 @@ while not done:
     msgs += obs
 
 # decisions:   N`,
-      },
+        },
+      ],
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'The rule: push left',
+      title: 'Push control flow as far left as the task allows',
       icon: 'arrow-right',
       points: [
         'Start at the **left** and move right only when the task actually breaks.',
         'Moving right buys **adaptability**. It costs tokens, latency, and testability.',
-        'Most production "agents" are a chain or a router wearing a trench coat — and that is fine.',
+        'Most production "agents" are a pipeline or a router wearing a trench coat — and that is fine.',
         'Reach for ReAct when you genuinely **cannot know the steps** until you see the data.',
         'The spectrum is per-task, not per-product. One app can use all four.',
       ],
@@ -160,6 +177,118 @@ while not done:
       title: 'Demo — one task, four strategies',
       subtitle: 'Switch to terminal: python demo/01_control_flow.py',
       icon: 'rocket',
+    },
+  },
+
+  // ---- Section: pipeline ----
+  {
+    type: 'title',
+    content: {
+      title: 'Pipeline',
+      subtitle: 'The fixed chain. Your code owns the order.',
+      icon: 'arrow-right',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Code decides every step',
+      icon: 'list',
+      points: [
+        'You write the sequence. The model only generates text where you ask.',
+        'Usually that is **one call, at the end**, to summarise findings the code already gathered.',
+        'The same request always takes the same path, so a unit test can lock it.',
+        'Cheapest, fastest, and the right answer more often than people want to admit.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'A pipeline is an ordinary function',
+      code: `findings = []
+for name, args in [
+    ("check_system", {"system": "reactor"}),
+    ("check_system", {"system": "shields"}),
+    ("search_logs", {"query": "plasma conduit"}),
+]:
+    findings.append(run_tool(name, args))
+
+answer = synthesise(task, findings)   # the only model call`,
+      highlights: [
+        'There is no loop the model can get stuck in. Adding a step is adding a line.',
+        '`synthesise` does not choose what runs. It only writes the sentence at the end.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'It breaks when the path is not fixed',
+      icon: 'git-branch',
+      points: [
+        'A pipeline runs **every** step, including the ones this request did not need.',
+        'It cannot look at the logs and decide the reactor needs a second check.',
+        'It cannot grow a step you did not write.',
+        'When requests come in a few known shapes, do not jump to ReAct. Add a router.',
+      ],
+    },
+  },
+
+  // ---- Section: router ----
+  {
+    type: 'title',
+    content: {
+      title: 'Router',
+      subtitle: 'The model picks a branch. Code runs it.',
+      icon: 'git-branch',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Agent chooses a branch',
+      icon: 'filter',
+      points: [
+        'The model does not choose tools. It chooses a **name from a list you wrote**.',
+        'Each name points at a pipeline. After the choice, control returns to code.',
+        'The route choice is the only thing you cannot unit test.',
+        'Everything after the route choice is testable.',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Classify, then run the branch',
+      code: `class Route(BaseModel):
+    branch: Literal["systems", "logs", "full"]
+
+route = client.responses.parse(
+    model=MODEL, text_format=Route, input=task,
+).output_parsed
+
+branch = route.branch if route.branch in BRANCHES else "full"
+
+for name, args in BRANCHES[branch]:
+    findings.append(run_tool(name, args))`,
+      highlights: [
+        'Constrain the label in the schema. A free string will invent branches.',
+        'An unknown branch must fall back to one you wrote — never to nothing.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Stop when you cannot name the branches',
+      icon: 'alert-triangle',
+      points: [
+        'A new kind of request is a **new branch**: written, reviewed, and tested like any other code.',
+        'A router cannot change its mind halfway. The logs branch will not go and check the reactor.',
+        'Move right when the next step depends on what the last step returned.',
+        'That is ReAct, and it costs a model decision on every turn.',
+      ],
     },
   },
 
@@ -495,7 +624,7 @@ def run_plan(state):
         {
           rule: 'Push control flow as far left as the task allows',
           example:
-            'Chain, then router, then plan, then ReAct. Move right only when the task breaks.',
+            'Pipeline, then router, then plan, then ReAct. Move right only when the task breaks.',
           icon: 'sliders',
         },
         {

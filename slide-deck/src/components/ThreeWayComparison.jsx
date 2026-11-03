@@ -1,46 +1,38 @@
+const THREE_COLORS = ["text-cyan-300", "text-purple-300", "text-green-300"];
+const FOUR_COLORS = ["text-cyan-300", "text-amber-300", "text-purple-300", "text-green-300"];
+
 export function ThreeWayComparison({ content }) {
-  const { title, left, middle, right } = content;
+  const { title, left, middle, right, columns } = content;
+  const panels = columns ?? [left, middle, right];
+  const colors = panels.length > 3 ? FOUR_COLORS : THREE_COLORS;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8">
       <h2 className="text-4xl font-bold mb-8 text-slate-100">{title}</h2>
 
-      <div className="grid grid-cols-3 gap-6 w-full max-w-6xl">
-        {/* Left column */}
-        <div className="flex flex-col">
-          <div className="text-center mb-4">
-            <h3 className="text-2xl font-bold text-cyan-300">{left.label}</h3>
+      <div
+        className={`grid w-full ${
+          panels.length > 3 ? "grid-cols-4 gap-4 max-w-7xl" : "grid-cols-3 gap-6 max-w-6xl"
+        }`}
+      >
+        {panels.map((panel, i) => (
+          <div key={panel.label} className="flex flex-col min-w-0">
+            <div className="text-center mb-4">
+              <h3 className={`font-bold ${panels.length > 3 ? "text-xl" : "text-2xl"} ${colors[i]}`}>
+                {panel.label}
+              </h3>
+            </div>
+            <div
+              className={`flex-1 bg-slate-800 rounded-xl border border-slate-700 ${
+                panels.length > 3 ? "p-4" : "p-6"
+              }`}
+            >
+              <pre className="text-sm text-slate-300 overflow-auto">
+                <code>{panel.code}</code>
+              </pre>
+            </div>
           </div>
-          <div className="flex-1 bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <pre className="text-sm text-slate-300 overflow-auto">
-              <code>{left.code}</code>
-            </pre>
-          </div>
-        </div>
-
-        {/* Middle column */}
-        <div className="flex flex-col">
-          <div className="text-center mb-4">
-            <h3 className="text-2xl font-bold text-purple-300">{middle.label}</h3>
-          </div>
-          <div className="flex-1 bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <pre className="text-sm text-slate-300 overflow-auto">
-              <code>{middle.code}</code>
-            </pre>
-          </div>
-        </div>
-
-        {/* Right column */}
-        <div className="flex flex-col">
-          <div className="text-center mb-4">
-            <h3 className="text-2xl font-bold text-green-300">{right.label}</h3>
-          </div>
-          <div className="flex-1 bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <pre className="text-sm text-slate-300 overflow-auto">
-              <code>{right.code}</code>
-            </pre>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

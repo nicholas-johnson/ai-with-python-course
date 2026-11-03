@@ -6,13 +6,15 @@ Delivery notes for Structured Workflows, the Day 2 closer. The course-wide [`ins
 
 ## What this module covers
 
-Five ideas, in order:
+Seven ideas, in order:
 
-1. **The control-flow spectrum** — fixed chain, router, plan-and-execute, ReAct. The organising idea for the whole module.
-2. **ReAct done properly** — a reasoning trace that is actually populated, and three guards that stop the loop running away.
-3. **Plan-and-execute** — decide once up front, re-plan on failure.
-4. **Parallel plans** — `depends_on` turns the plan into a graph you can schedule.
-5. **Approval gates and checkpointing** — a plan on disk can pause for a human and survive a restart.
+1. **The control-flow spectrum** — pipeline, router, plan-and-execute, ReAct. The organising idea for the whole module.
+2. **Pipeline** — the fixed chain. Code owns every step; the model only writes the summary.
+3. **Router** — one classification into a branch you wrote, then a pipeline. The fallback for an unknown branch is the whole safety story.
+4. **ReAct done properly** — a reasoning trace that is actually populated, and three guards that stop the loop running away.
+5. **Plan-and-execute** — decide once up front, re-plan on failure.
+6. **Parallel plans** — `depends_on` turns the plan into a graph you can schedule.
+7. **Approval gates and checkpointing** — a plan on disk can pause for a human and survive a restart.
 
 ### What it deliberately does not cover
 
@@ -48,11 +50,25 @@ Expect pushback along the lines of "but the model is smart enough now." The coun
 
 ### 1. The spectrum (slides 4–9)
 
-Open on the cards slide — four columns, who decides, cost, testability. Then the three-way code slide, which shows the same job written as a chain, a plan, and a ReAct loop side by side. Point at the comment lines: `# decisions: 0` versus `# decisions: N`. That is the entire module in one slide.
+Open on the cards slide — four columns, who decides, cost, testability. Then the code slide, which shows the same job written as a chain, a router, a plan, and a ReAct loop side by side. Point at the comment lines: `# decisions: 0` versus `# decisions: N`. That is the entire module in one slide.
 
-Land the push-left rule before the demo, so the demo confirms something they already believe rather than introducing it cold.
+Land the push-left rule before the demo, so the demo confirms something they already believe rather than introducing it cold. Demo 01 prints the pipeline as "Fixed chain" — same pattern, the name in the code.
 
-### 2. ReAct (slides 10–16)
+### 2. Pipeline (slides 10–13)
+
+This is the fixed chain, taught as the default rather than the thing you apologise for.
+
+- **You wrote the order.** The model writes one sentence at the end. Say that a unit test can lock the path because the path is source code.
+- **It fails in two specific ways:** it runs steps the request did not need, and it cannot add a step you did not write. Those two failures are why a router exists. Do not let the room jump from here to ReAct.
+
+### 3. Router (slides 14–17)
+
+- **The model picks a label, not a tool.** Each label is a pipeline. After the choice, you are back in code.
+- **The schema is the branch list.** A free string invents branches. `Literal["systems", "logs", "full"]` cannot.
+- **The fallback is the slide.** An unknown branch runs `full`, which is a pipeline you wrote. Never fall through to nothing.
+- **The exit ramp:** a router cannot change its mind halfway, and a new kind of request is a new branch you have to write. When the next step depends on the last observation, you have left router territory. That sentence is the handoff into ReAct.
+
+### 4. ReAct (slides 18–23)
 
 Beats in order:
 
@@ -65,7 +81,7 @@ Beats in order:
   - *Forced finalisation* — out of budget should produce a partial answer, never `None`.
 - **The subtlety on guard 2**, which is the best discussion point in the module: a repeat is only pointless *if nothing changed*. `read_notes()` after a new `take_note()` is a perfectly sensible repeat. Hence `MUTATING_TOOLS` resetting the seen-set. Ask the room when strict repeat-blocking would be wrong before you show the answer.
 
-### 3. Plan-and-execute (slides 17–20)
+### 5. Plan-and-execute (slides 24–27)
 
 Keep this section brisk — conceptually it is the easiest part, and the interesting consequences are in the two sections after it.
 
@@ -73,7 +89,7 @@ The one line that matters: **the plan is data.** A ReAct loop lives in a Python 
 
 Mention capping `max_replans` — re-planning on every failure is an infinite loop with extra steps.
 
-### 4. Parallel plans (slides 21–26)
+### 6. Parallel plans (slides 28–33)
 
 The strongest argument in the module, because it is a capability gap rather than a preference:
 
@@ -84,7 +100,7 @@ Two engineering points not to skip:
 - **Tell the planner not to invent dependencies.** Models love to impose a sequential order that is not required, and every false dependency costs you a wave. This is prompt work with a measurable payoff.
 - **Always handle the cycle case.** A confused plan should still run; it must never deadlock. The `if not ready:` branch is the whole fix.
 
-### 5. Approval and resume (slides 27–30)
+### 7. Approval and resume (slides 34–37)
 
 The key claim: **code decides what is dangerous, not the model.** A plan that can mark its own steps as safe is not a safety control — the model is the thing you are guarding against. Keep the irreversible-tool list in code where it can be reviewed and tested.
 
