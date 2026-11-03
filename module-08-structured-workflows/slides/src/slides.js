@@ -44,9 +44,9 @@ export const slides = [
   {
     type: 'description',
     content: {
-      title: 'The only question that matters',
+      title: 'Who owns the control flow?',
       description:
-        'Not "ReAct or planning?" but **how many decisions am I handing to the model** — because every one of those is a decision I cannot unit test.',
+        'How many decisions am I handing to the model? Every decision has a cost in time, tokens, and testability',
       icon: 'help-circle',
     },
   },
@@ -175,26 +175,12 @@ while not done:
   {
     type: 'standard',
     content: {
-      title: 'You already built most of this',
+      title: 'ReAct - Reason and Act',
       icon: 'wrench',
       points: [
-        'Module 2 gave you the loop: call the model, run the tool, feed the result back.',
-        'ReAct adds one thing — the model must say **why** before it acts.',
-        'That reasoning is what turns a tool log into a trace that explains itself.',
+        'The model must say **why** before it acts.',
+        'That reasoning is the trace that explains itself.',
         'It is also a steering wheel: you can prompt against the reasoning, not just the actions.',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'The trap: a Thought that is never there',
-      icon: 'alert-triangle',
-      points: [
-        'The obvious move is to read the thought from `response.output_text`.',
-        'But with native tool calling, that text is usually **empty** when the model emits a call.',
-        'So you log a "Thought" field that is blank on every step that actually did something.',
-        'Fix: make the thought a **required field on the schema**. Then it cannot go missing.',
       ],
     },
   },
@@ -249,14 +235,12 @@ return force_an_answer(messages)        # guard 3: never return None`,
   {
     type: 'standard',
     content: {
-      title: 'Three guards, and why each exists',
+      title: 'Three guards',
       icon: 'shield',
       points: [
         '**Step budget** — bounds the worst case. Without it, cost is unbounded.',
         '**No-progress detection** — a repeated call returns an observation it has already seen.',
         '**Forced finalisation** — out of budget means answer with what you have, not return `None`.',
-        'A cost ceiling is the fourth: stop on tokens spent, not just steps taken.',
-        'Log the whole trace. When it goes wrong at 3am, the trace is the only evidence.',
       ],
     },
   },
@@ -311,10 +295,10 @@ return force_an_answer(messages)        # guard 3: never return None`,
       icon: 'file-text',
       points: [
         'A ReAct loop lives in a call stack. A plan is a **list of objects**.',
-        'You can **show it to a user** before anything runs — the single best UX win here.',
+        'You can **show it to a user** before anything runs — Excellent for UX.',
         'You can **store it**, diff intended against actual, and replay it in tests.',
-        'You can **schedule it** — which is the next slide.',
-        'You can **stop in the middle of it** — which is the slide after that.',
+        'You can **schedule it**',
+        'You can **stop in the middle of it** ',
       ],
     },
   },
@@ -445,6 +429,19 @@ result = await asyncio.to_thread(run_tool, call.name, call.arguments)`,
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'Code decides what is dangerous',
+      icon: 'shield',
+      points: [
+        'Let the **code** flag which tools need approval, from a fixed allowlist.',
+        'Gate on the irreversible: money, messages, writes to a permanent record.',
+        'Checkpoint after every step, so a crash costs one step rather than the whole run.',
+        'Resuming must be **idempotent** — the guard is the status field, and you must test it.',
+      ],
+    },
+  },
+  {
     type: 'code',
     content: {
       title: 'The approval gate',
@@ -469,20 +466,6 @@ def run_plan(state):
       highlights: [
         'Skipping completed steps is what makes resuming safe to call repeatedly',
         'Save after every step — a crash should cost you one step, not the run',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Code decides what is dangerous',
-      icon: 'lock',
-      points: [
-        'Let the **code** flag which tools need approval, from a fixed allowlist.',
-        'A plan that marks **its own** steps as safe is not a safety control.',
-        'Gate on the irreversible: money, messages, writes to a permanent record.',
-        'Checkpoint after every step, so a crash costs one step rather than the whole run.',
-        'Resuming must be **idempotent** — the guard is the status field, and you must test it.',
       ],
     },
   },

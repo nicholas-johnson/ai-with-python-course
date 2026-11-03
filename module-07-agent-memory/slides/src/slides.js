@@ -2,8 +2,8 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 7 — Agent Memory',
-      subtitle: 'Context engineering: what to write, what to select, what to compress',
+      title: 'Module 7 — Context Engineering',
+      subtitle: 'What to write, what to select, what to compress',
       icon: 'brain',
     },
   },
