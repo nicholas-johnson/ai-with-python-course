@@ -96,6 +96,7 @@ Modules 1–13 run across three days. Module 0 is prework, covered only if the g
 - Implement coordination patterns: supervisor, swarm, debate, blackboard, task queue.
 - Share context and tools between agents safely.
 - Build conflict resolution and consensus mechanisms.
+- Spawn subagents on demand, run them in parallel, and reconcile their reports.
 
 ### Module 10 — LangChain with Python
 

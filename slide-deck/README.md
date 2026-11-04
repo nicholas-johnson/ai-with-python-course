@@ -62,6 +62,23 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 }
 ```
 
+### Credits
+
+`standard`, `code`, `description`, `equation` and `image` slides accept an optional
+`credit` string, rendered as small grey text under the slide body. Use it to cite a
+paper behind the idea on the slide:
+
+```js
+{
+  type: 'standard',
+  content: {
+    title: 'Consensus and conflict resolution',
+    points: ['Voting', 'Ranked choice'],
+    credit: 'Wang et al. (2022). "Self-Consistency Improves Chain of Thought Reasoning in Language Models." arXiv:2203.11171'
+  }
+}
+```
+
 ### Comparison Slide (with bullet points)
 
 ```js

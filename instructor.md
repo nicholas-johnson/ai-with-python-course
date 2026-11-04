@@ -266,6 +266,7 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 - Coordination patterns: supervisor, swarm, debate, blackboard
 - Shared context and tools across agents
 - Consensus and conflict resolution
+- Spawning subagents: context isolation, parallel fan-out, subagents as tools, reconciling reports
 
 **Demo:** `python module-09-multi-agent/demo/demo.py`
 
@@ -276,6 +277,7 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 | Part 3 | Structured debate with a judge |
 | Part 4 | Consensus voting across specialists |
 | Part 5 | Swarm handoffs with scoped tools |
+| Part 6 | Subagents spawned on demand: serial vs parallel, spawn-as-tool, reconciled reports |
 
 **Exercises:**
 
@@ -285,6 +287,7 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 | `exercises/02-supervisor-critic` | Supervisor orchestrates specialists + critic |
 | `exercises/03-consensus` | Debate, judge synthesis, and consensus voting |
 | `exercises/04-swarm-tools` | Scoped tools and peer-to-peer handoffs between agents |
+| `exercises/05-subagents` | Spawn researchers from a tool, fan out concurrently, reconcile conflicting reports |
 
 ---
 

@@ -297,6 +297,7 @@ By end of day, attendees can ground answers in **RAG and knowledge graphs**, giv
 - Roles: router, researcher, critic, supervisor, executor
 - Patterns: supervisor, debate, swarm/handoff, shared context
 - Consensus and conflict resolution; scoped tools per role
+- Spawning subagents: parallel fan-out, subagents as tools, reconciling reports
 
 **Demo**
 
@@ -308,11 +309,13 @@ By end of day, attendees can ground answers in **RAG and knowledge graphs**, giv
 2. **Supervisor-critic** — Supervisor + specialists + critic revision loop
 3. **Consensus** — Debate, judge synthesis, consensus voting
 4. **Swarm tools** — Scoped tools and peer-to-peer `transfer_to_*` handoffs
+5. **Subagents** — Spawn researchers in parallel, then reconcile their reports
 
 **After this module, attendees can**
 
 - Design multi-agent architectures with clear roles and tool scopes
 - Implement router, supervisor-critic, debate/consensus, and swarm handoffs
+- Spawn subagents concurrently and reconcile conflicting results before merging
 - Decide when multi-agent complexity is justified
 
 ---

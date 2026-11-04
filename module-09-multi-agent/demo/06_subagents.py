@@ -265,43 +265,55 @@ def synthesise(question: str, results: list[Result], conflicts: list[str], clien
 
 SPAWN_TOOL = {
     "type": "function",
-    "name": "spawn_researcher",
+    "name": "spawn_researchers",
     "description": (
-        "Spawn a subagent to research one narrow question in its own context window. "
-        "Call it once per independent sub-question — calls you make in the same turn "
-        "run at the same time. Maximum three."
+        "Spawn subagents to research independent sub-questions, each in its own "
+        "context window. Pass every brief in one call — they all run at the same "
+        "time. Maximum three."
     ),
     "parameters": {
         "type": "object",
         "properties": {
-            "department": {
-                "type": "string",
-                "enum": ["navigation", "engineering", "science"],
-                "description": "Which archive the subagent gets to read.",
-            },
-            "task": {
-                "type": "string",
-                "description": (
-                    "A self-contained brief. The subagent cannot see this "
-                    "conversation, so repeat anything it needs."
-                ),
-            },
+            "briefs": {
+                "type": "array",
+                "description": "One entry per independent sub-question.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "department": {
+                            "type": "string",
+                            "enum": ["navigation", "engineering", "science"],
+                            "description": "Which archive this subagent gets to read.",
+                        },
+                        "task": {
+                            "type": "string",
+                            "description": (
+                                "A self-contained brief. The subagent cannot see this "
+                                "conversation, so repeat anything it needs."
+                            ),
+                        },
+                    },
+                    "required": ["department", "task"],
+                },
+            }
         },
-        "required": ["department", "task"],
+        "required": ["briefs"],
     },
 }
 
 LEAD_PROMPT = (
     "You are the lead agent on the bridge of the DSS Pathfinder. You have no archive "
-    "access of your own — spawn researchers instead. Split the question into "
-    "independent briefs and spawn them all in one turn so they run concurrently. "
-    "When the reports come back, answer in three or four sentences, and say plainly "
-    "if the reports disagree."
+    "access of your own — spawn researchers instead.\n"
+    "Split the question into independent briefs and pass them all in a single "
+    "spawn_researchers call so they run concurrently. Do not spawn one, read it, and "
+    "then spawn the next.\n"
+    "Once the reports are back, answer in three or four sentences and say plainly if "
+    "they disagree. Do not spawn a second round."
 )
 
 
 async def lead_with_spawn_tool(
-    question: str, client: AsyncOpenAI, max_turns: int = 3
+    question: str, client: AsyncOpenAI, max_turns: int = 5
 ) -> tuple[str, list[Result]]:
     messages: list = [
         {"role": "system", "content": LEAD_PROMPT},
@@ -309,41 +321,56 @@ async def lead_with_spawn_tool(
     ]
     spawned: list[Result] = []
 
-    for _ in range(max_turns):
+    for turn in range(1, max_turns + 1):
         response = await client.responses.create(
             model=MODEL,
             reasoning={"effort": "none"},
             input=messages,
             tools=[SPAWN_TOOL],
             tool_choice="auto",
+            parallel_tool_calls=True,  # let it ask for several children at once
         )
         calls = [item for item in response.output if item.type == "function_call"]
         if not calls:
             return response.output_text, spawned
 
         messages += response.output
-        briefs = []
+
+        # A call carries a list of briefs; a turn can carry several calls. Flatten
+        # the lot into one fan-out, then slice the reports back per call_id.
+        groups: list[list[Brief]] = []
         for call in calls:
             args = json.loads(call.arguments or "{}")
-            briefs.append(Brief(args.get("department", "science"), args.get("task", question)))
+            groups.append(
+                [
+                    Brief(item.get("department", "science"), item.get("task", question))
+                    for item in args.get("briefs", [])
+                ]
+            )
 
-        print(f"  The lead spawned {len(briefs)} researchers in one turn:")
+        briefs = [brief for group in groups for brief in group]
+        plural = "s" if len(briefs) != 1 else ""
+        print(f"  Turn {turn}: the lead spawned {len(briefs)} researcher{plural} at once:")
         for brief in briefs:
             print(f"    {brief.department:>12}: {brief.task}")
         print()
 
         results = await fan_out(briefs, client)
         spawned.extend(results)
-        for call, result in zip(calls, results, strict=True):
+
+        cursor = 0
+        for call, group in zip(calls, groups, strict=True):
+            chunk = results[cursor : cursor + len(group)]
+            cursor += len(group)
             messages.append(
                 {
                     "type": "function_call_output",
                     "call_id": call.call_id,
-                    "output": result.report.model_dump_json(),
+                    "output": json.dumps([r.report.model_dump() for r in chunk]),
                 }
             )
 
-    return "(the lead never settled on an answer)", spawned
+    return f"(still spawning after {max_turns} turns — cut off)", spawned
 
 
 # ---------------------------------------------------------------------------
@@ -395,7 +422,7 @@ async def _run(client: OpenAI):
     print(f"    The lead received {summarised} — {share:.0f}% of it.")
     print("    That gap, not the stopwatch, is the real reason to spawn.\n")
 
-    print("  --- B. The lead writes the briefs itself (spawn_researcher) ---\n")
+    print("  --- B. The lead writes the briefs itself (spawn_researchers) ---\n")
     answer, _ = await lead_with_spawn_tool(QUESTION, async_client)
     print(f"  Lead's answer: {answer}\n")
     print("  Nobody wrote that fan-out. The model chose how many to spawn,")

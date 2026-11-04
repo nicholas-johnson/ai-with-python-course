@@ -125,29 +125,39 @@ ARCHIVE_TOOL = {
 
 SPAWN_TOOL = {
     "type": "function",
-    "name": "spawn_researcher",
+    "name": "spawn_researchers",
     "description": (
-        "Spawn a subagent to research one narrow question in its own context window. "
-        "Call it once per independent sub-question — calls made in the same turn run "
-        "at the same time. Maximum three."
+        "Spawn subagents to research independent sub-questions, each in its own "
+        "context window. Pass every brief in one call — they all run at the same "
+        "time. Maximum three."
     ),
     "parameters": {
         "type": "object",
         "properties": {
-            "department": {
-                "type": "string",
-                "enum": DEPARTMENTS,
-                "description": "Which archive the subagent is allowed to read.",
-            },
-            "task": {
-                "type": "string",
-                "description": (
-                    "A self-contained brief. The subagent cannot see this conversation, "
-                    "so repeat anything it needs to know."
-                ),
-            },
+            "briefs": {
+                "type": "array",
+                "description": "One entry per independent sub-question.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "department": {
+                            "type": "string",
+                            "enum": DEPARTMENTS,
+                            "description": "Which archive this subagent is allowed to read.",
+                        },
+                        "task": {
+                            "type": "string",
+                            "description": (
+                                "A self-contained brief. The subagent cannot see this "
+                                "conversation, so repeat anything it needs to know."
+                            ),
+                        },
+                    },
+                    "required": ["department", "task"],
+                },
+            }
         },
-        "required": ["department", "task"],
+        "required": ["briefs"],
     },
 }
 
@@ -180,10 +190,12 @@ SUBAGENT_PROMPTS: dict[str, str] = {
 
 LEAD_PROMPT = (
     "You are the lead agent on the bridge of the DSS Pathfinder. You have no archive "
-    "access of your own — spawn researchers instead. Split the question into "
-    "independent briefs and spawn them all in one turn so they run concurrently. "
-    "When the reports come back, answer in three or four sentences, and say plainly "
-    "if the reports disagree."
+    "access of your own — spawn researchers instead.\n"
+    "Split the question into independent briefs and pass them all in a single "
+    "spawn_researchers call so they run concurrently. Do not spawn one, read it, and "
+    "then spawn the next.\n"
+    "Once the reports are back, answer in three or four sentences and say plainly if "
+    "they disagree. Do not spawn a second round."
 )
 
 MERGER_PROMPT = (

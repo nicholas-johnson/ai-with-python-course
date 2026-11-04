@@ -24,6 +24,11 @@ export function StandardSlide({ content }) {
             </li>
           ))}
         </ul>
+        {content.credit && (
+          <p className="text-sm text-gray-400 text-center max-w-2xl mx-auto mt-6">
+            {content.credit}
+          </p>
+        )}
       </div>
     </div>
   );
