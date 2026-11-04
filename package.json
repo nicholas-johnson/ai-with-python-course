@@ -22,6 +22,7 @@
     "slides:11": "pnpm --filter @ai-python-course/module-11-slides dev",
     "slides:12": "pnpm --filter @ai-python-course/module-12-slides dev",
     "slides:13": "pnpm --filter @ai-python-course/module-13-slides dev",
+    "slides:pdf": "node scripts/export-slides-pdf.mjs",
     "lint:slides": "eslint slide-deck/",
     "format:slides": "prettier --write slide-deck/ **/slides/src/**"
   },
@@ -30,6 +31,8 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
+    "pdf-lib": "^1.17.1",
+    "playwright-core": "^1.56.1",
     "prettier": "^3.9.10"
   },
   "engines": {

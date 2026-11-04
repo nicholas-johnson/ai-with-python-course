@@ -3,7 +3,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 11 — Evals',
-      subtitle: 'Measure the agent, then ship it',
+      subtitle: 'Evaluating your agent',
       icon: 'trending-up',
     },
   },

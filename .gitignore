@@ -2,6 +2,7 @@ node_modules/
 __pycache__/
 *.egg-info/
 **/slides/dist/
+pdf/
 .pnpm-store/
 coverage/
 .DS_Store

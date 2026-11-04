@@ -142,6 +142,8 @@ Each module includes a Vite app under `slides/` that renders teaching decks with
 
 ```bash
 pnpm slides:01          # same pattern :00 … :13
+pnpm slides:pdf         # every deck → pdf/<module>.pdf and pdf/slides.pdf
+pnpm slides:pdf 10      # just module 10 (also accepts a module folder name)
 # or
 cd module-01-working-with-the-llm/slides && pnpm dev
 ```
