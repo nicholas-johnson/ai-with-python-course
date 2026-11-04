@@ -284,7 +284,7 @@ By end of day, attendees can ground answers in **RAG and knowledge graphs**, giv
 | 9 | Multi-Agent Systems | Roles, coordination, consensus |
 | 10 | LangChain with Python | LCEL, agents, RAG, serving chains |
 | 11 | Evals | Golden tests, retrieval metrics, LLM-as-judge, faithfulness, gate |
-| 12 | Productionisation | Production hardening |
+| 12 | Productionisation | Production hardening + capstone |
 | 13 | Edge Topics | Advanced RAG & production techniques (pick-and-choose) |
 
 ---
@@ -399,6 +399,14 @@ By end of day, attendees can ground answers in **RAG and knowledge graphs**, giv
 - Add tracing, retries, circuit breakers, and cost budgets to an AI service
 - Configure secrets and health checks for deployment
 - Harden an AI endpoint end to end: traced, retried, budgeted, and health-checked
+- Pick one capstone (exercises 04–07) and build its FastAPI backend. The frontend is provided.
+
+| App | Techniques practised |
+| --- | -------------------- |
+| **Recipe Finder** | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| **Movie Night** | RAG, hybrid search, text-to-SQL, structured output |
+| **Travel Planner** | Agentic RAG, tool calling, structured itineraries, web fallback |
+| **Personal Assistant** | Chat + tools + MCP, RAG over notes, calendar, cost controls |
 
 ---
 
@@ -441,19 +449,6 @@ Independent labs — attendees choose by interest/time, e.g.:
 
 ---
 
-### Extras — Capstone *(after Module 13)*
-
-*Choose one full-stack capstone in `extras/` — frontend provided; build the FastAPI backend.*
-
-| App | Techniques practised |
-| --- | -------------------- |
-| **Recipe Finder** | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
-| **Movie Night** | RAG, hybrid search, text-to-SQL, structured output |
-| **Travel Planner** | Agentic RAG, tool calling, structured itineraries, web fallback |
-| **Personal Assistant** | Chat + tools + MCP, RAG over notes, calendar, cost controls |
-
----
-
 ### Day 3 outcomes
 
 By end of day, attendees can coordinate **multi-agent** systems, accelerate with **LangChain**, **evaluate** agents and RAG, harden a **capstone app** for production, and optionally apply **advanced RAG/ops techniques**.
@@ -466,7 +461,7 @@ By end of day, attendees can coordinate **multi-agent** systems, accelerate with
 | --- | ------- | ------ | ------------------------ |
 | **1** | 1–4 | Research Assistant | Call LLMs, build tool agents, serve MCP, ship a streaming multimodal chat API |
 | **2** | 5–8 | Holiday Planner | Ground answers (RAG + graphs), engineer context and memory, run ReAct / plan-and-execute workflows |
-| **3** | 9–13 + extras | Capstone app | Orchestrate multi-agent systems, use LangChain, evaluate pipelines, productionise and ship, pick edge techniques |
+| **3** | 9–13 | Edge techniques | Orchestrate multi-agent systems, use LangChain, evaluate pipelines, productionise and ship a capstone, pick edge techniques |
 
 ---
 
