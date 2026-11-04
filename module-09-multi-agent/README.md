@@ -215,7 +215,10 @@ SPAWN_TOOL = {
                 "items": {
                     "type": "object",
                     "properties": {
-                        "department": {"type": "string", "enum": DEPARTMENTS},
+                        "department": {
+                            "type": "string",
+                            "enum": ["navigation", "engineering", "science"],
+                        },
                         "task": {"type": "string", "description": "A self-contained brief."},
                     },
                     "required": ["department", "task"],
@@ -351,7 +354,7 @@ Menu:
 | [`exercises/02-supervisor-critic`](exercises/02-supervisor-critic/) | Supervisor orchestrates specialists + critic with a revision loop for quality control. |
 | [`exercises/03-consensus`](exercises/03-consensus/) | Debate pattern, judge synthesis, and consensus voting across multiple agents. |
 | [`exercises/04-swarm-tools`](exercises/04-swarm-tools/) | Swarm handoffs: each agent has scoped ship tools and passes control via `transfer_to_*`. |
-| [`exercises/05-subagents`](exercises/05-subagents/) | Spawn subagents from a `spawn_researcher` tool, fan them out concurrently, then reconcile conflicting reports before merging. |
+| [`exercises/05-subagents`](exercises/05-subagents/) | Spawn subagents from a `spawn_researchers` tool, fan them out concurrently, then reconcile conflicting reports before merging. |
 
 Run tests per exercise (each folder has its own `test_start.py`):
 
