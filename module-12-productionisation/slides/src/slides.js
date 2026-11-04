@@ -438,50 +438,7 @@ export const slides = [
       icon: 'globe',
     },
   },
-  // {
-  //   type: 'cards',
-  //   content: {
-  //     title: 'What is available',
-  //     cards: [
-  //       {
-  //         heading: 'Hosting',
-  //         points: [
-  //           'Cloud Run — the API container',
-  //           'Cloud Run functions — small jobs',
-  //           'GKE — more than one service',
-  //           'Compute Engine — only for a VM',
-  //         ],
-  //       },
-  //       {
-  //         heading: 'Databases',
-  //         points: [
-  //           'Cloud SQL, AlloyDB — Postgres',
-  //           'Firestore — documents',
-  //           'Memorystore — Redis',
-  //           'Cloud Storage — files, not rows',
-  //         ],
-  //       },
-  //       {
-  //         heading: 'AI',
-  //         points: [
-  //           'Vertex AI — Gemini, Model Garden',
-  //           'Vector Search — RAG embeddings',
-  //           'Endpoints — a model you trained',
-  //           'Quotas on this project',
-  //         ],
-  //       },
-  //       {
-  //         heading: 'Google Cloud Security and ops',
-  //         points: [
-  //           'IAM and service accounts',
-  //           'Secret Manager',
-  //           'Artifact Registry',
-  //           'Logging, Trace, Cloud Armor',
-  //         ],
-  //       },
-  //     ],
-  //   },
-  // },
+
   {
     type: 'standard',
     content: {
