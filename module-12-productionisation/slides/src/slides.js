@@ -3,7 +3,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 12 — Productionisation',
-      subtitle: 'From prototype to production-ready AI',
+      subtitle: 'Production-ready AI',
       icon: 'shield',
     },
   },
@@ -515,6 +515,78 @@ export const slides = [
     },
   },
 
+  {
+    type: 'welcome',
+    content: {
+      title: 'Exercises',
+      points: [
+        '01 — Structured tracing: TraceContext with nested spans, durations, and one JSON log line per span',
+        '02 — Reliability: retry with backoff and jitter, a circuit breaker, and a fallback chain',
+        '03 — Cost controls: token budgets, a model-tiering router, and a prompt cache',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Capstone exercises',
+      subtitle: 'Choose one. Build it production-ready.',
+      icon: 'pen-tool',
+    },
+  },
+  {
+    type: 'cards',
+    content: {
+      title: 'Pick your capstone',
+      cards: [
+        {
+          heading: '04 — AI Recipe Finder',
+          points: [
+            'Photo your fridge, get recipe suggestions.',
+            'RAG + hybrid search + multimodal vision.',
+            'Allergen guardrails + semantic caching.',
+          ],
+        },
+        {
+          heading: '05 — AI Movie Night',
+          points: [
+            'Describe your mood, get movie picks.',
+            'RAG + reranking + text-to-SQL for data questions.',
+            'Charts and structured output.',
+          ],
+        },
+        {
+          heading: '06 — AI Travel Planner',
+          points: [
+            'Describe your dream trip, get a day-by-day itinerary.',
+            'Agentic RAG + tool calling + web fallback.',
+            'Budget tracking + structured itineraries.',
+          ],
+        },
+        {
+          heading: '07 — AI Personal Assistant',
+          points: [
+            'Friendly companion with calendar, notes, reminders.',
+            'Chat + tool calling + MCP + RAG over notes.',
+            'Session memory + cost controls.',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'How the capstones work',
+      icon: 'pen-tool',
+      points: [
+        'Exercises **04–07** in this module. Each has a **frontend/** (SvelteKit — provided), a **starter/** (your code), and a **solution/**.',
+        'You build the **FastAPI backend** in `starter/` — the frontend connects automatically.',
+        'Apply the patterns from this module: **tracing**, **retries**, **cost tracking**. Several also use Module 13 techniques (hybrid search, caching, guardrails).',
+        'Run with `uvicorn starter.app:app --reload --port 8000` and `cd frontend && pnpm dev`.',
+      ],
+    },
+  },
   {
     type: 'title',
     content: {
