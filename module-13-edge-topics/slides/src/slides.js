@@ -797,69 +797,8 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Capstone projects',
-      subtitle: 'extras/ — choose one, build it production-ready',
-      icon: 'pen-tool',
-    },
-  },
-  {
-    type: 'cards',
-    content: {
-      title: 'Pick your capstone',
-      cards: [
-        {
-          heading: 'AI Recipe Finder',
-          points: [
-            'Photo your fridge, get recipe suggestions.',
-            'RAG + hybrid search + multimodal vision.',
-            'Allergen guardrails + semantic caching.',
-          ],
-        },
-        {
-          heading: 'AI Movie Night',
-          points: [
-            'Describe your mood, get movie picks.',
-            'RAG + reranking + text-to-SQL for data questions.',
-            'Charts and structured output.',
-          ],
-        },
-        {
-          heading: 'AI Travel Planner',
-          points: [
-            'Describe your dream trip, get a day-by-day itinerary.',
-            'Agentic RAG + tool calling + web fallback.',
-            'Budget tracking + structured itineraries.',
-          ],
-        },
-        {
-          heading: 'AI Personal Assistant',
-          points: [
-            'Friendly companion with calendar, notes, reminders.',
-            'Chat + tool calling + MCP + RAG over notes.',
-            'Session memory + cost controls.',
-          ],
-        },
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'How the capstones work',
-      icon: 'pen-tool',
-      points: [
-        'Each capstone in **`extras/`** has a **frontend/** (SvelteKit — provided), a **starter/** (your code), and a **solution/**.',
-        'You build the **FastAPI backend** in `starter/` — the frontend connects automatically.',
-        'Combine **Module 12** patterns (tracing, retries, cost tracking) with **Module 13** techniques (hybrid search, caching, guardrails).',
-        'Run with `uvicorn starter.app:app --reload --port 8000` and `cd frontend && pnpm dev`.',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
       title: 'Module 13 — Complete',
-      subtitle: 'Next: pick a capstone in extras/',
+      subtitle: 'Course complete',
       icon: 'check-circle',
     },
   },

@@ -18,7 +18,7 @@ trace 4f2a9c1e8b3d7a60
 
 Each span is also emitted as a single line of JSON. That is the part that matters in production: Datadog, Grafana, and CloudWatch index the fields, so `trace_id` and `duration_ms` become things you filter and aggregate on rather than text you parse back out of a log message.
 
-This is the real `TraceContext` the capstones in [`extras/`](../../../extras/) import.
+This is the real `TraceContext` the capstones in this module (`04-recipe-finder` through `07-personal-assistant`) import.
 
 ### Two details worth knowing before you start
 

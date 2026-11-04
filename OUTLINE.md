@@ -120,6 +120,14 @@ Modules 1–13 run across three days. Module 0 is prework, covered only if the g
 - Apply reliability patterns: retries with backoff, timeouts, circuit breakers, fallbacks.
 - Enforce cost controls: token budgets, model tiering, caching.
 - Deploy with environment config, secrets management, and health checks.
+- Pick one capstone (exercises 04–07) and build its FastAPI backend. The frontend is provided.
+
+| App | Folder | Techniques practised |
+| --- | ------ | -------------------- |
+| Recipe Finder | `exercises/04-recipe-finder` | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| Movie Night | `exercises/05-movie-night` | RAG, hybrid search, text-to-SQL, structured output |
+| Travel Planner | `exercises/06-travel-planner` | Agentic RAG, tool calling, structured itineraries, web fallback |
+| Personal Assistant | `exercises/07-personal-assistant` | Chat + tools + MCP, RAG over notes, calendar, cost controls |
 
 ### Module 13 — Edge Topics *(pick and choose)*
 
@@ -132,15 +140,3 @@ Independent advanced techniques; exercise numbers match topic numbers.
 - Local ML on a laptop CPU: train a small model, run a Hugging Face model.
 - Concepts only: test-time compute scaling, speculative decoding, GraphRAG, mixture of experts.
 
----
-
-## Capstone *(in `extras/`)*
-
-Choose one full-stack application — the frontend is provided, build the FastAPI backend.
-
-| App | Techniques practised |
-| --- | -------------------- |
-| Recipe Finder | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
-| Movie Night | RAG, hybrid search, text-to-SQL, structured output |
-| Travel Planner | Agentic RAG, tool calling, structured itineraries, web fallback |
-| Personal Assistant | Chat + tools + MCP, RAG over notes, calendar, cost controls |

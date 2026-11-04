@@ -303,7 +303,7 @@ context = "Warp core operating at 94% efficiency. Conduit 7-B fluctuation."
       description:
         'A **scorecard** is retrieval + judge + faithfulness for one pipeline (`rag` vs `rag_rerank`). **Compare** ranks configs on a metric. A **gate** is a floor: if recall drops below 0.6, the build fails even if the demo looked fine. Compare on a delta (“did we get better?”). Gate on a floor (“is this shippable?”).',
       icon: 'award',
-      credit: 'Reuse this as a release check on a capstone in extras/.',
+      credit: 'Reuse this as a release check on a Module 12 capstone.',
     },
   },
   {

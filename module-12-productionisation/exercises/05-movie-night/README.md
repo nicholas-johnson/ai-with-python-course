@@ -1,4 +1,4 @@
-# Capstone 2 — AI Movie Night
+# Exercise 05 — AI Movie Night
 
 A full-stack AI movie recommendation app combining **RAG** (mood-based search) with **text-to-SQL** (data questions), wrapped in production patterns.
 
@@ -18,7 +18,7 @@ A full-stack AI movie recommendation app combining **RAG** (mood-based search) w
 ## Project Structure
 
 ```
-02-movie-night/
+05-movie-night/
 ├── data/
 │   └── movies.json          # Movie dataset (100 films)
 ├── starter/                  # Your working copy (has TODOs)
@@ -40,7 +40,7 @@ A full-stack AI movie recommendation app combining **RAG** (mood-based search) w
 ## Setup
 
 ```bash
-# From extras/02-movie-night
+# From module-12-productionisation/exercises/05-movie-night
 
 # 1. Install dependencies
 #    Option A - pip (venv active):
@@ -130,10 +130,10 @@ Wire everything together.
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-cd extras/02-movie-night
+cd module-12-productionisation/exercises/05-movie-night
 python -m pytest tests/ -v
 
 # Option B - uv (no activation needed):
-cd extras/02-movie-night
+cd module-12-productionisation/exercises/05-movie-night
 uv run --extra dev pytest tests/ -v
 ```

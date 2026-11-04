@@ -1,4 +1,4 @@
-# Capstone 4 — AI Personal Assistant (Compass)
+# Exercise 07 — AI Personal Assistant (Compass)
 
 Build **Compass**, a personalised AI assistant that manages your calendar, searches your notes, tracks reminders, and checks the weather — all through natural conversation with tool calling and SSE streaming.
 
@@ -20,7 +20,7 @@ Build **Compass**, a personalised AI assistant that manages your calendar, searc
 
 ```bash
 # From the exercise directory
-cd extras/04-personal-assistant
+cd module-12-productionisation/exercises/07-personal-assistant
 
 # Set your OpenAI API key
 export OPENAI_API_KEY=your-key-here
@@ -102,11 +102,11 @@ Wire everything together:
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-cd extras/04-personal-assistant
+cd module-12-productionisation/exercises/07-personal-assistant
 python -m pytest tests/ -v
 
 # Option B - uv (no activation needed):
-cd extras/04-personal-assistant
+cd module-12-productionisation/exercises/07-personal-assistant
 uv run --extra dev pytest tests/ -v
 ```
 

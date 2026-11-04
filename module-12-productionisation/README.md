@@ -336,28 +336,28 @@ Menu, `a` runs all three. Parts 1 and 3 make live API calls; part 2 is offline.
 
 ## Exercises
 
-The three exercises are independent; each one hardens a different part of the same request path.
+Exercises 01–03 are independent; each one hardens a different part of the same request path. Exercises 04–07 are capstones: pick one full-stack app and build the FastAPI backend for the provided SvelteKit frontend. Open-ended alternatives are in [`exercises/capstone-ideas.md`](exercises/capstone-ideas.md).
 
 | Folder | What you build |
 | ------ | -------------- |
 | [`exercises/01-tracing`](exercises/01-tracing/) | `TraceContext` with nested spans, durations, and one JSON log line per span |
 | [`exercises/02-reliability`](exercises/02-reliability/) | Retry with backoff and jitter, a circuit breaker, and a fallback chain |
 | [`exercises/03-cost-controls`](exercises/03-cost-controls/) | Token budgets, a model-tiering router, and a prompt cache |
+| [`exercises/04-recipe-finder`](exercises/04-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| [`exercises/05-movie-night`](exercises/05-movie-night/) | RAG, text-to-SQL, reranking, semantic cache, chart data |
+| [`exercises/06-travel-planner`](exercises/06-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
+| [`exercises/07-personal-assistant`](exercises/07-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar, cost controls |
 
-All three run with no API key — the tests drive a scripted client.
+Exercises 01–03 run with no API key — the tests drive a scripted client. Run a capstone's tests from that exercise directory; they import `solution` from there.
 
 ```bash
 # Option A - pip + venv (run from the repo root):
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pytest module-12-productionisation/ -v
+pytest module-12-productionisation/exercises/01-tracing module-12-productionisation/exercises/02-reliability module-12-productionisation/exercises/03-cost-controls -v
 
 # Option B - uv (no activation needed):
-uv run --extra dev pytest module-12-productionisation/ -v
+uv run --extra dev pytest module-12-productionisation/exercises/01-tracing module-12-productionisation/exercises/02-reliability module-12-productionisation/exercises/03-cost-controls -v
 ```
-
-## Capstones
-
-The four full-stack capstone apps (Recipe Finder, Movie Night, Travel Planner, Personal Assistant) live in [`extras/`](../extras/). They combine this module's patterns with techniques from **Module 13 — Edge Topics**, so do them after Module 13.
 
 ## Slides
 

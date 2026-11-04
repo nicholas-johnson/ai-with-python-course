@@ -1,6 +1,6 @@
 # Capstone Ideas
 
-The capstones in this folder (`01-recipe-finder` through `04-personal-assistant`) are full-stack projects with starter code, tests, and reference solutions. The ideas below are **open-ended capstone projects** — no starter code, no tests, just a title and enough detail to get you building.
+The capstones in this folder (`04-recipe-finder` through `07-personal-assistant`) are full-stack projects with starter code, tests, and reference solutions. The ideas below are **open-ended capstone projects** — no starter code, no tests, just a title and enough detail to get you building.
 
 They focus on **Hugging Face models running on CPU**, so you can work offline after the first download and avoid API costs. You bring your own project structure, dataset, and frontend (if any).
 
@@ -14,11 +14,11 @@ pip install -e ".[local-ml]"
 uv sync --extra local-ml
 ```
 
-For model sizes and CPU tips, see [Exercise 14 — Hugging Face Run](../module-13-edge-topics/exercises/14-huggingface-run/README.md) in Module 13.
+For model sizes and CPU tips, see [Exercise 14 — Hugging Face Run](../../module-13-edge-topics/exercises/14-huggingface-run/README.md) in Module 13.
 
 ---
 
-## Exercise 05 — Sentiment Monitor
+## Exercise 08 — Sentiment Monitor
 
 Build a service that ingests text (reviews, support tickets, ship logs, social posts) and tracks sentiment over time. Expose a FastAPI API that classifies each message, stores results, and returns rolling aggregates (e.g. positive ratio in the last hour).
 
@@ -46,7 +46,7 @@ Build a service that ingests text (reviews, support tickets, ship logs, social p
 
 ---
 
-## Exercise 06 — Multilingual FAQ Bot
+## Exercise 09 — Multilingual FAQ Bot
 
 Build a Q&A system that accepts questions in multiple languages. Translate the question to English with a local translation model, run your RAG pipeline against an English knowledge base, then translate the answer back to the user's language.
 
@@ -77,7 +77,7 @@ Pick language pairs you care about; each pair is a separate model download.
 
 ---
 
-## Exercise 07 — Content Moderation Pipeline
+## Exercise 10 — Content Moderation Pipeline
 
 Create a moderation service that scores user input through several small classifiers before any downstream LLM or storage step. Block, flag, or allow content based on combined scores and configurable thresholds.
 
@@ -107,7 +107,7 @@ Start with one toxicity model; add zero-shot labels only if you need custom cate
 
 ---
 
-## Exercise 08 — Local Embedding Search
+## Exercise 11 — Local Embedding Search
 
 Replace OpenAI embeddings with a sentence-transformer model and build a **fully offline** RAG pipeline: index documents, search by semantic similarity, and optionally rerank with a small local model or heuristics — no API keys required.
 
@@ -135,7 +135,7 @@ Replace OpenAI embeddings with a sentence-transformer model and build a **fully 
 
 ---
 
-## Exercise 09 — Document Classifier API
+## Exercise 12 — Document Classifier API
 
 Fine-tune DistilBERT on a custom labeled dataset, save the checkpoint, and deploy it behind FastAPI with production patterns: health checks, semantic caching for repeated queries, and tracing.
 
@@ -162,7 +162,7 @@ Fine-tune DistilBERT on a custom labeled dataset, save the checkpoint, and deplo
 
 ---
 
-## Exercise 10 — Summarisation Service
+## Exercise 13 — Summarisation Service
 
 Build a service that accepts long text (articles, meeting notes, incident reports) and returns a short summary. Enforce input length limits, validate output shape (e.g. bullet list or fixed fields), and handle timeouts gracefully on CPU.
 
@@ -192,7 +192,7 @@ Build a service that accepts long text (articles, meeting notes, incident report
 
 ---
 
-## Exercise 11 — Zero-Shot Classifier
+## Exercise 14 — Zero-Shot Classifier
 
 Build a labeling API that classifies text into **arbitrary categories supplied at request time** — no training step. Useful for triage, routing, or tagging when categories change often.
 
@@ -220,7 +220,7 @@ Build a labeling API that classifies text into **arbitrary categories supplied a
 
 ---
 
-## Exercise 12 — Local Chatbot with Memory
+## Exercise 15 — Local Chatbot with Memory
 
 Deploy a small instruction-tuned causal language model behind an API with multi-turn conversation memory, token budgets, and reliability patterns from this module (circuit breaker, cost/token limits).
 

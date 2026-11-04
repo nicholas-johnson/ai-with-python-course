@@ -134,7 +134,7 @@ This is a **hybrid monorepo** — Python exercises and demos live alongside a pn
 
 Each **module** has its own `README.md`, **demo** scripts you can run with `python …` (venv active) or `uv run python …`, and **exercises** with `start.py` (your work), `test_start.py` (pytest), and `solution.py` (instructor reference — try the exercise first!).
 
-Shared mission data lives in [`data/`](data/). Full-stack capstone apps live in [`extras/`](extras/).
+Shared mission data lives in [`data/`](data/). Full-stack capstone apps are exercises 04–07 in [Module 12](module-12-productionisation/).
 
 ## Slides
 
@@ -176,9 +176,8 @@ cd module-01-working-with-the-llm/slides && pnpm dev
 | 9 | [module-09-multi-agent](module-09-multi-agent/) | Roles, coordination patterns, shared context |
 | 10 | [module-10-langchain](module-10-langchain/) | Chains, agents, tools, RAG — framework-powered AI |
 | 11 | [module-11-evals](module-11-evals/) | Golden tests, retrieval metrics, LLM-as-judge, faithfulness, scorecard + gate |
-| 12 | [module-12-productionisation](module-12-productionisation/) | Production hardening: tracing, reliability, cost controls, deployment |
+| 12 | [module-12-productionisation](module-12-productionisation/) | Production hardening, then pick one capstone and build the backend |
 | 13 | [module-13-edge-topics](module-13-edge-topics/) | Hybrid search, re-ranking, HyDE, agentic RAG, guardrails, and more |
-| Extras | [extras](extras/) | Capstone apps: pick one and build a production-ready backend |
 
 ## Course outline
 
@@ -311,7 +310,19 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 
 ### Module 12 — [Productionisation](module-12-productionisation/)
 
-**Topics:** Production hardening — structured tracing, retries and timeouts, circuit breakers, fallbacks, cost controls, deployment (config, secrets, Docker, health checks).
+**Topics:** Production hardening — structured tracing, retries and timeouts, circuit breakers, fallbacks, cost controls, deployment (config, secrets, Docker, health checks). Then pick one capstone (04–07) and build its FastAPI backend.
+
+| Exercise | Folder | What you practise |
+| -------- | ------ | ----------------- |
+| Structured tracing | [`exercises/01-tracing`](module-12-productionisation/exercises/01-tracing/) | Nested spans, durations, one JSON log line per span |
+| Reliability | [`exercises/02-reliability`](module-12-productionisation/exercises/02-reliability/) | Retry with backoff and jitter, a circuit breaker, and a fallback chain |
+| Cost controls | [`exercises/03-cost-controls`](module-12-productionisation/exercises/03-cost-controls/) | Token budgets, a model-tiering router, and a prompt cache |
+| Recipe Finder | [`exercises/04-recipe-finder`](module-12-productionisation/exercises/04-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
+| Movie Night | [`exercises/05-movie-night`](module-12-productionisation/exercises/05-movie-night/) | RAG, hybrid search, text-to-SQL, structured output, charts |
+| Travel Planner | [`exercises/06-travel-planner`](module-12-productionisation/exercises/06-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
+| Personal Assistant | [`exercises/07-personal-assistant`](module-12-productionisation/exercises/07-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar management, cost controls |
+
+Open-ended ideas using Hugging Face models on CPU: [`exercises/capstone-ideas.md`](module-12-productionisation/exercises/capstone-ideas.md).
 
 ### Module 13 — [Edge Topics](module-13-edge-topics/)
 
@@ -333,19 +344,6 @@ All **exercises** run in **Python** and are checked with **pytest** (`start.py` 
 | Fine-tuning data | [`exercises/12-fine-tuning-data`](module-13-edge-topics/exercises/12-fine-tuning-data/) | Build datasets for fine-tuning |
 | Local training | [`exercises/13-local-training`](module-13-edge-topics/exercises/13-local-training/) | Fine-tune a small classifier on CPU |
 | Hugging Face run | [`exercises/14-huggingface-run`](module-13-edge-topics/exercises/14-huggingface-run/) | Run a Hub model with tokenizer + model, no `pipeline` |
-
-### Extras — [Capstones](extras/)
-
-**After Module 13.** Choose one full-stack app and build a production-ready FastAPI backend for a provided frontend. Each capstone combines Module 12's production patterns with Module 13 techniques.
-
-| Capstone | Folder | What you practise |
-| -------- | ------ | ----------------- |
-| Recipe Finder | [`extras/01-recipe-finder`](extras/01-recipe-finder/) | RAG, hybrid search, reranking, multimodal vision, allergen guardrails |
-| Movie Night | [`extras/02-movie-night`](extras/02-movie-night/) | RAG, hybrid search, text-to-SQL, structured output, charts |
-| Travel Planner | [`extras/03-travel-planner`](extras/03-travel-planner/) | Agentic RAG, tool calling, structured itineraries, web fallback |
-| Personal Assistant | [`extras/04-personal-assistant`](extras/04-personal-assistant/) | Chat + tools + MCP, RAG over notes, calendar management, cost controls |
-
-Open-ended ideas using Hugging Face models on CPU: [`extras/capstone-ideas.md`](extras/capstone-ideas.md).
 
 ## License
 

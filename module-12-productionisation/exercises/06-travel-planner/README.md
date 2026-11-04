@@ -1,4 +1,4 @@
-# Capstone 3 — AI Travel Planner
+# Exercise 06 — AI Travel Planner
 
 An agentic travel planning API that uses RAG search, tool calling, and guardrails to generate day-by-day itineraries.
 
@@ -33,7 +33,7 @@ GET /api/weather?city=X → mock weather
 
 ```bash
 # From the exercise directory
-cd extras/03-travel-planner
+cd module-12-productionisation/exercises/06-travel-planner
 
 # Install dependencies
 #   Option A - pip (venv active):

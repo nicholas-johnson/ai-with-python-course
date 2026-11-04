@@ -107,7 +107,7 @@ gate(scorecard, {"avg_recall": 0.6, "overall": 0.5})
 # {"passed": False, "failures": [{"metric": "avg_recall", "value": 0.4, "threshold": 0.6}]}
 ```
 
-The capstones in `extras/` can reuse this as a release check, not a slide.
+The Module 12 capstones (`exercises/04`–`07`) can reuse this as a release check, not a slide.
 
 ---
 

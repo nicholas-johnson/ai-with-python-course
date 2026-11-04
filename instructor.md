@@ -334,7 +334,7 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 - LLM-as-judge: correctness, completeness, relevance (JSON, temperature 0)
 - Faithfulness: claims grounded in retrieved context, not the gold answer
 - Scorecard + gate: pick a winner, fail a release below a floor
-- The capstones in `extras/` can reuse the harness as a release check
+- The Module 12 capstones (exercises 04–07) can reuse the harness as a release check
 
 **Demo:**
 
@@ -363,6 +363,7 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 - Reliability: retries with exponential backoff + jitter, timeouts, circuit breakers, fallbacks
 - Cost controls: token budgets (per-session, per-day), model tiering, caching, batching
 - Deployment: Docker, health checks, environment config, secrets management
+- Capstones: learners pick one of exercises 04–07 and build its FastAPI backend against a provided SvelteKit frontend. Module 11's eval harness can serve as the release check.
 
 **Demo:**
 
@@ -371,6 +372,18 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 | `module-12-productionisation/demo/01_tracing.py` | TraceContext with spans, timing, JSON output |
 | `module-12-productionisation/demo/02_circuit_breaker.py` | Circuit breaker states, failure handling, recovery |
 | `module-12-productionisation/demo/03_cost_controls.py` | Token budgets, model tiering, cost tracking |
+
+**Exercises:**
+
+| Folder | Delegates build |
+| ------ | --------------- |
+| `exercises/01-tracing` | `TraceContext` with nested spans and one JSON log line per span |
+| `exercises/02-reliability` | Retry with backoff and jitter, a circuit breaker, and a fallback chain |
+| `exercises/03-cost-controls` | Token budgets, a model-tiering router, and a prompt cache |
+| `exercises/04-recipe-finder` | RAG + hybrid search + multimodal vision + allergen guardrails |
+| `exercises/05-movie-night` | RAG + text-to-SQL + reranking + chart data |
+| `exercises/06-travel-planner` | Agentic RAG + tool calling + structured itineraries |
+| `exercises/07-personal-assistant` | Chat + tools + MCP + RAG notes + calendar management |
 
 ---
 
@@ -413,21 +426,3 @@ Run tests per exercise — a bare `pytest module-08-structured-workflows/` canno
 | `exercises/13-local-training` | Fine-tune a small classifier on CPU |
 | `exercises/14-huggingface-run` | Run a Hub model with tokenizer + model, no `pipeline` |
 
----
-
-### Extras — Capstones
-
-**Talk about:**
-
-- Learners pick one full-stack app and build its FastAPI backend against a provided SvelteKit frontend
-- Each capstone combines Module 12 production patterns (tracing, retries, cost tracking) with Module 13 techniques
-- Module 11's eval harness can serve as each capstone's release check
-
-**Capstones (choose one; after Module 13):**
-
-| Folder | What you build |
-| ------ | -------------- |
-| `extras/01-recipe-finder` | RAG + hybrid search + multimodal vision + allergen guardrails |
-| `extras/02-movie-night` | RAG + text-to-SQL + reranking + chart data |
-| `extras/03-travel-planner` | Agentic RAG + tool calling + structured itineraries |
-| `extras/04-personal-assistant` | Chat + tools + MCP + RAG notes + calendar management |

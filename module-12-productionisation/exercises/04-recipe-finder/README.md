@@ -1,4 +1,4 @@
-# Capstone 1 — AI Recipe Finder
+# Exercise 04 — AI Recipe Finder
 
 Build a production-ready recipe search API that combines techniques from across the course into one FastAPI application.
 
@@ -19,7 +19,7 @@ Build a production-ready recipe search API that combines techniques from across 
 ## Project Structure
 
 ```
-01-recipe-finder/
+04-recipe-finder/
 ├── data/
 │   └── recipes.json          # Recipe dataset
 ├── starter/                   # Your working directory (has TODOs)
@@ -60,7 +60,7 @@ export OPENAI_API_KEY=your-key-here
 ### 3. Run the starter app
 
 ```bash
-cd extras/01-recipe-finder
+cd module-12-productionisation/exercises/04-recipe-finder
 
 # Option A (venv active):
 uvicorn starter.app:app --reload --port 8000

@@ -110,4 +110,4 @@ uv run --extra dev pytest module-11-evals/exercises/05-eval-compare/test_start.p
 
 - Make weights configurable so a medical domain can emphasise faithfulness.
 - Gate on a *delta* vs last week's scorecard, not only an absolute floor.
-- Plug this into a capstone (`extras/`) as a `/eval` endpoint that returns JSON.
+- Plug this into a Module 12 capstone (`exercises/04`–`07`) as a `/eval` endpoint that returns JSON.
