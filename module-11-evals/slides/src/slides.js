@@ -31,7 +31,7 @@ export const slides = [
           'Sample size: 1',
           'Model drift hides behind “it worked on stage”',
           'No number to compare chunk sizes',
-          'You find regressions when crew complain',
+          'You find issues when customers tell you about them',
         ],
       },
       right: {
@@ -65,7 +65,7 @@ export const slides = [
     type: 'title',
     content: {
       title: '1. Golden tests',
-      subtitle: 'Freeze the outcome, swap the build, catch the drift',
+      subtitle: 'Compare against known good results',
       icon: 'check-square',
     },
   },
@@ -74,27 +74,62 @@ export const slides = [
     content: {
       title: 'What is a golden test?',
       description:
-        'A **golden test** freezes the question and the outcome you accept, then re-runs it and compares. The golden file holds **only** the reference — what the agent does comes from the build under test. That separation is the point: a fixture that also scripts the agent just confirms the script matched itself and passes forever. Keep them apart and “we stopped calling `get_ship_status`” becomes a failing case.',
+        'A **golden test** compares the output of the agent against a known good result. When you make changes to your agent, you can get a numeric score that tells you if you are still good.',
       icon: 'check-square',
-      credit:
-        'Demo: two builds, one reference. Build A passes, build B drifted — the suite says where.',
     },
   },
   {
     type: 'code',
     content: {
       title: 'run_case → score_case',
-      code: `actual = run_case(client, question)  # what the build did
-score_case(actual, case)             # vs the frozen reference
+      code: `actual = run_case(client, question)      # what the build did
+score_case(actual, case, judge)          # vs the frozen reference
 
-# {"id": "warp-status", "passed": False, "mismatches": ["tools"]}
-#   expected  get_ship_status(system=warp)
-#   actual    (no tools called)`,
+# {"id": "warp-status", "score": 0.25, "passed": False,
+#  "criteria": {"tools": 0.00, "correctness": 0.25,
+#               "completeness": 0.00, "relevance": 0.75}}`,
       highlights: [
-        'Tool calls are structured — exact match, cheap, every commit.',
-        'Prose is not: “Voss is the captain” vs “the captain is Voss”.',
-        'So exact-match the tools and judge the answer (part 3).',
+        'Tool calls are structured, so they exact-match: 0 or 1.',
+        'LLM-as-judge scores the prose against the reference on criteria such as correctness, completeness, and relevance.',
+        'An aggregated score gives a hard numerical value — and the criteria say where it went wrong.',
       ],
+    },
+  },
+  {
+    type: 'equation',
+    content: {
+      title: 'Scoring the suite',
+      mathml: `<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mi>suite</mi>
+  <mo>=</mo>
+  <mfrac>
+    <mn>1</mn>
+    <mi>N</mi>
+  </mfrac>
+  <munderover>
+    <mo>&sum;</mo>
+    <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow>
+    <mi>N</mi>
+  </munderover>
+  <mfrac>
+    <mn>1</mn>
+    <mi>M</mi>
+  </mfrac>
+  <munderover>
+    <mo>&sum;</mo>
+    <mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow>
+    <mi>M</mi>
+  </munderover>
+  <msub><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub>
+  <mspace width="1.5em"/>
+  <msub><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub>
+  <mo>&isin;</mo>
+  <mo>[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>]</mo>
+</math>`,
+      description:
+        'Two means. The judge scores case i on criterion j — correctness, completeness, relevance — as a continuous value in [0, 1]. Average over the M criteria for a per-case score, then over the N cases for the suite. Because the score is continuous, a paraphrase scores near 1 instead of failing outright.',
+      credit:
+        'Equal weights give a plain mean; the part 5 scorecard replaces 1/M with weights that sum to 1. Tool calls stay the exact-match criterion — structured, so 0 or 1.',
     },
   },
 
@@ -102,19 +137,22 @@ score_case(actual, case)             # vs the frozen reference
   {
     type: 'title',
     content: {
-      title: '2. Retrieval metrics',
+      title: '2. RAG Retrieval metrics',
       subtitle: 'Did we fetch the right documents?',
       icon: 'search',
     },
   },
   {
-    type: 'description',
+    type: 'standard',
     content: {
-      title: 'What do recall, precision, and MRR measure?',
-      description:
-        'You need a **labelled set**: for each query, the document IDs that should come back. **Recall@k** is the fraction of those gold docs in the top k (did we miss evidence?). **Precision@k** is the fraction of the top k that are gold (how much junk hit the prompt?). **MRR** is 1/rank of the first relevant hit. Pure functions — no embeddings, no API.',
+      title: 'Recall, precision, and MRR',
       icon: 'search',
-      credit: 'Classic IR / TREC metrics. Label twenty queries well rather than two hundred guessed ones.',
+      points: [
+        'Start from a **labelled set**: for each query, the document IDs that should come back.',
+        '**Recall@k** is the fraction of gold docs in the top k. Did we miss evidence?',
+        '**Precision@k** is the fraction of the top k that are gold. How much junk hit the prompt?',
+        '**MRR** (mean reciprocal rank) is `1/rank` of the first relevant hit. How far down was the first good doc?',
+      ],
     },
   },
   {
@@ -280,22 +318,26 @@ gate(scorecard, {"avg_recall": 0.6, "overall": 0.55})
         {
           icon: 'zap',
           rule: 'Golden tests freeze the outcome',
-          example: 'The fixture does not script the agent. Exact-match the tool calls; judge the prose.',
+          example:
+            'The fixture does not script the agent. Exact-match the tool calls; judge the prose.',
         },
         {
           icon: 'search',
           rule: 'Retrieval has numbers',
-          example: 'recall@k, precision@k, and MRR, on a small set you labelled properly.',
+          example:
+            'recall@k, precision@k, and MRR, on a small set you labelled properly.',
         },
         {
           icon: 'scale',
           rule: 'Judge the answer, then check the claims',
-          example: 'Correctness, completeness, relevance — then faithfulness against the retrieved context.',
+          example:
+            'Correctness, completeness, relevance — then faithfulness against the retrieved context.',
         },
         {
           icon: 'award',
           rule: 'Compare on a delta, gate on a floor',
-          example: '“Did we get better?” is a different question from “is this shippable?”',
+          example:
+            '“Did we get better?” is a different question from “is this shippable?”',
         },
       ],
     },

@@ -7,6 +7,7 @@ Run:  python module-09-multi-agent/demo/demo.py
   Part 3: Two agents debate, a judge rules
   Part 4: Three specialists vote
   Part 5: Swarm handoffs
+  Part 6: Spawned subagents, in parallel, reconciled
 
 Requires: OPENAI_API_KEY environment variable.
 """
@@ -21,6 +22,7 @@ demo_critic = import_module("02_critic").demo_critic
 demo_debate = import_module("03_debate").demo_debate
 demo_consensus = import_module("04_consensus").demo_consensus
 demo_swarm = import_module("05_swarm").demo_swarm
+demo_subagents = import_module("06_subagents").demo_subagents
 
 DEMOS = {
     "1": ("Route one question", demo_route),
@@ -28,6 +30,7 @@ DEMOS = {
     "3": ("Debate", demo_debate),
     "4": ("Consensus", demo_consensus),
     "5": ("Swarm", demo_swarm),
+    "6": ("Spawned subagents", demo_subagents),
 }
 
 
@@ -69,6 +72,7 @@ def main():
     print("  3. Debate     — two sides, then a judge")
     print("  4. Consensus  — independent votes, then a tally")
     print("  5. Swarm      — agents hand off, each with scoped tools")
+    print("  6. Subagents  — spawned on demand, run at once, reports merged")
     print()
     print("=" * 60)
 

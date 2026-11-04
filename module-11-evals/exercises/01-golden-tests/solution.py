@@ -3,6 +3,9 @@ Exercise 01 — Golden Tests (Solution)
 
 One frozen reference, two builds of the agent. Build A matches the reference;
 build B has drifted and the suite says where.
+
+A case scores the mean of four criteria in [0, 1]: an exact match on the tool
+calls, plus correctness, completeness and relevance from a judge.
 """
 
 from __future__ import annotations
@@ -111,6 +114,10 @@ SYSTEM_PROMPT = (
     "You are the DSS Pathfinder ship AI. Use tools for crew and system queries. Be concise."
 )
 
+PASS_THRESHOLD = 0.8
+
+JUDGE_CRITERIA = ("correctness", "completeness", "relevance")
+
 
 def load_cases() -> list[dict]:
     return json.loads((DATA_DIR / "golden_cases.json").read_text())
@@ -118,6 +125,21 @@ def load_cases() -> list[dict]:
 
 def load_build(name: str) -> dict:
     return json.loads((DATA_DIR / "builds.json").read_text())[name]
+
+
+def make_canned_judge(build_name: str):
+    """A stand-in for the judge model so this runs with no API key."""
+    verdicts = json.loads((DATA_DIR / "judge_scores.json").read_text())[build_name]
+
+    def judge(case_id: str, question: str, answer: str | None, reference: str) -> dict:
+        return verdicts[case_id]
+
+    return judge
+
+
+def normalise(score: int) -> float:
+    """A 1-5 rubric score onto [0, 1], so every criterion shares one scale."""
+    return (score - 1) / 4
 
 
 def make_scripted_client(build: dict):
@@ -200,29 +222,38 @@ def run_case(client, case: dict, max_steps: int = 5) -> dict:
     return {"tools": tools_used, "answer": answer}
 
 
-def score_case(result: dict, case: dict) -> dict:
-    mismatches: list[str] = []
-    if result.get("tools") != case["expected_tools"]:
-        mismatches.append("tools")
-    if result.get("answer") != case["expected_answer"]:
-        mismatches.append("answer")
+def score_case(result: dict, case: dict, judge) -> dict:
+    verdict = judge(
+        case["id"],
+        case["question"],
+        result.get("answer"),
+        case["expected_answer"],
+    )
+    criteria = {
+        "tools": 1.0 if result.get("tools") == case["expected_tools"] else 0.0,
+        **{name: normalise(verdict[name]) for name in JUDGE_CRITERIA},
+    }
+    score = sum(criteria.values()) / len(criteria)
     return {
         "id": case["id"],
-        "passed": not mismatches,
-        "mismatches": mismatches,
+        "score": score,
+        "criteria": criteria,
+        "passed": score >= PASS_THRESHOLD,
+        "explanation": verdict["explanation"],
     }
 
 
-def run_suite(client, cases: list[dict]) -> dict:
+def run_suite(client, cases: list[dict], judge) -> dict:
     results = []
     for case in cases:
         actual = run_case(client, case)
-        results.append(score_case(actual, case))
+        results.append(score_case(actual, case, judge))
     n_pass = sum(1 for r in results if r["passed"])
     return {
         "total": len(results),
         "passed": n_pass,
         "failed": len(results) - n_pass,
+        "suite": sum(r["score"] for r in results) / len(results) if results else 0.0,
         "results": results,
     }
 
@@ -243,27 +274,31 @@ if __name__ == "__main__":
 
     for build_name, note in (("build-a", "shipped"), ("build-b", "prompt changed")):
         client = make_scripted_client(load_build(build_name))
+        judge = make_canned_judge(build_name)
         actuals = {case["id"]: run_case(client, case) for case in cases}
-        results = [score_case(actuals[case["id"]], case) for case in cases]
+        results = [score_case(actuals[case["id"]], case, judge) for case in cases]
         n_pass = sum(1 for r in results if r["passed"])
+        suite = sum(r["score"] for r in results) / len(results)
 
         print(f"  {build_name} ({note})")
         for result in results:
             case = by_id[result["id"]]
             actual = actuals[result["id"]]
+            criteria = result["criteria"]
             mark = "PASS" if result["passed"] else "FAIL"
-            detail = ",".join(result["mismatches"])
-            print(f"    [{mark}] {result['id']}" + (f"  ({detail})" if detail else ""))
-            if "tools" in result["mismatches"]:
+            print(f"    [{mark}] {result['id']:24} score={result['score']:.2f}")
+            print(
+                "           "
+                + "  ".join(f"{name}={criteria[name]:.2f}" for name in criteria)
+            )
+            print(f"           judge: {result['explanation']}")
+            if criteria["tools"] < 1.0:
                 print(f"           expected  {_format_tools(case['expected_tools'])}")
                 print(f"           actual    {_format_tools(actual['tools'])}")
-            if "answer" in result["mismatches"]:
-                print(f"           expected  {case['expected_answer']}")
-                print(f"           actual    {actual['answer']}")
-        print(f"    {n_pass}/{len(results)} passed\n")
+        print(f"    suite={suite:.2f}  {n_pass}/{len(results)} cases passed\n")
 
     print("  ship-status-warp is the regression golden tests exist for: build B")
     print("  stopped calling get_ship_status. Nothing in the golden file told it")
     print("  to call that tool — the build changed, and the suite noticed.\n")
-    print("  search-captain is a false alarm: the facts are right, the wording")
-    print("  moved. Exact match cannot tell those apart. That is exercise 03's job.")
+    print("  search-captain is the case a string comparison gets wrong: right")
+    print("  facts, reordered clause. The judge scores it 1.00 and it passes.")

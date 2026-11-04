@@ -30,6 +30,8 @@ export const slides = [
         '**Yes**: different expertise needed (finance vs legal vs technical).',
         '**Yes**: critic/reviewer improves quality of high-stakes answers.',
         '**Yes**: parallel research on independent sub-questions.',
+        '**Yes**: Context window management is needed.',
+        '**Yes**: reduce costs by giving simple tasks to smaller agents.',
         '**No**: single-domain Q&A where one prompt + tools suffices.',
         '**No**: latency-sensitive paths where an extra round-trip hurts.',
       ],
@@ -46,6 +48,9 @@ export const slides = [
         "**Critic**: reviews another agent's output for accuracy and gaps.",
         '**Supervisor**: orchestrates the team, merges results, decides when done.',
         '**Executor**: takes the final plan and runs it (deploy, notify, write).',
+        '**Planner**: writes the plan based on the query and the context.',
+        '**Conflict Resolver**: fixes conflicting results from the agents.',
+        '**Reporter**: reports the final answer to the human user.',
       ],
     },
   },
@@ -253,7 +258,6 @@ def route(query, client):
         '**Swarm**: the active agent decides — use a tool, answer, or **hand off**.',
         'Each agent gets a **scoped tool set** (principle of least privilege).',
         '**Handoff** is a tool: `transfer_to_engineering` passes full context.',
-        'More hops = more latency; cap with `max_hops` and log the chain.',
       ],
     },
   },
@@ -341,7 +345,8 @@ def route(query, client):
         },
         {
           rule: 'Roles stay narrow',
-          example: 'Router, specialist, critic, supervisor. Overlap means duplicate work.',
+          example:
+            'Router, specialist, critic, supervisor. Overlap means duplicate work.',
           icon: 'users',
         },
         {
@@ -351,7 +356,8 @@ def route(query, client):
         },
         {
           rule: 'Scope tools and log the trace',
-          example: 'The critic should not delete production data. Keep the whole conversation.',
+          example:
+            'The critic should not delete production data. Keep the whole conversation.',
           icon: 'lock',
         },
       ],

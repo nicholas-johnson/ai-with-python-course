@@ -10,22 +10,30 @@ This exercise ships two builds of the same agent so you can see the difference. 
 
 ```python
 client = make_scripted_client(load_build("build-b"))
-summary = run_suite(client, load_cases())
-# {"total": 4, "passed": 1, "failed": 3, "results": [...]}
+summary = run_suite(client, load_cases(), make_canned_judge("build-b"))
+# {"total": 4, "passed": 2, "failed": 2, "suite": 0.64, "results": [...]}
 ```
 
-Tool calls are structured, so they exact-match cleanly. Prose does not. "Commander Elara Voss is the captain." and "The captain is Commander Elara Voss." are the same answer, and a string comparison fails one of them. That is why the harness exact-matches the tools and leaves the prose to a judge — which you build in [exercise 03](../03-llm-judge/).
+Tool calls are structured, so they exact-match cleanly: 0 or 1. Prose does not. "Commander Elara Voss is the captain." and "The captain is Commander Elara Voss." are the same answer, and a string comparison fails one of them. So the harness exact-matches the tools and hands the prose to a **judge**, which scores correctness, completeness and relevance on a 1–5 rubric — the same judge you build in [exercise 03](../03-llm-judge/).
+
+That makes a case score continuous rather than pass/fail. Normalise each rubric score onto `[0, 1]`, average the four criteria for a per-case score, and average those for the suite:
+
+```
+suite = mean over cases of ( mean over criteria of s )
+```
+
+A case passes when its score reaches `PASS_THRESHOLD` (0.8). The judge verdicts are canned here, so the whole lab still runs with no API key.
 
 ### What the two builds do
 
-| Case | `build-a` | `build-b` |
-|---|---|---|
-| `crew-count-engineering` | Calls `get_crew_count(department=engineering)` | Reads the wrong department |
-| `ship-status-warp` | Calls `get_ship_status(system=warp)` | Skips the tool and answers from memory |
-| `search-captain` | Matches the reference wording | Right facts, different words |
-| `direct-answer` | Answers without a tool | Unchanged |
+| Case | `build-a` | `build-b` | `build-b` score |
+|---|---|---|---|
+| `crew-count-engineering` | Calls `get_crew_count(department=engineering)` | Reads the wrong department | 0.31 |
+| `ship-status-warp` | Calls `get_ship_status(system=warp)` | Skips the tool and answers from memory | 0.25 |
+| `search-captain` | Matches the reference wording | Right facts, different words | 1.00 |
+| `direct-answer` | Answers without a tool | Unchanged | 1.00 |
 
-Two of those are real regressions. One is a false alarm that exact matching cannot tell apart from a regression.
+Two of those are real regressions, and they score low enough to fail. `search-captain` is the one a string comparison gets wrong: the facts are right and only the clause order moved, so the judge gives it full marks and it passes.
 
 ### What a golden case looks like
 
@@ -44,13 +52,13 @@ No scripted responses, no recorded tool output. Just the question and what you a
 
 ## What you build
 
-Three functions in **`start.py`**. The ship tools, the handlers, `load_cases`, `load_build` and `make_scripted_client` are already written.
+Three functions in **`start.py`**. The ship tools, the handlers, `load_cases`, `load_build`, `make_scripted_client`, `make_canned_judge` and `normalise` are already written.
 
 | Function | What it does |
 |---|---|
 | `run_case(client, case)` | Agent loop: call the client, execute tools, collect `{tools, answer}` |
-| `score_case(result, case)` | Exact match on the tools list and the answer; list any mismatches |
-| `run_suite(client, cases)` | Run every case, count passed and failed |
+| `score_case(result, case, judge)` | Score four criteria in `[0, 1]` and average them |
+| `run_suite(client, cases, judge)` | Run every case, count passes, average the scores |
 
 `run_case` returns what the agent actually did:
 
@@ -61,13 +69,19 @@ Three functions in **`start.py`**. The ship tools, the handlers, `load_cases`, `
 }
 ```
 
-`score_case` compares that to the reference:
+`score_case` scores that against the reference:
 
 ```python
-{"id": "crew-count-engineering", "passed": True, "mismatches": []}
+{
+    "id": "crew-count-engineering",
+    "score": 0.31,
+    "criteria": {"tools": 0.0, "correctness": 0.0, "completeness": 0.25, "relevance": 1.0},
+    "passed": False,
+    "explanation": "Says 1 crew member; the reference says 2.",
+}
 ```
 
-`mismatches` is a list containing `"tools"`, `"answer"`, or both.
+The `criteria` dict is where the diagnosis lives. A score of 0.31 tells you the case failed; `tools: 0.0` tells you it called the wrong tool, and `correctness: 0.0` tells you the answer was wrong too.
 
 ## Step-by-step
 
@@ -84,11 +98,15 @@ This is the same tool-calling loop you wrote in Module 2, with one addition: rec
 
 ### 2. Implement `score_case`
 
-Compare `result["tools"]` to `case["expected_tools"]` with `!=`, which checks order and the argument dicts together. Compare `result["answer"]` to `case["expected_answer"]` the same way. Collect the name of each thing that differs, and set `passed` to `True` only when nothing did.
+Call `judge(case["id"], case["question"], result["answer"], case["expected_answer"])`. It returns 1–5 scores for `correctness`, `completeness` and `relevance`, plus an `explanation`.
+
+Then build the `criteria` dict. The `tools` criterion is `1.0` when `result["tools"] == case["expected_tools"]` and `0.0` otherwise — comparing the lists with `==` checks order and the argument dicts together, and tool calls are structured, so they either match or they do not. Each judge criterion is `normalise(verdict[name])`, which maps 1–5 onto `[0, 1]`.
+
+`score` is the mean of the criteria values, and `passed` is `score >= PASS_THRESHOLD`.
 
 ### 3. Implement `run_suite`
 
-Call `run_case` and then `score_case` for every case, then count the results. Return `total`, `passed`, `failed`, and the list of `results`.
+Call `run_case` and then `score_case` for every case, then aggregate. Return `total`, `passed`, `failed`, the mean of the per-case scores as `suite`, and the list of `results`. Guard the empty suite so it reports `0.0` instead of dividing by zero.
 
 ## Try it
 
@@ -103,7 +121,7 @@ cd module-11-evals/exercises/01-golden-tests
 uv run python start.py
 ```
 
-No API key needed. When your harness is working, `build-a` passes 4 of 4 and `build-b` passes 1 of 4.
+No API key needed. When your harness is working, `build-a` scores 1.00 and passes 4 of 4; `build-b` scores 0.64 and passes 2 of 4.
 
 ## Tests
 
@@ -122,37 +140,36 @@ The tests check:
 
 - `run_case` records tool names and parsed arguments, and returns the final answer
 - `run_case` handles a case that needs no tools at all
-- `score_case` reports `tools`, `answer`, or both as mismatches
-- `run_suite` counts passes and failures, including an empty suite
-- `build-a` passes every case and `build-b` does not
+- `normalise` maps the 1–5 rubric onto `[0, 1]`
+- `score_case` returns the mean of its four criteria, all within `[0, 1]`
+- A wrong tool call costs a whole criterion, and a paraphrased answer still passes
+- `run_suite` counts passes and averages the scores, including an empty suite
+- `build-a` scores 1.00 on every case and `build-b` scores lower
 - The golden file carries only the reference, never the agent's behaviour
 
 ## Running it against a real model
 
-Everything above works with a live client too. Swap `make_scripted_client` for `OpenAI()` and `run_case` now reports what the *model* did rather than what a recording says it did. Keep the exact match on tool calls, and hand the prose to the judge from [exercise 03](../03-llm-judge/) instead of comparing strings:
+Two things are simulated here: the build under test and the judge. Swap either for a real client and nothing about the harness changes.
+
+Pass `OpenAI()` instead of `make_scripted_client(...)` and `run_case` reports what the *model* did rather than what a recording says it did. Replace `make_canned_judge(...)` with a judge backed by `llm_judge` from [exercise 03](../03-llm-judge/), which has the same signature:
 
 ```python
 from openai import OpenAI
-from start import load_cases, run_case
+from start import load_cases, run_suite
 
 client = OpenAI()
 
-def golden_eval(case):
-    actual = run_case(client, case)                      # live tool calls + answer
-    tools_ok = actual["tools"] == case["expected_tools"]  # structured, so exact match
-    verdict = llm_judge(                                  # prose, so judge it
-        client,
-        question=case["question"],
-        answer=actual["answer"],
-        reference=case["expected_answer"],
-    )
-    return {"tools_ok": tools_ok, "judge": verdict}
+def live_judge(case_id, question, answer, reference):
+    return llm_judge(client, question=question, answer=answer, reference=reference)
+
+summary = run_suite(client, load_cases(), live_judge)
 ```
 
-Run the scripted suite on every commit, because it is free and fast. Run the live one on a schedule or behind a PR label, because it spends tokens.
+Run the scripted suite on every commit, because it is free and fast. Run the live one on a schedule or behind a PR label, because it spends tokens — one judge call per case on top of the agent itself.
 
 ## Stretch goals
 
-- Let the answer comparison ignore trailing whitespace and case.
+- Weight the criteria instead of averaging them equally: replace the `1/M` with weights that sum to 1, so a wrong tool call costs more than a terse answer. That is what the scorecard in [exercise 05](../05-eval-compare/) does.
 - Score tool *names* separately from their arguments, so a wrong department reads as a clearer failure than a missing call.
 - Add a golden case that expects two tool calls in one turn, and a build that only makes one.
+- Tune `PASS_THRESHOLD`. At what floor does `build-b`'s paraphrase case start failing, and is that the behaviour you want?

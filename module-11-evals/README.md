@@ -4,7 +4,7 @@
 
 ## Learning goals
 
-- Catch agent regressions with **golden tests**: a frozen reference, exact-match tool calls, and a judged answer.
+- Catch agent regressions with **golden tests**: a frozen reference, exact-match tool calls, and a judged answer averaged into one score.
 - Score retrieval with **recall@k**, **precision@k**, and **MRR** against a labelled query set.
 - Grade answers with an **LLM-as-judge** on correctness, completeness, and relevance.
 - Measure **faithfulness**: every claim in an answer must be grounded in retrieved context.
@@ -35,16 +35,26 @@ A **golden test** freezes a known-good outcome for a question — the tool calls
 That separation is the whole trick. If the fixture also scripts the agent's behaviour, the test just confirms the script matched itself and passes forever. Keep the reference and the behaviour apart and a real regression — "the agent stopped calling `get_ship_status`" — turns into a failing case.
 
 ```python
-actual = run_case(client, question)   # what the build actually did
-score = score_case(actual, case)      # vs the frozen reference
-# {"id": "warp-status", "passed": False, "mismatches": ["tools"]}
+actual = run_case(client, question)        # what the build actually did
+score = score_case(actual, case, judge)    # vs the frozen reference
+# {"id": "warp-status", "score": 0.25, "passed": False,
+#  "criteria": {"tools": 0.0, "correctness": 0.25,
+#               "completeness": 0.0, "relevance": 0.75}}
 #   expected  get_ship_status(system=warp)
 #   actual    (no tools called)
 ```
 
-Tool calls are structured, so they exact-match cleanly. Prose does not: "Commander Elara Voss is the captain." and "The captain is Commander Elara Voss." are the same answer and a string comparison fails one of them. Exact-match the tools, and send the answer to an **LLM-as-judge** (below) or a human.
+Tool calls are structured, so they exact-match cleanly: 0 or 1. Prose does not: "Commander Elara Voss is the captain." and "The captain is Commander Elara Voss." are the same answer and a string comparison fails one of them. So exact-match the tools, and send the answer to an **LLM-as-judge** (below) for correctness, completeness and relevance.
 
-The demo swaps in two simulated agent builds instead of calling the API, so it runs with no key: build A matches the reference, build B has had its prompt changed and drifts. Point the same loop at a real client and nothing about the test changes — only the cost. Run the structured checks often; spend tokens on the judged pass when prompts or retrieval change.
+That makes a case score continuous rather than pass/fail, and the suite a mean of means — average the criteria for a per-case score, average those for the suite:
+
+```
+suite = mean over cases of ( mean over criteria of s ),   s ∈ [0, 1]
+```
+
+Equal weights give a plain mean; the scorecard at the end of this module swaps the `1/M` for weights that sum to 1. A case passes when its score clears a threshold, so the floor is a knob rather than a string comparison.
+
+The demo simulates both the build under test and the judge, so it runs with no key: build A matches the reference and scores 1.00, build B has had its prompt changed and scores 0.52. Point the same loop at a real client and nothing about the test changes — only the cost. Run the structured checks often; spend tokens on the judged pass when prompts or retrieval change.
 
 ---
 
@@ -103,7 +113,7 @@ The capstones in `extras/` can reuse this as a release check, not a slide.
 
 ## Summary
 
-- **Golden tests freeze the outcome.** The fixture does not script the agent. Exact-match the tool calls; judge the prose. Cheap checks on every commit; judged passes when prompts or retrieval change.
+- **Golden tests freeze the outcome.** The fixture does not script the agent. Exact-match the tool calls; judge the prose. Average the criteria for a case score, average those for the suite, and pass on a threshold. Cheap checks on every commit; judged passes when prompts or retrieval change.
 - **Retrieval has numbers.** recall@k, precision@k, and MRR, on a small set you labelled properly.
 - **Judge the answer, then check the claims.** Correctness, completeness, and relevance — then faithfulness against the retrieved context. Read the mismatches, not only the average.
 - **Compare on a delta, gate on a floor.** “Did we get better?” is a different question from “is this shippable?”
@@ -123,7 +133,7 @@ uv run python module-11-evals/demo/demo.py
 
 Menu, no API key. `a` runs all five:
 
-1. **Golden tests** — two agent builds against one frozen reference; the drifted build fails
+1. **Golden tests** — two agent builds against one frozen reference; the drifted build scores 0.52 and fails
 2. **Retrieval metrics** — recall@k, precision@k, MRR on labelled ship-log queries
 3. **LLM-as-judge** — canned judge JSON, dataset summary
 4. **Faithfulness** — claims vs context, supported ratio
@@ -135,7 +145,7 @@ The exercises chain: each one adds a measurement the next one can consume.
 
 | Folder | Mission |
 | ------ | ------- |
-| [`exercises/01-golden-tests`](exercises/01-golden-tests/) | Agent-loop regression test with a mock LLM; wire `run_case` + the ex03 judge for a live golden eval |
+| [`exercises/01-golden-tests`](exercises/01-golden-tests/) | Agent-loop regression test with a mock LLM; exact-match tools, judge the prose, average into one score |
 | [`exercises/02-retrieval-metrics`](exercises/02-retrieval-metrics/) | recall@k, precision@k, MRR on labelled ship-log queries |
 | [`exercises/03-llm-judge`](exercises/03-llm-judge/) | LLM-as-judge: correctness, completeness, relevance |
 | [`exercises/04-faithfulness`](exercises/04-faithfulness/) | Claim extraction + support check + faithfulness ratio |

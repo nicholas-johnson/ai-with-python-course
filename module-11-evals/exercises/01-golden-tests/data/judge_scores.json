@@ -1,0 +1,54 @@
+{
+  "build-a": {
+    "crew-count-engineering": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Same count, same wording as the reference."
+    },
+    "ship-status-warp": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Status and efficiency both match."
+    },
+    "search-captain": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Names the captain, as the reference does."
+    },
+    "direct-answer": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Identifies the ship correctly."
+    }
+  },
+  "build-b": {
+    "crew-count-engineering": {
+      "correctness": 1,
+      "completeness": 2,
+      "relevance": 5,
+      "explanation": "Says 1 crew member; the reference says 2."
+    },
+    "ship-status-warp": {
+      "correctness": 2,
+      "completeness": 1,
+      "relevance": 4,
+      "explanation": "Hedges instead of reporting status and efficiency."
+    },
+    "search-captain": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Same captain, reordered clause."
+    },
+    "direct-answer": {
+      "correctness": 5,
+      "completeness": 5,
+      "relevance": 5,
+      "explanation": "Identifies the ship correctly."
+    }
+  }
+}

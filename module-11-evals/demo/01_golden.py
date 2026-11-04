@@ -5,8 +5,13 @@ agent actually does comes from the build under test, so the reference never
 tells the agent what to do. Build A matches the reference. Build B has had
 its prompt changed and drifts — and the suite catches it.
 
-In production the build under test is a real API call. Here it is simulated
-so the demo runs with no key; the structure of the test is the same.
+Scoring is a mean of criteria in [0, 1]. Tool calls are structured, so they
+exact-match: 0 or 1. Prose never matches exactly, so an LLM judge scores it on
+correctness, completeness, and relevance. Average the criteria for a per-case
+score, average those for the suite.
+
+Both the build under test and the judge are real API calls in production. Here
+both are simulated so the demo runs with no key; the test is the same shape.
 
 Run alone:  python module-11-evals/demo/01_golden.py
 """
@@ -117,6 +122,66 @@ BUILD_B = {
     ],
 }
 
+# ---------------------------------------------------------------------------
+# The judge. In production this is one llm_judge call per case, scoring 1-5 on
+# each criterion. Here the verdicts are canned so the demo needs no key.
+# ---------------------------------------------------------------------------
+
+JUDGE_VERDICTS = {
+    ("build-a", "crew-engineering"): {
+        "correctness": 5,
+        "completeness": 5,
+        "relevance": 5,
+        "explanation": "Same count, same wording as the reference.",
+    },
+    ("build-a", "warp-status"): {
+        "correctness": 5,
+        "completeness": 5,
+        "relevance": 5,
+        "explanation": "Status and efficiency both match.",
+    },
+    ("build-a", "who-is-captain"): {
+        "correctness": 5,
+        "completeness": 5,
+        "relevance": 5,
+        "explanation": "Names the captain, as the reference does.",
+    },
+    ("build-b", "crew-engineering"): {
+        "correctness": 1,
+        "completeness": 2,
+        "relevance": 5,
+        "explanation": "Says 1 crew member; the reference says 2.",
+    },
+    ("build-b", "warp-status"): {
+        "correctness": 2,
+        "completeness": 1,
+        "relevance": 4,
+        "explanation": "Hedges instead of reporting status and efficiency.",
+    },
+    ("build-b", "who-is-captain"): {
+        "correctness": 5,
+        "completeness": 5,
+        "relevance": 5,
+        "explanation": "Same captain, reordered clause.",
+    },
+}
+
+PASS_THRESHOLD = 0.8
+
+
+def _canned_judge(build_name):
+    """Stand in for the judge model: one verdict per case, scored 1-5."""
+
+    def judge(case_id, question, answer, reference):
+        return JUDGE_VERDICTS[(build_name, case_id)]
+
+    return judge
+
+
+def _normalise(score):
+    """A 1-5 rubric score onto [0, 1], so every criterion shares one scale."""
+    return (score - 1) / 4
+
 
 def _client_for(turns):
     """Stand in for the model: replay one build's behaviour for one question."""
@@ -166,13 +231,23 @@ def run_case(client, question, max_steps=5):
     return {"tools": tools, "answer": answer}
 
 
-def score_case(actual, case):
-    mismatches = []
-    if actual["tools"] != case["expected_tools"]:
-        mismatches.append("tools")
-    if actual["answer"] != case["expected_answer"]:
-        mismatches.append("answer")
-    return {"id": case["id"], "passed": not mismatches, "mismatches": mismatches}
+def score_case(actual, case, judge):
+    """One case, four criteria in [0, 1], and their mean."""
+    verdict = judge(case["id"], case["question"], actual["answer"], case["expected_answer"])
+    criteria = {
+        "tools": 1.0 if actual["tools"] == case["expected_tools"] else 0.0,
+        "correctness": _normalise(verdict["correctness"]),
+        "completeness": _normalise(verdict["completeness"]),
+        "relevance": _normalise(verdict["relevance"]),
+    }
+    score = sum(criteria.values()) / len(criteria)
+    return {
+        "id": case["id"],
+        "score": score,
+        "criteria": criteria,
+        "passed": score >= PASS_THRESHOLD,
+        "explanation": verdict["explanation"],
+    }
 
 
 def _fmt_tools(tools):
@@ -184,12 +259,14 @@ def _fmt_tools(tools):
     )
 
 
-def run_suite(build, cases):
+def run_suite(build, cases, judge):
+    """Score every case, then average the per-case scores for the suite."""
     rows = []
     for case in cases:
         actual = run_case(_client_for(build[case["question"]]), case["question"])
-        rows.append((case, actual, score_case(actual, case)))
-    return rows
+        rows.append((case, actual, score_case(actual, case, judge)))
+    suite = sum(score["score"] for _, _, score in rows) / len(rows)
+    return rows, suite
 
 
 def demo_golden():
@@ -199,30 +276,40 @@ def demo_golden():
     print()
     print("  The golden file holds the question and the outcome we accept.")
     print("  The build under test decides what actually happens.")
+    print(f"  Each case scores the mean of four criteria; {PASS_THRESHOLD:.2f} passes.")
     print()
 
-    for label, build in (("build-a (shipped)", BUILD_A), ("build-b (prompt changed)", BUILD_B)):
-        print(f"  {label}")
-        rows = run_suite(build, GOLDEN)
+    builds = (
+        ("build-a", "shipped", BUILD_A),
+        ("build-b", "prompt changed", BUILD_B),
+    )
+    for name, note, build in builds:
+        print(f"  {name} ({note})")
+        rows, suite = run_suite(build, GOLDEN, _canned_judge(name))
         for case, actual, score in rows:
             mark = "PASS" if score["passed"] else "FAIL"
-            detail = ",".join(score["mismatches"])
-            print(f"    [{mark}] {case['id']}" + (f"  ({detail})" if detail else ""))
-            if "tools" in score["mismatches"]:
+            criteria = score["criteria"]
+            print(f"    [{mark}] {case['id']:16} score={score['score']:.2f}")
+            print(
+                f"           tools={criteria['tools']:.2f}  "
+                f"correctness={criteria['correctness']:.2f}  "
+                f"completeness={criteria['completeness']:.2f}  "
+                f"relevance={criteria['relevance']:.2f}"
+            )
+            print(f"           judge: {score['explanation']}")
+            if criteria["tools"] < 1.0:
                 print(f"           expected  {_fmt_tools(case['expected_tools'])}")
                 print(f"           actual    {_fmt_tools(actual['tools'])}")
-            if "answer" in score["mismatches"]:
-                print(f"           expected  {case['expected_answer']}")
-                print(f"           actual    {actual['answer']}")
         passed = sum(1 for _, _, s in rows if s["passed"])
-        print(f"    {passed}/{len(rows)} passed\n")
+        print(f"    suite={suite:.2f}  {passed}/{len(rows)} cases passed\n")
 
     print("  warp-status is the regression golden tests exist for: build B")
     print("  stopped calling get_ship_status. Nothing in the golden file told")
     print("  it to call that tool — the build changed, and the suite noticed.")
     print()
-    print("  who-is-captain is a false alarm: the facts are right, the wording")
-    print("  moved. Exact match cannot tell those apart. That is part 3's job.")
+    print("  who-is-captain is the case a string comparison gets wrong: right")
+    print("  facts, reordered clause. The judge scores it 1.00 and it passes,")
+    print("  so the suite reports two regressions rather than three.")
     print()
 
 

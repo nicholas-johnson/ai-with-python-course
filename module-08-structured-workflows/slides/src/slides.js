@@ -74,22 +74,23 @@ export const slides = [
             'You must enumerate the branches',
           ],
         },
+
         {
-          heading: '3. Plan-and-execute',
-          points: [
-            '**Model decides once**, up front',
-            'Code executes the plan',
-            'The plan is data: show it, store it, resume it',
-            'A bad plan fails the whole run',
-          ],
-        },
-        {
-          heading: '4. ReAct',
+          heading: '3. ReAct',
           points: [
             '**Model decides every step**',
             'Adapts to whatever it finds',
             'Most expensive, slowest, hardest to test',
             'Can loop, wander, or never finish',
+          ],
+        },
+        {
+          heading: '4. Plan-and-execute',
+          points: [
+            '**Model decides once**, up front',
+            'Code executes the plan',
+            'The plan is data: show it, store it, resume it',
+            'A bad plan fails the whole run',
           ],
         },
       ],
@@ -128,6 +129,19 @@ summarise(findings)
 # decisions:   1`,
         },
         {
+          label: 'ReAct',
+          code: `# model decides
+# every turn
+while not done:
+    s = decide(msgs)
+    if s.final:
+        break
+    obs = run(s)
+    msgs += obs
+
+# decisions:   N`,
+        },
+        {
           label: 'Plan-and-execute',
           code: `# model wrote
 # the order, once
@@ -140,19 +154,6 @@ summarise(results)
 
 # model calls: 2+
 # decisions:   1`,
-        },
-        {
-          label: 'ReAct',
-          code: `# model decides
-# every turn
-while not done:
-    s = decide(msgs)
-    if s.final:
-        break
-    obs = run(s)
-    msgs += obs
-
-# decisions:   N`,
         },
       ],
     },
