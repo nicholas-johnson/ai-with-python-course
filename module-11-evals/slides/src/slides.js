@@ -127,7 +127,14 @@ score_case(actual, case, judge)          # vs the frozen reference
   <mo>[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>]</mo>
 </math>`,
       description:
-        'Two means. The judge scores case i on criterion j — correctness, completeness, relevance — as a continuous value in [0, 1]. Average over the M criteria for a per-case score, then over the N cases for the suite. Because the score is continuous, a paraphrase scores near 1 instead of failing outright.',
+        'Two means. Average the criteria for one case, then average the cases for the suite. A continuous score lets a paraphrase land near 1.',
+      points: [
+        '**suite** — the score for the whole golden set.',
+        '**N** — how many cases. **i** is one of them.',
+        '**M** — how many criteria on a case. **j** is one of them: tools, correctness, completeness, relevance.',
+        '**s_ij** — case i’s score on criterion j.',
+        '**[0, 1]** — 0 is a miss, 1 is perfect, and a value in between is partial credit.',
+      ],
       credit:
         'Equal weights give a plain mean; the part 5 scorecard replaces 1/M with weights that sum to 1. Tool calls stay the exact-match criterion — structured, so 0 or 1.',
     },
@@ -176,6 +183,12 @@ score_case(actual, case, judge)          # vs the frozen reference
 </math>`,
       description:
         'Precision divides by k even if fewer than k docs were returned. MRR = 1 / rank of the first relevant document (0 if none).',
+      points: [
+        '**@** — say "at". Recall@k is recall at k.',
+        '**∩** — the intersection: documents in both sets. Say "intersect" or "cap".',
+        '**| |** — the size of the set: how many documents are inside.',
+        '**top@k** — the first k results. **relevant** — the gold set for that query.',
+      ],
     },
   },
   {
