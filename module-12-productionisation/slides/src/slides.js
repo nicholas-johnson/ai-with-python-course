@@ -16,7 +16,7 @@ export const slides = [
         'Implement **structured tracing** with trace IDs and spans for every request.',
         'Apply **reliability patterns**: retries with backoff, timeouts, circuit breakers, fallbacks.',
         'Enforce **cost controls**: token budgets, model tiering, caching.',
-        'Deploy with **environment config**, secrets management, containers, and health checks.',
+        'Deploy with **environment config**, secrets, containers, and health checks — including a **Google Cloud** path.',
       ],
     },
   },
@@ -266,59 +266,59 @@ export const slides = [
 
   // --- Deployment ---
 
-  {
-    type: 'title',
-    content: {
-      title: 'Deployment',
-      subtitle: 'Config, secrets, containers, health checks',
-      icon: 'server',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Deployment essentials',
-      icon: 'server',
-      points: [
-        '**Environment config** — `python-dotenv` for dev, real env vars in production. Never hard-code.',
-        '**Secrets** — API keys in `.env` (gitignored), secrets manager in production.',
-        '**Containers** — Dockerfile packages the app with its dependencies for consistent deployment.',
-        '**Health checks** — `/health` endpoint returns 200 when the service is ready. Check dependencies.',
-        'Provider-specific mappings: **AWS / Azure / GCP** sections below.',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Dockerfile for an AI API',
-      code: `FROM python:3.12-slim
-WORKDIR /app
+  //   {
+  //     type: 'title',
+  //     content: {
+  //       title: 'Deployment',
+  //       subtitle: 'Config, secrets, containers, health checks',
+  //       icon: 'server',
+  //     },
+  //   },
+  //   {
+  //     type: 'standard',
+  //     content: {
+  //       title: 'Deployment essentials',
+  //       icon: 'server',
+  //       points: [
+  //         '**Environment config** — `python-dotenv` for dev, real env vars in production. Never hard-code.',
+  //         '**Secrets** — API keys in `.env` (gitignored), secrets manager in production.',
+  //         '**Containers** — Dockerfile packages the app with its dependencies for consistent deployment.',
+  //         '**Health checks** — `/health` endpoint returns 200 when the service is ready. Check dependencies.',
+  //         'Provider-specific mappings: **AWS / Azure / GCP** sections below.',
+  //       ],
+  //     },
+  //   },
+  //   {
+  //     type: 'code',
+  //     content: {
+  //       title: 'Dockerfile for an AI API',
+  //       code: `FROM python:3.12-slim
+  // WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+  // COPY requirements.txt .
+  // RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-EXPOSE 8000
+  // COPY . .
+  // EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s \\
-    CMD python -c "import httpx; httpx.get('http://localhost:8000/api/health').raise_for_status()"
+  // HEALTHCHECK --interval=30s --timeout=5s \\
+  //     CMD python -c "import httpx; httpx.get('http://localhost:8000/api/health').raise_for_status()"
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]`,
-      highlights: [
-        '**HEALTHCHECK** — orchestrators use this to route traffic only to healthy instances.',
-        '**Slim base image** — smaller attack surface, faster builds.',
-        'Copy requirements first — Docker caches the layer, rebuilds only when deps change.',
-      ],
-    },
-  },
+  // CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]`,
+  //       highlights: [
+  //         '**HEALTHCHECK** — orchestrators use this to route traffic only to healthy instances.',
+  //         '**Slim base image** — smaller attack surface, faster builds.',
+  //         'Copy requirements first — Docker caches the layer, rebuilds only when deps change.',
+  //       ],
+  //     },
+  //   },
 
   // --- Cloud production ---
 
   {
     type: 'title',
     content: {
-      title: 'Section — Cloud production',
+      title: 'Cloud production',
       subtitle: 'Map patterns to your provider',
       icon: 'globe',
     },
@@ -329,34 +329,40 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]`,
       title: 'Production patterns at a glance',
       left: {
         label: 'AWS',
-        code: `Run API: App Runner, ECS Fargate
-Secrets: Secrets Manager, SSM
-Logs/trace: CloudWatch, X-Ray, ADOT
-Managed LLM: Amazon Bedrock
-Cost: AWS Budgets, quotas`,
+        items: [
+          '**Run API** — App Runner, ECS Fargate',
+          '**Secrets** — Secrets Manager, SSM',
+          '**Logs / trace** — CloudWatch, X-Ray',
+          '**Managed LLM** — Amazon Bedrock',
+          '**Cost** — AWS Budgets, quotas',
+        ],
       },
       middle: {
         label: 'Azure',
-        code: `Run API: Container Apps, App Service
-Secrets: Key Vault
-Logs/trace: App Insights, Monitor
-Managed LLM: Azure OpenAI
-Cost: Cost Management, AOAI quotas`,
+        items: [
+          '**Run API** — Container Apps, App Service',
+          '**Secrets** — Key Vault',
+          '**Logs / trace** — App Insights, Monitor',
+          '**Managed LLM** — Azure OpenAI',
+          '**Cost** — Cost Management, AOAI quotas',
+        ],
       },
       right: {
         label: 'GCP',
-        code: `Run API: Cloud Run, GKE
-Secrets: Secret Manager
-Logs/trace: Cloud Logging, Trace
-Managed LLM: Vertex AI
-Cost: Billing budgets, quotas`,
+        items: [
+          '**Run API** — Cloud Run, GKE',
+          '**Secrets** — Secret Manager',
+          '**Logs / trace** — Cloud Logging, Trace',
+          '**Managed LLM** — Vertex AI',
+          '**Cost** — Billing budgets, quotas',
+        ],
       },
     },
   },
   {
     type: 'title',
     content: {
-      title: 'Section — AWS',
+      title: 'AWS',
       subtitle: 'Enterprise AI on the most common cloud',
       icon: 'server',
     },
@@ -387,7 +393,7 @@ Cost: Billing budgets, quotas`,
   {
     type: 'title',
     content: {
-      title: 'Section — Azure',
+      title: 'Azure',
       subtitle: 'Microsoft cloud + Azure OpenAI',
       icon: 'globe',
     },
@@ -418,31 +424,142 @@ Cost: Billing budgets, quotas`,
   {
     type: 'title',
     content: {
-      title: 'Section — GCP',
-      subtitle: 'Cloud Run + Vertex AI',
-      icon: 'database',
+      title: 'Deploying to Google Cloud',
+      subtitle: 'Hosting, data, security, and the model in one project',
+      icon: 'globe',
     },
   },
   {
     type: 'description',
     content: {
-      title: 'When teams choose GCP',
+      title: 'When teams choose Google Cloud',
       description:
-        '**GCP** is strong for container-native AI APIs: **Cloud Run** runs a single Docker image with minimal ops, and **Vertex AI** hosts Gemini and other models in-region. Teams on Google Cloud map `TraceContext` JSON to **Cloud Logging**, store secrets in **Secret Manager**, and use **Cloud Trace** for latency breakdowns. The module's Dockerfile maps cleanly to Cloud Run — one service, env-based config, `/health` for readiness probes.',
-      icon: 'database',
+        '**Google Cloud** fits a container-native API: **Cloud Run** runs one Docker image, and **Vertex AI** hosts Gemini and other models in-region. The patterns from this module stay the same. `TraceContext` JSON goes to **Cloud Logging**, keys live in **Secret Manager**, and latency goes to **Cloud Trace**. The Dockerfile from the deployment section maps onto Cloud Run: one service, env config, and `/health` for the probe.',
+      icon: 'globe',
+    },
+  },
+  {
+    type: 'cards',
+    content: {
+      title: 'What is available',
+      cards: [
+        {
+          heading: 'Hosting',
+          points: [
+            'Cloud Run — the API container',
+            'Cloud Run functions — small jobs',
+            'GKE — more than one service',
+            'Compute Engine — only for a VM',
+          ],
+        },
+        {
+          heading: 'Databases',
+          points: [
+            'Cloud SQL, AlloyDB — Postgres',
+            'Firestore — documents',
+            'Memorystore — Redis',
+            'Cloud Storage — files, not rows',
+          ],
+        },
+        {
+          heading: 'AI',
+          points: [
+            'Vertex AI — Gemini, Model Garden',
+            'Vector Search — RAG embeddings',
+            'Endpoints — a model you trained',
+            'Quotas on this project',
+          ],
+        },
+        {
+          heading: 'Security and ops',
+          points: [
+            'IAM and service accounts',
+            'Secret Manager',
+            'Artifact Registry',
+            'Logging, Trace, Cloud Armor',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Where to host the API',
+      left: {
+        label: 'Cloud Run',
+        items: [
+          'One container, scales to zero, billed per request',
+          'HTTPS URL without a cluster to operate',
+          'Best fit for this module FastAPI image',
+          'Limits: request timeout, concurrency, no sidecars',
+        ],
+      },
+      right: {
+        label: 'GKE',
+        items: [
+          'Many services, GPUs, custom networking, sidecars',
+          'You run node pools, upgrades, and manifests',
+          'Choose it when a Cloud Run limit actually binds',
+          'Same image and the same `/health` endpoint',
+        ],
+      },
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Deploy the image to Cloud Run',
+      code: `gcloud run deploy pathfinder-api \\
+  --image REGION-docker.pkg.dev/PROJECT/apps/pathfinder-api:latest \\
+  --region REGION \\
+  --port 8000 \\
+  --service-account pathfinder-api@PROJECT.iam.gserviceaccount.com \\
+  --set-secrets OPENAI_API_KEY=openai-api-key:latest \\
+  --no-allow-unauthenticated`,
+      highlights: [
+        'Build the image once and push it to **Artifact Registry**.',
+        '`--set-secrets` mounts **Secret Manager** at startup. The key is not in the image.',
+        '`--no-allow-unauthenticated` requires `roles/run.invoker`. Open the service only for a public demo.',
+      ],
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'GCP service mapping',
+      title: 'Databases',
       icon: 'database',
       points: [
-        '**Run container** — Cloud Run (best fit for one FastAPI container) or GKE for larger fleets.',
-        '**Secrets** — Secret Manager mounted as env vars or volumes at deploy time.',
-        '**Tracing** — Cloud Logging + Cloud Trace; OpenTelemetry export supported.',
-        '**Managed LLM** — Vertex AI (Gemini, Model Garden) when data residency requires Google-hosted models.',
-        '**Cost** — Billing budgets and quotas; pair with app-level `CostTracker` for per-session caps.',
+        '**Cloud SQL** (Postgres) — users, eval runs, anything with joins. Private IP only.',
+        '**Firestore** — document state such as session checkpoints and flags, when you do not need SQL.',
+        '**Memorystore** — shared Redis for the response cache and rate limits across instances.',
+        '**Vertex AI Vector Search** plus **Cloud Storage** — embeddings and the source files. A local Chroma disk does not survive a new instance.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Security',
+      icon: 'shield',
+      points: [
+        'One **service account** per service. Grant the roles it needs. Do not download a JSON key.',
+        '**Secret Manager** holds API keys and `DATABASE_URL`. Inject them with `--set-secrets`.',
+        '**Artifact Registry** stores the image and can scan it on push. The build never sees the secrets.',
+        '**Cloud SQL**, **Memorystore**, and Vector Search stay on private IP. Cloud Run reaches them with **Direct VPC egress**. Add **Cloud Armor** if the API is on the public internet.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Logs, traces, and cost',
+      icon: 'search',
+      points: [
+        'Write JSON to stdout. **Cloud Logging** collects it. No agent in the image.',
+        'Every line carries `trace_id` from `TraceContext`, so Logs Explorer can isolate one request.',
+        '**Cloud Trace** shows latency across retrieve, model, and guardrail. Export OpenTelemetry if the spans already exist.',
+        '**Billing budgets** and Vertex quotas sit beside `CostTracker`. The app cap and the project cap are different limits.',
       ],
     },
   },
@@ -461,17 +578,20 @@ Cost: Billing budgets, quotas`,
         },
         {
           rule: 'Retry with backoff, then fall back',
-          example: 'Jitter stops a thundering herd. A cheaper model or a cache is still an answer.',
+          example:
+            'Jitter stops a thundering herd. A cheaper model or a cache is still an answer.',
           icon: 'refresh-cw',
         },
         {
           rule: 'Budget tokens before you spend them',
-          example: 'Track per-session and per-day. Check the cap before the call, not after the bill.',
+          example:
+            'Track per-session and per-day. Check the cap before the call, not after the bill.',
           icon: 'list',
         },
         {
           rule: 'Config and secrets stay out of the code',
-          example: 'Environment variables or a secrets manager. A health check for the container.',
+          example:
+            'Environment variables or a secrets manager. A health check for the container.',
           icon: 'shield',
         },
       ],

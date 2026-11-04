@@ -1,3 +1,5 @@
+import { InlineMarkdown } from "./InlineMarkdown";
+
 const THREE_COLORS = ["text-cyan-300", "text-purple-300", "text-green-300"];
 const FOUR_COLORS = ["text-cyan-300", "text-amber-300", "text-purple-300", "text-green-300"];
 
@@ -27,9 +29,25 @@ export function ThreeWayComparison({ content }) {
                 panels.length > 3 ? "p-4" : "p-6"
               }`}
             >
-              <pre className="text-sm text-slate-300 overflow-auto">
-                <code>{panel.code}</code>
-              </pre>
+              {panel.items ? (
+                <ul className="space-y-3">
+                  {panel.items.map((item, itemIndex) => (
+                    <li
+                      key={itemIndex}
+                      className="text-base text-gray-300 flex items-start gap-2"
+                    >
+                      <span className="text-secondary font-bold">→</span>
+                      <span>
+                        <InlineMarkdown text={item} />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <pre className="text-sm text-slate-300 overflow-auto">
+                  <code>{panel.code}</code>
+                </pre>
+              )}
             </div>
           </div>
         ))}
