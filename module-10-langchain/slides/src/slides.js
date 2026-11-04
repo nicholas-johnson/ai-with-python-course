@@ -47,34 +47,6 @@ export const slides = [
     },
   },
 
-  {
-    type: 'standard',
-    content: {
-      title: 'The broader ecosystem',
-      icon: 'globe',
-      points: [
-        '**LangGraph** — stateful, graph-based multi-agent workflows (cycles, branching, human-in-the-loop).',
-        '**LangSmith** — tracing and observability for debugging chains in production.',
-        '**LangChain 1.x agents** run on LangGraph — `create_agent` plus middleware.',
-        'We focus on core LangChain in this module — the rest builds on top.',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'How does the pipe (|) work?',
-      icon: 'plug',
-      points: [
-        'The `|` **looks** like a Unix pipe — it is **real Python**. LangChain defines what `|` means for its own objects.',
-        'Every chain step (prompt, model, parser) is a **Runnable**: anything with `.invoke()`, `.stream()`, and `.batch()`.',
-        '`prompt | model | parser` uses **operator overloading** — Python calls `__or__` and builds a **RunnableSequence** (a recipe, not a result).',
-        'Nothing runs until you call **`.invoke()`** — then output flows left to right, same as three manual `.invoke()` calls in Demo 1.',
-        'You can only pipe **LangChain Runnables** — plain strings or unrelated types will not work.',
-      ],
-    },
-  },
-
   // ---- Section: LCEL chains ----
   {
     type: 'standard',
@@ -86,7 +58,18 @@ export const slides = [
         '**ChatModel**: LLM wrapper (OpenAI, Anthropic, local models).',
         '**Structured output**: `model.with_structured_output(PydanticModel)` returns typed objects.',
         '**OutputParser**: turn raw text into a string or parsed JSON.',
-        '**Chain (LCEL)**: compose steps with the `|` pipe operator.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Pipes',
+      icon: 'box',
+      points: [
+        'The pipe operator (|) chains steps: prompt → model → parser',
+        'Each step is independently testable and swappable',
+        'LCEL (LangChain Expression Language) chains are the core of LangChain',
       ],
     },
   },
@@ -122,7 +105,7 @@ result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
   {
     type: 'code',
     content: {
-      title: 'Structured output — a schema, not a sentence',
+      title: 'Structured output',
       code: `from typing import Literal
 from pydantic import BaseModel, Field
 
@@ -137,10 +120,19 @@ chain = prompt | model.with_structured_output(Classification)
 result = chain.invoke({"report": "Plasma conduit 7-B ruptured"})
 # Classification(category='engineering', summary='...', priority='critical')
 result.priority  # 'critical' — typed attribute access`,
-      highlights: [
-        'No "respond with ONLY JSON" — the provider is constrained to the schema',
-        'Literal fields mean an unknown category can\'t come back',
-        'JsonOutputParser still wins for streaming partial results',
+      highlights: ['The provider is constrained to the schema'],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'How does the pipe (|) work?',
+      icon: 'plug',
+      points: [
+        'The `|` **looks** like a Unix pipe.',
+        'LangChain uses operator overloading to define what `|` means for its own objects.',
+        'Every chain step (prompt, model, parser) is a **Runnable**: anything with `.invoke()`, `.stream()`, and `.batch()`.',
+        'Nothing runs until you call **`.invoke()`** — ',
       ],
     },
   },
@@ -166,7 +158,7 @@ result.priority  # 'critical' — typed attribute access`,
   {
     type: 'standard',
     content: {
-      title: 'From @tool to create_agent',
+      title: 'Giving tools to the agent',
       icon: 'wrench',
       points: [
         'The **@tool** decorator generates JSON Schema from type hints + docstring.',
@@ -207,28 +199,41 @@ print(result["messages"][-1].text)`,
       ],
     },
   },
+  // {
+  //   type: 'comparison',
+  //   content: {
+  //     title: 'Hand-rolled vs LangChain',
+  //     left: {
+  //       label: 'Hand-rolled (Module 2)',
+  //       items: [
+  //         'Full control over the loop',
+  //         'No framework dependency',
+  //         'You write retry / parse / routing',
+  //         'Easier to debug',
+  //       ],
+  //     },
+  //     right: {
+  //       label: 'LangChain',
+  //       items: [
+  //         'Composable building blocks',
+  //         'Batteries included (tools, memory, RAG)',
+  //         'Faster to prototype standard patterns',
+  //         'Abstraction hides details',
+  //       ],
+  //     },
+  //   },
+  // },
   {
-    type: 'comparison',
+    type: 'standard',
     content: {
-      title: 'Hand-rolled vs LangChain',
-      left: {
-        label: 'Hand-rolled (Module 2)',
-        items: [
-          'Full control over the loop',
-          'No framework dependency',
-          'You write retry / parse / routing',
-          'Easier to debug',
-        ],
-      },
-      right: {
-        label: 'LangChain',
-        items: [
-          'Composable building blocks',
-          'Batteries included (tools, memory, RAG)',
-          'Faster to prototype standard patterns',
-          'Abstraction hides details',
-        ],
-      },
+      title: 'Middleware and memory',
+      icon: 'shield',
+      points: [
+        '**Middleware** hooks into the agent loop: before or after the model, or around each tool call.',
+        'Use it for logging, call limits, human approval, PII redaction, and retries.',
+        '**Memory** is a checkpointer: the agent saves its state after every step.',
+        'Calls that share a **thread_id** continue the same conversation. A different id starts fresh.',
+      ],
     },
   },
   {
@@ -328,7 +333,7 @@ result["answer"], result["docs"]`,
       title: 'Agentic RAG — retrieval as a tool',
       icon: 'bot',
       points: [
-        'A chain **always** retrieves once, with the user\'s exact words.',
+        "A chain **always** retrieves once, with the user's exact words.",
         'Wrap the retriever in a `@tool` (`search_logs`) and give it to `create_agent`.',
         'The agent decides **whether** to search, **what** to search for, and whether to search again.',
         'It can combine logs with live tools — at the cost of more model calls.',
@@ -410,8 +415,21 @@ async def classify_invoke(req: InvokeRequest):
     type: 'title',
     content: {
       title: 'Demo — Serving chains',
-      subtitle: 'Switch to terminal: python module-10-langchain/demo/04_serving_chains.py',
+      subtitle:
+        'Switch to terminal: python module-10-langchain/demo/04_serving_chains.py',
       icon: 'rocket',
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'The broader ecosystem',
+      icon: 'globe',
+      points: [
+        '**LangGraph** — stateful, graph-based multi-agent workflows (cycles, branching, human-in-the-loop).',
+        '**LangSmith** — tracing and observability for debugging chains in production.',
+      ],
     },
   },
 
@@ -449,17 +467,20 @@ async def classify_invoke(req: InvokeRequest):
         },
         {
           rule: 'Agents and RAG are the same patterns',
-          example: 'create_agent runs the tool loop. A retriever is the RAG chain, or a tool the agent calls.',
+          example:
+            'create_agent runs the tool loop. A retriever is the RAG chain, or a tool the agent calls.',
           icon: 'layers',
         },
         {
           rule: 'Know the pattern, then pick the tool',
-          example: 'LangChain is faster for chains, tool agents, and RAG — if you know what it does underneath.',
+          example:
+            'LangChain is faster for chains, tool agents, and RAG — if you know what it does underneath.',
           icon: 'scale',
         },
         {
           rule: 'Read the trace, and leave when it fights you',
-          example: 'result["messages"] shows every call. If the framework gets in the way, go back to plain Python.',
+          example:
+            'result["messages"] shows every call. If the framework gets in the way, go back to plain Python.',
           icon: 'check-square',
         },
       ],
