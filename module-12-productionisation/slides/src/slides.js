@@ -459,10 +459,10 @@ export const slides = [
       title: 'Google Cloud: AI friendly Databases',
       icon: 'database',
       points: [
-        '**Vertex AI Vector Search** — a RAG index you own. A local Chroma directory does not survive a new Cloud Run instance.',
-        '**Cloud Storage** — source documents, prompt files, and golden eval sets the index was built from.',
-        '**Memorystore** — a shared cache of embeddings and model answers, so a repeated query does not call the model again.',
-        '**Firestore** — conversation memory and agent checkpoints. **Cloud SQL** with **pgvector** when those records must join to eval rows.',
+        "**Vertex AI Vector Search** — Google's managed service for indexing and searching vectors.",
+        "**Cloud Storage** — Google's object storage service—broadly equivalent to Amazon S3.",
+        '**Memorystore** — In memory Redis-like key-value store.',
+        '**Firestore** — a NoSQL document database, storing data in collections and documents, with real-time updates and offline support.',
       ],
     },
   },
@@ -472,10 +472,9 @@ export const slides = [
       title: 'Google Cloud: Vector stores',
       icon: 'database',
       points: [
-        '**RAG Engine, managed** — the default. Google stores the embeddings with the corpus. You do not create an index.',
-        '**Vertex AI Vector Search** — an index you own. Use it for scale, metadata filters, or hybrid keyword and vector search. This is the replacement for Chroma on the container.',
-        '**pgvector on Cloud SQL or AlloyDB** — the embedding sits on the same row as the citation and any SQL filter. Choose it when retrieval is vectors plus a WHERE clause.',
-        '**An index you already run** — RAG Engine can query Pinecone or Weaviate. **Vertex AI Search** is the other end: you upload documents and never handle the vectors.',
+        '**RAG Engine** — Managed RAG service, an use Vertex under the hood.',
+        "**Vertex AI Vector Search** — Google's managed service for indexing and searching vectors.",
+        '**pgvector on Cloud SQL or AlloyDB** — adds vector search to PostgreSQL',
       ],
     },
   },
@@ -497,10 +496,9 @@ export const slides = [
       title: 'Google Cloud: Security',
       icon: 'shield',
       points: [
-        'One **service account** per service. Grant the roles it needs. Do not download a JSON key.',
         '**Secret Manager** holds API keys and `DATABASE_URL`. Inject them with `--set-secrets`.',
         '**Artifact Registry** stores the image and can scan it on push. The build never sees the secrets.',
-        '**Cloud SQL**, **Memorystore**, and Vector Search stay on private IP. Cloud Run reaches them with **Direct VPC egress**. Add **Cloud Armor** if the API is on the public internet.',
+        `**Cloud Armor** provides DDOS protection, like Cloudflare's WAF.`,
       ],
     },
   },
@@ -510,44 +508,9 @@ export const slides = [
       title: 'Google Cloud: Logs, traces, and cost',
       icon: 'search',
       points: [
-        'Write JSON to stdout. **Cloud Logging** collects it. No agent in the image.',
-        'Every line carries `trace_id` from `TraceContext`, so Logs Explorer can isolate one request.',
+        '**Cloud Logging**. Write JSON to stdout. Cloud Logging collects it.',
         '**Cloud Trace** shows latency across retrieve, model, and guardrail. Export OpenTelemetry if the spans already exist.',
         '**Billing budgets** and Vertex quotas sit beside `CostTracker`. The app cap and the project cap are different limits.',
-      ],
-    },
-  },
-
-  // --- Summary ---
-
-  {
-    type: 'rules',
-    content: {
-      title: 'Summary',
-      rules: [
-        {
-          rule: 'Trace every request',
-          example: 'A trace ID is cheap. Debugging without one is expensive.',
-          icon: 'search',
-        },
-        {
-          rule: 'Retry with backoff, then fall back',
-          example:
-            'Jitter stops a thundering herd. A cheaper model or a cache is still an answer.',
-          icon: 'refresh-cw',
-        },
-        {
-          rule: 'Budget tokens before you spend them',
-          example:
-            'Track per-session and per-day. Check the cap before the call, not after the bill.',
-          icon: 'list',
-        },
-        {
-          rule: 'Config and secrets stay out of the code',
-          example:
-            'Environment variables or a secrets manager. A health check for the container.',
-          icon: 'shield',
-        },
       ],
     },
   },
