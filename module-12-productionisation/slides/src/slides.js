@@ -330,7 +330,7 @@ export const slides = [
       left: {
         label: 'AWS',
         items: [
-          '**Run API** — App Runner, ECS Fargate',
+          '**API** — App Runner, ECS Fargate',
           '**Secrets** — Secrets Manager, SSM',
           '**Logs / trace** — CloudWatch, X-Ray',
           '**Managed LLM** — Amazon Bedrock',
@@ -340,7 +340,7 @@ export const slides = [
       middle: {
         label: 'Azure',
         items: [
-          '**Run API** — Container Apps, App Service',
+          '**API** — Container Apps, App Service',
           '**Secrets** — Key Vault',
           '**Logs / trace** — App Insights, Monitor',
           '**Managed LLM** — Azure OpenAI',
@@ -350,7 +350,7 @@ export const slides = [
       right: {
         label: 'GCP',
         items: [
-          '**Run API** — Cloud Run, GKE',
+          '**API** — Cloud Run, GKE',
           '**Secrets** — Secret Manager',
           '**Logs / trace** — Cloud Logging, Trace',
           '**Managed LLM** — Vertex AI',
@@ -438,109 +438,106 @@ export const slides = [
       icon: 'globe',
     },
   },
-  {
-    type: 'cards',
-    content: {
-      title: 'What is available',
-      cards: [
-        {
-          heading: 'Hosting',
-          points: [
-            'Cloud Run — the API container',
-            'Cloud Run functions — small jobs',
-            'GKE — more than one service',
-            'Compute Engine — only for a VM',
-          ],
-        },
-        {
-          heading: 'Databases',
-          points: [
-            'Cloud SQL, AlloyDB — Postgres',
-            'Firestore — documents',
-            'Memorystore — Redis',
-            'Cloud Storage — files, not rows',
-          ],
-        },
-        {
-          heading: 'AI',
-          points: [
-            'Vertex AI — Gemini, Model Garden',
-            'Vector Search — RAG embeddings',
-            'Endpoints — a model you trained',
-            'Quotas on this project',
-          ],
-        },
-        {
-          heading: 'Security and ops',
-          points: [
-            'IAM and service accounts',
-            'Secret Manager',
-            'Artifact Registry',
-            'Logging, Trace, Cloud Armor',
-          ],
-        },
-      ],
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Where to host the API',
-      left: {
-        label: 'Cloud Run',
-        items: [
-          'One container, scales to zero, billed per request',
-          'HTTPS URL without a cluster to operate',
-          'Best fit for this module FastAPI image',
-          'Limits: request timeout, concurrency, no sidecars',
-        ],
-      },
-      right: {
-        label: 'GKE',
-        items: [
-          'Many services, GPUs, custom networking, sidecars',
-          'You run node pools, upgrades, and manifests',
-          'Choose it when a Cloud Run limit actually binds',
-          'Same image and the same `/health` endpoint',
-        ],
-      },
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Deploy the image to Cloud Run',
-      code: `gcloud run deploy pathfinder-api \\
-  --image REGION-docker.pkg.dev/PROJECT/apps/pathfinder-api:latest \\
-  --region REGION \\
-  --port 8000 \\
-  --service-account pathfinder-api@PROJECT.iam.gserviceaccount.com \\
-  --set-secrets OPENAI_API_KEY=openai-api-key:latest \\
-  --no-allow-unauthenticated`,
-      highlights: [
-        'Build the image once and push it to **Artifact Registry**.',
-        '`--set-secrets` mounts **Secret Manager** at startup. The key is not in the image.',
-        '`--no-allow-unauthenticated` requires `roles/run.invoker`. Open the service only for a public demo.',
-      ],
-    },
-  },
+  // {
+  //   type: 'cards',
+  //   content: {
+  //     title: 'What is available',
+  //     cards: [
+  //       {
+  //         heading: 'Hosting',
+  //         points: [
+  //           'Cloud Run — the API container',
+  //           'Cloud Run functions — small jobs',
+  //           'GKE — more than one service',
+  //           'Compute Engine — only for a VM',
+  //         ],
+  //       },
+  //       {
+  //         heading: 'Databases',
+  //         points: [
+  //           'Cloud SQL, AlloyDB — Postgres',
+  //           'Firestore — documents',
+  //           'Memorystore — Redis',
+  //           'Cloud Storage — files, not rows',
+  //         ],
+  //       },
+  //       {
+  //         heading: 'AI',
+  //         points: [
+  //           'Vertex AI — Gemini, Model Garden',
+  //           'Vector Search — RAG embeddings',
+  //           'Endpoints — a model you trained',
+  //           'Quotas on this project',
+  //         ],
+  //       },
+  //       {
+  //         heading: 'Google Cloud Security and ops',
+  //         points: [
+  //           'IAM and service accounts',
+  //           'Secret Manager',
+  //           'Artifact Registry',
+  //           'Logging, Trace, Cloud Armor',
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // },
   {
     type: 'standard',
     content: {
-      title: 'Databases',
+      title: 'Google Cloud: Hosting',
+      icon: 'server',
+      points: [
+        '**Cloud Run** — one container behind an HTTPS URL. Scales to zero, billed per request. Best fit for the FastAPI image in this module.',
+        '**Cloud Run functions** — one function for a small job: an event, a queue message, or a schedule. Not the place for the whole API.',
+        '**GKE** — Kubernetes. Many services, GPUs, custom networking, and sidecars. You run the node pools. Choose it when a Cloud Run limit binds.',
+        '**Compute Engine** — a virtual machine. Use it for a box you log into, or a GPU that is not part of a cluster.',
+      ],
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'Google Cloud: AI friendly Databases',
       icon: 'database',
       points: [
-        '**Cloud SQL** (Postgres) — users, eval runs, anything with joins. Private IP only.',
-        '**Firestore** — document state such as session checkpoints and flags, when you do not need SQL.',
-        '**Memorystore** — shared Redis for the response cache and rate limits across instances.',
-        '**Vertex AI Vector Search** plus **Cloud Storage** — embeddings and the source files. A local Chroma disk does not survive a new instance.',
+        '**Vertex AI Vector Search** — a RAG index you own. A local Chroma directory does not survive a new Cloud Run instance.',
+        '**Cloud Storage** — source documents, prompt files, and golden eval sets the index was built from.',
+        '**Memorystore** — a shared cache of embeddings and model answers, so a repeated query does not call the model again.',
+        '**Firestore** — conversation memory and agent checkpoints. **Cloud SQL** with **pgvector** when those records must join to eval rows.',
       ],
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'Security',
+      title: 'Google Cloud: Vector stores',
+      icon: 'database',
+      points: [
+        '**RAG Engine, managed** — the default. Google stores the embeddings with the corpus. You do not create an index.',
+        '**Vertex AI Vector Search** — an index you own. Use it for scale, metadata filters, or hybrid keyword and vector search. This is the replacement for Chroma on the container.',
+        '**pgvector on Cloud SQL or AlloyDB** — the embedding sits on the same row as the citation and any SQL filter. Choose it when retrieval is vectors plus a WHERE clause.',
+        '**An index you already run** — RAG Engine can query Pinecone or Weaviate. **Vertex AI Search** is the other end: you upload documents and never handle the vectors.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Google Cloud: LLM services',
+      icon: 'brain',
+      points: [
+        '**Gemini** — Google models behind a managed API. Prompt in, text out. No GPU to run.',
+        '**Model Garden** — the catalog. Gemini and Gemma, partner models such as Claude and Mistral, and open models such as Llama.',
+        '**Model as a Service** — partner and open models on a managed API. Same call shape as Gemini. You do not deploy them.',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Google Cloud: Security',
       icon: 'shield',
       points: [
         'One **service account** per service. Grant the roles it needs. Do not download a JSON key.',
@@ -553,7 +550,7 @@ export const slides = [
   {
     type: 'standard',
     content: {
-      title: 'Logs, traces, and cost',
+      title: 'Google Cloud: Logs, traces, and cost',
       icon: 'search',
       points: [
         'Write JSON to stdout. **Cloud Logging** collects it. No agent in the image.',
